@@ -1,0 +1,14 @@
+:jar /Users/rutz/Documents/workspace/ScalaCollider/libraries/collections-generic-4.01.jar
+:jar /Users/rutz/Documents/workspace/ScalaCollider/libraries/jung-algorithms-2.0.jar
+:jar /Users/rutz/Documents/workspace/ScalaCollider/libraries/jung-api-2.0.jar
+:jar /Users/rutz/Documents/workspace/ScalaCollider/libraries/jung-graph-impl-2.0.jar
+:jar /Users/rutz/Documents/workspace/ScalaCollider/libraries/jung-visualization-2.0.jar
+:jar /Users/rutz/Documents/workspace/ScalaCollider/libraries/ScalaOSC.jar
+:jar /Users/rutz/Documents/devel/ScalaCollider/dist/ScalaCollider.jar
+import scala.math._
+import de.sciss.tint.sc._
+import Predef._
+val s = new Server( "Default" )
+s.options.program.value = "/Users/rutz/Documents/devel/fromSVN/SuperCollider3/build/scsynth"
+new gui.NodeTreePanel( s ).makeWindow
+new gui.ServerStatusPanel( s ).makeWindow

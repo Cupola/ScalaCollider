@@ -1,0 +1,51 @@
+// from SC2-examples_1.scd (note: multichannel expansion currently broken!)
+val x = play { val f = LFSaw.kr( 0.4, 0, 24, LFSaw.kr( 7.23, 0, 3, 80 )).midicps; CombN.ar(SinOsc.ar(f, 0, 0.04), 0.2, 0.2, 4)} // analog bubbles
+val x = play { CombL.ar( RLPF.ar( LFPulse.ar( FSinOsc.kr( 0.05, 0, 80, 160 ), 0, 0.4, 0.05 ), FSinOsc.kr( 0.6, 0, 3600, 4000 ), 0.2 ), 0.3, 0.2, 2 )} // LFO modulation of Pulse waves and resonant filters
+val x = play { RLPF.ar( LFPulse.ar( SinOsc.kr( 0.2, 0, 10, 21 ), 0.1), 100, 0.1 ).clip2( 0.4 )} // moto rev
+val x = play { RHPF.ar( max( 0, BrownNoise.ar( 0.5, -0.49 )) * 20, 5000, 1 )} // scratchy
+val x = play { BPZ2.ar( WhiteNoise.ar( LFPulse.kr( LFPulse.kr( 0.09, 0, 0.16, 10, 7 ), 0, 0.25, 0.1)))} // sprinkler
+val x = play { BPZ2.ar( WhiteNoise.ar( LFPulse.kr( MouseX.kr( 0.2, 50 ), 0, 0.25, 0.1)))} // sprinkler
+val x = play { val f = 50; /* fundamental frequency */ val p = 20; /* number of partials per channel */ var z: GE = 0.0; /* start of oscil daisy chain */ val offset = Line.kr(0, -0.02, 60); /* causes sound to separate and fade */ for( i <- (0 until p) ) { z = FSinOsc.ar( f * (i+1), /* freq of partial */ 0, max( 0 /* clip negative amplitudes to zero */, LFNoise1.kr( 6 + 4.0, /* amplitude rate */ 0.02, /* amplitude scale */ offset /* amplitude offset */ )), z )}; z } // harmonic swimming
+val x = play { val f = 80; /* fundamental frequency */ val p = 10; /* number of partials per channel */ var z: GE = 0.0; /* start of oscil daisy chain */ val trig = XLine.kr( 10, 0.1, 60 ); /* trigger probability decreases over time */ for( i <- (0 until p) ) { z = FSinOsc.ar( f * (i+1), /* freq of partial */ 0, Decay2.kr( Dust.kr( trig, /* trigger rate */ 0.02 /* trigger amplitude */), 0.005, /* grain attack time */ 0.5 /* grain decay time */), z )}; z } // harmonic tumbling
+val x = play { val z = RLPF.ar( Pulse.ar( max( Decay.ar( LFPulse.ar( 0.1, 0, 0.05, Impulse.ar( 8, 0, 500 )), 2 ), SinOsc.kr( 4, 0, 1, 80 )), LFNoise1.kr( 0.157, 0.4, 0.5 ), 0.04 ), LFNoise1.kr( 0.2, 2000, 2400 ), 0.2 ); val y = z * 0.6; z + (CombL.ar( y, 0.06, LFNoise1.kr( 0.3, 0.025, 0.035 ), 1) + CombL.ar( y, 0.06, LFNoise1.kr( 0.3, 0.025, 0.035 ), 1 ))} // what was I thinking?
+val x = play { val n = 4; /* number of sirens */ CombL.ar( Mix.fill( n, (i) => { /* Pan2.ar( */ SinOsc.ar( SinOsc.kr( 0.1 + 0.02, 2*Pi, 600, 1000 + 300), 0, LFNoise2.ar( 100 + 20.0, 0.1 )) /*, 1.0 )*/}) + LFNoise2.ar( LFNoise2.kr( 0.4, 90, 620 ), LFNoise2.kr( 0.3, 0.15, 0.18 )), 0.3, 0.3, 3 )} // police state XXX CURRENTLY BROKEN (MULTICH)
+
+(
+// aleatoric quartet
+// mouse x controls density
+
+val x = play {
+    val amp = 0.07
+    val density = MouseX.kr( 0.01, 1 )    // mouse determines density of excitation
+
+    // calculate multiply and add for excitation probability
+    val dmul = density.reciprocal * 0.5 * amp
+    val dadd = dmul.neg + amp
+
+    var signal = Mix(    // mix an array of 4 instruments
+        Range( 0, 4 ).map( i => {
+            val excitation = PinkNoise.ar(
+                // if amplitude is below zero it is clipped
+                // density determines the probability of being above zero
+                max( 0, LFNoise1.kr( 8, dmul, dadd )) 
+            )
+            val freq = Lag.kr(    // lag the pitch so it glissandos between pitches
+                LFNoise0.kr(      // use low freq step noise as a pitch control
+                    1, // [1, 0.5, 0.25].choose,    // choose a frequency of pitch change
+                    7,            // +/- 7 semitones
+                    66 + 30    // .rand2    // random center note
+                ).round( 1 ),    // round to nearest semitone
+                0.2              // gliss time
+            ).midicps            // convert to hertz
+
+//          Pan2.ar(    // pan each intrument
+                CombL.ar( excitation, 0.02, freq.reciprocal, 3 ) //,    // comb delay simulates string
+//              1.0.rand2    // random pan position
+//          );
+    }))
+
+    // add some reverb via allpass delays
+    for( i <- (0 until 5) ) signal = AllpassN.ar( signal, 0.05, 0.05, 1 )
+    LeakDC.ar( signal, 0.995 )    // delays build up a lot of DC, so leak it out here.
+}
+)
