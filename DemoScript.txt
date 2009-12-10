@@ -1,10 +1,10 @@
-:jar /Users/rutz/Documents/workspace/ScalaCollider/libraries/collections-generic-4.01.jar
-:jar /Users/rutz/Documents/workspace/ScalaCollider/libraries/jung-algorithms-2.0.jar
-:jar /Users/rutz/Documents/workspace/ScalaCollider/libraries/jung-api-2.0.jar
-:jar /Users/rutz/Documents/workspace/ScalaCollider/libraries/jung-graph-impl-2.0.jar
-:jar /Users/rutz/Documents/workspace/ScalaCollider/libraries/jung-visualization-2.0.jar
-:jar /Users/rutz/Documents/workspace/ScalaCollider/libraries/ScalaOSC.jar
-:jar /Users/rutz/Documents/devel/ScalaCollider/dist/ScalaCollider.jar
+:jar libraries/collections-generic-4.01.jar
+:jar libraries/jung-algorithms-2.0.jar
+:jar libraries/jung-api-2.0.jar
+:jar libraries/jung-graph-impl-2.0.jar
+:jar libraries/jung-visualization-2.0.jar
+:jar libraries/ScalaOSC.jar
+:jar dist/ScalaCollider.jar
 import scala.math._
 import de.sciss.tint.sc._
 import Predef._
