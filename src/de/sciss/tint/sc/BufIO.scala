@@ -28,18 +28,19 @@
 package de.sciss.tint.sc
 
 import Predef._
-import _root_.scala.Predef._
+import _root_.scala.Predef.error
+import Rates._
 
 /**
  * 	@version	0.11, 16-Jun-09
  */
 object PlayBuf {
 	def ar( numChannels: Int, bufNum: GE = 0, rate: GE = 1, trigger: GE = 1, startPos: GE = 0, loop: GE = 1, doneAction: GE = 0 ) : GE = {
-		UGen.multiNew( "PlayBuf", 'audio, dup( 'audio, numChannels ), List( bufNum, rate, trigger, startPos, loop, doneAction ))
+		UGen.multiNew( "PlayBuf", audio, dup( audio, numChannels ), List( bufNum, rate, trigger, startPos, loop, doneAction ))
 	}
 
 	def kr( numChannels: Int, bufNum: GE = 0, rate: GE = 1, trigger: GE = 1, startPos: GE = 0, loop: GE = 1, doneAction: GE = 0 ) : GE = {
-		UGen.multiNew( "PlayBuf", 'control, dup( 'audio, numChannels ), List( bufNum, rate, trigger, startPos, loop, doneAction ))
+		UGen.multiNew( "PlayBuf", control, dup( control, numChannels ), List( bufNum, rate, trigger, startPos, loop, doneAction ))
 	}
 }
 
@@ -48,32 +49,32 @@ object TGrains {
 		if( numChannels < 2 ) {
 			 error( "TGrains needs at least two channels." )
 		}
-		UGen.multiNew( "TGrains", 'audio, dup( 'audio, numChannels ),
+		UGen.multiNew( "TGrains", audio, dup( audio, numChannels ),
 			List( trigger, bufNum, rate, centerPos, dur, pan, amp, interp ))
 	}
 }
 
 object BufRd {
 	def ar( numChannels: Int, bufNum: GE = 0, phase: GE = 0, loop: GE = 1, interpolation: GE = 2 ) : GE = {
-		UGen.multiNew( "BufRd", 'audio, dup( 'audio, numChannels ), List( bufNum, phase, loop, interpolation ))
+		UGen.multiNew( "BufRd", audio, dup( audio, numChannels ), List( bufNum, phase, loop, interpolation ))
 	}
 
 	def kr( numChannels: Int, bufNum: GE = 0, phase: GE = 0, loop: GE = 1, interpolation: GE = 2 ) : GE = {
-		UGen.multiNew( "BufRd", 'control, dup( 'control, numChannels ), List( bufNum, phase, loop, interpolation ))
+		UGen.multiNew( "BufRd", control, dup( control, numChannels ), List( bufNum, phase, loop, interpolation ))
 	}
 }
 
 object BufWr {
 	def ar( inputArray: GE, bufNum: GE = 0, phase: GE = 0, loop: GE = 1 ) : GE = {
-		UGen.multiNew( "BufWr", 'audio, List( 'audio ), List( bufNum, phase, loop ) ++ inputArray.toUGenInputs )
+		UGen.multiNew( "BufWr", audio, List( audio ), List( bufNum, phase, loop ) ++ inputArray.toUGenInputs )
 	}
 
 	def kr( inputArray: GE, bufNum: GE = 0, phase: GE = 0, loop: GE = 1 ) : GE = {
-		UGen.multiNew( "BufWr", 'control, List( 'control ), List( bufNum, phase, loop ) ++ inputArray.toUGenInputs )
+		UGen.multiNew( "BufWr", control, List( control ), List( bufNum, phase, loop ) ++ inputArray.toUGenInputs )
 	}
 
 //	checkInputs {
-// 		if (rate == 'audio' and: {inputs.at(1).rate != 'audio'}, { 
+// 		if (rate == audio' and: {inputs.at(1).rate != audio'}, {
 // 			^("phase input is not audio rate: " + inputs.at(1) + inputs.at(1).rate);
 // 		});
 // 		^this.checkValidInputs
@@ -83,14 +84,14 @@ object BufWr {
 object RecordBuf {
 	def ar( inputArray: GE, bufNum: GE = 0, offset: GE = 0, recLevel: GE = 1, preLevel: GE = 0,
 			run: GE = 1, loop: GE = 1, trigger: GE = 1, doneAction: GE = 0 ) : GE = {
-		UGen.multiNew( "RecordBuf", 'audio, List( 'audio ),
+		UGen.multiNew( "RecordBuf", audio, List( audio ),
 			List( bufNum, offset, recLevel, preLevel, run, loop, trigger, doneAction ) ++
 				inputArray.toUGenInputs )
 	}
 
 	def kr( inputArray: GE, bufNum: GE = 0, offset: GE = 0, recLevel: GE = 1, preLevel: GE = 0,
 			run: GE = 1, loop: GE = 1, trigger: GE = 1, doneAction: GE = 0 ) : GE = {
-		UGen.multiNew( "RecordBuf", 'control, List( 'control ),
+		UGen.multiNew( "RecordBuf", control, List( control ),
 			List( bufNum, offset, recLevel, preLevel, run, loop, trigger, doneAction ) ++
 				inputArray.toUGenInputs )
 	}

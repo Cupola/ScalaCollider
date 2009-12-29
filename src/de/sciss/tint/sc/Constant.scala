@@ -30,13 +30,14 @@ package de.sciss.tint.sc
 
 import java.io.DataOutputStream
 import java.io.IOException
+import Rates._
 
 /**
  *	@author		Hanns Holger Rutz
  *	@version	0.11, 02-Dec-09
  */
 case class Constant( val value: Float ) extends UGenInput {
-  val rate = 'scalar
+  val rate = scalar
   
 //  def toUGenInputs = List( this )
 //  val numOutputs = 1

@@ -31,11 +31,12 @@ package de.sciss.tint.sc
 import _root_.de.sciss.scalaosc.OSCMessage
 import _root_.scala.collection.mutable.{ HashMap, HashSet, ListBuffer, Map, Set }
 import _root_.java.io.{ ByteArrayOutputStream, BufferedOutputStream, DataOutputStream,
-                        File, FileOutputStream, IOException }
+                        File, FileOutputStream }
 import _root_.java.nio.ByteBuffer
 
 import Predef._
 import _root_.scala.Predef._
+import Rates._
 
 /**
  * 	@author		Hanns Holger Rutz
@@ -247,7 +248,8 @@ class SynthDef( val name: String, ugenGraphFunc: () => GE, rates: Seq[Any] = Nil
 
 	if( verbose ) println( "writing ugen spec, name = " + ugen.name + "; index " + ugen.synthIndex + "; numInputs = " + ugen.numInputs + "; numOutputs " + ugen.numOutputs + "; specialIndex " + ugen.specialIndex )
 
-    dos.writeByte( UGen.getRateID( ugen.rate ))
+//  dos.writeByte( UGen.getRateID( ugen.rate ))
+    dos.writeByte( ugen.rate.id )
     dos.writeShort( ugen.numInputs )
     dos.writeShort( ugen.numOutputs )
     dos.writeShort( ugen.specialIndex )
@@ -257,7 +259,8 @@ class SynthDef( val name: String, ugenGraphFunc: () => GE, rates: Seq[Any] = Nil
       if( verbose ) println( "... input:" )
       ugen.writeInputSpec( dos, this )
     })
-    ugen.outputRates.foreach (rate => dos.writeByte( UGen.getRateID( rate )))
+//    ugen.outputRates.foreach (rate => dos.writeByte( UGen.getRateID( rate )))
+    for( rate <- ugen.outputRates ) dos.writeByte( rate.id )
   }
 
 /*
@@ -428,10 +431,11 @@ class SynthDef( val name: String, ugenGraphFunc: () => GE, rates: Seq[Any] = Nil
   private def buildControls {
     if( verbose ) println( "buildControls" )
     
-//  var nonControlDescs	= controlDescs.filter( _.rate == 'none )
-    val irControlDescs	= controlDescs.filter( _.rate == 'scalar )
-    val krControlDescs	= controlDescs.filter( _.rate == 'control )
-    val trControlDescs	= controlDescs.filter( _.rate == 'trigger )
+//  var nonControlDescs	= controlDescs.filter( _.rate == none )
+    val irControlDescs	= controlDescs.filter( _.rate == scalar )
+    val krControlDescs	= controlDescs.filter( _.rate == control )
+// XXX tr currently broken
+//    val trControlDescs	= controlDescs.filter( _.rate == trigger )
 
 //    if (nonControlNames.size > 0) {
 //      nonControlNames.do {|cn|
@@ -444,11 +448,12 @@ class SynthDef( val name: String, ugenGraphFunc: () => GE, rates: Seq[Any] = Nil
       val ctrl = Control.ir( irControlDescs.flatMap( _.initValues ))
       setControlDescSource( irControlDescs, ctrl )
 	}
-	if( trControlDescs.size > 0 ) {
-	  if( verbose ) println( "trControlDescs.size = " + trControlDescs.size )
-      val ctrl = TrigControl.kr( trControlDescs.flatMap( _.initValues ))
-      setControlDescSource( trControlDescs, ctrl )
-	}
+// XXX tr currently broken
+//	if( trControlDescs.size > 0 ) {
+//	  if( verbose ) println( "trControlDescs.size = " + trControlDescs.size )
+//      val ctrl = TrigControl.kr( trControlDescs.flatMap( _.initValues ))
+//      setControlDescSource( trControlDescs, ctrl )
+//	}
     if( krControlDescs.size > 0 ) {
       val krControlDescsPlain 	= krControlDescs.filter( _.lag.isEmpty )
       val krControlDescsLagged	= krControlDescs.filter( _.lag.isDefined )

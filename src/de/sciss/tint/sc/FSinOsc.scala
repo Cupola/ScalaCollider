@@ -29,17 +29,18 @@
 package de.sciss.tint.sc
 
 import Predef._
+import Rates._
 
 /**
  *	@version	0.11, 09-Dec-09
  */
 object FSinOsc {	
 	def ar( freq: GE = 440, iphase: GE = 0, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "FSinOsc", 'audio, List( 'audio ), List( freq, iphase )).madd( mul, add )
+		UGen.multiNew( "FSinOsc", audio, List( audio ), List( freq, iphase )).madd( mul, add )
 	}
 
 	def kr( freq: GE = 440, iphase: GE = 0, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "FSinOsc", 'control, List( 'control ), List( freq, iphase )).madd( mul, add )
+		UGen.multiNew( "FSinOsc", control, List( control ), List( freq, iphase )).madd( mul, add )
 	}
 }
 
@@ -50,30 +51,30 @@ object FSinOsc {
 
 object Blip {
 	def ar( freq: GE = 440, numHarm: GE = 200, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "Blip", 'audio, List( 'audio ), List( freq, numHarm )).madd( mul, add )
+		UGen.multiNew( "Blip", audio, List( audio ), List( freq, numHarm )).madd( mul, add )
 	}
 
 	def kr( freq: GE = 440, numHarm: GE = 200, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "Blip", 'control, List( 'control ), List( freq, numHarm )).madd( mul, add )
+		UGen.multiNew( "Blip", control, List( control ), List( freq, numHarm )).madd( mul, add )
 	}
 }
 
 object Saw {
 	def ar( freq: GE = 440, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "Saw", 'audio, List( 'audio ), List( freq )).madd( mul, add )
+		UGen.multiNew( "Saw", audio, List( audio ), List( freq )).madd( mul, add )
 	}
 
 	def kr( freq: GE = 440, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "Saw", 'control, List( 'control ), List( freq )).madd( mul, add )
+		UGen.multiNew( "Saw", control, List( control ), List( freq )).madd( mul, add )
 	}
 }
 
 object Pulse {
 	def ar( freq: GE = 440, width: GE = 0.5f, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "Pulse", 'audio, List( 'audio ), List( freq, width )).madd( mul, add )
+		UGen.multiNew( "Pulse", audio, List( audio ), List( freq, width )).madd( mul, add )
 	}
 
 	def kr( freq: GE = 440, width: GE = 0.5f, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "Pulse", 'control, List( 'control ), List( freq, width )).madd( mul, add )
+		UGen.multiNew( "Pulse", control, List( control ), List( freq, width )).madd( mul, add )
 	}
 }

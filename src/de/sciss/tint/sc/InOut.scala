@@ -29,6 +29,7 @@
 package de.sciss.tint.sc
 
 import Predef._
+import Rates._
 
 /*
 object AbstractOut {
@@ -37,9 +38,9 @@ object AbstractOut {
                 
 /* XXX
  	checkInputs {
- 		if (rate == 'audio', {
+ 		if (rate == audio', {
  			for(this.class.numFixedArgs, inputs.size - 1, { arg i;
- 				if (inputs.at(i).rate != 'audio', { 
+ 				if (inputs.at(i).rate != audio', {
  					^(" input at index " + i + 
  						"(" + inputs.at(i) + ") is not audio rate");
  				});
@@ -60,12 +61,12 @@ object AbstractOut {
 object Out /* extends AbstractOut */ {
   def ar( bus: GE, channelsArray: GE ) : GE = {
 //    println( "bus : " + bus.toUGenInputs.first )
-    UGen.multiNew( "Out", 'audio, Nil, List( bus ) ++ channelsArray.toUGenInputs )
+    UGen.multiNew( "Out", audio, Nil, List( bus ) ++ channelsArray.toUGenInputs )
     // XXX ^0.0		// Out has no output
   }
 
   def kr( bus: GE, channelsArray: Seq[ GE ]) : GE = {
-    UGen.multiNew( "Out", 'control, Nil, List( bus ) ++ channelsArray )
+    UGen.multiNew( "Out", control, Nil, List( bus ) ++ channelsArray )
     // XXX ^0.0		// Out has no output
   }
 
@@ -75,12 +76,12 @@ object Out /* extends AbstractOut */ {
 object ReplaceOut /* extends AbstractOut */ {
   def ar( bus: GE, channelsArray: GE ) : GE = {
 //    println( "bus : " + bus.toUGenInputs.first )
-    UGen.multiNew( "ReplaceOut", 'audio, Nil, List( bus ) ++ channelsArray.toUGenInputs )
+    UGen.multiNew( "ReplaceOut", audio, Nil, List( bus ) ++ channelsArray.toUGenInputs )
     // XXX ^0.0		// Out has no output
   }
 
   def kr( bus: GE, channelsArray: Seq[ GE ]) : GE = {
-    UGen.multiNew( "ReplaceOut", 'control, Nil, List( bus ) ++ channelsArray )
+    UGen.multiNew( "ReplaceOut", control, Nil, List( bus ) ++ channelsArray )
     // XXX ^0.0		// Out has no output
   }
 
@@ -95,13 +96,13 @@ object In { /* AbstractIn */
 	def ar( bus: GE ) : GE = ar( bus, 1 )
 	  
 	def ar( bus: GE, numChannels: Int ) : GE = {
-	  UGen.multiNew( "In", 'audio, dup( 'audio, numChannels ), List( bus ))
+	  UGen.multiNew( "In", audio, dup( audio, numChannels ), List( bus ))
 	}
 
  	def kr( bus: GE ) : GE = kr( bus, 1 )
 
  	def kr( bus: GE, numChannels: Int ) : GE = {
-	  UGen.multiNew( "In", 'control, dup( 'control, numChannels ), List( bus ))
+	  UGen.multiNew( "In", control, dup( control, numChannels ), List( bus ))
 	}
   
 //	init { arg numChannels ... argBus;
@@ -135,7 +136,7 @@ object Control {
 		UGen.multiNew( "Control", rate, dup( rate, values.length ), Nil )
 	}
  
-	def kr( name: Symbol, values: Float* ) : GE = named( name, 'control, values )
+	def kr( name: Symbol, values: Float* ) : GE = named( name, control, values )
  
 	def ir( name: Symbol, values: Float* ) : GE = named( name, 'scalar, values )
  

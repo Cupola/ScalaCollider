@@ -29,14 +29,13 @@
 package de.sciss.tint.sc
 
 import _root_.scala.math._
+import Rates._
 
 object MulAdd {
-//  private def multiNew( name: String, rate: Symbol, outputRates: Seq[ Symbol ], inputs: Seq[ GE ]) : GE = {... }
-  private def findHighestRate( inputs: Seq[ UGenInput ]) : Symbol = {
-    var mx = 0
-    inputs.foreach (input => { mx = max( mx, UGen.getRateID( input.rate ))})
-    UGen.getRateSymbol( mx )
-  }
+//  private def multiNew( name: String, rate: Rate, outputRates: Seq[ Symbol ], inputs: Seq[ GE ]) : GE = {... }
+//  private def findHighestRate( inputs: Seq[ UGenInput ]) : Rate = {
+//    inputs.map(_.rate).max
+//  }
   
   def apply( in: GE, mul: GE, add: GE ) : GE = {
     var chanExp = 0;
@@ -92,7 +91,8 @@ object MulAdd {
     
     // do the full ugen
     val inputs = List( in, mul, add )
-    val rate = findHighestRate( inputs )
+//    val rate = findHighestRate( inputs )
+    val rate = Rates.highest( inputs.map( _.rate ))
     return new SingleOutUGen( "MulAdd", rate, rate, inputs )
   }
 
@@ -105,8 +105,8 @@ object MulAdd {
   }
 }
 
-class BasicOpUGen( override val name: String, override val specialIndex: Int, override val rate: Symbol,
-                       override val inputs: Seq[ UGenInput ] )
+class BasicOpUGen( override val name: String, override val specialIndex: Int, override val rate: Rate,
+                   override val inputs: Seq[ UGenInput ] )
 extends SingleOutUGen( name, rate, rate, inputs );
 
 object UnaryOpUGen {
@@ -214,14 +214,16 @@ object UnaryOpUGen {
     result
   }
 
-  def determineRate( a: UGenInput, b: UGenInput ) : Symbol = {
-    if( a.rate == 'demand ) return 'demand
-    if( b.rate == 'demand ) return 'demand
-    if( a.rate == 'audio ) return 'audio
-    if( b.rate == 'audio ) return 'audio
-    if( a.rate == 'control ) return 'control
-    if( b.rate == 'control ) return 'control
-    'scalar
+  def determineRate( a: UGenInput, b: UGenInput ) : Rate = {
+    if( a.rate > b.rate ) a.rate else b.rate
+//    max( a.rate, b.rate )
+//    if( a.rate == 'demand ) return 'demand
+//    if( b.rate == 'demand ) return 'demand
+//    if( a.rate == 'audio ) return 'audio
+//    if( b.rate == 'audio ) return 'audio
+//    if( a.rate == 'control ) return 'control
+//    if( b.rate == 'control ) return 'control
+//    'scalar
   }
 }
 
@@ -303,13 +305,14 @@ object BinaryOpUGen {
     result
   }
 
-  private def determineRate( a: UGenInput, b: UGenInput ) : Symbol = {
-    if( a.rate == 'demand ) return 'demand
-    if( b.rate == 'demand ) return 'demand
-    if( a.rate == 'audio ) return 'audio
-    if( b.rate == 'audio ) return 'audio
-    if( a.rate == 'control ) return 'control
-    if( b.rate == 'control ) return 'control
-    'scalar
+  private def determineRate( a: UGenInput, b: UGenInput ) : Rate = {
+    if( a.rate > b.rate ) a.rate else b.rate
+//    if( a.rate == 'demand ) return 'demand
+//    if( b.rate == 'demand ) return 'demand
+//    if( a.rate == 'audio ) return 'audio
+//    if( b.rate == 'audio ) return 'audio
+//    if( a.rate == 'control ) return 'control
+//    if( b.rate == 'control ) return 'control
+//    'scalar
   }
 }

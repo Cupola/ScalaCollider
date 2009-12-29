@@ -35,10 +35,22 @@ import _root_.java.io.{ DataOutputStream, IOException }
 
 /**
  *	@author		Hanns Holger Rutz
- *	@version	0.12, 02-Dec-09
+ *	@version	0.13, 29-Dec-09
  */
+object Rates extends Enumeration { // with Ordering[ Enumeration#Value ]
+  type Rate = Value
+  val scalar, control, audio, demand = Value
+//  def compare( a: Enumeration#Value, b: Enumeration#Value ) = a.compare( b )
+
+  def highest( rates: Seq[ Rate ]) : Rate = {
+    rates.foldLeft( scalar )( (a, b) => if( a > b ) a else b )
+  }
+}
+
+import Rates._
+
 trait RatedGE extends GE {
-  val rate : Symbol
+  val rate : Rate
 }
 
 trait UGenInput extends RatedGE {
@@ -51,7 +63,7 @@ trait UGenProxy {
   def source : UGen
 }
 
-abstract class UGen( val name: String, val rate: Symbol, val outputRates: Seq[ Symbol ], val inputs: Seq[ UGenInput ])
+abstract class UGen( val name: String, val rate: Rate, val outputRates: Seq[ Rate ], val inputs: Seq[ UGenInput ])
 extends RatedGE with UGenProxy /* UGenInput */ {
   var synthIndex = -1
   val specialIndex = 0
@@ -153,17 +165,17 @@ extends RatedGE with UGenProxy /* UGenInput */ {
 }
 
 object UGen {
-  private val rateSymbols = List( 'scalar, 'control, 'audio, 'demand )
+//  private val rateSymbols = List( 'scalar, 'control, 'audio, 'demand )
   
-  def getRateID( rate: Symbol ) : Int = {
-    rateSymbols.indexOf( rate )
-  }
+//  def getRateID( rate: Symbol ) : Int = {
+//    rateSymbols.indexOf( rate )
+//  }
   
-  def getRateSymbol( rate: Int ) : Symbol = {
-    rateSymbols( rate )
-  }
+//  def getRateSymbol( rate: Int ) : Symbol = {
+//    rateSymbols( rate )
+//  }
 
-  def multiNew( name: String, rate: Symbol, outputRates: Seq[ Symbol ], inputs: Seq[ GE ]) : GE = {
+  def multiNew( name: String, rate: Rate, outputRates: Seq[ Rate ], inputs: Seq[ GE ]) : GE = {
     var chanExp = 0;
     var allOne = true
     var hasZero = false
@@ -193,7 +205,7 @@ object UGen {
 //    new UGen( source.name + "[" + outputIndex + "]", rate, List[ rate ], List[ source ])
   }
 
-class MultiOutUGen( override val name: String, override val rate: Symbol, override val outputRates: Seq[ Symbol ], override val inputs: Seq[ UGenInput ])
+class MultiOutUGen( override val name: String, override val rate: Rate, override val outputRates: Seq[ Rate ], override val inputs: Seq[ UGenInput ])
 extends UGen( name, rate, outputRates, inputs ) {
 	// a class for UGens with multiple outputs
 	val outputs : Seq[ OutputProxy ] = (0 until outputRates.size) map (i => { 
@@ -203,7 +215,7 @@ extends UGen( name, rate, outputRates, inputs ) {
     def toUGenInputs = outputs
 }
 
-class SingleOutUGen( override val name: String, override val rate: Symbol, outputRate: Symbol, override val inputs: Seq[ UGenInput ] )
+class SingleOutUGen( override val name: String, override val rate: Rate, outputRate: Rate, override val inputs: Seq[ UGenInput ] )
 extends UGen( name, rate, List( outputRate ), inputs ) with UGenInput {
   def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {
 //      val ugenIndex	= synthDef.getUGenIndex( this )

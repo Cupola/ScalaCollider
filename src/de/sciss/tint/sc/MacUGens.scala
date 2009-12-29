@@ -28,6 +28,8 @@
 
 package de.sciss.tint.sc
 
+import Rates._
+
 object MouseX {
 	def kr : GE = kr( Constants.zero, Constants.one, Constants.zero, Constant( 0.2f ))
 
@@ -40,7 +42,7 @@ object MouseX {
 	def kr( minVal: GE, maxVal: GE, warp: GE, lag: GE ) : GE = {
 //	  if (warp === 'linear, { warp = 0 });	// XXX
 //	  if (warp === 'exponential, { warp = 1 });	// XXX
-      UGen.multiNew( "MouseX", 'control, List( 'control ), List( minVal, maxVal, warp, lag ))
+      UGen.multiNew( "MouseX", control, List( control ), List( minVal, maxVal, warp, lag ))
 	}
 }
 
@@ -56,7 +58,7 @@ object MouseY {
 	def kr( minVal: GE, maxVal: GE, warp: GE, lag: GE ) : GE = {
 //	  if (warp === 'linear, { warp = 0 });	// XXX
 //	  if (warp === 'exponential, { warp = 1 });	// XXX
-      UGen.multiNew( "MouseY", 'control, List( 'control ), List( minVal, maxVal, warp, lag ))
+      UGen.multiNew( "MouseY", control, List( control ), List( minVal, maxVal, warp, lag ))
 	}
 }
 

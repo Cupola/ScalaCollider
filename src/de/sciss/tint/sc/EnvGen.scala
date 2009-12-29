@@ -27,6 +27,8 @@
  */
 package de.sciss.tint.sc
 
+import Rates._
+
 object EnvGen {
   def ar( envelope: Env ) : GE = {
     ar( envelope, Constants.one, Constants.one, Constants.zero, Constants.one, Constants.zero )
@@ -53,7 +55,7 @@ object EnvGen {
   }
   
   def ar( envArray: Array[ GE ], gate: GE, levelScale: GE, levelBias: GE, timeScale: GE, doneAction: GE ) : GE = {
-  	UGen.multiNew( "EnvGen", 'audio, List( 'audio ), List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envArray )
+  	UGen.multiNew( "EnvGen", audio, List( audio ), List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envArray )
   }
   
   def kr( envelope: Env ) : GE = {
@@ -81,6 +83,6 @@ object EnvGen {
   }
   
   def kr( envArray: Array[ GE ], gate: GE, levelScale: GE, levelBias: GE, timeScale: GE, doneAction: GE ) : GE = {
-  	UGen.multiNew( "EnvGen", 'control, List( 'control ), List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envArray )
+  	UGen.multiNew( "EnvGen", control, List( control ), List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envArray )
   }
 }

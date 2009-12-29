@@ -28,12 +28,14 @@
 
 package de.sciss.tint.sc
 
+import Rates._
+
 object Osc {	
   def ar( bufNum: GE ) : GE = ar( bufNum, Constant( 440f ), Constants.zero )
   def ar( bufNum: GE, freq: GE ) : GE = ar( bufNum, freq, Constants.zero )
   
   def ar( bufNum: GE, freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "Osc", 'audio, List( 'audio ), List( bufNum, freq, phase ))
+    UGen.multiNew( "Osc", audio, List( audio ), List( bufNum, freq, phase ))
   }
   
   def ar( bufNum: GE, freq: GE, phase: GE, mul: GE ) : GE = {
@@ -47,7 +49,7 @@ object Osc {
   def kr( bufNum: GE, freq: GE ) : GE = kr( bufNum, freq, Constants.zero )
 
   def kr( bufNum: GE, freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "Osc", 'control, List( 'control ), List( bufNum, freq, phase ))
+    UGen.multiNew( "Osc", control, List( control ), List( bufNum, freq, phase ))
   }
 
   def kr( bufNum: GE, freq: GE, phase: GE, mul: GE ) : GE = {
@@ -63,7 +65,7 @@ object SinOsc {
   def ar( freq: GE ) : GE = ar( freq, Constants.zero )
   
   def ar( freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "SinOsc", 'audio, List( 'audio ), List( freq, phase ))
+    UGen.multiNew( "SinOsc", audio, List( audio ), List( freq, phase ))
   }
   
   def ar( freq: GE, phase: GE, mul: GE ) : GE = {
@@ -77,7 +79,7 @@ object SinOsc {
   def kr( freq: GE ) : GE = kr( freq, Constants.zero )
 
   def kr( freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "SinOsc", 'control, List( 'control ), List( freq, phase ))
+    UGen.multiNew( "SinOsc", control, List( control ), List( freq, phase ))
   }
 
   def kr( freq: GE, phase: GE, mul: GE ) : GE = {
@@ -93,7 +95,7 @@ object SinOscFB {
   def ar( freq: GE ) : GE = ar( freq, Constants.zero )
   
   def ar( freq: GE, feedback: GE ) : GE = {
-    UGen.multiNew( "SinOscFB", 'audio, List( 'audio ), List( freq, feedback ))
+    UGen.multiNew( "SinOscFB", audio, List( audio ), List( freq, feedback ))
   }
   
   def ar( freq: GE, feedback: GE, mul: GE ) : GE = {
@@ -107,7 +109,7 @@ object SinOscFB {
   def kr( freq: GE ) : GE = kr( freq, Constants.zero )
 
   def kr( freq: GE, feedback: GE ) : GE = {
-    UGen.multiNew( "SinOscFB", 'control, List( 'control ), List( freq, feedback ))
+    UGen.multiNew( "SinOscFB", control, List( control ), List( freq, feedback ))
   }
 
   def kr( freq: GE, feedback: GE, mul: GE ) : GE = {
@@ -123,7 +125,7 @@ object OscN {
   def ar( bufNum: GE, freq: GE ) : GE = ar( bufNum, freq, Constants.zero )
   
   def ar( bufNum: GE, freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "OscN", 'audio, List( 'audio ), List( bufNum, freq, phase ))
+    UGen.multiNew( "OscN", audio, List( audio ), List( bufNum, freq, phase ))
   }
   
   def ar( bufNum: GE, freq: GE, phase: GE, mul: GE ) : GE = {
@@ -137,7 +139,7 @@ object OscN {
   def kr( bufNum: GE, freq: GE ) : GE = kr( bufNum, freq, Constants.zero )
 
   def kr( bufNum: GE, freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "OscN", 'control, List( 'control ), List( bufNum, freq, phase ))
+    UGen.multiNew( "OscN", control, List( control ), List( bufNum, freq, phase ))
   }
 
   def kr( bufNum: GE, freq: GE, phase: GE, mul: GE ) : GE = {
@@ -153,7 +155,7 @@ object VOsc {
   def ar( bufPos: GE, freq: GE ) : GE = ar( bufPos, freq, Constants.zero )
   
   def ar( bufPos: GE, freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "VOsc", 'audio, List( 'audio ), List( bufPos, freq, phase ))
+    UGen.multiNew( "VOsc", audio, List( audio ), List( bufPos, freq, phase ))
   }
   
   def ar( bufPos: GE, freq: GE, phase: GE, mul: GE ) : GE = {
@@ -167,7 +169,7 @@ object VOsc {
   def kr( bufPos: GE, freq: GE ) : GE = kr( bufPos, freq, Constants.zero )
 
   def kr( bufPos: GE, freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "VOsc", 'control, List( 'control ), List( bufPos, freq, phase ))
+    UGen.multiNew( "VOsc", control, List( control ), List( bufPos, freq, phase ))
   }
 
   def kr( bufPos: GE, freq: GE, phase: GE, mul: GE ) : GE = {
@@ -181,7 +183,7 @@ object VOsc {
 object VOsc3 {
   def ar( bufPos: GE ) : GE = ar( bufPos, Constant( 110f ), Constant( 220f ), Constant( 440f ))
   def ar( bufPos: GE, freq1: GE, freq2: GE, freq3: GE ) : GE = {
-    UGen.multiNew( "VOsc3", 'audio, List( 'audio ), List( bufPos, freq1, freq2, freq3 ))
+    UGen.multiNew( "VOsc3", audio, List( audio ), List( bufPos, freq1, freq2, freq3 ))
   }
   
   def ar( bufPos: GE, freq1: GE, freq2: GE, freq3: GE, mul: GE ) : GE = {
@@ -193,7 +195,7 @@ object VOsc3 {
 
   def kr( bufPos: GE ) : GE = kr( bufPos, Constant( 110f ), Constant( 220f ), Constant( 440f ))
   def kr( bufPos: GE, freq1: GE, freq2: GE, freq3: GE ) : GE = {
-    UGen.multiNew( "VOsc3", 'control, List( 'control ), List( bufPos, freq1, freq2, freq3 ))
+    UGen.multiNew( "VOsc3", control, List( control ), List( bufPos, freq1, freq2, freq3 ))
   }
   
   def kr( bufPos: GE, freq1: GE, freq2: GE, freq3: GE, mul: GE ) : GE = {
@@ -209,7 +211,7 @@ object COsc {
   def ar( bufNum: GE, freq: GE ) : GE = ar( bufNum, freq, Constant( 0.5f ))
   
   def ar( bufNum: GE, freq: GE, beats: GE ) : GE = {
-    UGen.multiNew( "COsc", 'audio, List( 'audio ), List( bufNum, freq, beats ))
+    UGen.multiNew( "COsc", audio, List( audio ), List( bufNum, freq, beats ))
   }
   
   def ar( bufNum: GE, freq: GE, beats: GE, mul: GE ) : GE = {
@@ -223,7 +225,7 @@ object COsc {
   def kr( bufNum: GE, freq: GE ) : GE = kr( bufNum, freq, Constant( 0.5f ))
 
   def kr( bufNum: GE, freq: GE, beats: GE ) : GE = {
-    UGen.multiNew( "COsc", 'control, List( 'control ), List( bufNum, freq, beats ))
+    UGen.multiNew( "COsc", control, List( control ), List( bufNum, freq, beats ))
   }
 
   def kr( bufNum: GE, freq: GE, beats: GE, mul: GE ) : GE = {
@@ -240,7 +242,7 @@ object Formant {
   def ar( fundFreq: GE, formFreq: GE ) : GE = ar( fundFreq, formFreq, Constant( 880f ))
   
   def ar( fundFreq: GE, formFreq: GE, bwFreq: GE ) : GE = {
-    UGen.multiNew( "Formant", 'audio, List( 'audio ), List( fundFreq, formFreq, bwFreq ))
+    UGen.multiNew( "Formant", audio, List( audio ), List( fundFreq, formFreq, bwFreq ))
   }
   
   def ar( fundFreq: GE, formFreq: GE, bwFreq: GE, mul: GE ) : GE = {
@@ -255,7 +257,7 @@ object Formant {
   def kr( fundFreq: GE, formFreq: GE ) : GE = kr( fundFreq, formFreq, Constant( 880f ))
   
   def kr( fundFreq: GE, formFreq: GE, bwFreq: GE ) : GE = {
-    UGen.multiNew( "Formant", 'control, List( 'control ), List( fundFreq, formFreq, bwFreq ))
+    UGen.multiNew( "Formant", control, List( control ), List( fundFreq, formFreq, bwFreq ))
   }
   
   def kr( fundFreq: GE, formFreq: GE, bwFreq: GE, mul: GE ) : GE = {
@@ -271,7 +273,7 @@ object LFSaw {
   def ar( freq: GE ) : GE = ar( freq, Constants.zero )
   
   def ar( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFSaw", 'audio, List( 'audio ), List( freq, iphase ))
+    UGen.multiNew( "LFSaw", audio, List( audio ), List( freq, iphase ))
   }
   
   def ar( freq: GE, iphase: GE, mul: GE ) : GE = {
@@ -285,7 +287,7 @@ object LFSaw {
   def kr( freq: GE ) : GE = kr( freq, Constants.zero )
 
   def kr( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFSaw", 'control, List( 'control ), List( freq, iphase ))
+    UGen.multiNew( "LFSaw", control, List( control ), List( freq, iphase ))
   }
 
   def kr( freq: GE, iphase: GE, mul: GE ) : GE = {
@@ -301,7 +303,7 @@ object LFPar {
   def ar( freq: GE ) : GE = ar( freq, Constants.zero )
   
   def ar( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFPar", 'audio, List( 'audio ), List( freq, iphase ))
+    UGen.multiNew( "LFPar", audio, List( audio ), List( freq, iphase ))
   }
   
   def ar( freq: GE, iphase: GE, mul: GE ) : GE = {
@@ -315,7 +317,7 @@ object LFPar {
   def kr( freq: GE ) : GE = kr( freq, Constants.zero )
 
   def kr( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFPar", 'control, List( 'control ), List( freq, iphase ))
+    UGen.multiNew( "LFPar", control, List( control ), List( freq, iphase ))
   }
 
   def kr( freq: GE, iphase: GE, mul: GE ) : GE = {
@@ -331,7 +333,7 @@ object LFCub {
   def ar( freq: GE ) : GE = ar( freq, Constants.zero )
   
   def ar( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFCub", 'audio, List( 'audio ), List( freq, iphase ))
+    UGen.multiNew( "LFCub", audio, List( audio ), List( freq, iphase ))
   }
   
   def ar( freq: GE, iphase: GE, mul: GE ) : GE = {
@@ -345,7 +347,7 @@ object LFCub {
   def kr( freq: GE ) : GE = kr( freq, Constants.zero )
 
   def kr( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFCub", 'control, List( 'control ), List( freq, iphase ))
+    UGen.multiNew( "LFCub", control, List( control ), List( freq, iphase ))
   }
 
   def kr( freq: GE, iphase: GE, mul: GE ) : GE = {
@@ -361,7 +363,7 @@ object LFTri {
   def ar( freq: GE ) : GE = ar( freq, Constants.zero )
   
   def ar( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFTri", 'audio, List( 'audio ), List( freq, iphase ))
+    UGen.multiNew( "LFTri", audio, List( audio ), List( freq, iphase ))
   }
   
   def ar( freq: GE, iphase: GE, mul: GE ) : GE = {
@@ -375,7 +377,7 @@ object LFTri {
   def kr( freq: GE ) : GE = kr( freq, Constants.zero )
 
   def kr( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFTri", 'control, List( 'control ), List( freq, iphase ))
+    UGen.multiNew( "LFTri", control, List( control ), List( freq, iphase ))
   }
 
   def kr( freq: GE, iphase: GE, mul: GE ) : GE = {
@@ -392,7 +394,7 @@ object LFPulse {
   def ar( freq: GE, iphase: GE ) : GE = ar( freq, iphase, Constant( 0.5f ) )
   
   def ar( freq: GE, iphase: GE, width: GE ) : GE = {
-    UGen.multiNew( "LFPulse", 'audio, List( 'audio ), List( freq, iphase, width ))
+    UGen.multiNew( "LFPulse", audio, List( audio ), List( freq, iphase, width ))
   }
   
   def ar( freq: GE, iphase: GE, width: GE, mul: GE ) : GE = {
@@ -407,7 +409,7 @@ object LFPulse {
   def kr( freq: GE, iphase: GE ) : GE = kr( freq, iphase, Constant( 0.5f ) )
   
   def kr( freq: GE, iphase: GE, width: GE ) : GE = {
-    UGen.multiNew( "LFPulse", 'control, List( 'control ), List( freq, iphase, width ))
+    UGen.multiNew( "LFPulse", control, List( control ), List( freq, iphase, width ))
   }
   
   def kr( freq: GE, iphase: GE, width: GE, mul: GE ) : GE = {
@@ -424,7 +426,7 @@ object VarSaw {
   def ar( freq: GE, iphase: GE ) : GE = ar( freq, iphase, Constant( 0.5f ) )
   
   def ar( freq: GE, iphase: GE, width: GE ) : GE = {
-    UGen.multiNew( "VarSaw", 'audio, List( 'audio ), List( freq, iphase, width ))
+    UGen.multiNew( "VarSaw", audio, List( audio ), List( freq, iphase, width ))
   }
   
   def ar( freq: GE, iphase: GE, width: GE, mul: GE ) : GE = {
@@ -439,7 +441,7 @@ object VarSaw {
   def kr( freq: GE, iphase: GE ) : GE = kr( freq, iphase, Constant( 0.5f ) )
   
   def kr( freq: GE, iphase: GE, width: GE ) : GE = {
-    UGen.multiNew( "VarSaw", 'control, List( 'control ), List( freq, iphase, width ))
+    UGen.multiNew( "VarSaw", control, List( control ), List( freq, iphase, width ))
   }
   
   def kr( freq: GE, iphase: GE, width: GE, mul: GE ) : GE = {
@@ -455,7 +457,7 @@ object Impulse {
   def ar( freq: GE ) : GE = ar( freq, Constants.zero )
   
   def ar( freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "Impulse", 'audio, List( 'audio ), List( freq, phase ))
+    UGen.multiNew( "Impulse", audio, List( audio ), List( freq, phase ))
   }
   
   def ar( freq: GE, phase: GE, mul: GE ) : GE = {
@@ -469,7 +471,7 @@ object Impulse {
   def kr( freq: GE ) : GE = kr( freq, Constants.zero )
 
   def kr( freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "Impulse", 'control, List( 'control ), List( freq, phase ))
+    UGen.multiNew( "Impulse", control, List( control ), List( freq, phase ))
   }
 
   def kr( freq: GE, phase: GE, mul: GE ) : GE = {
@@ -485,7 +487,7 @@ object SyncSaw {
   def ar( syncFreq: GE ) : GE = ar( syncFreq, Constant( 440f ))
   
   def ar( syncFreq: GE, sawFreq: GE ) : GE = {
-    UGen.multiNew( "SyncSaw", 'audio, List( 'audio ), List( syncFreq, sawFreq ))
+    UGen.multiNew( "SyncSaw", audio, List( audio ), List( syncFreq, sawFreq ))
   }
   
   def ar( syncFreq: GE, sawFreq: GE, mul: GE ) : GE = {
@@ -499,7 +501,7 @@ object SyncSaw {
   def kr( syncFreq: GE ) : GE = kr( syncFreq, Constant( 440f ))
 
   def kr( syncFreq: GE, sawFreq: GE ) : GE = {
-    UGen.multiNew( "SyncSaw", 'control, List( 'control ), List( syncFreq, sawFreq ))
+    UGen.multiNew( "SyncSaw", control, List( control ), List( syncFreq, sawFreq ))
   }
 
   def kr( syncFreq: GE, sawFreq: GE, mul: GE ) : GE = {
@@ -514,7 +516,7 @@ object Index {
   def ar( bufNum: GE ) : GE = ar( bufNum, Constants.zero )
   
   def ar( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "Index", 'audio, List( 'audio ), List( bufNum, in ))
+    UGen.multiNew( "Index", audio, List( audio ), List( bufNum, in ))
   }
   
   def ar( bufNum: GE, in: GE, mul: GE ) : GE = {
@@ -527,7 +529,7 @@ object Index {
   def kr( bufNum: GE ) : GE = kr( bufNum, Constants.zero )
   
   def kr( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "Index", 'scalar, List( 'scalar ), List( bufNum, in ))
+    UGen.multiNew( "Index", scalar, List( scalar ), List( bufNum, in ))
   }
   
   def kr( bufNum: GE, in: GE, mul: GE ) : GE = {
@@ -542,7 +544,7 @@ object WrapIndex {
   def ar( bufNum: GE ) : GE = ar( bufNum, Constants.zero )
   
   def ar( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "WrapIndex", 'audio, List( 'audio ), List( bufNum, in ))
+    UGen.multiNew( "WrapIndex", audio, List( audio ), List( bufNum, in ))
   }
   
   def ar( bufNum: GE, in: GE, mul: GE ) : GE = {
@@ -555,7 +557,7 @@ object WrapIndex {
   def kr( bufNum: GE ) : GE = kr( bufNum, Constants.zero )
   
   def kr( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "WrapIndex", 'scalar, List( 'scalar ), List( bufNum, in ))
+    UGen.multiNew( "WrapIndex", scalar, List( scalar ), List( bufNum, in ))
   }
   
   def kr( bufNum: GE, in: GE, mul: GE ) : GE = {
@@ -570,7 +572,7 @@ object IndexInBetween {
   def ar( bufNum: GE ) : GE = ar( bufNum, Constants.zero )
   
   def ar( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "IndexInBetween", 'audio, List( 'audio ), List( bufNum, in ))
+    UGen.multiNew( "IndexInBetween", audio, List( audio ), List( bufNum, in ))
   }
   
   def ar( bufNum: GE, in: GE, mul: GE ) : GE = {
@@ -583,7 +585,7 @@ object IndexInBetween {
   def kr( bufNum: GE ) : GE = kr( bufNum, Constants.zero )
   
   def kr( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "IndexInBetween", 'scalar, List( 'scalar ), List( bufNum, in ))
+    UGen.multiNew( "IndexInBetween", scalar, List( scalar ), List( bufNum, in ))
   }
   
   def kr( bufNum: GE, in: GE, mul: GE ) : GE = {
@@ -598,7 +600,7 @@ object DetectIndex {
   def ar( bufNum: GE ) : GE = ar( bufNum, Constants.zero )
   
   def ar( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "DetectIndex", 'audio, List( 'audio ), List( bufNum, in ))
+    UGen.multiNew( "DetectIndex", audio, List( audio ), List( bufNum, in ))
   }
   
   def ar( bufNum: GE, in: GE, mul: GE ) : GE = {
@@ -611,7 +613,7 @@ object DetectIndex {
   def kr( bufNum: GE ) : GE = kr( bufNum, Constants.zero )
   
   def kr( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "DetectIndex", 'scalar, List( 'scalar ), List( bufNum, in ))
+    UGen.multiNew( "DetectIndex", scalar, List( scalar ), List( bufNum, in ))
   }
   
   def kr( bufNum: GE, in: GE, mul: GE ) : GE = {
@@ -626,7 +628,7 @@ object Shaper {
   def ar( bufNum: GE ) : GE = ar( bufNum, Constants.zero )
   
   def ar( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "Shaper", 'audio, List( 'audio ), List( bufNum, in ))
+    UGen.multiNew( "Shaper", audio, List( audio ), List( bufNum, in ))
   }
   
   def ar( bufNum: GE, in: GE, mul: GE ) : GE = {
@@ -639,7 +641,7 @@ object Shaper {
   def kr( bufNum: GE ) : GE = kr( bufNum, Constants.zero )
   
   def kr( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "Shaper", 'scalar, List( 'scalar ), List( bufNum, in ))
+    UGen.multiNew( "Shaper", scalar, List( scalar ), List( bufNum, in ))
   }
   
   def kr( bufNum: GE, in: GE, mul: GE ) : GE = {

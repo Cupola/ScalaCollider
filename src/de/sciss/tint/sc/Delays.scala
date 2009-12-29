@@ -28,29 +28,31 @@
 
 package de.sciss.tint.sc
 
+import Rates._
+
 /**
  * 	@version	0.11, 16-Jun-09
  */
 object Delay1 {
 	def ar( in: GE ) : GE = {
-		UGen.multiNew( "Delay1", 'audio, List( 'audio ), List( in ))
+		UGen.multiNew( "Delay1", audio, List( audio ), List( in ))
 	}
 
 	def kr( in: GE ) : GE = {
-    	UGen.multiNew( "Delay1", 'control, List( 'control ), List( in ))
+    	UGen.multiNew( "Delay1", control, List( control ), List( in ))
 	}
 }
 
 object Delay2 {
   def ar( in: GE ) : GE = {
-    UGen.multiNew( "Delay2", 'audio, List( 'audio ), List( in ))
+    UGen.multiNew( "Delay2", audio, List( audio ), List( in ))
   }
   
   def ar( in: GE, mul: GE ) : GE = ar( in ).madd( mul, Constants.zero ) 
   def ar( in: GE, mul: GE, add: GE ) : GE = ar( in ).madd( mul, add ) 
 
   def kr( in: GE ) : GE = {
-    UGen.multiNew( "Delay2", 'control, List( 'control ), List( in ))
+    UGen.multiNew( "Delay2", control, List( control ), List( in ))
   }
 
   def kr( in: GE, mul: GE ) : GE = kr( in ).madd( mul, Constants.zero ) 
@@ -64,7 +66,7 @@ object DelayN {
   def ar( in: GE, maxDelayTime: GE ) : GE = ar( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )))
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = {
-    UGen.multiNew( "DelayN", 'audio, List( 'audio ), List( in, maxDelayTime, delayTime ))
+    UGen.multiNew( "DelayN", audio, List( audio ), List( in, maxDelayTime, delayTime ))
   }
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE ) : GE = {
@@ -78,7 +80,7 @@ object DelayN {
   def kr( in: GE, maxDelayTime: GE ) : GE = kr( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )))
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = {
-    UGen.multiNew( "DelayN", 'control, List( 'control ), List( in, maxDelayTime, delayTime ))
+    UGen.multiNew( "DelayN", control, List( control ), List( in, maxDelayTime, delayTime ))
   }
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE ) : GE = {
@@ -94,7 +96,7 @@ object DelayL {
   def ar( in: GE, maxDelayTime: GE ) : GE = ar( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )))
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = {
-    UGen.multiNew( "DelayL", 'audio, List( 'audio ), List( in, maxDelayTime, delayTime ))
+    UGen.multiNew( "DelayL", audio, List( audio ), List( in, maxDelayTime, delayTime ))
   }
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE ) : GE = {
@@ -108,7 +110,7 @@ object DelayL {
   def kr( in: GE, maxDelayTime: GE ) : GE = kr( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )))
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = {
-    UGen.multiNew( "DelayL", 'control, List( 'control ), List( in, maxDelayTime, delayTime ))
+    UGen.multiNew( "DelayL", control, List( control ), List( in, maxDelayTime, delayTime ))
   }
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE ) : GE = {
@@ -124,7 +126,7 @@ object DelayC {
   def ar( in: GE, maxDelayTime: GE ) : GE = ar( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )))
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = {
-    UGen.multiNew( "DelayC", 'audio, List( 'audio ), List( in, maxDelayTime, delayTime ))
+    UGen.multiNew( "DelayC", audio, List( audio ), List( in, maxDelayTime, delayTime ))
   }
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE ) : GE = {
@@ -138,7 +140,7 @@ object DelayC {
   def kr( in: GE, maxDelayTime: GE ) : GE = kr( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )))
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = {
-    UGen.multiNew( "DelayC", 'control, List( 'control ), List( in, maxDelayTime, delayTime ))
+    UGen.multiNew( "DelayC", control, List( control ), List( in, maxDelayTime, delayTime ))
   }
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE ) : GE = {
@@ -155,7 +157,7 @@ object CombN {
   def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = ar( in, maxDelayTime, delayTime, Constants.one )
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "CombN", 'audio, List( 'audio ), List( in, maxDelayTime, delayTime, decayTime ))
+    UGen.multiNew( "CombN", audio, List( audio ), List( in, maxDelayTime, delayTime, decayTime ))
   }
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
@@ -170,7 +172,7 @@ object CombN {
   def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = kr( in, maxDelayTime, delayTime, Constants.one )
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "CombN", 'control, List( 'control ), List( in, maxDelayTime, delayTime, decayTime ))
+    UGen.multiNew( "CombN", control, List( control ), List( in, maxDelayTime, delayTime, decayTime ))
   }
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
@@ -187,7 +189,7 @@ object CombL {
   def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = ar( in, maxDelayTime, delayTime, Constants.one )
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "CombL", 'audio, List( 'audio ), List( in, maxDelayTime, delayTime, decayTime ))
+    UGen.multiNew( "CombL", audio, List( audio ), List( in, maxDelayTime, delayTime, decayTime ))
   }
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
@@ -202,7 +204,7 @@ object CombL {
   def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = kr( in, maxDelayTime, delayTime, Constants.one )
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "CombL", 'control, List( 'control ), List( in, maxDelayTime, delayTime, decayTime ))
+    UGen.multiNew( "CombL", control, List( control ), List( in, maxDelayTime, delayTime, decayTime ))
   }
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
@@ -219,7 +221,7 @@ object CombC {
   def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = ar( in, maxDelayTime, delayTime, Constants.one )
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "CombC", 'audio, List( 'audio ), List( in, maxDelayTime, delayTime, decayTime ))
+    UGen.multiNew( "CombC", audio, List( audio ), List( in, maxDelayTime, delayTime, decayTime ))
   }
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
@@ -234,7 +236,7 @@ object CombC {
   def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = kr( in, maxDelayTime, delayTime, Constants.one )
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "CombC", 'control, List( 'control ), List( in, maxDelayTime, delayTime, decayTime ))
+    UGen.multiNew( "CombC", control, List( control ), List( in, maxDelayTime, delayTime, decayTime ))
   }
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
@@ -251,7 +253,7 @@ object AllpassN {
   def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = ar( in, maxDelayTime, delayTime, Constants.one )
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "AllpassN", 'audio, List( 'audio ), List( in, maxDelayTime, delayTime, decayTime ))
+    UGen.multiNew( "AllpassN", audio, List( audio ), List( in, maxDelayTime, delayTime, decayTime ))
   }
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
@@ -266,7 +268,7 @@ object AllpassN {
   def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = kr( in, maxDelayTime, delayTime, Constants.one )
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "AllpassN", 'control, List( 'control ), List( in, maxDelayTime, delayTime, decayTime ))
+    UGen.multiNew( "AllpassN", control, List( control ), List( in, maxDelayTime, delayTime, decayTime ))
   }
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
@@ -283,7 +285,7 @@ object AllpassL {
   def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = ar( in, maxDelayTime, delayTime, Constants.one )
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "AllpassL", 'audio, List( 'audio ), List( in, maxDelayTime, delayTime, decayTime ))
+    UGen.multiNew( "AllpassL", audio, List( audio ), List( in, maxDelayTime, delayTime, decayTime ))
   }
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
@@ -298,7 +300,7 @@ object AllpassL {
   def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = kr( in, maxDelayTime, delayTime, Constants.one )
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "AllpassL", 'control, List( 'control ), List( in, maxDelayTime, delayTime, decayTime ))
+    UGen.multiNew( "AllpassL", control, List( control ), List( in, maxDelayTime, delayTime, decayTime ))
   }
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
@@ -315,7 +317,7 @@ object AllpassC {
   def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = ar( in, maxDelayTime, delayTime, Constants.one )
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "AllpassC", 'audio, List( 'audio ), List( in, maxDelayTime, delayTime, decayTime ))
+    UGen.multiNew( "AllpassC", audio, List( audio ), List( in, maxDelayTime, delayTime, decayTime ))
   }
   
   def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
@@ -330,7 +332,7 @@ object AllpassC {
   def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = kr( in, maxDelayTime, delayTime, Constants.one )
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "AllpassC", 'control, List( 'control ), List( in, maxDelayTime, delayTime, decayTime ))
+    UGen.multiNew( "AllpassC", control, List( control ), List( in, maxDelayTime, delayTime, decayTime ))
   }
   
   def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {

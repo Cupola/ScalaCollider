@@ -1,19 +1,20 @@
 package de.sciss.tint.sc
 
 import Predef._
+import Rates._
 
 /**
  * 	@version	0.10, 19-Jul-09
  */
 object DiskOut {	
 	def ar( bufNum: GE, channelsArray: GE ) : GE = {
-    	UGen.multiNew( "DiskOut", 'audio, Nil, bufNum :: channelsArray.toUGenInputs.toList )
+    	UGen.multiNew( "DiskOut", audio, Nil, bufNum :: channelsArray.toUGenInputs.toList )
 	}
 }
 
 object DiskIn {	
 	def ar( numChannels: Int, bufNum: GE, loop: GE = 0 ) : GE = {
-    	UGen.multiNew( "DiskIn", 'audio, dup( 'audio, numChannels ), List( bufNum, loop ))
+    	UGen.multiNew( "DiskIn", audio, dup( audio, numChannels ), List( bufNum, loop ))
 	}
 
 	def ar( buf: Buffer ) : GE = {
@@ -21,13 +22,13 @@ object DiskIn {
 	}
 	
 	def ar( buf: Buffer, loop: GE ) : GE = {
-		UGen.multiNew( "DiskIn", 'audio, dup( 'audio, buf.numChannels ), List( buf.bufNum, loop ))
+		UGen.multiNew( "DiskIn", audio, dup( audio, buf.numChannels ), List( buf.bufNum, loop ))
 	}
 }
 
 object VDiskIn {	
 	def ar( numChannels: Int, bufNum: GE, rate: GE = 1, loop: GE = 0, sendID: GE = 0 ) : GE = {
-    	UGen.multiNew( "VDiskIn", 'audio, dup( 'audio, numChannels ), List( bufNum, rate, loop, sendID ))
+    	UGen.multiNew( "VDiskIn", audio, dup( audio, numChannels ), List( bufNum, rate, loop, sendID ))
 	}
 
 	// unfortunately we cannot define two ar methods with default args...
@@ -44,6 +45,6 @@ object VDiskIn {
 	}
 	
 	def ar( buf: Buffer, rate: GE, loop: GE, sendID: GE ) : GE = {
-		UGen.multiNew( "VDiskIn", 'audio, dup( 'audio, buf.numChannels ), List( buf.bufNum, rate, loop, sendID ))
+		UGen.multiNew( "VDiskIn", audio, dup( audio, buf.numChannels ), List( buf.bufNum, rate, loop, sendID ))
 	}
 }

@@ -29,6 +29,7 @@
 package de.sciss.tint.sc
 
 import Predef._
+import Rates._
 
 /**
  * 	@version	0.12, 09-Dec-09
@@ -178,13 +179,13 @@ object GraphBuilder {
     def wrapOut( name: String, func: () => GE, rates: Seq[Any], prependArgs: Seq[Any], outClass: String = "Out", fadeTime: Option[Float] ) : SynthDef = {
 		def fullFunc() : GE = {
 			var result = func.apply() // .toUGenInputs
-			val rate = Symbol( result.toUGenInputs.map(_.rate.name).max )
+			val rate = highest( result.toUGenInputs.map( _.rate ))
 //			( new Ordering[ Symbol ] {
 //				def compare( x: Symbol, y: Symbol ) : Int = {
 //					x.name.compare( y.name )
 //				}
 //			})
-			if( rate == 'scalar ) {
+			if( rate == scalar ) {
 				result
 			} else {
 				fadeTime.foreach( fdt => {

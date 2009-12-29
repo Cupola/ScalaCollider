@@ -28,6 +28,7 @@
 package de.sciss.tint.sc
 
 import Predef._
+import Rates._
 
 /**
  *	@version	0.11, 07-Apr-09
@@ -36,24 +37,24 @@ import Predef._
 object Trig1 {
   def ar( in: GE ) : GE = ar( in, Constant( 0.1f ))
   def ar( in: GE, dur: GE ) : GE = {
-    UGen.multiNew( "Trig1", 'audio, List( 'audio ), List( in, dur ))
+    UGen.multiNew( "Trig1", audio, List( audio ), List( in, dur ))
   }
   
   def kr( in: GE ) : GE = ar( in, Constant( 0.1f ))
   def kr( in: GE, dur: GE ) : GE = {
-    UGen.multiNew( "Trig1", 'control, List( 'control ), List( in, dur ))
+    UGen.multiNew( "Trig1", control, List( control ), List( in, dur ))
   }
 }
 
 object Trig {
   def ar( in: GE ) : GE = ar( in, Constant( 0.1f ))
   def ar( in: GE, dur: GE ) : GE = {
-    UGen.multiNew( "Trig", 'audio, List( 'audio ), List( in, dur ))
+    UGen.multiNew( "Trig", audio, List( audio ), List( in, dur ))
   }
   
   def kr( in: GE ) : GE = ar( in, Constant( 0.1f ))
   def kr( in: GE, dur: GE ) : GE = {
-    UGen.multiNew( "Trig", 'control, List( 'control ), List( in, dur ))
+    UGen.multiNew( "Trig", control, List( control ), List( in, dur ))
   }
 }
 
@@ -61,83 +62,83 @@ object SendTrig {
   def ar( in: GE ) : GE = ar( in, Constants.zero )
   def ar( in: GE, id: GE ) : GE = ar( in, id, Constants.zero )
   def ar( in: GE, id: GE, value: GE ) : GE = {
-    UGen.multiNew( "SendTrig", 'audio, List(), List( in, id, value ))
+    UGen.multiNew( "SendTrig", audio, List(), List( in, id, value ))
   }
   
   def kr( in: GE ) : GE = kr( in, Constants.zero )
   def kr( in: GE, id: GE ) : GE = kr( in, id, Constants.zero )
   def kr( in: GE, id: GE, value: GE ) : GE = {
-    UGen.multiNew( "SendTrig", 'control, List(), List( in, id, value ))
+    UGen.multiNew( "SendTrig", control, List(), List( in, id, value ))
   }
 }
 
 object TDelay {
   def ar( in: GE ) : GE = ar( in, Constant( 0.1f ))
   def ar( in: GE, dur: GE ) : GE = {
-    UGen.multiNew( "TDelay", 'audio, List( 'audio ), List( in, dur ))
+    UGen.multiNew( "TDelay", audio, List( audio ), List( in, dur ))
   }
   
   def kr( in: GE ) : GE = ar( in, Constant( 0.1f ))
   def kr( in: GE, dur: GE ) : GE = {
-    UGen.multiNew( "TDelay", 'control, List( 'control ), List( in, dur ))
+    UGen.multiNew( "TDelay", control, List( control ), List( in, dur ))
   }
 }
 
 object Latch {
   def ar( in: GE, trig: GE ) : GE = {
-    UGen.multiNew( "Latch", 'audio, List( 'audio ), List( in, trig ))
+    UGen.multiNew( "Latch", audio, List( audio ), List( in, trig ))
   }
   
   def kr( in: GE, trig: GE ) : GE = {
-    UGen.multiNew( "Latch", 'control, List( 'control ), List( in, trig ))
+    UGen.multiNew( "Latch", control, List( control ), List( in, trig ))
   }
 }
 
 object PulseCount {
   def ar( trig: GE ) : GE = ar( trig, Constants.zero )
   def ar( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "Peak", 'audio, List( 'audio ), List( trig, reset ))
+    UGen.multiNew( "Peak", audio, List( audio ), List( trig, reset ))
   }
   
   def kr( trig: GE ) : GE = ar( trig, Constants.zero )
   def kr( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "Peak", 'control, List( 'control ), List( trig, reset ))
+    UGen.multiNew( "Peak", control, List( control ), List( trig, reset ))
   }
 }
 
 object Peak {
   def ar( trig: GE ) : GE = ar( trig, Constants.zero )
   def ar( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "Peak", 'audio, List( 'audio ), List( trig, reset ))
+    UGen.multiNew( "Peak", audio, List( audio ), List( trig, reset ))
   }
   
   def kr( trig: GE ) : GE = ar( trig, Constants.zero )
   def kr( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "Peak", 'control, List( 'control ), List( trig, reset ))
+    UGen.multiNew( "Peak", control, List( control ), List( trig, reset ))
   }
 }
 
 object RunningMin {
   def ar( trig: GE ) : GE = ar( trig, Constants.zero )
   def ar( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "RunningMin", 'audio, List( 'audio ), List( trig, reset ))
+    UGen.multiNew( "RunningMin", audio, List( audio ), List( trig, reset ))
   }
   
   def kr( trig: GE ) : GE = ar( trig, Constants.zero )
   def kr( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "RunningMin", 'control, List( 'control ), List( trig, reset ))
+    UGen.multiNew( "RunningMin", control, List( control ), List( trig, reset ))
   }
 }
 
 object RunningMax {
   def ar( trig: GE ) : GE = ar( trig, Constants.zero )
   def ar( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "RunningMax", 'audio, List( 'audio ), List( trig, reset ))
+    UGen.multiNew( "RunningMax", audio, List( audio ), List( trig, reset ))
   }
   
   def kr( trig: GE ) : GE = ar( trig, Constants.zero )
   def kr( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "RunningMax", 'control, List( 'control ), List( trig, reset ))
+    UGen.multiNew( "RunningMax", control, List( control ), List( trig, reset ))
   }
 }
 
@@ -148,7 +149,7 @@ object Stepper {
   def ar( trig: GE, reset: GE, min: GE, max: GE ) : GE = ar( trig, reset, min, max, Constants.one )
   def ar( trig: GE, reset: GE, min: GE, max: GE, step: GE ) : GE = ar( trig, reset, min, max, step, min )
   def ar( trig: GE, reset: GE, min: GE, max: GE, step: GE, resetVal: GE ) : GE = {
-    UGen.multiNew( "Stepper", 'audio, List( 'audio ), List( trig, reset, min, max, step, resetVal ))
+    UGen.multiNew( "Stepper", audio, List( audio ), List( trig, reset, min, max, step, resetVal ))
   }
   
   def kr( trig: GE ) : GE = ar( trig, Constants.zero )
@@ -157,7 +158,7 @@ object Stepper {
   def kr( trig: GE, reset: GE, min: GE, max: GE ) : GE = kr( trig, reset, min, max, Constants.one )
   def kr( trig: GE, reset: GE, min: GE, max: GE, step: GE ) : GE = kr( trig, reset, min, max, step, min )
   def kr( trig: GE, reset: GE, min: GE, max: GE, step: GE, resetVal: GE ) : GE = {
-    UGen.multiNew( "Stepper", 'control, List( 'control ), List( trig, reset, min, max, step, resetVal ))
+    UGen.multiNew( "Stepper", control, List( control ), List( trig, reset, min, max, step, resetVal ))
   }
 }
 
@@ -165,67 +166,67 @@ object PulseDivider {
   def ar( trig: GE ) : GE = ar( trig, Constant( 2 ))
   def ar( trig: GE, div: GE ) : GE = ar( trig, div, Constants.zero )
   def ar( trig: GE, div: GE, start: GE ) : GE = {
-    UGen.multiNew( "PulseDivider", 'audio, List( 'audio ), List( trig, div, start ))
+    UGen.multiNew( "PulseDivider", audio, List( audio ), List( trig, div, start ))
   }
   
   def kr( trig: GE ) : GE = kr( trig, Constant( 2 ))
   def kr( trig: GE, div: GE ) : GE = kr( trig, div, Constants.zero )
   def kr( trig: GE, div: GE, start: GE ) : GE = {
-    UGen.multiNew( "PulseDivider", 'control, List( 'control ), List( trig, div, start ))
+    UGen.multiNew( "PulseDivider", control, List( control ), List( trig, div, start ))
   }
 }
 
 object SetResetFF {
   def ar( trig: GE ) : GE = ar( trig, Constants.zero )
   def ar( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "SetResetFF", 'audio, List( 'audio ), List( trig, reset ))
+    UGen.multiNew( "SetResetFF", audio, List( audio ), List( trig, reset ))
   }
   
   def kr( trig: GE ) : GE = ar( trig, Constants.zero )
   def kr( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "SetResetFF", 'control, List( 'control ), List( trig, reset ))
+    UGen.multiNew( "SetResetFF", control, List( control ), List( trig, reset ))
   }
 }
 
 object ToggleFF {
   def ar( trig: GE ) : GE = {
-    UGen.multiNew( "ToggleFF", 'audio, List( 'audio ), List( trig ))
+    UGen.multiNew( "ToggleFF", audio, List( audio ), List( trig ))
   }
   
   def kr( trig: GE ) : GE = {
-    UGen.multiNew( "ToggleFF", 'control, List( 'control ), List( trig ))
+    UGen.multiNew( "ToggleFF", control, List( control ), List( trig ))
   }
 }
 
 object ZeroCrossing {
   def ar( in: GE ) : GE = {
-    UGen.multiNew( "ZeroCrossing", 'audio, List( 'audio ), List( in ))
+    UGen.multiNew( "ZeroCrossing", audio, List( audio ), List( in ))
   }
   
   def kr( in: GE ) : GE = {
-    UGen.multiNew( "ZeroCrossing", 'control, List( 'control ), List( in ))
+    UGen.multiNew( "ZeroCrossing", control, List( control ), List( in ))
   }
 }
 
 object Timer {
   def ar( trig: GE ) : GE = {
-    UGen.multiNew( "Timer", 'audio, List( 'audio ), List( trig ))
+    UGen.multiNew( "Timer", audio, List( audio ), List( trig ))
   }
   
   def kr( trig: GE ) : GE = {
-    UGen.multiNew( "Timer", 'control, List( 'control ), List( trig ))
+    UGen.multiNew( "Timer", control, List( control ), List( trig ))
   }
 }
 
 object Sweep {
   def ar( trig: GE ) : GE = ar( trig, Constants.one )
   def ar( trig: GE, rate: GE ) : GE = {
-    UGen.multiNew( "Sweep", 'audio, List( 'audio ), List( trig, rate ))
+    UGen.multiNew( "Sweep", audio, List( audio ), List( trig, rate ))
   }
   
   def kr( trig: GE ) : GE = ar( trig, Constants.one )
   def kr( trig: GE, rate: GE ) : GE = {
-    UGen.multiNew( "Sweep", 'control, List( 'control ), List( trig, rate ))
+    UGen.multiNew( "Sweep", control, List( control ), List( trig, rate ))
   }
 }
 
@@ -235,7 +236,7 @@ object Phasor {
   def ar( trig: GE, rate: GE, start: GE ) : GE = ar( trig, rate, start, Constants.one )
   def ar( trig: GE, rate: GE, start: GE, end: GE ) : GE = ar( trig, rate, start, end, Constants.zero )
   def ar( trig: GE, rate: GE, start: GE, end: GE, resetPos: GE ) : GE = {
-    UGen.multiNew( "Phasor", 'audio, List( 'audio ), List( trig, rate, start, end, resetPos ))
+    UGen.multiNew( "Phasor", audio, List( audio ), List( trig, rate, start, end, resetPos ))
   }
   
   def kr( trig: GE ) : GE = kr( trig, Constants.one )
@@ -243,6 +244,6 @@ object Phasor {
   def kr( trig: GE, rate: GE, start: GE ) : GE = kr( trig, rate, start, Constants.one )
   def kr( trig: GE, rate: GE, start: GE, end: GE ) : GE = kr( trig, rate, start, end, Constants.zero )
   def kr( trig: GE, rate: GE, start: GE, end: GE, resetPos: GE ) : GE = {
-    UGen.multiNew( "Phasor", 'control, List( 'control ), List( trig, rate, start, end, resetPos ))
+    UGen.multiNew( "Phasor", control, List( control ), List( trig, rate, start, end, resetPos ))
   }
 }

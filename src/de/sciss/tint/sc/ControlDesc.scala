@@ -30,6 +30,7 @@ package de.sciss.tint.sc
 
 import _root_.java.io.{ DataOutputStream, IOException }
 import _root_.scala.math._
+import Rates._
 
 /**
  *	@author		Hanns Holger Rutz
@@ -42,19 +43,20 @@ case class ControlName( name: String )
   def kr : ControlDesc = kr( List( 0f ))
   def kr( value: Float ) : ControlDesc = kr( List( value ))
 //  def kr( value: Tuple2[ GE, Float ]) : ControlDesc = kr( Tuple2( value._1, List( value._2 )))
-  def tr : ControlDesc = tr( List( 0f ))
-  def tr( value: Float ) : ControlDesc = tr( List( value ))
+//  def tr : ControlDesc = tr( List( 0f ))
+//  def tr( value: Float ) : ControlDesc = tr( List( value ))
   
-  def ir( values: Seq[ Float ]) = new ControlDesc( Some( name ), 'scalar, values, None )
-  def kr( values: Seq[ Float ]) = new ControlDesc( Some( name ), 'control, values, None )
-  def tr( values: Seq[ Float ]) = new ControlDesc( Some( name ), 'trigger, values, None )
+  def ir( values: Seq[ Float ]) = new ControlDesc( Some( name ), scalar, values, None )
+  def kr( values: Seq[ Float ]) = new ControlDesc( Some( name ), control, values, None )
+// XXX trigger is not a real rate
+//  def tr( values: Seq[ Float ]) = new ControlDesc( Some( name ), trigger, values, None )
 
   def kr( values: Tuple2[ GE, Seq[ Float ]]) : ControlDesc = {
     val lags = values._1.toUGenInputs
     val inits = values._2
     val numCh = max( lags.size, inits.size )
 //    val iter = lags.elements.counted
-    new ControlDesc( Some( name ), 'control, wrapExtend( values._2, numCh ), Some( wrapExtend( lags, numCh )))
+    new ControlDesc( Some( name ), control, wrapExtend( values._2, numCh ), Some( wrapExtend( lags, numCh )))
   }
   
   private def wrapExtend[T]( coll: Seq[T], size: Int ) : Seq[T] = {
@@ -69,7 +71,7 @@ case class ControlName( name: String )
   }
 }
 
-class ControlDesc( val name: Option[ String ], val rate: Symbol, val initValues: Seq[ Float ], val lag : Option[ Seq[ UGenInput ]])
+class ControlDesc( val name: Option[ String ], val rate: Rate, val initValues: Seq[ Float ], val lag : Option[ Seq[ UGenInput ]])
 extends RatedGE
 {
   var ugen: UGen = null
@@ -106,7 +108,7 @@ extends UGenInput with UGenProxy
   }
 }
 
-class Control( name: String, rate: Symbol, val values: Seq[ Float ])
+class Control( name: String, rate: Rate, val values: Seq[ Float ])
 extends MultiOutUGen( name, rate, (0 until values.size).map (i => rate), Nil )
 {
 //  override val specialIndex = SynthDef.buildSynthDef.map( _.allocControl( numOutputs )).getOrElse( 0 )
@@ -117,11 +119,11 @@ extends MultiOutUGen( name, rate, (0 until values.size).map (i => rate), Nil )
 }
                       
 object Control {
-	def kr( values: Seq[ Float ]) : Control = new Control( "Control", 'control, values )
-	def ir( values: Seq[ Float ]) : Control = new Control( "Control", 'scalar, values )
+	def kr( values: Seq[ Float ]) : Control = new Control( "Control", control, values )
+	def ir( values: Seq[ Float ]) : Control = new Control( "Control", scalar, values )
 }
 
 object TrigControl {
-	def kr( values: Seq[ Float ]) : Control = new Control( "TrigControl", 'control, values )
-	def ir( values: Seq[ Float ]) : Control = new Control( "TrigControl", 'scalar, values )
+	def kr( values: Seq[ Float ]) : Control = new Control( "TrigControl", control, values )
+	def ir( values: Seq[ Float ]) : Control = new Control( "TrigControl", scalar, values )
 }

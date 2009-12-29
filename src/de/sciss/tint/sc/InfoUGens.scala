@@ -28,9 +28,11 @@
 
 package de.sciss.tint.sc
 
+import Rates._
+
 // InfoUGenBase : UGen {
 //	*ir {
-//		^this.multiNew('scalar')
+//		^this.multiNew(scalar')
 //	}
 // }
 
@@ -40,67 +42,67 @@ package de.sciss.tint.sc
  */
 object SampleRate {	/* extends InfoUGenBase */
 	def ir : UGenInput = {
-	  new SingleOutUGen( "SampleRate", 'scalar, 'scalar, Nil )
+	  new SingleOutUGen( "SampleRate", scalar, scalar, Nil )
 	}
 }
 
 object SampleDur {	/* extends InfoUGenBase */
 	def ir : UGenInput = {
-	  new SingleOutUGen( "SampleDur", 'scalar, 'scalar, Nil )
+	  new SingleOutUGen( "SampleDur", scalar, scalar, Nil )
 	}
 }
 
 object RadiansPerSample {	/* extends InfoUGenBase */
 	def ir : UGenInput = {
-	  new SingleOutUGen( "RadiansPerSample", 'scalar, 'scalar, Nil )
+	  new SingleOutUGen( "RadiansPerSample", scalar, scalar, Nil )
 	}
 }
 
 object ControlRate {	/* extends InfoUGenBase */
 	def ir : UGenInput = {
-	  new SingleOutUGen( "ControlRate", 'scalar, 'scalar, Nil )
+	  new SingleOutUGen( "ControlRate", scalar, scalar, Nil )
 	}
 }
 
 object SubsampleOffset {	/* extends InfoUGenBase */
 	def ir : UGenInput = {
-	  new SingleOutUGen( "SubsampleOffset", 'scalar, 'scalar, Nil )
+	  new SingleOutUGen( "SubsampleOffset", scalar, scalar, Nil )
 	}
 }
 
 object NumOutputBuses {	/* extends InfoUGenBase */
 	def ir : UGenInput = {
-	  new SingleOutUGen( "NumOutputBuses", 'scalar, 'scalar, Nil )
+	  new SingleOutUGen( "NumOutputBuses", scalar, scalar, Nil )
 	}
 }
 
 object NumInputBuses {	/* extends InfoUGenBase */
 	def ir : UGenInput = {
-	  new SingleOutUGen( "NumInputBuses", 'scalar, 'scalar, Nil )
+	  new SingleOutUGen( "NumInputBuses", scalar, scalar, Nil )
 	}
 }
 
 object NumAudioBuses {	/* extends InfoUGenBase */
 	def ir : UGenInput = {
-	  new SingleOutUGen( "NumAudioBuses", 'scalar, 'scalar, Nil )
+	  new SingleOutUGen( "NumAudioBuses", scalar, scalar, Nil )
 	}
 }
 
 object NumControlBuses {	/* extends InfoUGenBase */
 	def ir : UGenInput = {
-      new SingleOutUGen( "NumControlBuses", 'scalar, 'scalar, Nil )
+      new SingleOutUGen( "NumControlBuses", scalar, scalar, Nil )
 	}
 }
 
 object NumBuffers {	/* extends InfoUGenBase */
 	def ir : UGenInput = {
-	  new SingleOutUGen( "NumBuffers", 'scalar, 'scalar, Nil )
+	  new SingleOutUGen( "NumBuffers", scalar, scalar, Nil )
 	}
 }
 
 object NumRunningSynths {	/* extends InfoUGenBase */
 	def kr : UGenInput = {
-	  new SingleOutUGen( "NumRunningSynths", 'control, 'control, Nil )
+	  new SingleOutUGen( "NumRunningSynths", control, control, Nil )
 	}
 }
 
@@ -108,73 +110,73 @@ object NumRunningSynths {	/* extends InfoUGenBase */
 /*
 BufInfoUGenBase : UGen {
 	*kr { arg bufnum;
-		^this.multiNew('control', bufnum)
+		^this.multiNew(control', bufnum)
 	}
 	
 	// the .ir method is not the safest choice. Since a buffer can be reallocated at any time,
 	// using .ir will not track the changes.
 	*ir { arg bufnum;
-		^this.multiNew('scalar',bufnum)
+		^this.multiNew(scalar',bufnum)
 	}
 }
 */
 
 object BufSampleRate {	/* extends BufInfoUGenBase */
 	def ir( bufNum: GE ) : GE = {
-	  UGen.multiNew( "BufSampleRate", 'scalar, List( 'scalar ), List( bufNum ))
+	  UGen.multiNew( "BufSampleRate", scalar, List( scalar ), List( bufNum ))
 	}
 
 	def kr( bufNum: GE ) : GE = {
-	  UGen.multiNew( "BufSampleRate", 'control, List( 'control ), List( bufNum ))
+	  UGen.multiNew( "BufSampleRate", control, List( control ), List( bufNum ))
 	}
 }
 
 object BufRateScale {	/* extends BufInfoUGenBase */
 	def ir( bufNum: GE ) : GE = {
-	  UGen.multiNew( "BufRateScale", 'scalar, List( 'scalar ), List( bufNum ))
+	  UGen.multiNew( "BufRateScale", scalar, List( scalar ), List( bufNum ))
 	}
 
 	def kr( bufNum: GE ) : GE = {
-	  UGen.multiNew( "BufRateScale", 'control, List( 'control ), List( bufNum ))
+	  UGen.multiNew( "BufRateScale", control, List( control ), List( bufNum ))
 	}
 }
 
 object BufFrames {	/* extends BufInfoUGenBase */
 	def ir( bufNum: GE ) : GE = {
-	  UGen.multiNew( "BufFrames", 'scalar, List( 'scalar ), List( bufNum ))
+	  UGen.multiNew( "BufFrames", scalar, List( scalar ), List( bufNum ))
 	}
 
 	def kr( bufNum: GE ) : GE = {
-	  UGen.multiNew( "BufFrames", 'control, List( 'control ), List( bufNum ))
+	  UGen.multiNew( "BufFrames", control, List( control ), List( bufNum ))
 	}
 }
 
 object BufSamples {	/* extends BufInfoUGenBase */
 	def ir( bufNum: GE ) : GE = {
-	  UGen.multiNew( "BufSamples", 'scalar, List( 'scalar ), List( bufNum ))
+	  UGen.multiNew( "BufSamples", scalar, List( scalar ), List( bufNum ))
 	}
 
 	def kr( bufNum: GE ) : GE = {
-	  UGen.multiNew( "BufSamples", 'control, List( 'control ), List( bufNum ))
+	  UGen.multiNew( "BufSamples", control, List( control ), List( bufNum ))
 	}
 }
 
 object BufDur {	/* extends BufInfoUGenBase */
 	def ir( bufNum: GE ) : GE = {
-	  UGen.multiNew( "BufDur", 'scalar, List( 'scalar ), List( bufNum ))
+	  UGen.multiNew( "BufDur", scalar, List( scalar ), List( bufNum ))
 	}
 
 	def kr( bufNum: GE ) : GE = {
-	  UGen.multiNew( "BufDur", 'control, List( 'control ), List( bufNum ))
+	  UGen.multiNew( "BufDur", control, List( control ), List( bufNum ))
 	}
 }
 
 object BufChannels {	/* extends BufInfoUGenBase */
 	def ir( bufNum: GE ) : GE = {
-	  UGen.multiNew( "BufChannels", 'scalar, List( 'scalar ), List( bufNum ))
+	  UGen.multiNew( "BufChannels", scalar, List( scalar ), List( bufNum ))
 	}
 
 	def kr( bufNum: GE ) : GE = {
-	  UGen.multiNew( "BufChannels", 'control, List( 'control ), List( bufNum ))
+	  UGen.multiNew( "BufChannels", control, List( control ), List( bufNum ))
 	}
 }
