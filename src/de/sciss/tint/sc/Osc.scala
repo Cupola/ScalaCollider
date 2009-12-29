@@ -28,65 +28,34 @@
 
 package de.sciss.tint.sc
 
+import Predef._
 import Rates._
 
+/**
+ *  @author   Hanns Holger Rutz
+ *  @version  0.11, 29-Dec-09
+ */
 object Osc {	
-  def ar( bufNum: GE ) : GE = ar( bufNum, Constant( 440f ), Constants.zero )
-  def ar( bufNum: GE, freq: GE ) : GE = ar( bufNum, freq, Constants.zero )
-  
-  def ar( bufNum: GE, freq: GE, phase: GE ) : GE = {
+  def ar( bufNum: GE, freq: GE = 440, phase: GE = 0 ) : GE = {
     UGen.multiNew( "Osc", audio, List( audio ), List( bufNum, freq, phase ))
   }
-  
-  def ar( bufNum: GE, freq: GE, phase: GE, mul: GE ) : GE = {
-    ar( bufNum, freq, phase ).madd( mul, Constants.zero ) 
-  }
-  def ar( bufNum: GE, freq: GE, phase: GE, mul: GE, add: GE ) : GE = {
-    ar( bufNum, freq, phase ).madd( mul, add ) 
-  }
 
-  def kr( bufNum: GE ) : GE = kr( bufNum, Constant( 440f ), Constants.zero )
-  def kr( bufNum: GE, freq: GE ) : GE = kr( bufNum, freq, Constants.zero )
-
-  def kr( bufNum: GE, freq: GE, phase: GE ) : GE = {
+  def kr( bufNum: GE, freq: GE = 440, phase: GE = 0 ) : GE = {
     UGen.multiNew( "Osc", control, List( control ), List( bufNum, freq, phase ))
-  }
-
-  def kr( bufNum: GE, freq: GE, phase: GE, mul: GE ) : GE = {
-    kr( bufNum, freq, phase ).madd( mul, Constants.zero )
-  }
-  def kr( bufNum: GE, freq: GE, phase: GE, mul: GE, add: GE ) : GE = {
-    kr( bufNum, freq, phase ).madd( mul, add )
   }
 }
 
+// class Osc private ( r: Rate, val bufNum: UGenInput, val freq: UGenInput, val phase: UGenInput )
+// extends UGen( "Osc", r, List( r ), List( bufNum, freq, phase )) {
+// }
+
 object SinOsc {	
-  def ar : GE = ar( Constant( 440f ), Constants.zero )
-  def ar( freq: GE ) : GE = ar( freq, Constants.zero )
-  
-  def ar( freq: GE, phase: GE ) : GE = {
+  def ar( freq: GE = 440, phase: GE = 0 ) : GE = {
     UGen.multiNew( "SinOsc", audio, List( audio ), List( freq, phase ))
   }
   
-  def ar( freq: GE, phase: GE, mul: GE ) : GE = {
-    ar( freq, phase ).madd( mul, Constants.zero ) 
-  }
-  def ar( freq: GE, phase: GE, mul: GE, add: GE ) : GE = {
-    ar( freq, phase ).madd( mul, add ) 
-  }
-
-  def kr : GE = kr( Constant( 440f ), Constants.zero )
-  def kr( freq: GE ) : GE = kr( freq, Constants.zero )
-
-  def kr( freq: GE, phase: GE ) : GE = {
+  def kr( freq: GE = 400, phase: GE = 0 ) : GE = {
     UGen.multiNew( "SinOsc", control, List( control ), List( freq, phase ))
-  }
-
-  def kr( freq: GE, phase: GE, mul: GE ) : GE = {
-    kr( freq, phase ).madd( mul, Constants.zero )
-  }
-  def kr( freq: GE, phase: GE, mul: GE, add: GE ) : GE = {
-    kr( freq, phase ).madd( mul, add )
   }
 }
 
