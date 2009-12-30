@@ -27,7 +27,7 @@
  */
 package de.sciss.tint.sc
 
-import _root_.de.sciss.tint.sc.Predef._
+import SC._
 
 object Env {
 	val shapeNames = Map( 'step -> 0, 'lin -> 1, 'linear -> 1, 'exp -> 2, 'exponential -> 2, 'sin -> 3, 'sine -> 3, 'wel -> 4, 'welch -> 4, 'sqr -> 6, 'squared -> 6, 'cub -> 7, 'cubed -> 7 )

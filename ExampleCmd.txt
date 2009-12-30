@@ -1,7 +1,24 @@
-// from SC2-examples_1.scd (note: multichannel expansion currently broken!)
-val x = play { val f = LFSaw.kr( 0.4, 0, 24, LFSaw.kr( 7.23, 0, 3, 80 )).midicps; CombN.ar(SinOsc.ar(f, 0, 0.04), 0.2, 0.2, 4)} // analog bubbles
+// from SC2-examples_1.scd
+
+// analog bubbles
+val x = play {
+    val f = LFSaw.kr(0.4).madd(24, LFSaw.kr(List(8, 7.23)).madd(3, 80)).midicps; // glissando function
+    CombN.ar(SinOsc.ar(f)*0.04, 0.2, 0.2, 4) // echoing sine wave
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+// LFO modulation of Pulse waves and resonant filters
+val x = play {
+    CombL.ar(
+        RLPF.ar(LFPulse.ar(FSinOsc.kr(0.05).madd(80,160),0,0.4)*0.05, 
+            FSinOsc.kr(List(0.6, 0.7)).madd(3600, 4000), 0.2),
+        0.3, List(0.2, 0.25), 2)
+}
+
+// these without multich. expansion, since ugens need to be adapted to new system still
 val x = play { CombL.ar( RLPF.ar( LFPulse.ar( FSinOsc.kr( 0.05, 0, 80, 160 ), 0, 0.4, 0.05 ), FSinOsc.kr( 0.6, 0, 3600, 4000 ), 0.2 ), 0.3, 0.2, 2 )} // LFO modulation of Pulse waves and resonant filters
-val x = play { RLPF.ar( LFPulse.ar( SinOsc.kr( 0.2, 0, 10, 21 ), 0.1), 100, 0.1 ).clip2( 0.4 )} // moto rev
+val x = play { RLPF.ar( LFPulse.ar( SinOsc.kr( 0.2 ).madd( 10, 21 ), 0.1), 100, 0.1 ).clip2( 0.4 )} // moto rev
 val x = play { RHPF.ar( max( 0, BrownNoise.ar( 0.5, -0.49 )) * 20, 5000, 1 )} // scratchy
 val x = play { BPZ2.ar( WhiteNoise.ar( LFPulse.kr( LFPulse.kr( 0.09, 0, 0.16, 10, 7 ), 0, 0.25, 0.1)))} // sprinkler
 val x = play { BPZ2.ar( WhiteNoise.ar( LFPulse.kr( MouseX.kr( 0.2, 50 ), 0, 0.25, 0.1)))} // sprinkler

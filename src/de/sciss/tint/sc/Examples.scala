@@ -1,7 +1,8 @@
 package de.sciss.tint.sc
 
-import Predef._
+import SC._
 import _root_.scala.Predef._
+import ugen._
 
 object Examples {
 	def main( args: Array[ String ]) {
@@ -11,9 +12,9 @@ object Examples {
 	}
 
 	def debug {
-		import Predef._
+		import SC._
 		val x = play {
-			val f = LFSaw.kr( 0.4, 0, 24, LFSaw.kr( 8, 0, 3, 80 )).midicps
+			val f = LFSaw.kr( 0.4 ).madd( 24, LFSaw.kr( 8 ).madd( 3, 80 )).midicps
      		CombN.ar(SinOsc.ar(f, 0) * 0.04, 0.2, 0.2, 4) // echoing sine wave
 		}
 	}

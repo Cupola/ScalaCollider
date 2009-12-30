@@ -25,10 +25,11 @@
  *
  *  Changelog:
  */
-package de.sciss.tint.sc
+package de.sciss.tint.sc.ugen
 
-import Predef._
-import Rates._
+import de.sciss.tint.sc._
+import SC._
+//import Rates._
 
 /**
  * 	@version	0.11, 09-Dec-09

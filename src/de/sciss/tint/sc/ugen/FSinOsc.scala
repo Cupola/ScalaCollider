@@ -26,23 +26,27 @@
  *  Changelog:
  */
 
-package de.sciss.tint.sc
+package de.sciss.tint.sc.ugen
 
-import Predef._
-import Rates._
+import de.sciss.tint.sc._
+import SC._
+import GraphBuilder._
 
 /**
  *	@version	0.11, 09-Dec-09
  */
-object FSinOsc {	
-	def ar( freq: GE = 440, iphase: GE = 0, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "FSinOsc", audio, List( audio ), List( freq, iphase )).madd( mul, add )
-	}
+object FSinOsc {
+  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = {
+    simplify( for( List( f, p ) <- expand( freq, iphase )) yield this( audio, f, p ))
+  }
 
-	def kr( freq: GE = 440, iphase: GE = 0, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "FSinOsc", control, List( control ), List( freq, iphase )).madd( mul, add )
-	}
+  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = {
+    simplify( for( List( f, p ) <- expand( freq, iphase )) yield this( control, f, p ))
+  }
 }
+
+case class FSinOsc( override rate: Rate, freq: UGenInput, iphase: UGenInput )
+extends SingleOutUGen( "FSinOsc", rate, rate, List( freq, iphase ))
 
 // Klang XXX missing
 // Klank XXX missing

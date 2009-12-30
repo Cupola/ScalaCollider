@@ -26,10 +26,13 @@
  *  Changelog:
  */
 
-package de.sciss.tint.sc
+package de.sciss.tint.sc.ugen
 
-import Predef._
-import Rates._
+import de.sciss.tint.sc._
+import SC._
+import GraphBuilder._
+
+//import Rates._
 
 /*
 object AbstractOut {
@@ -60,17 +63,34 @@ object AbstractOut {
  */
 object Out /* extends AbstractOut */ {
   def ar( bus: GE, channelsArray: GE ) : GE = {
-//    println( "bus : " + bus.toUGenInputs.first )
-    UGen.multiNew( "Out", audio, Nil, List( bus ) ++ channelsArray.toUGenInputs )
-    // XXX ^0.0		// Out has no output
+    val args = bus :: channelsArray.toUGenInputs.toList
+    simplify( for( b :: c <- expand( args: _* ))
+      yield this( audio, b, c: _* ))
   }
 
-  def kr( bus: GE, channelsArray: Seq[ GE ]) : GE = {
-    UGen.multiNew( "Out", control, Nil, List( bus ) ++ channelsArray )
-    // XXX ^0.0		// Out has no output
+  def kr( bus: GE, channelsArray: GE ) : GE = {
+    val args = bus :: channelsArray.toUGenInputs.toList
+    simplify( for( b :: c <- expand( args: _* ))
+      yield this( control, b, c: _* ))
   }
+
+//  def ar( bus: GE, channelsArray: GE ) : GE = {
+//    UGen.multiNew( "Out", audio, Nil, List( bus ) ++ channelsArray.toUGenInputs )
+//    // XXX ^0.0		// Out has no output
+//  }
+
+//  def kr( bus: GE, channelsArray: Seq[ GE ]) : GE = {
+//    UGen.multiNew( "Out", control, Nil, List( bus ) ++ channelsArray )
+//    // XXX ^0.0		// Out has no output
+//  }
 
 //	*numFixedArgs { ^1 }
+}
+
+case class Out( override rate: Rate, bus: UGenInput, channels: UGenInput* )
+extends UGen( "Out", rate, Nil, bus :: channels.toList ) {
+  def toUGenInputs = Nil
+  val numOutputs = 0
 }
 
 object ReplaceOut /* extends AbstractOut */ {

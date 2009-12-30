@@ -26,10 +26,11 @@
  *  Changelog:
  */
 
-package de.sciss.tint.sc
+package de.sciss.tint.sc.ugen
 
-import Predef._
-import Rates._
+import de.sciss.tint.sc._
+import SC._
+import GraphBuilder._
 
 /**
  *  @author   Hanns Holger Rutz
@@ -49,15 +50,18 @@ object Osc {
 // extends UGen( "Osc", r, List( r ), List( bufNum, freq, phase )) {
 // }
 
-object SinOsc {	
+object SinOsc {
   def ar( freq: GE = 440, phase: GE = 0 ) : GE = {
-    UGen.multiNew( "SinOsc", audio, List( audio ), List( freq, phase ))
+    simplify( for( List( f, p ) <- expand( freq, phase )) yield this( audio, f, p ))
   }
-  
-  def kr( freq: GE = 400, phase: GE = 0 ) : GE = {
-    UGen.multiNew( "SinOsc", control, List( control ), List( freq, phase ))
+
+  def kr( freq: GE = 440, phase: GE = 0 ) : GE = {
+    simplify( for( List( f, p ) <- expand( freq, phase )) yield this( control, f, p ))
   }
 }
+
+case class SinOsc( override rate: Rate, freq: UGenInput, phase: UGenInput )
+extends SingleOutUGen( "SinOsc", rate, rate, List( freq, phase ))
 
 object SinOscFB {	
   def ar : GE = ar( Constant( 440f ), Constants.zero )
@@ -238,34 +242,17 @@ object Formant {
 }
 
 object LFSaw {	
-  def ar : GE = ar( Constant( 440f ), Constants.zero )
-  def ar( freq: GE ) : GE = ar( freq, Constants.zero )
-  
-  def ar( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFSaw", audio, List( audio ), List( freq, iphase ))
+  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = {
+    simplify( for( List( f, p ) <- expand( freq, iphase )) yield this( audio, f, p ))
   }
   
-  def ar( freq: GE, iphase: GE, mul: GE ) : GE = {
-    ar( freq, iphase ).madd( mul, Constants.zero ) 
-  }
-  def ar( freq: GE, iphase: GE, mul: GE, add: GE ) : GE = {
-    ar( freq, iphase ).madd( mul, add ) 
-  }
-
-  def kr : GE = kr( Constant( 440f ), Constants.zero )
-  def kr( freq: GE ) : GE = kr( freq, Constants.zero )
-
-  def kr( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFSaw", control, List( control ), List( freq, iphase ))
-  }
-
-  def kr( freq: GE, iphase: GE, mul: GE ) : GE = {
-    kr( freq, iphase ).madd( mul, Constants.zero )
-  }
-  def kr( freq: GE, iphase: GE, mul: GE, add: GE ) : GE = {
-    kr( freq, iphase ).madd( mul, add )
+  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = {
+    simplify( for( List( f, p ) <- expand( freq, iphase )) yield this( control, f, p ))
   }
 }
+
+case class LFSaw( override rate: Rate, freq: UGenInput, iphase: UGenInput )
+extends SingleOutUGen( "LFSaw", rate, rate, List( freq, iphase ))
 
 object LFPar {	
   def ar : GE = ar( Constant( 440f ), Constants.zero )

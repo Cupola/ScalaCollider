@@ -28,8 +28,9 @@
 
 package de.sciss.tint.sc
 
-import Predef._
-import Rates._
+import SC._
+import ugen.{ BinaryOpUGen => BinOp, EnvGen, MulAdd, Silent, Out, UnaryOpUGen => UnOp }
+//import Rates._
 
 /**
  * 	@version	0.12, 09-Dec-09
@@ -39,101 +40,105 @@ trait GE {
   def toUGenInputs : Seq[ UGenInput ]
 
   // binary ops
-  def +( b: GE ) : GE     = BinaryOpUGen( Symbol( "+" ), this, b )
-  def -( b: GE ) : GE     = BinaryOpUGen( Symbol( "-" ), this, b )
-  def *( b: GE ) : GE     = BinaryOpUGen( Symbol( "*" ), this, b )
-//  def div( b: GE ) : GE   = BinaryOpUGen( Symbol( 'div, this, b )
-  def /( b: GE ) : GE     = BinaryOpUGen( Symbol( "/" ), this, b )
-  def mod( b: GE ) : GE   = BinaryOpUGen( 'mod, this, b )
-  def <( b: GE ) : GE	  = BinaryOpUGen( Symbol( "<" ), this, b )
-  def >( b: GE ) : GE	  = BinaryOpUGen( Symbol( ">" ), this, b )
-  def <=( b: GE ) : GE	  = BinaryOpUGen( Symbol( "<=" ), this, b )
-  def >=( b: GE ) : GE	  = BinaryOpUGen( Symbol( ">=" ), this, b )
-  def min( b: GE ) : GE   = BinaryOpUGen( 'min, this, b )
-  def max( b: GE ) : GE   = BinaryOpUGen( 'max, this, b )
-//  def &( b: GE ) : GE	  = BinaryOpUGen( Symbol( "&" ), this, b )
-//  def |( b: GE ) : GE	  = BinaryOpUGen( Symbol( "|" ), this, b )
-  def round( b: GE ) : GE = BinaryOpUGen( 'round, this, b )
-  def clip2( b: GE ) : GE = BinaryOpUGen( 'clip2, this, b )
+  def +( b: GE ) : GE     = BinOp.make( Symbol( "+" ), this, b )
+  def -( b: GE ) : GE     = BinOp.make( Symbol( "-" ), this, b )
+  def *( b: GE ) : GE     = BinOp.make( Symbol( "*" ), this, b )
+//  def div( b: GE ) : GE   = BinOp.make( Symbol( 'div, this, b )
+  def /( b: GE ) : GE     = BinOp.make( Symbol( "/" ), this, b )
+  def mod( b: GE ) : GE   = BinOp.make( 'mod, this, b )
+  def <( b: GE ) : GE	  = BinOp.make( Symbol( "<" ), this, b )
+  def >( b: GE ) : GE	  = BinOp.make( Symbol( ">" ), this, b )
+  def <=( b: GE ) : GE	  = BinOp.make( Symbol( "<=" ), this, b )
+  def >=( b: GE ) : GE	  = BinOp.make( Symbol( ">=" ), this, b )
+  def min( b: GE ) : GE   = BinOp.make( 'min, this, b )
+  def max( b: GE ) : GE   = BinOp.make( 'max, this, b )
+//  def &( b: GE ) : GE	  = BinOp.make( Symbol( "&" ), this, b )
+//  def |( b: GE ) : GE	  = BinOp.make( Symbol( "|" ), this, b )
+  def round( b: GE ) : GE = BinOp.make( 'round, this, b )
+  def clip2( b: GE ) : GE = BinOp.make( 'clip2, this, b )
 
   // unary ops
-  def neg : GE        = UnaryOpUGen( 'neg, this )
-  def reciprocal : GE = UnaryOpUGen( 'reciprocal, this )
-  def bitNot : GE	  = UnaryOpUGen( 'bitNot, this )
-  def abs : GE	      = UnaryOpUGen( 'abs, this )
-// def asFloat : GE	  = UnaryOpUGen( 'asFloat, this )
-// def asInteger : GE	  = UnaryOpUGen( 'asInteger, this )
-  def ceil : GE	      = UnaryOpUGen( 'ceil, this )
-  def floor : GE	  = UnaryOpUGen( 'floor, this )
-  def frac : GE	      = UnaryOpUGen( 'frac, this )
-  def sign : GE	      = UnaryOpUGen( 'sign, this )
-  def squared : GE    = UnaryOpUGen( 'squared, this )
-  def cubed : GE      = UnaryOpUGen( 'cubed, this )
-  def sqrt : GE       = UnaryOpUGen( 'sqrt, this )
-  def exp : GE        = UnaryOpUGen( 'exp, this )
-  def midicps : GE    = UnaryOpUGen( 'midicps, this )
-  def cpsmidi : GE    = UnaryOpUGen( 'cpsmidi, this )
-  def midiratio : GE  = UnaryOpUGen( 'midiratio, this )
-  def ratiomidi : GE  = UnaryOpUGen( 'ratiomidi, this )
-  def ampdb : GE      = UnaryOpUGen( 'ampdb, this )
-  def dbamp : GE      = UnaryOpUGen( 'dbamp, this )
-  def octcps : GE     = UnaryOpUGen( 'octcps, this )
-  def cpsoct : GE     = UnaryOpUGen( 'cpsoct, this )
-  def log : GE        = UnaryOpUGen( 'log, this )
-  def log2 : GE       = UnaryOpUGen( 'log2, this )
-  def log10 : GE      = UnaryOpUGen( 'log10, this )
-  def sin : GE        = UnaryOpUGen( 'sin, this )
-  def cos : GE        = UnaryOpUGen( 'cos, this )
-  def tan : GE        = UnaryOpUGen( 'tan, this )
-  def asin : GE       = UnaryOpUGen( 'asin, this )
-  def acos : GE       = UnaryOpUGen( 'acos, this )
-  def atan : GE       = UnaryOpUGen( 'atan, this )
-  def sinh : GE       = UnaryOpUGen( 'sinh, this )
-  def cosh : GE       = UnaryOpUGen( 'cosh, this )
-  def tanh : GE       = UnaryOpUGen( 'tanh, this )
-  def rand : GE       = UnaryOpUGen( 'rand, this )
-  def rand2 : GE      = UnaryOpUGen( 'rand2, this )
-  def linrand : GE    = UnaryOpUGen( 'linrand, this )
-  def bilinrand : GE  = UnaryOpUGen( 'bilinrand, this )
-  def sum3rand : GE   = UnaryOpUGen( 'sum3rand, this )
-  def distort : GE    = UnaryOpUGen( 'distort, this )
-  def softclip : GE   = UnaryOpUGen( 'softclip, this )
-  def coin : GE       = UnaryOpUGen( 'coin, this )
-  def even : GE       = UnaryOpUGen( 'even, this )
-  def odd : GE        = UnaryOpUGen( 'odd, this )
-  def rectWindow : GE = UnaryOpUGen( 'rectWindow, this )
-  def hanWindow : GE  = UnaryOpUGen( 'hanWindow, this )
-  def welWindow : GE  = UnaryOpUGen( 'sum3rand, this )
-  def triWindow : GE  = UnaryOpUGen( 'triWindow, this )
-  def scurve : GE     = UnaryOpUGen( 'scurve, this )
-  def ramp : GE       = UnaryOpUGen( 'ramp, this )
-  def isPositive : GE = UnaryOpUGen( 'isPositive, this )
-  def isNegative : GE = UnaryOpUGen( 'isNegative, this )
-  def isStrictlyPositive : GE = UnaryOpUGen( 'isStrictlyPositive, this )
-  def rho : GE        = UnaryOpUGen( 'rho, this )
-  def theta : GE      = UnaryOpUGen( 'theta, this )
+  def neg : GE        = UnOp.make( 'neg, this )
+  def reciprocal : GE = UnOp.make( 'reciprocal, this )
+  def bitNot : GE	  = UnOp.make( 'bitNot, this )
+  def abs : GE	      = UnOp.make( 'abs, this )
+// def asFloat : GE	  = UnOp.make( 'asFloat, this )
+// def asInteger : GE	  = UnOp.make( 'asInteger, this )
+  def ceil : GE	      = UnOp.make( 'ceil, this )
+  def floor : GE	  = UnOp.make( 'floor, this )
+  def frac : GE	      = UnOp.make( 'frac, this )
+  def sign : GE	      = UnOp.make( 'sign, this )
+  def squared : GE    = UnOp.make( 'squared, this )
+  def cubed : GE      = UnOp.make( 'cubed, this )
+  def sqrt : GE       = UnOp.make( 'sqrt, this )
+  def exp : GE        = UnOp.make( 'exp, this )
+  def midicps : GE    = UnOp.make( 'midicps, this )
+  def cpsmidi : GE    = UnOp.make( 'cpsmidi, this )
+  def midiratio : GE  = UnOp.make( 'midiratio, this )
+  def ratiomidi : GE  = UnOp.make( 'ratiomidi, this )
+  def ampdb : GE      = UnOp.make( 'ampdb, this )
+  def dbamp : GE      = UnOp.make( 'dbamp, this )
+  def octcps : GE     = UnOp.make( 'octcps, this )
+  def cpsoct : GE     = UnOp.make( 'cpsoct, this )
+  def log : GE        = UnOp.make( 'log, this )
+  def log2 : GE       = UnOp.make( 'log2, this )
+  def log10 : GE      = UnOp.make( 'log10, this )
+  def sin : GE        = UnOp.make( 'sin, this )
+  def cos : GE        = UnOp.make( 'cos, this )
+  def tan : GE        = UnOp.make( 'tan, this )
+  def asin : GE       = UnOp.make( 'asin, this )
+  def acos : GE       = UnOp.make( 'acos, this )
+  def atan : GE       = UnOp.make( 'atan, this )
+  def sinh : GE       = UnOp.make( 'sinh, this )
+  def cosh : GE       = UnOp.make( 'cosh, this )
+  def tanh : GE       = UnOp.make( 'tanh, this )
+  def rand : GE       = UnOp.make( 'rand, this )
+  def rand2 : GE      = UnOp.make( 'rand2, this )
+  def linrand : GE    = UnOp.make( 'linrand, this )
+  def bilinrand : GE  = UnOp.make( 'bilinrand, this )
+  def sum3rand : GE   = UnOp.make( 'sum3rand, this )
+  def distort : GE    = UnOp.make( 'distort, this )
+  def softclip : GE   = UnOp.make( 'softclip, this )
+  def coin : GE       = UnOp.make( 'coin, this )
+  def even : GE       = UnOp.make( 'even, this )
+  def odd : GE        = UnOp.make( 'odd, this )
+  def rectWindow : GE = UnOp.make( 'rectWindow, this )
+  def hanWindow : GE  = UnOp.make( 'hanWindow, this )
+  def welWindow : GE  = UnOp.make( 'sum3rand, this )
+  def triWindow : GE  = UnOp.make( 'triWindow, this )
+  def scurve : GE     = UnOp.make( 'scurve, this )
+  def ramp : GE       = UnOp.make( 'ramp, this )
+  def isPositive : GE = UnOp.make( 'isPositive, this )
+  def isNegative : GE = UnOp.make( 'isNegative, this )
+  def isStrictlyPositive : GE = UnOp.make( 'isStrictlyPositive, this )
+  def rho : GE        = UnOp.make( 'rho, this )
+  def theta : GE      = UnOp.make( 'theta, this )
 
-  def madd( mul: GE ) : GE = { 		
-    MulAdd( this, mul, Constants.zero )
-  }
-  
-  def madd( mul: GE, add: GE ) : GE = { 		
-    MulAdd( this, mul, add )
+//  def madd( mul: GE, add: GE ) : GE
+
+  def madd( mul: GE, add: GE ) : GE = {
+    Rates.highest( toUGenInputs.map( _.rate ): _* ) match {
+      case `audio`   => MulAdd.ar( this, mul, add )
+      case `control` => MulAdd.kr( this, mul, add )
+      case r => error( "Illegal rate " + r )
+    }
   }
 }
 
-case class GESeq( elements: Seq[ UGenInput ]) extends GE
+case class GESeq( elements: UGenInput* ) extends GE
 {
   val numOutputs = elements.size
   def getOutputAt( idx: Int ) = elements( idx )
   def toUGenInputs : Seq[ UGenInput ] = elements
+
+  override def toString = elements.mkString( "[ ", ", ", " ]" )
 }
 
 object GraphBuilder {
 	//used to create an out ugen automatically and a fade envelope
 
-    def seq( elements: Seq[ UGenInput ]) : GE = {
-      if( elements.size == 1 ) elements.head else new GESeq( elements )
+    def seq( elements: UGenInput* ) : GE = {
+      if( elements.size == 1 ) elements.head else new GESeq( elements: _* )
     }
 
  	def replaceZeroesWithSilence( input: GE ) : GE = {
@@ -160,7 +165,7 @@ object GraphBuilder {
 							silent( pos - 1 )
 						} else ugenInput
 					})
-					new GESeq( result )
+					new GESeq( result: _* )
 				}
 			}
 			case _ => input
@@ -176,27 +181,35 @@ object GraphBuilder {
     }
 */
   
-    def wrapOut( name: String, func: () => GE, rates: Seq[Any], prependArgs: Seq[Any], outClass: String = "Out", fadeTime: Option[Float] ) : SynthDef = {
+    def wrapOut( name: String, func: () => GE, fadeTime: Option[Float] ) : SynthDef = {
 		def fullFunc() : GE = {
 			var result = func.apply() // .toUGenInputs
-			val rate = highest( result.toUGenInputs.map( _.rate ))
+			val rate = Rates.highest( result.toUGenInputs.map( _.rate ): _* )
 //			( new Ordering[ Symbol ] {
 //				def compare( x: Symbol, y: Symbol ) : Int = {
 //					x.name.compare( y.name )
 //				}
 //			})
-			if( rate == scalar ) {
-				result
-			} else {
+			if( (rate == audio) || (rate == control) ) {
 				fadeTime.foreach( fdt => {
 					result = makeFadeEnv( fdt ) * result
 				})
 //				val i_out : UGenInput = Constant( 0 )
 				val i_out = "i_out".ir
 //				result = replaceZeroesWithSilence( result )
-				UGen.multiNew( outClass, rate, Nil /* (1 to result.size) map (x => rate) */,
-							   List( i_out ) ++ result.toUGenInputs )
-			}
+
+//                UGen.multiNew( outClass, rate, Nil /* (1 to result.size) map (x => rate) */,
+//							   List( i_out ) ++ result.toUGenInputs )
+
+                if( rate == audio ) {
+                  Out.ar( i_out, result )
+                } else {
+                  Out.kr( i_out, result )
+                }
+        
+			} else {
+            	result
+            }
 //			val rate='scalar // XXX
 //			val rate = result.first.rate
 //			val resultSeq: GESeq = result match {
@@ -218,4 +231,33 @@ object GraphBuilder {
 		val startVal	= (dt <= 0)
 		EnvGen.kr( new Env( List( startVal, 1, 0 ), List( 1, 1 ), List( 1, 1 ), 1 ), gate, 1, 0, dt, 2 )
 	}
+
+  def expand( args: GE* ): Seq[ List[ UGenInput ]] = {
+    var chanExp = 0
+    var allOne  = true
+    var hasZero = false
+    for( arg <- args ) {
+      chanExp = scala.Math.max( chanExp, arg.numOutputs ) // shitty implicits don't work properly
+      allOne  = allOne && (arg.numOutputs == 1)
+      hasZero = hasZero || (arg.numOutputs == 0)
+    }
+//    println( "chanExp " + chanExp + "; allOne " + allOne + "; hasZero " + hasZero )
+    if( allOne ) {
+      List( args.toList.flatMap( _.toUGenInputs.toList ))
+    } else if( hasZero ) {
+      Nil	// cannot wrap zero size seq
+    } else {
+      val exp  = args.toList.map( _.toUGenInputs.toArray )
+      for( ch <- 0 until chanExp ) yield exp.map( (arr) => arr.apply( ch % arr.size ))
+    }
+  }
+
+  def simplify( res: Seq[ GE ]) : GE = { // UGenInput
+//    println( "simplify : " + res )
+    if( res.size == 1 ) {
+      res.head
+    } else {
+      seqOfGE2GESeq( res )
+    }
+  }
 }

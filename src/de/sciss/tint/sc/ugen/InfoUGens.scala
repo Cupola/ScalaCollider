@@ -26,9 +26,11 @@
  *  Changelog:
  */
 
-package de.sciss.tint.sc
+package de.sciss.tint.sc.ugen
 
-import Rates._
+import de.sciss.tint.sc._
+
+//import Rates._
 
 // InfoUGenBase : UGen {
 //	*ir {

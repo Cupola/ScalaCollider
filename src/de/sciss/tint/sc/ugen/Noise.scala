@@ -26,10 +26,11 @@
  *  Changelog:
  */
 
-package de.sciss.tint.sc
+package de.sciss.tint.sc.ugen
 
-import Predef._
-import Rates._
+import de.sciss.tint.sc._
+import SC._
+//import Rates._
 
 /**
  *	@version	0.11, 09-Dec-09
@@ -142,7 +143,7 @@ object WhiteNoise {
 		} else {	// support this idiom from SC2
 // XXX Range implicit seems broken with tint Predef import?
 //			GraphBuilder.seq( (0 until mul.numOutputs).map (x => ar) ).madd( mul, add )
-			GraphBuilder.seq( Range( 0, mul.numOutputs ).map( _ => arPlain )).madd( mul, add )
+			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => arPlain ): _* ).madd( mul, add )
 	    }
 	}
 
@@ -151,7 +152,7 @@ object WhiteNoise {
 			krPlain.madd( mul, add )
 		} else {	// support this idiom from SC2
 //			GraphBuilder.seq( (0 until mul.numOutputs).map (x => kr) ).madd( mul, add )
-			GraphBuilder.seq( Range( 0, mul.numOutputs ).map( _ => krPlain )).madd( mul, add )
+			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => krPlain ): _* ).madd( mul, add )
 		}
 	}
 }
@@ -169,7 +170,7 @@ object BrownNoise {
 		if( mul.numOutputs == 1 ) {
 			arPlain.madd( mul, add )
 		} else {	// support this idiom from SC2
-			GraphBuilder.seq( Range( 0, mul.numOutputs ).map( _ => arPlain )).madd( mul, add )
+			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => arPlain ): _* ).madd( mul, add )
 	    }
 	}
 
@@ -177,7 +178,7 @@ object BrownNoise {
 		if( mul.numOutputs == 1 ) {
 			krPlain.madd( mul, add )
 		} else {	// support this idiom from SC2
-			GraphBuilder.seq( Range( 0, mul.numOutputs ).map( _ => krPlain )).madd( mul, add )
+			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => krPlain ): _* ).madd( mul, add )
 		}
 	}
 }
@@ -195,7 +196,7 @@ object PinkNoise {
 		if( mul.numOutputs == 1 ) {
 			arPlain.madd( mul, add )
 		} else {	// support this idiom from SC2
-			GraphBuilder.seq( Range( 0, mul.numOutputs ).map( _ => arPlain )).madd( mul, add )
+			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => arPlain ): _* ).madd( mul, add )
 	    }
 	}
 
@@ -203,7 +204,7 @@ object PinkNoise {
 		if( mul.numOutputs == 1 ) {
 			krPlain.madd( mul, add )
 		} else {	// support this idiom from SC2
-			GraphBuilder.seq( Range( 0, mul.numOutputs ).map( _ => krPlain )).madd( mul, add )
+			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => krPlain ): _* ).madd( mul, add )
 		}
 	}
 }
@@ -221,7 +222,7 @@ object ClipNoise {
 		if( mul.numOutputs == 1 ) {
 			arPlain.madd( mul, add )
 		} else {	// support this idiom from SC2
-			GraphBuilder.seq( Range( 0, mul.numOutputs ).map( _ => arPlain )).madd( mul, add )
+			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => arPlain ): _* ).madd( mul, add )
 	    }
 	}
 
@@ -229,7 +230,7 @@ object ClipNoise {
 		if( mul.numOutputs == 1 ) {
 			krPlain.madd( mul, add )
 		} else {	// support this idiom from SC2
-			GraphBuilder.seq( Range( 0, mul.numOutputs ).map( _ => krPlain )).madd( mul, add )
+			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => krPlain ): _* ).madd( mul, add )
 		}
 	}
 }
@@ -247,7 +248,7 @@ object GrayNoise {
 		if( mul.numOutputs == 1 ) {
 			arPlain.madd( mul, add )
 		} else {	// support this idiom from SC2
-			GraphBuilder.seq( Range( 0, mul.numOutputs ).map( _ => arPlain )).madd( mul, add )
+			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => arPlain ): _* ).madd( mul, add )
 	    }
 	}
 
@@ -255,7 +256,7 @@ object GrayNoise {
 		if( mul.numOutputs == 1 ) {
 			krPlain.madd( mul, add )
 		} else {	// support this idiom from SC2
-			GraphBuilder.seq( Range( 0, mul.numOutputs ).map( _ => krPlain )).madd( mul, add )
+			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => krPlain ): _* ).madd( mul, add )
 		}
 	}
 }

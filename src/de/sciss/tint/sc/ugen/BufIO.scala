@@ -25,11 +25,12 @@
  *
  *  Changelog:
  */
-package de.sciss.tint.sc
+package de.sciss.tint.sc.ugen
 
-import Predef._
-import _root_.scala.Predef.error
-import Rates._
+import de.sciss.tint.sc._
+import SC._
+// import _root_.scala.Predef.error
+//import Rates._
 
 /**
  * 	@version	0.11, 16-Jun-09

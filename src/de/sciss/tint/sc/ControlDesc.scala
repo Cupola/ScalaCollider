@@ -30,7 +30,7 @@ package de.sciss.tint.sc
 
 import _root_.java.io.{ DataOutputStream, IOException }
 import _root_.scala.math._
-import Rates._
+//import Rates._
 
 /**
  *	@author		Hanns Holger Rutz
@@ -106,24 +106,4 @@ extends UGenInput with UGenProxy
       dos.writeShort( ugenIndex )
       dos.writeShort( desc.ugenOutputIndex + channel )
   }
-}
-
-class Control( name: String, rate: Rate, val values: Seq[ Float ])
-extends MultiOutUGen( name, rate, (0 until values.size).map (i => rate), Nil )
-{
-//  override val specialIndex = SynthDef.buildSynthDef.map( _.allocControl( numOutputs )).getOrElse( 0 )
-
-	override val specialIndex = SynthDef.buildSynthDef.map( _.addControl( this )).getOrElse( 0 )
-	
-//	*isControlUGen { ^true }
-}
-                      
-object Control {
-	def kr( values: Seq[ Float ]) : Control = new Control( "Control", control, values )
-	def ir( values: Seq[ Float ]) : Control = new Control( "Control", scalar, values )
-}
-
-object TrigControl {
-	def kr( values: Seq[ Float ]) : Control = new Control( "TrigControl", control, values )
-	def ir( values: Seq[ Float ]) : Control = new Control( "TrigControl", scalar, values )
 }

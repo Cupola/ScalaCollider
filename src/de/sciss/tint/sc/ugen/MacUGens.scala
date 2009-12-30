@@ -26,9 +26,10 @@
  *  Changelog:
  */
 
-package de.sciss.tint.sc
+package de.sciss.tint.sc.ugen
 
-import Rates._
+import de.sciss.tint.sc._
+//import Rates._
 
 object MouseX {
 	def kr : GE = kr( Constants.zero, Constants.one, Constants.zero, Constant( 0.2f ))

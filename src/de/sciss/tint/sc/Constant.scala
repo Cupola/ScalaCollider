@@ -30,7 +30,7 @@ package de.sciss.tint.sc
 
 import java.io.DataOutputStream
 import java.io.IOException
-import Rates._
+//import Rates._
 
 /**
  *	@author		Hanns Holger Rutz
@@ -49,6 +49,8 @@ case class Constant( val value: Float ) extends UGenInput {
       dos.writeShort( -1 )
       dos.writeShort( constIndex )
   }
+
+  override def toString = value.toString
 }
 
 object Constants {

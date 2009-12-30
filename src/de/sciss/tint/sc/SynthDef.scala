@@ -28,15 +28,16 @@
 
 package de.sciss.tint.sc
 
-import _root_.de.sciss.scalaosc.OSCMessage
-import _root_.scala.collection.mutable.{ HashMap, HashSet, ListBuffer, Map, Set }
-import _root_.java.io.{ ByteArrayOutputStream, BufferedOutputStream, DataOutputStream,
+import de.sciss.scalaosc.OSCMessage
+import scala.collection.mutable.{ HashMap, HashSet, ListBuffer, Map, Set }
+import java.io.{ ByteArrayOutputStream, BufferedOutputStream, DataOutputStream,
                         File, FileOutputStream }
-import _root_.java.nio.ByteBuffer
+import java.nio.ByteBuffer
 
-import Predef._
-import _root_.scala.Predef._
-import Rates._
+import de.sciss.tint.sc.ugen.{ Control }
+import SC._
+//import _root_.scala.Predef._
+//import Rates._
 
 /**
  * 	@author		Hanns Holger Rutz

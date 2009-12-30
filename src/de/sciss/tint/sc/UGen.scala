@@ -37,17 +37,33 @@ import _root_.java.io.{ DataOutputStream, IOException }
  *	@author		Hanns Holger Rutz
  *	@version	0.13, 29-Dec-09
  */
-object Rates extends Enumeration { // with Ordering[ Enumeration#Value ]
+/*
+object Rates extends Enumeration {
   type Rate = Value
   val scalar, control, audio, demand = Value
-//  def compare( a: Enumeration#Value, b: Enumeration#Value ) = a.compare( b )
 
   def highest( rates: Seq[ Rate ]) : Rate = {
     rates.foldLeft( scalar )( (a, b) => if( a > b ) a else b )
   }
 }
+*/
 
-import Rates._
+sealed abstract class Rate( val id: Int )
+
+// extends Ordered[ Rate ] {
+//   def compare( that: Rate ) = this.id compare that.id
+// }
+
+object Rates {
+  def highest( rates: Rate* ) = rates.foldLeft[ Rate ]( scalar )( (a, b) => if( a.id > b.id ) a else b )
+}
+
+case object scalar  extends Rate( 0 )
+case object control extends Rate( 1 )
+case object audio   extends Rate( 2 )
+case object demand  extends Rate( 3 )
+
+//import Rates._
 
 trait RatedGE extends GE {
   val rate : Rate
@@ -162,6 +178,16 @@ extends RatedGE with UGenProxy /* UGenInput */ {
 //    println( "WARNING:\nUGen * mul not yet working" )
 //    this	// XXX
 //  }
+
+  override def toString: String = {
+    name + "." + (rate match {
+    case `scalar` => "ir";
+    case `control` => "kr";
+    case `audio` => "ar";
+    case `demand` => "dr";
+    case _ => "?";
+    }) + inputs.mkString( "(", ", ", ")" )
+  }
 }
 
 object UGen {
@@ -184,7 +210,7 @@ object UGen {
       allOne  = allOne && (input.numOutputs == 1)
       hasZero = hasZero || (input.numOutputs == 0)
     }
-    if( hasZero ) return new GESeq( Nil )	// cannot wrap zero size seq
+    if( hasZero ) return new GESeq()	// cannot wrap zero size seq
 //  if( allOne )  return new UGen( name, rate, outputRates, inputs map (_.asInstanceOf[ UGenInput ]))
 //  if( allOne )  return new MultiOutUGen( name, rate, outputRates, inputs map (_.asInstanceOf[ UGenInput ]))
     if( allOne )  return new MultiOutUGen( name, rate, outputRates, inputs.flatMap (_.toUGenInputs ))
@@ -198,7 +224,7 @@ object UGen {
       results.update( chan, new MultiOutUGen( name, rate, outputRates, newArgs ))
     }
     val res2 = results flatMap (_.toUGenInputs)
-    GraphBuilder.seq( res2 )
+    GraphBuilder.seq( res2: _* )
   }
              
 //  def outputProxy( rate: Symbol, source: UGen, outputIndex: Int ) : UGen {

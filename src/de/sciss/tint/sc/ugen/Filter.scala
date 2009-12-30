@@ -26,10 +26,11 @@
  *  Changelog:
  */
 
-package de.sciss.tint.sc
+package de.sciss.tint.sc.ugen
 
-import Predef._
-import Rates._
+import de.sciss.tint.sc._
+import SC._
+import GraphBuilder._
 
 /**
  * 	@version	0.11, 16-Jun-09
@@ -205,14 +206,17 @@ object LeakDC {
 }
 
 object RLPF {
-	def ar( in: GE, freq: GE = 440, rq: GE = 1 ) : GE = {
-    	UGen.multiNew( "RLPF", audio, List( audio ), List( in, freq, rq ))
-	}
-  
-	def kr( in: GE, freq: GE = 440, rq: GE = 1 ) : GE = {
-    	UGen.multiNew( "RLPF", control, List( control ), List( in, freq, rq ))
-	}
+  def ar( in: GE, freq: GE = 440, rq: GE = 1 ) : GE = {
+    simplify( for( List( i, f, q ) <- expand( in, freq, rq )) yield this( audio, i, f, q ))
+  }
+
+  def kr( in: GE, freq: GE = 440, rq: GE = 1 ) : GE = {
+    simplify( for( List( i, f, q ) <- expand( in, freq, rq )) yield this( control, i, f, q ))
+  }
 }
+
+case class RLPF( override rate: Rate, in: UGenInput, freq: UGenInput, rq: UGenInput )
+extends SingleOutUGen( "RLPF", rate, rate, List( in, freq, rq ))
 
 object RHPF {	
 	def ar( in: GE, freq: GE = 440, rq: GE = 1 ) : GE = {

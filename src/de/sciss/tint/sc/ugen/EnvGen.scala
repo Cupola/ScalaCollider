@@ -25,9 +25,12 @@
  *
  *  Changelog:
  */
-package de.sciss.tint.sc
+package de.sciss.tint.sc.ugen
 
-import Rates._
+import de.sciss.tint.sc._
+import SC._
+
+//import Rates._
 
 object EnvGen {
   def ar( envelope: Env ) : GE = {
