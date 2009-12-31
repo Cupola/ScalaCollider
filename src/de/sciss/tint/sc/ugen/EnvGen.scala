@@ -29,63 +29,30 @@ package de.sciss.tint.sc.ugen
 
 import de.sciss.tint.sc._
 import SC._
-
-//import Rates._
+import GraphBuilder._
 
 object EnvGen {
-  def ar( envelope: Env ) : GE = {
-    ar( envelope, Constants.one, Constants.one, Constants.zero, Constants.one, Constants.zero )
-   }
-  
-  def ar( envelope: Env, gate: GE ) : GE = {
-    ar( envelope, gate, Constants.one, Constants.zero, Constants.one, Constants.zero )
-   }
-  
-  def ar( envelope: Env, gate: GE, levelScale: GE ) : GE = {
-    ar( envelope, gate, levelScale, Constants.zero, Constants.one, Constants.zero )
-   }
-  
-  def ar( envelope: Env, gate: GE, levelScale: GE, levelBias: GE ) : GE = {
-    ar( envelope, gate, levelScale, levelBias, Constants.one, Constants.zero )
-   }
-  
-  def ar( envelope: Env, gate: GE, levelScale: GE, levelBias: GE, timeScale: GE ) : GE = {
-    ar( envelope, gate, levelScale, levelBias, timeScale, Constants.zero )
-   }
-  
-  def ar( envelope: Env, gate: GE, levelScale: GE, levelBias: GE, timeScale: GE, doneAction: GE ) : GE = {
-  	ar( envelope.toArray, gate, levelScale, levelBias, timeScale, doneAction )
+  def ar( envelope: Env, gate: GE = 1, levelScale: GE = 1, levelBias: GE = 0, timeScale: GE = 1, doneAction: GE = 0 ) : GE = {
+//    val exp = expand( gate, levelScale, levelBias, timeScale, doneAction, envelope.toArray: _* )
+    val exp = expand( (List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envelope.toArray): _* )
+    simplify( for( List( g, ls, lb, t, d, e @ _* ) <- exp) yield this( audio, g, ls, lb, t, d, e ))
+//  ar( envelope.toArray, gate, levelScale, levelBias, timeScale, doneAction )
   }
   
-  def ar( envArray: Array[ GE ], gate: GE, levelScale: GE, levelBias: GE, timeScale: GE, doneAction: GE ) : GE = {
-  	UGen.multiNew( "EnvGen", audio, List( audio ), List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envArray )
+//  def ar( envArray: Array[ GE ], gate: GE, levelScale: GE, levelBias: GE, timeScale: GE, doneAction: GE ) : GE = {
+//  	UGen.multiNew( "EnvGen", audio, List( audio ), List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envArray )
+//  }
+  
+  def kr( envelope: Env, gate: GE = 1, levelScale: GE = 1, levelBias: GE = 0, timeScale: GE = 1, doneAction: GE = 0 ) : GE = {
+    val exp = expand( (List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envelope.toArray): _* )
+    simplify( for( List( g, ls, lb, t, d, e @ _* ) <- exp) yield this( control, g, ls, lb, t, d, e ))
   }
   
-  def kr( envelope: Env ) : GE = {
-    kr( envelope, Constants.one, Constants.one, Constants.zero, Constants.one, Constants.zero )
-   }
-  
-  def kr( envelope: Env, gate: GE ) : GE = {
-    kr( envelope, gate, Constants.one, Constants.zero, Constants.one, Constants.zero )
-   }
-  
-  def kr( envelope: Env, gate: GE, levelScale: GE ) : GE = {
-    kr( envelope, gate, levelScale, Constants.zero, Constants.one, Constants.zero )
-   }
-  
-  def kr( envelope: Env, gate: GE, levelScale: GE, levelBias: GE ) : GE = {
-    kr( envelope, gate, levelScale, levelBias, Constants.one, Constants.zero )
-   }
-  
-  def kr( envelope: Env, gate: GE, levelScale: GE, levelBias: GE, timeScale: GE ) : GE = {
-    kr( envelope, gate, levelScale, levelBias, timeScale, Constants.zero )
-   }
-  
-  def kr( envelope: Env, gate: GE, levelScale: GE, levelBias: GE, timeScale: GE, doneAction: GE ) : GE = {
-  	kr( envelope.toArray, gate, levelScale, levelBias, timeScale, doneAction )
-  }
-  
-  def kr( envArray: Array[ GE ], gate: GE, levelScale: GE, levelBias: GE, timeScale: GE, doneAction: GE ) : GE = {
-  	UGen.multiNew( "EnvGen", control, List( control ), List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envArray )
-  }
+//  def kr( envArray: Array[ GE ], gate: GE, levelScale: GE, levelBias: GE, timeScale: GE, doneAction: GE ) : GE = {
+//  	UGen.multiNew( "EnvGen", control, List( control ), List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envArray )
+//  }
 }
+
+case class EnvGen( rate: Rate, gate: UGenInput, levelScale: UGenInput, levelBias: UGenInput,
+                   timeScale: UGenInput, doneAction: UGenInput, envSeq: Seq[ UGenInput ])
+extends SingleOutUGen( (List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envSeq): _* )

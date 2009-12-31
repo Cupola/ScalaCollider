@@ -136,12 +136,11 @@ object MulAdd {
 */
 }
 
-case class MulAdd( override rate: Rate, in: UGenInput, mul: UGenInput, add: UGenInput )
-extends SingleOutUGen( "MulAdd", rate, rate, List( in, mul, add ))
+case class MulAdd( rate: Rate, in: UGenInput, mul: UGenInput, add: UGenInput )
+extends SingleOutUGen( in, mul, add )
 
-class BasicOpUGen( override val name: String, override val specialIndex: Int, override val rate: Rate,
-                   override val inputs: Seq[ UGenInput ] )
-extends SingleOutUGen( name, rate, rate, inputs );
+abstract class BasicOpUGen( override val specialIndex: Int, inputs: UGenInput* )
+extends SingleOutUGen( inputs: _* )
 
 object UnaryOpUGen {
   private val selectors = Map( List(
@@ -151,33 +150,6 @@ object UnaryOpUGen {
     'sinh, 'cosh, 'tanh, 'rand, 'rand2, 'linrand, 'bilinrand, 'sum3rand, 'distort, 'softclip,
     'coin, 'digitValue, 'silence, 'GAGA, 'rectWindow, 'hanWindow, 'welWindow, 'triWindow, 'ramp, 'scurve
   ).zipWithIndex: _* )
-
-  def applyXXX( selector: Symbol, a: GE ) : GE = {
-    val chanExp = a.numOutputs
-    val allOne	= a.numOutputs == 1
-    val hasZero = a.numOutputs == 0
-    
-    if( hasZero ) return new GESeq()	// cannot wrap zero size seq
-    if( allOne ) {
- //	  val ugenInputs = inputs.flatMap (_.toUGenInputs )
-      val ai = a.toUGenInputs.head
-      return optimizedNew( selector, ai )
-     }
-
-    val results = new Array[ GE ]( chanExp )
-    val ais  = a.toUGenInputs
-        
-    for( chan <- (0 until chanExp)) {
-      val ai = ais( chan % ais.size )
-      results.update( chan, optimizedNew( selector, ai ))
-    }
-    val res2 = results flatMap (_.toUGenInputs)
-    GraphBuilder.seq( res2: _* )
-  }
-
-  private def optimizedNew( selector: Symbol, a: UGenInput ) : GE = {
-    this( a.rate, selector, a )
-  }
 
   protected[sc] def make( selector: Symbol, a: GE ) : GE = {
     simplify( for( List( ai ) <- expand( a )) yield make1( selector, ai ))
@@ -250,78 +222,6 @@ object UnaryOpUGen {
     }
   }
 
-  private def optimizedNewXXX( selector: Symbol, a: UGenInput ) : GE = {
-    if( a.isInstanceOf[ c ]) {
-      val aval = a.asInstanceOf[ c ].value
-      val bval : Double = selector match {
-	      case 'neg => -aval
-	//    case 'not =>
-	      case 'isNil => 0f
-	      case 'notNil => 1f
-	      case 'bitNot => aval.toInt ^ -1
-	      case 'abs => abs( aval )
-	      case 'asFloat => aval
-	      case 'asInteger => aval.toInt
-	      case 'ceil => ceil( aval )
-	      case 'floor => floor( aval )
-	      case 'frac => aval % 1.0	// XXX OK for negative values?
-	      case 'sign => if( aval == 0 ) 0 else if( aval < 0 ) -1 else 1
-	      case 'squared => aval * aval
-	      case 'cubed => aval * aval * aval
-	      case 'sqrt => sqrt( aval )
-	      case 'exp => exp( aval )
-	      case 'reciprocal => 1.0f / aval
-	      case 'midicps => 440 * pow( 2, (aval - 69) * 0.083333333333 )
-	      case 'cpsmidi => log( aval * 0.0022727272727 ) / log( 2 ) * 12 + 69
-	      case 'midiratio => pow( 2, aval * 0.083333333333 )
-	      case 'ratiomidi => 12 * log( aval ) / log( 2 )
-	      case 'dbamp => pow( 10, aval * 0.05 )
-	      case 'ampdb => log( aval ) / log( 10 )* 20
-	      case 'octcps => 440 * pow( 2, aval - 4.75 )
-	      case 'cpsoct => log( aval * 0.0022727272727 ) / log( 2 ) + 4.75
-	      case 'log => log( aval )
-	      case 'log2 => log( aval ) / log( 2 )
-	      case 'log10 => log( aval ) / log( 10 )
-	      case 'sin => sin( aval )
-	      case 'cos => cos( aval )
-	      case 'tan => tan( aval )
-	      case 'asin => asin( aval )
-	      case 'acos => acos( aval )
-	      case 'atan => atan( aval )
-//	      case 'sinh => Math.sinh( aval )	// XXX
-//	      case 'cosh => Math.cosh( aval )	// XXX
-//	      case 'tanh => Math.tanh( aval )	// XXX
-//	      case 'rand => Math.rand( aval ) // XXX seed / Routine
-//	      case 'rand2 => Math.rand( -aval, aval ) // XXX seed / Routine
-	//      case 'linrand =>	// XXX
-	//      case 'bilinrand =>	// XXX
-	//      case 'sum3rand =>	// XXX
-	      case 'distort => aval / (1 + abs( aval ))
-	      case 'softclip =>	{ val absx = abs( aval ); if( absx <= 0.5 ) aval; else (absx - 0.25) / aval }
-//	      case 'coin => if( Math.rand() < aval ) 1 else 0	// XXXX
-	//    case 'digitValue =>	// XXX
-	      case 'silence => 0f
-	      case 'thru => aval
-	      case 'rectWindow => if( (aval < 0) || (aval > 1) ) 0 else 1
-	      case 'hanWindow => if( (aval < 0) || (aval > 1) ) 0 else 0.5 - 0.5 * cos( aval * Pi * 2 )
-	      case 'welWindow => if( (aval < 0) || (aval > 1) ) 0 else sin( aval * Pi )
-	      case 'triWindow => if( (aval < 0) || (aval > 1) ) 0 else if( aval < 0.5 ) 2 * aval else -2 * aval + 2
-	      case 'ramp =>	if( aval <= 0 ) 0 else if( aval >= 1 ) 1 else aval
-	      case 'scurve => if( aval <= 0 ) 0 else if( aval > 1 ) 1 else aval * aval * (3 - 2 * aval)
-	      case _ => {
-	        // do the full ugen
-	        val result = new SingleOutUGen( "UnaryOpUGen", a.rate, a.rate, List( a ))
-	        result.synthIndex = selectors( selector )
-	        return result
-	      }
-      }
-      return c( bval.toFloat )
-    }
-    // do the full ugen
-    val result = new BasicOpUGen( "UnaryOpUGen", selectors( selector ), a.rate, List( a ));
-    result
-  }
-
 /*
   def determineRate( a: UGenInput, b: UGenInput ) : Rate = {
     if( a.rate > b.rate ) a.rate else b.rate
@@ -337,8 +237,8 @@ object UnaryOpUGen {
   */
 }
 
-case class UnaryOpUGen( override rate: Rate, selector: Symbol, a: UGenInput )
-extends BasicOpUGen( "UnaryOpUGen", UnaryOpUGen.selectors( selector ), rate, List( a ))
+case class UnaryOpUGen( rate: Rate, selector: Symbol, a: UGenInput )
+extends BasicOpUGen( UnaryOpUGen.selectors( selector ), a )
 
 object BinaryOpUGen {
   private val selectors = Map( List(
@@ -378,74 +278,6 @@ object BinaryOpUGen {
     }
   }
 
-  def applyXXX( selector: Symbol, a: GE, b: GE ) : GE = {
-    var chanExp = 0;
-    var allOne = true
-    var hasZero = false
-    val inputs = List( a, b )
-    
-    for( input <- inputs ) {
-      chanExp = Math.max( chanExp, input.numOutputs )
-      allOne  = allOne && (input.numOutputs == 1)
-      hasZero = hasZero || (input.numOutputs == 0)
-    }
-    if( hasZero ) return new GESeq()	// cannot wrap zero size seq
-    if( allOne ) {
- //	  val ugenInputs = inputs.flatMap (_.toUGenInputs )
-      val ai  = a.toUGenInputs.head
-      val bi  = b.toUGenInputs.head
-      return optimizedNew( selector, ai, bi )
-     }
-
-    val results = new Array[ GE ]( chanExp )
-//  val ugenInputs = inputs map (_.toUGenInputs)
-    val ais  = a.toUGenInputs
-    val bis	 = b.toUGenInputs
-        
-    for( chan <- (0 until chanExp)) {
-//    val newArgs = ugenInputs map (multiInput => multiInput( chan % ugenInputs.size ))
-//    results.update( chan, new UGen( name, rate, outputRates, newArgs ));
-//	  results.update( chan, optimizedNew( newArgs ))
-      val ai  = ais( chan % ais.size )
-      val bi  = bis( chan % bis.size )
-      results.update( chan, optimizedNew( selector, ai, bi ))
-    }
-    val res2 = results flatMap (_.toUGenInputs)
-    GraphBuilder.seq( res2: _* )
-  }
-
-  private def optimizedNew( selector: Symbol, a: UGenInput, b: UGenInput ) : GE = {
-//    if( a.isInstanceOf[ Constant ] && b.isInstanceOf[ Constant ]) {
-      // XXX
-//    }
-    
-    // eliminate degenerate cases
-    if( selector == Symbol( "*" )) {
-      if( a == Constants.zero ) return Constants.zero
-      if( b == Constants.zero ) return Constants.zero
-      if( a == Constants.one ) return b
-      if( a == Constants.minusOne ) return b.neg
-      if( b == Constants.one ) return a
-      if( b == Constants.minusOne ) return a.neg
-    } else if( selector == Symbol( "+" )) {
-      if( a == Constants.zero ) return b
-      if( b == Constants.zero ) return a
-    } else if( selector == Symbol( "-" )) {
-      if( a == Constants.zero ) return b.neg
-      if( b == Constants.zero ) return a
-    } else if( selector == Symbol( "/" )) {
-      if( b == Constants.one ) return a
-      if( b == Constants.minusOne ) return a.neg
-      if( b.rate == 'scalar ) return( a * b.reciprocal )
-    }
-
-    // do the full ugen
-    val rate = Rates.highest( a.rate, b.rate ) // determineRate( a, b )
-    val result = new BasicOpUGen( "BinaryOpUGen", selectors( selector ), rate, List( a, b ));
-//    println( "index of " + selector + " is " + result.synthIndex )
-    result
-  }
-
 /*
   private def determineRate( a: UGenInput, b: UGenInput ) : Rate = {
     if( a.rate > b.rate ) a.rate else b.rate
@@ -460,5 +292,5 @@ object BinaryOpUGen {
   */
 }
 
-case class BinaryOpUGen( override rate: Rate, selector: Symbol, a: UGenInput, b: UGenInput )
-extends BasicOpUGen( "BinaryOpUGen", BinaryOpUGen.selectors( selector ), rate, List( a, b ))
+case class BinaryOpUGen( rate: Rate, selector: Symbol, a: UGenInput, b: UGenInput )
+extends BasicOpUGen( BinaryOpUGen.selectors( selector ), a, b )

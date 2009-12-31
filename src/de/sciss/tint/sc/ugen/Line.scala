@@ -145,7 +145,7 @@ object T2A {
 // DC missing
 
 object Silent {
-	def ar( numChannels: Int ) : GE = {
-	  new MultiOutUGen( "Silent", audio, dup( audio, numChannels ), Nil );
-	}
+	def ar( numChannels: Int ) : GE = this( numChannels )
 }
+case class Silent( numChannels: Int )
+extends MultiOutUGen( List.make( numChannels, audio ), Nil ) { val rate = audio }

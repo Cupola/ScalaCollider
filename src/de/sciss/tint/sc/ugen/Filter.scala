@@ -215,8 +215,8 @@ object RLPF {
   }
 }
 
-case class RLPF( override rate: Rate, in: UGenInput, freq: UGenInput, rq: UGenInput )
-extends SingleOutUGen( "RLPF", rate, rate, List( in, freq, rq ))
+case class RLPF( rate: Rate, in: UGenInput, freq: UGenInput, rq: UGenInput )
+extends SingleOutUGen( in, freq, rq )
 
 object RHPF {	
 	def ar( in: GE, freq: GE = 440, rq: GE = 1 ) : GE = {

@@ -87,8 +87,10 @@ object Out /* extends AbstractOut */ {
 //	*numFixedArgs { ^1 }
 }
 
-case class Out( override rate: Rate, bus: UGenInput, channels: UGenInput* )
-extends UGen( "Out", rate, Nil, bus :: channels.toList ) {
+case class Out( rate: Rate, bus: UGenInput, channels: UGenInput* )
+extends UGen {
+  def inputs = bus :: channels.toList
+  def outputRates = Nil
   def toUGenInputs = Nil
   val numOutputs = 0
 }

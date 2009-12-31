@@ -33,9 +33,11 @@ import _root_.scala.math._
 
 import _root_.java.io.{ DataOutputStream, IOException }
 
+import GraphBuilder._
+
 /**
  *	@author		Hanns Holger Rutz
- *	@version	0.13, 29-Dec-09
+ *	@version	0.13, 31-Dec-09
  */
 /*
 object Rates extends Enumeration {
@@ -79,8 +81,12 @@ trait UGenProxy {
   def source : UGen
 }
 
-abstract class UGen( val name: String, val rate: Rate, val outputRates: Seq[ Rate ], val inputs: Seq[ UGenInput ])
+abstract class UGen
 extends RatedGE with UGenProxy /* UGenInput */ {
+  def name = { val cn = getClass.getName; cn.substring( cn.lastIndexOf( '.' ) + 1 )}
+  def outputRates: Seq[ Rate ]
+  def inputs: Seq[ UGenInput ]
+
   var synthIndex = -1
   val specialIndex = 0
     
@@ -202,6 +208,11 @@ object UGen {
 //  }
 
   def multiNew( name: String, rate: Rate, outputRates: Seq[ Rate ], inputs: Seq[ GE ]) : GE = {
+    error( "OBSOLETE ")
+  }
+  
+/*
+  def multiNew( name: String, rate: Rate, outputRates: Seq[ Rate ], inputs: Seq[ GE ]) : GE = {
     var chanExp = 0;
     var allOne = true
     var hasZero = false
@@ -226,13 +237,54 @@ object UGen {
     val res2 = results flatMap (_.toUGenInputs)
     GraphBuilder.seq( res2: _* )
   }
+*/
              
 //  def outputProxy( rate: Symbol, source: UGen, outputIndex: Int ) : UGen {
 //    new UGen( source.name + "[" + outputIndex + "]", rate, List[ rate ], List[ source ])
   }
 
-class MultiOutUGen( override val name: String, override val rate: Rate, override val outputRates: Seq[ Rate ], override val inputs: Seq[ UGenInput ])
-extends UGen( name, rate, outputRates, inputs ) {
+trait UGen1Args {
+  def apply( rate: Rate, arg1: UGenInput ) : GE
+  protected def arExp( arg1: GE ) : GE = {
+    simplify( for( List( a1 ) <- expand( arg1 )) yield this( audio, a1 ))
+  }
+  protected def krExp( arg1: GE ) : GE = {
+    simplify( for( List( a1 ) <- expand( arg1 )) yield this( control, a1 ))
+  }
+}
+
+trait UGen2Args {
+  def apply( rate: Rate, arg1: UGenInput, arg2: UGenInput ) : GE
+  protected def arExp( arg1: GE, arg2: GE ) : GE = {
+    simplify( for( List( a1, a2 ) <- expand( arg1, arg2 )) yield this( audio, a1, a2 ))
+  }
+  protected def krExp( arg1: GE, arg2: GE ) : GE = {
+    simplify( for( List( a1, a2 ) <- expand( arg1, arg2 )) yield this( control, a1, a2 ))
+  }
+}
+
+trait UGen3Args {
+  def apply( rate: Rate, arg1: UGenInput, arg2: UGenInput, arg3: UGenInput ) : GE
+  protected def arExp( arg1: GE, arg2: GE, arg3: GE ) : GE = {
+    simplify( for( List( a1, a2, a3 ) <- expand( arg1, arg2, arg3 )) yield this( audio, a1, a2, a3 ))
+  }
+  protected def krExp( arg1: GE, arg2: GE, arg3: GE ) : GE = {
+    simplify( for( List( a1, a2, a3 ) <- expand( arg1, arg2, arg3 )) yield this( control, a1, a2, a3 ))
+  }
+}
+
+trait UGen4Args {
+  def apply( rate: Rate, arg1: UGenInput, arg2: UGenInput, arg3: UGenInput, arg4: UGenInput ) : GE
+  protected def arExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE = {
+    simplify( for( List( a1, a2, a3, a4 ) <- expand( arg1, arg2, arg3, arg4 )) yield this( audio, a1, a2, a3, a4 ))
+  }
+  protected def krExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE = {
+    simplify( for( List( a1, a2, a3, a4 ) <- expand( arg1, arg2, arg3, arg4 )) yield this( control, a1, a2, a3, a4 ))
+  }
+}
+
+abstract class MultiOutUGen( val outputRates: Seq[ Rate ], val inputs: Seq[ UGenInput ])
+extends UGen {
 	// a class for UGens with multiple outputs
 	val outputs : Seq[ OutputProxy ] = (0 until outputRates.size) map (i => { 
 			new OutputProxy( this, i ); 
@@ -241,8 +293,11 @@ extends UGen( name, rate, outputRates, inputs ) {
     def toUGenInputs = outputs
 }
 
-class SingleOutUGen( override val name: String, override val rate: Rate, outputRate: Rate, override val inputs: Seq[ UGenInput ] )
-extends UGen( name, rate, List( outputRate ), inputs ) with UGenInput {
+//  = List.make( inputs.size, rate )
+abstract class SingleOutUGen( /* override val name: String, */ val inputs: UGenInput* )
+extends UGen with UGenInput {
+  def outputRates: Seq[ Rate ] = List( rate )
+
   def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {
 //      val ugenIndex	= synthDef.getUGenIndex( this )
       if( SynthDef.verbose ) println( "  SingleOutUGen.writeInputSpec. ugenIndex = " + synthIndex /* ugenIndex */)

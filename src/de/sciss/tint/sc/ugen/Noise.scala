@@ -30,7 +30,7 @@ package de.sciss.tint.sc.ugen
 
 import de.sciss.tint.sc._
 import SC._
-//import Rates._
+import GraphBuilder._
 
 /**
  *	@version	0.11, 09-Dec-09
@@ -127,139 +127,36 @@ object CoinGate {
 
 // TWindex XXX missing
 
-object WhiteNoise {
-  // XXX sucky shit, returning UGen breaks it
-	private def arPlain : UGenInput = {
-		new SingleOutUGen( "WhiteNoise", audio, audio, Nil )
-	}
+trait NoiseUGen {
+//  type noiseType <: UGen
+  def apply( rate: Rate ) : SingleOutUGen
 
-	private def krPlain : UGenInput = {
-		new SingleOutUGen( "WhiteNoise", control, control, Nil )
-	}
+  def ar: SingleOutUGen = this( audio )
+  def kr: SingleOutUGen = this( control )
 
-	def ar( mul: GE = 1, add: GE = 0 ) : GE = {
-		if( mul.numOutputs == 1 ) {
-			arPlain.madd( mul, add )
-		} else {	// support this idiom from SC2
-// XXX Range implicit seems broken with tint Predef import?
-//			GraphBuilder.seq( (0 until mul.numOutputs).map (x => ar) ).madd( mul, add )
-			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => arPlain ): _* ).madd( mul, add )
-	    }
-	}
+  private def make( make1: => SingleOutUGen, mul: GE ) : GE = {
+    val zipped = List.fill[ UGenInput ]( mul.numOutputs )( make1 ).zip( mul.toUGenInputs )
+    seq( zipped.flatMap( p => (p._1 * p._2).toUGenInputs ): _* )
+  }
 
-	def kr( mul: GE = 1, add: GE = 0 ) : GE = {
-		if( mul.numOutputs == 1 ) {
-			krPlain.madd( mul, add )
-		} else {	// support this idiom from SC2
-//			GraphBuilder.seq( (0 until mul.numOutputs).map (x => kr) ).madd( mul, add )
-			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => krPlain ): _* ).madd( mul, add )
-		}
-	}
+  def ar( mul: GE ): GE = make( ar, mul )
+  def kr( mul: GE ): GE = make( kr, mul )
 }
 
-object BrownNoise {
-	private def arPlain : UGenInput = {
-		new SingleOutUGen( "BrownNoise", audio, audio, Nil )
-	}
+object WhiteNoise extends NoiseUGen { type noiseType = WhiteNoise }
+case class WhiteNoise( rate: Rate ) extends SingleOutUGen()
 
-	private def krPlain : UGenInput = {
-		new SingleOutUGen( "BrownNoise", control, control, Nil )
-	}
+object BrownNoise extends NoiseUGen { type noiseType = BrownNoise }
+case class BrownNoise( rate: Rate ) extends SingleOutUGen()
 
-	def ar( mul: GE = 1, add: GE = 0 ) : GE = {
-		if( mul.numOutputs == 1 ) {
-			arPlain.madd( mul, add )
-		} else {	// support this idiom from SC2
-			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => arPlain ): _* ).madd( mul, add )
-	    }
-	}
+object PinkNoise extends NoiseUGen { type noiseType = PinkNoise }
+case class PinkNoise( rate: Rate ) extends SingleOutUGen()
 
-	def kr( mul: GE = 1, add: GE = 0 ) : GE = {
-		if( mul.numOutputs == 1 ) {
-			krPlain.madd( mul, add )
-		} else {	// support this idiom from SC2
-			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => krPlain ): _* ).madd( mul, add )
-		}
-	}
-}
+object ClipNoise extends NoiseUGen { type noiseType = ClipNoise }
+case class ClipNoise( rate: Rate ) extends SingleOutUGen()
 
-object PinkNoise {
-	private def arPlain : UGenInput = {
-		new SingleOutUGen( "PinkNoise", audio, audio, Nil )
-	}
-
-	private def krPlain : UGenInput = {
-		new SingleOutUGen( "PinkNoise", control, control, Nil )
-	}
-
-	def ar( mul: GE = 1, add: GE = 0 ) : GE = {
-		if( mul.numOutputs == 1 ) {
-			arPlain.madd( mul, add )
-		} else {	// support this idiom from SC2
-			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => arPlain ): _* ).madd( mul, add )
-	    }
-	}
-
-	def kr( mul: GE = 1, add: GE = 0 ) : GE = {
-		if( mul.numOutputs == 1 ) {
-			krPlain.madd( mul, add )
-		} else {	// support this idiom from SC2
-			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => krPlain ): _* ).madd( mul, add )
-		}
-	}
-}
-
-object ClipNoise {
-	private def arPlain : UGenInput = {
-		new SingleOutUGen( "ClipNoise", audio, audio, Nil )
-	}
-
-	private def krPlain : UGenInput = {
-		new SingleOutUGen( "ClipNoise", control, control, Nil )
-	}
-
-	def ar( mul: GE = 1, add: GE = 0 ) : GE = {
-		if( mul.numOutputs == 1 ) {
-			arPlain.madd( mul, add )
-		} else {	// support this idiom from SC2
-			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => arPlain ): _* ).madd( mul, add )
-	    }
-	}
-
-	def kr( mul: GE = 1, add: GE = 0 ) : GE = {
-		if( mul.numOutputs == 1 ) {
-			krPlain.madd( mul, add )
-		} else {	// support this idiom from SC2
-			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => krPlain ): _* ).madd( mul, add )
-		}
-	}
-}
-
-object GrayNoise {
-	private def arPlain : UGenInput = {
-		new SingleOutUGen( "GrayNoise", audio, audio, Nil )
-	}
-
-	private def krPlain : UGenInput = {
-		new SingleOutUGen( "GrayNoise", control, control, Nil )
-	}
-
-	def ar( mul: GE = 1, add: GE = 0 ) : GE = {
-		if( mul.numOutputs == 1 ) {
-			arPlain.madd( mul, add )
-		} else {	// support this idiom from SC2
-			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => arPlain ): _* ).madd( mul, add )
-	    }
-	}
-
-	def kr( mul: GE = 1, add: GE = 0 ) : GE = {
-		if( mul.numOutputs == 1 ) {
-			krPlain.madd( mul, add )
-		} else {	// support this idiom from SC2
-			GraphBuilder.seq( (0 until mul.numOutputs).map( _ => krPlain ): _* ).madd( mul, add )
-		}
-	}
-}
+object GrayNoise extends NoiseUGen { type noiseType = GrayNoise }
+case class GrayNoise( rate: Rate ) extends SingleOutUGen()
 
 object Crackle {
 	def ar( chaosParam: GE = 1.5f, mul: GE = 1, add: GE = 0 ) : GE = {

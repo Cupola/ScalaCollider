@@ -60,8 +60,8 @@ object SinOsc {
   }
 }
 
-case class SinOsc( override rate: Rate, freq: UGenInput, phase: UGenInput )
-extends SingleOutUGen( "SinOsc", rate, rate, List( freq, phase ))
+case class SinOsc( rate: Rate, freq: UGenInput, phase: UGenInput )
+extends SingleOutUGen( freq, phase )
 
 object SinOscFB {	
   def ar : GE = ar( Constant( 440f ), Constants.zero )
@@ -251,8 +251,8 @@ object LFSaw {
   }
 }
 
-case class LFSaw( override rate: Rate, freq: UGenInput, iphase: UGenInput )
-extends SingleOutUGen( "LFSaw", rate, rate, List( freq, iphase ))
+case class LFSaw( rate: Rate, freq: UGenInput, iphase: UGenInput )
+extends SingleOutUGen( freq, iphase )
 
 object LFPar {	
   def ar : GE = ar( Constant( 440f ), Constants.zero )

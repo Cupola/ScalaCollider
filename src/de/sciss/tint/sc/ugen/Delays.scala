@@ -165,9 +165,9 @@ object CombN {
   }
 }
 
-case class CombN( override rate: Rate, in: UGenInput, maxDelayTime: UGenInput,
+case class CombN( rate: Rate, in: UGenInput, maxDelayTime: UGenInput,
                   delayTime: UGenInput, decayTime: UGenInput )
-extends SingleOutUGen( "CombN", rate, rate, List( in, maxDelayTime, delayTime, decayTime ))
+extends SingleOutUGen( in, maxDelayTime, delayTime, decayTime )
 
 object CombL {
   def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE = {
@@ -181,9 +181,9 @@ object CombL {
   }
 }
 
-case class CombL( override rate: Rate, in: UGenInput, maxDelayTime: UGenInput,
+case class CombL( rate: Rate, in: UGenInput, maxDelayTime: UGenInput,
                   delayTime: UGenInput, decayTime: UGenInput )
-extends SingleOutUGen( "CombL", rate, rate, List( in, maxDelayTime, delayTime, decayTime ))
+extends SingleOutUGen( in, maxDelayTime, delayTime, decayTime )
 
 object CombC {
   def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE = {
@@ -197,9 +197,9 @@ object CombC {
   }
 }
 
-case class CombC( override rate: Rate, in: UGenInput, maxDelayTime: UGenInput,
+case class CombC( rate: Rate, in: UGenInput, maxDelayTime: UGenInput,
                   delayTime: UGenInput, decayTime: UGenInput )
-extends SingleOutUGen( "CombC", rate, rate, List( in, maxDelayTime, delayTime, decayTime ))
+extends SingleOutUGen( in, maxDelayTime, delayTime, decayTime )
 
 object AllpassN {
   def ar( in: GE ) : GE = ar( in, Constant( 0.2f ), Constant( 0.2f ), Constants.one )

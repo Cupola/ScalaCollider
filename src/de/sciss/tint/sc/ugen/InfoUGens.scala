@@ -40,73 +40,64 @@ import de.sciss.tint.sc._
 
 /**
  * 	@author		Hanns Holger Rutz
- *	@version	0.10, 15-Jun-08
+ *	@version	0.11, 31-Dec-09
  */
-object SampleRate {	/* extends InfoUGenBase */
-	def ir : UGenInput = {
-	  new SingleOutUGen( "SampleRate", scalar, scalar, Nil )
-	}
-}
+abstract class InfoUGenBase extends SingleOutUGen() { val rate = scalar }
 
-object SampleDur {	/* extends InfoUGenBase */
-	def ir : UGenInput = {
-	  new SingleOutUGen( "SampleDur", scalar, scalar, Nil )
-	}
+object SampleRate {
+	def ir: GE = this()
 }
+case class SampleRate extends InfoUGenBase
 
-object RadiansPerSample {	/* extends InfoUGenBase */
-	def ir : UGenInput = {
-	  new SingleOutUGen( "RadiansPerSample", scalar, scalar, Nil )
-	}
+object SampleDur {
+	def ir: GE = this()
 }
+case class SampleDur extends InfoUGenBase
 
-object ControlRate {	/* extends InfoUGenBase */
-	def ir : UGenInput = {
-	  new SingleOutUGen( "ControlRate", scalar, scalar, Nil )
-	}
+object RadiansPerSample {
+	def ir: GE = this()
 }
+case class RadiansPerSample extends InfoUGenBase
 
-object SubsampleOffset {	/* extends InfoUGenBase */
-	def ir : UGenInput = {
-	  new SingleOutUGen( "SubsampleOffset", scalar, scalar, Nil )
-	}
+object ControlRate {
+	def ir: GE = this()
 }
+case class ControlRate extends InfoUGenBase
 
-object NumOutputBuses {	/* extends InfoUGenBase */
-	def ir : UGenInput = {
-	  new SingleOutUGen( "NumOutputBuses", scalar, scalar, Nil )
-	}
+object SubsampleOffset {
+	def ir: GE = this()
 }
+case class SubsampleOffset extends InfoUGenBase
 
-object NumInputBuses {	/* extends InfoUGenBase */
-	def ir : UGenInput = {
-	  new SingleOutUGen( "NumInputBuses", scalar, scalar, Nil )
-	}
+object NumOutputBuses {
+	def ir: GE = this()
 }
+case class NumOutputBuses extends InfoUGenBase
 
-object NumAudioBuses {	/* extends InfoUGenBase */
-	def ir : UGenInput = {
-	  new SingleOutUGen( "NumAudioBuses", scalar, scalar, Nil )
-	}
+object NumInputBuses {
+	def ir: GE = this()
 }
+case class NumInputBuses extends InfoUGenBase
 
-object NumControlBuses {	/* extends InfoUGenBase */
-	def ir : UGenInput = {
-      new SingleOutUGen( "NumControlBuses", scalar, scalar, Nil )
-	}
+object NumAudioBuses {
+	def ir: GE = this()
 }
+case class NumAudioBuses extends InfoUGenBase
+
+object NumControlBuses {
+	def ir: GE = this()
+}
+case class NumControlBuses extends InfoUGenBase
 
 object NumBuffers {	/* extends InfoUGenBase */
-	def ir : UGenInput = {
-	  new SingleOutUGen( "NumBuffers", scalar, scalar, Nil )
-	}
+	def ir: GE = this()
 }
+case class NumBuffers extends InfoUGenBase
 
 object NumRunningSynths {	/* extends InfoUGenBase */
-	def kr : UGenInput = {
-	  new SingleOutUGen( "NumRunningSynths", control, control, Nil )
-	}
+	def ir: GE = this()
 }
+case class NumRunningSynths extends InfoUGenBase
 
 
 /*

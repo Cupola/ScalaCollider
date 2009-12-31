@@ -35,18 +35,12 @@ import GraphBuilder._
 /**
  *	@version	0.11, 09-Dec-09
  */
-object FSinOsc {
-  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = {
-    simplify( for( List( f, p ) <- expand( freq, iphase )) yield this( audio, f, p ))
-  }
-
-  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = {
-    simplify( for( List( f, p ) <- expand( freq, iphase )) yield this( control, f, p ))
-  }
+object FSinOsc extends UGen2Args {
+  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
+  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
 }
-
-case class FSinOsc( override rate: Rate, freq: UGenInput, iphase: UGenInput )
-extends SingleOutUGen( "FSinOsc", rate, rate, List( freq, iphase ))
+case class FSinOsc( rate: Rate, freq: UGenInput, iphase: UGenInput )
+extends SingleOutUGen( freq, iphase )
 
 // Klang XXX missing
 // Klank XXX missing

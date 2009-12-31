@@ -7,8 +7,8 @@ package de.sciss.tint.sc.ugen
 
 import de.sciss.tint.sc._
 
-class Control( name: String, rate: Rate, val values: Seq[ Float ])
-extends MultiOutUGen( name, rate, (0 until values.size).map (i => rate), Nil )
+class Control( val rate: Rate, val values: Seq[ Float ])
+extends MultiOutUGen( List.make( values.size, rate ), Nil )
 {
 //  override val specialIndex = SynthDef.buildSynthDef.map( _.allocControl( numOutputs )).getOrElse( 0 )
 
@@ -17,12 +17,14 @@ extends MultiOutUGen( name, rate, (0 until values.size).map (i => rate), Nil )
 //	*isControlUGen { ^true }
 }
 
+class TrigControl( r: Rate, v: Seq[ Float ]) extends Control( r, v )
+
 object Control {
-	def kr( values: Seq[ Float ]) : Control = new Control( "Control", control, values )
-	def ir( values: Seq[ Float ]) : Control = new Control( "Control", scalar, values )
+	def kr( values: Seq[ Float ]) : Control = new Control( control, values )
+	def ir( values: Seq[ Float ]) : Control = new Control( scalar, values )
 }
 
 object TrigControl {
-	def kr( values: Seq[ Float ]) : Control = new Control( "TrigControl", control, values )
-	def ir( values: Seq[ Float ]) : Control = new Control( "TrigControl", scalar, values )
+	def kr( values: Seq[ Float ]) : Control = new TrigControl( control, values )
+	def ir( values: Seq[ Float ]) : Control = new TrigControl( scalar, values )
 }
