@@ -37,7 +37,7 @@ import ugen.{ BinaryOpUGen => BinOp, EnvGen, MulAdd, Silent, Out, UnaryOpUGen =>
  */
 trait GE {
   val numOutputs : Int
-  def toUGenInputs : Seq[ UGenInput ]
+  def toUGenIns : Seq[ UGenIn ]
 
   // binary ops
   def +( b: GE ) : GE     = BinOp.make( Symbol( "+" ), this, b )
@@ -117,7 +117,7 @@ trait GE {
 //  def madd( mul: GE, add: GE ) : GE
 
   def madd( mul: GE, add: GE ) : GE = {
-    Rates.highest( toUGenInputs.map( _.rate ): _* ) match {
+    Rates.highest( toUGenIns.map( _.rate ): _* ) match {
       case `audio`   => MulAdd.ar( this, mul, add )
       case `control` => MulAdd.kr( this, mul, add )
       case r => error( "Illegal rate " + r )
@@ -125,11 +125,11 @@ trait GE {
   }
 }
 
-case class GESeq( elements: UGenInput* ) extends GE
+case class GESeq( elements: UGenIn* ) extends GE
 {
   val numOutputs = elements.size
   def getOutputAt( idx: Int ) = elements( idx )
-  def toUGenInputs : Seq[ UGenInput ] = elements
+  def toUGenIns : Seq[ UGenIn ] = elements
 
   override def toString = elements.mkString( "[ ", ", ", " ]" )
 }
@@ -137,7 +137,7 @@ case class GESeq( elements: UGenInput* ) extends GE
 object GraphBuilder {
 	//used to create an out ugen automatically and a fade envelope
 
-    def seq( elements: UGenInput* ) : GE = {
+    def seq( elements: UGenIn* ) : GE = {
       if( elements.size == 1 ) elements.head else new GESeq( elements: _* )
     }
 
@@ -150,20 +150,20 @@ object GraphBuilder {
 				// this replaces zeroes with audio rate silence.
 				// sub collections are deep replaced
 
-				val ugenInputs = input.toUGenInputs
-				val numZeroes = ugenInputs.filter( _ == Constants.zero ).size
+				val UGenIns = input.toUGenIns
+				val numZeroes = UGenIns.filter( _ == Constants.zero ).size
 				if( numZeroes == 0 ) {
 					input
 				} else {
-					val silent = Silent.ar( numZeroes ).toUGenInputs
-//		    val iter = ugenInputs.elements.counted
+					val silent = Silent.ar( numZeroes ).toUGenIns
+//		    val iter = UGenIns.elements.counted
 					var pos = 0
 					// XXX recursion missing
-					val result = ugenInputs map (ugenInput => {
+					val result = UGenIns map (UGenIn => {
 						if( input == Constants.zero ) {
 							pos = pos + 1
 							silent( pos - 1 )
-						} else ugenInput
+						} else UGenIn
 					})
 					new GESeq( result: _* )
 				}
@@ -174,8 +174,8 @@ object GraphBuilder {
   
 /*
     def rateForElem( elem: GE ) : Symbol = {
-      if( elem.isInstanceOf[ UGenInput ])
-        elem.asInstanceOf[ UGenInput ].rate
+      if( elem.isInstanceOf[ UGenIn ])
+        elem.asInstanceOf[ UGenIn ].rate
       else
         rateForElem( elem.getOutputAt( 0 ))
     }
@@ -183,8 +183,8 @@ object GraphBuilder {
   
     def wrapOut( name: String, func: () => GE, fadeTime: Option[Float] ) : SynthDef = {
 		def fullFunc() : GE = {
-			var result = func.apply() // .toUGenInputs
-			val rate = Rates.highest( result.toUGenInputs.map( _.rate ): _* )
+			var result = func.apply() // .toUGenIns
+			val rate = Rates.highest( result.toUGenIns.map( _.rate ): _* )
 //			( new Ordering[ Symbol ] {
 //				def compare( x: Symbol, y: Symbol ) : Int = {
 //					x.name.compare( y.name )
@@ -194,12 +194,12 @@ object GraphBuilder {
 				fadeTime.foreach( fdt => {
 					result = makeFadeEnv( fdt ) * result
 				})
-//				val i_out : UGenInput = Constant( 0 )
+//				val i_out : UGenIn = Constant( 0 )
 				val i_out = "i_out".ir
 //				result = replaceZeroesWithSilence( result )
 
 //                UGen.multiNew( outClass, rate, Nil /* (1 to result.size) map (x => rate) */,
-//							   List( i_out ) ++ result.toUGenInputs )
+//							   List( i_out ) ++ result.toUGenIns )
 
                 if( rate == audio ) {
                   Out.ar( i_out, result )
@@ -232,7 +232,7 @@ object GraphBuilder {
 		EnvGen.kr( new Env( List( startVal, 1, 0 ), List( 1, 1 ), List( 1, 1 ), 1 ), gate, 1, 0, dt, 2 )
 	}
 
-  def expand( args: GE* ): Seq[ List[ UGenInput ]] = {
+  def expand( args: GE* ): Seq[ List[ UGenIn ]] = {
     var chanExp = 0
     var allOne  = true
     var hasZero = false
@@ -243,16 +243,16 @@ object GraphBuilder {
     }
 //    println( "chanExp " + chanExp + "; allOne " + allOne + "; hasZero " + hasZero )
     if( allOne ) {
-      List( args.toList.flatMap( _.toUGenInputs.toList ))
+      List( args.toList.flatMap( _.toUGenIns.toList ))
     } else if( hasZero ) {
       Nil	// cannot wrap zero size seq
     } else {
-      val exp  = args.toList.map( _.toUGenInputs.toArray )
+      val exp  = args.toList.map( _.toUGenIns.toArray )
       for( ch <- 0 until chanExp ) yield exp.map( (arr) => arr.apply( ch % arr.size ))
     }
   }
 
-  def simplify( res: Seq[ GE ]) : GE = { // UGenInput
+  def simplify( res: Seq[ GE ]) : GE = { // UGenIn
 //    println( "simplify : " + res )
     if( res.size == 1 ) {
       res.head

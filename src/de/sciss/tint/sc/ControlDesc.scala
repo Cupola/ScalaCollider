@@ -52,7 +52,7 @@ case class ControlName( name: String )
 //  def tr( values: Seq[ Float ]) = new ControlDesc( Some( name ), trigger, values, None )
 
   def kr( values: Tuple2[ GE, Seq[ Float ]]) : ControlDesc = {
-    val lags = values._1.toUGenInputs
+    val lags = values._1.toUGenIns
     val inits = values._2
     val numCh = max( lags.size, inits.size )
 //    val iter = lags.elements.counted
@@ -71,7 +71,7 @@ case class ControlName( name: String )
   }
 }
 
-class ControlDesc( val name: Option[ String ], val rate: Rate, val initValues: Seq[ Float ], val lag : Option[ Seq[ UGenInput ]])
+class ControlDesc( val name: Option[ String ], val rate: Rate, val initValues: Seq[ Float ], val lag : Option[ Seq[ UGenIn ]])
 extends RatedGE
 {
   var ugen: UGen = null
@@ -84,7 +84,7 @@ extends RatedGE
   
   addToSynth
 
-  def toUGenInputs	= outputs
+  def toUGenIns	= outputs
 
   private def addToSynth {
     SynthDef.buildSynthDef.foreach (_.addControlDesc( this ))
@@ -92,7 +92,7 @@ extends RatedGE
 }
 
 class ControlProxy( val desc: ControlDesc, val channel: Int )
-extends UGenInput with UGenProxy
+extends UGenIn with UGenProxy
 {
   val rate = desc.rate
 

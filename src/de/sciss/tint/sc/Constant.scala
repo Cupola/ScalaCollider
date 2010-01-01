@@ -36,10 +36,10 @@ import java.io.IOException
  *	@author		Hanns Holger Rutz
  *	@version	0.11, 02-Dec-09
  */
-case class Constant( val value: Float ) extends UGenInput {
+case class Constant( val value: Float ) extends UGenIn {
   val rate = scalar
   
-//  def toUGenInputs = List( this )
+//  def toUGenIns = List( this )
 //  val numOutputs = 1
                              
   def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {

@@ -44,7 +44,7 @@ object SC {
   implicit def float2GE( x: Float ) = Constant( x )
   implicit def int2GE( x: Int ) = Constant( x.toFloat )
   implicit def double2GE( x: Double ) = Constant( x.toFloat )
-  implicit def seqOfGE2GESeq( x: Seq[ GE ]) = new GESeq( (x flatMap (_.toUGenInputs)): _* )
+  implicit def seqOfGE2GESeq( x: Seq[ GE ]) = new GESeq( (x flatMap (_.toUGenIns)): _* )
 
 	// why these are necessary now??
   implicit def seqOfFloat2GESeq( x: Seq[ Float ]) = new GESeq( (x map (Constant( _ ))): _* )
@@ -71,8 +71,10 @@ object SC {
     (1 to num) map (y => x)
   }
   
-  def ampdb( amp: Float ) = log10( amp ) * 20
-  def dbamp( db: Float ) = exp( db / 20 * log( 10 ))
+  def ampdb( amp: Float ) = (log10( amp ) * 20).toFloat
+  def dbamp( db: Float ) = (exp( db / 20 * log( 10 ))).toFloat
+  def midicps( midi: Float ) = (440 * pow( 2, (midi - 69) * 0.083333333333 )).toFloat
+  def cpsmidi( freq: Float ) = (log( freq * 0.0022727272727 ) / log( 2 ) * 12 + 69).toFloat
   
 //  implicit def stringToStringOrInt( x: String ) = new StringOrInt( x )
 //  implicit def intToStringOrInt( x: Int ) = new StringOrInt( x )

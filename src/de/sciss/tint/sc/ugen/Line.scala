@@ -2,7 +2,7 @@
  *  Line.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -32,120 +32,104 @@ import SC._
 //import Rates._
 
 /**
- * 	@version	0.11, 09-Dec-09
+ * 	@version	0.12, 01-Jan-10
  */
-object Line {
-//	def ar( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = 0, mul: GE = 1, add: GE = 0 ) : GE = {
-//		ar( start, end, dur, doneAction ).madd( mul, add )
-//	}
+object Line extends UGen4Args {
+	def ar( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = 0 ) : GE =
+      arExp( start, end, dur, doneAction )
 
-	def ar( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = 0 ) : GE = {
-    	UGen.multiNew( "Line", audio, List( audio ), List( start, end, dur, doneAction ))
-	}
-
-//	def kr( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = 0, mul: GE = 1, add: GE = 0 ) : GE = {
-//		kr( start, end, dur, doneAction ).madd( mul, add )
-//	}
-
-	def kr( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = 0 ) : GE = {
-    	UGen.multiNew( "Line", control, List( control ), List( start, end, dur, doneAction ))
-	}
+	def kr( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = 0 ) : GE =
+      krExp( start, end, dur, doneAction )
 }
+case class Line( rate: Rate, start: UGenIn, end: UGenIn, dur: UGenIn, doneAction: UGenIn )
+extends SingleOutUGen( start, end, dur, doneAction )
 
-object XLine {
-//	def ar( start: GE = 1, end: GE = 2, dur: GE = 1, doneAction: GE = 0, mul: GE = 1, add: GE = 0 ) : GE = {
-//		ar( start, end, dur, doneAction ).madd( mul, add )
-//	}
+object XLine extends UGen4Args {
+	def ar( start: GE = 1, end: GE = 2, dur: GE = 1, doneAction: GE = 0 ) : GE =
+      arExp( start, end, dur, doneAction )
 
-	def ar( start: GE = 1, end: GE = 2, dur: GE = 1, doneAction: GE = 0 ) : GE = {
-    	UGen.multiNew( "XLine", audio, List( audio ), List( start, end, dur, doneAction ))
-	}
-
-//	def kr( start: GE = 1, end: GE = 2, dur: GE = 1, doneAction: GE = 0, mul: GE = 1, add: GE = 0 ) : GE = {
-//		kr( start, end, dur, doneAction ).madd( mul, add )
-//	}
-
-	def kr( start: GE = 1, end: GE = 2, dur: GE = 1, doneAction: GE = 0 ) : GE = {
-    	UGen.multiNew( "XLine", control, List( control ), List( start, end, dur, doneAction ))
-	}
+	def kr( start: GE = 1, end: GE = 2, dur: GE = 1, doneAction: GE = 0 ) : GE =
+      krExp( start, end, dur, doneAction )
 }
+case class XLine( rate: Rate, start: UGenIn, end: UGenIn, dur: UGenIn, doneAction: UGenIn )
+extends SingleOutUGen( start, end, dur, doneAction )
 
-object LinExp {
-	def ar( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE = {
-    	UGen.multiNew( "LinExp", audio, List( audio ), List( in, srcLo, srcHi, dstLo, dstHi ))
-	}
+object LinExp extends UGen5Args {
+	def ar( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE =
+      arExp( in, srcLo, srcHi, dstLo, dstHi )
 
-	def kr( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE = {
-    	UGen.multiNew( "LinExp", control, List( control ), List( in, srcLo, srcHi, dstLo, dstHi ))
-	}
+	def kr( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE =
+      krExp( in, srcLo, srcHi, dstLo, dstHi )
 }
+case class LinExp( rate: Rate, in: UGenIn, srcLo: UGenIn, srcHi: UGenIn, dstLo: UGenIn, dstHi: UGenIn )
+extends SingleOutUGen( in, srcLo, srcHi, dstLo, dstHi )
 
-object LinLin {
-	def ar( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE = {
-    	UGen.multiNew( "LinLin", audio, List( audio ), List( in, srcLo, srcHi, dstLo, dstHi ))
-	}
+object LinLin extends UGen5Args {
+	def ar( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE =
+      arExp( in, srcLo, srcHi, dstLo, dstHi )
 
-	def kr( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE = {
-    	UGen.multiNew( "LinLin", control, List( control ), List( in, srcLo, srcHi, dstLo, dstHi ))
-	}
+	def kr( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE =
+      krExp( in, srcLo, srcHi, dstLo, dstHi )
 }
+case class LinLin( rate: Rate, in: UGenIn, srcLo: UGenIn, srcHi: UGenIn, dstLo: UGenIn, dstHi: UGenIn )
+extends SingleOutUGen( in, srcLo, srcHi, dstLo, dstHi )
 
-object AmpComp {
-	def ar( freq: GE = 261.6255653006, root: GE = 261.6255653006, exp: GE = 0.3333 ) : GE = {
-    	UGen.multiNew( "AmpComp", audio, List( audio ), List( freq, root, exp ))
-	}
+object AmpComp extends UGen3Args {
+	def ar( freq: GE = midicps( 60 ), root: GE = midicps( 60 ), expon: GE = 0.3333 ) : GE =
+      arExp( freq, root, expon )
 
-	def kr( freq: GE = 261.6255653006, root: GE = 261.6255653006, exp: GE = 0.3333 ) : GE = {
-    	UGen.multiNew( "AmpComp", control, List( control ), List( freq, root, exp ))
-	}
+	def kr( freq: GE = midicps( 60 ), root: GE = midicps( 60 ), expon: GE = 0.3333 ) : GE =
+      krExp( freq, root, expon )
 
-	def ir( freq: GE = 261.6255653006, root: GE = 261.6255653006, exp: GE = 0.3333 ) : GE = {
-    	UGen.multiNew( "AmpComp", scalar, List( scalar ), List( freq, root, exp ))
-	}
+	def ir( freq: GE = midicps( 60 ), root: GE = midicps( 60 ), expon: GE = 0.3333 ) : GE =
+      irExp( freq, root, expon )
+// XXX checkInputs
 }
+case class AmpComp( rate: Rate, freq: UGenIn, root: UGenIn, expon: UGenIn )
+extends SingleOutUGen( freq, root, expon )
 
-object AmpCompA {
-	def ar( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32, rootAmp: GE = 1 ) : GE = {
-    	UGen.multiNew( "AmpCompA", audio, List( audio ), List( freq, root, minAmp, rootAmp ))
-	}
+object AmpCompA extends UGen4Args {
+	def ar( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32, rootAmp: GE = 1 ) : GE =
+      arExp( freq, root, minAmp, rootAmp )
 
-	def kr( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32, rootAmp: GE = 1 ) : GE = {
-    	UGen.multiNew( "AmpCompA", control, List( control ), List( freq, root, minAmp, rootAmp ))
-	}
+	def kr( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32, rootAmp: GE = 1 ) : GE =
+      krExp( freq, root, minAmp, rootAmp )
 
-	def ir( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32, rootAmp: GE = 1 ) : GE = {
-    	UGen.multiNew( "AmpCompA", scalar, List( scalar ), List( freq, root, minAmp, rootAmp ))
-	}
+	def ir( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32, rootAmp: GE = 1 ) : GE =
+      irExp( freq, root, minAmp, rootAmp )
 }
+case class AmpCompA( rate: Rate, freq: UGenIn, root: UGenIn, minAmp: UGenIn, maxAmp: UGenIn )
+extends SingleOutUGen( freq, root, minAmp, maxAmp )
 
-object K2A {
-  def ar( in: GE ) : GE = {
-    UGen.multiNew( "K2A", audio, List( audio ), List( in ))
-  }
+object K2A extends UGen1Args {
+  def ar( in: GE ) : GE = arExp( in )
 }
+case class K2A( rate: Rate, in: UGenIn ) extends SingleOutUGen( in )
 
-object A2K {
-  def kr( in: GE ) : GE = {
-    UGen.multiNew( "A2K", control, List( control ), List( in ))
-  }
+object A2K extends UGen1Args {
+  def kr( in: GE ) : GE = krExp( in )
 }
+case class A2K( rate: Rate, in: UGenIn ) extends SingleOutUGen( in )
 
-object T2K {
-  def kr( in: GE ) : GE = {
-    UGen.multiNew( "T2K", control, List( control ), List( in ))
-  }
+object T2K extends UGen1Args {
+  def kr( in: GE ) : GE = krExp( in )
 }
+case class T2K( rate: Rate, in: UGenIn ) extends SingleOutUGen( in )
 
-object T2A {
-  def ar( in: GE ) : GE = {
-    UGen.multiNew( "T2A", audio, List( audio ), List( in ))
-  }
+object T2A extends UGen1Args {
+  def ar( in: GE ) : GE = arExp( in )
 }
+case class T2A( rate: Rate, in: UGenIn ) extends SingleOutUGen( in )
 
-// DC missing
+object DC {
+	def ar( in: GE ) : GE = this( audio, in.toUGenIns: _* )
+	def kr( in: GE ) : GE = this( control, in.toUGenIns: _* )
+}
+case class DC( rate: Rate, in: UGenIn* )
+extends MultiOutUGen( in.map( _ => audio ), in )
 
 object Silent {
 	def ar( numChannels: Int ) : GE = this( numChannels )
 }
 case class Silent( numChannels: Int )
-extends MultiOutUGen( List.make( numChannels, audio ), Nil ) { val rate = audio }
+extends MultiOutUGen( List.fill( numChannels )( audio ), Nil ) { val rate = audio }

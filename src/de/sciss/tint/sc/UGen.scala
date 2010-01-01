@@ -71,9 +71,9 @@ trait RatedGE extends GE {
   val rate : Rate
 }
 
-trait UGenInput extends RatedGE {
+trait UGenIn extends RatedGE {
   final val numOutputs = 1
-  final def toUGenInputs = List( this )
+  final def toUGenIns = List( this )
   def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit;
 }
 
@@ -82,17 +82,17 @@ trait UGenProxy {
 }
 
 abstract class UGen
-extends RatedGE with UGenProxy /* UGenInput */ {
+extends RatedGE with UGenProxy /* UGenIn */ {
   def name = { val cn = getClass.getName; cn.substring( cn.lastIndexOf( '.' ) + 1 )}
   def outputRates: Seq[ Rate ]
-  def inputs: Seq[ UGenInput ]
+  def inputs: Seq[ UGenIn ]
 
   var synthIndex = -1
   val specialIndex = 0
     
   def numInputs = inputs.size
 //  val outputs = outputRates.foreach (rate => { })
-//  def toUGenInputs = inputs
+//  def toUGenIns = inputs
 //  val numOutputs = outputRates.size
   def source = this
 
@@ -137,7 +137,7 @@ extends RatedGE with UGenProxy /* UGenInput */ {
 
 //  protected def checkValidInputs : Option[String] = {
 //    inputs.foreach (input => {
-//      if( input.isValidUGenInput.not ) {
+//      if( input.isValidUGenIn.not ) {
 //        val argName = this.argNameForInputAt(i) ? i
 //        return Some( "arg: '" + argName + "' has bad input: " + input )
 //      })
@@ -222,19 +222,19 @@ object UGen {
       hasZero = hasZero || (input.numOutputs == 0)
     }
     if( hasZero ) return new GESeq()	// cannot wrap zero size seq
-//  if( allOne )  return new UGen( name, rate, outputRates, inputs map (_.asInstanceOf[ UGenInput ]))
-//  if( allOne )  return new MultiOutUGen( name, rate, outputRates, inputs map (_.asInstanceOf[ UGenInput ]))
-    if( allOne )  return new MultiOutUGen( name, rate, outputRates, inputs.flatMap (_.toUGenInputs ))
+//  if( allOne )  return new UGen( name, rate, outputRates, inputs map (_.asInstanceOf[ UGenIn ]))
+//  if( allOne )  return new MultiOutUGen( name, rate, outputRates, inputs map (_.asInstanceOf[ UGenIn ]))
+    if( allOne )  return new MultiOutUGen( name, rate, outputRates, inputs.flatMap (_.toUGenIns ))
 
     val results = new Array[ GE ]( chanExp )
-    val ugenInputs = inputs map (_.toUGenInputs)
+    val UGenIns = inputs map (_.toUGenIns)
         
     for( chan <- (0 until chanExp)) {
-      val newArgs = ugenInputs map (multiInput => multiInput( chan % ugenInputs.size ))
+      val newArgs = UGenIns map (multiInput => multiInput( chan % UGenIns.size ))
 //    results.update( chan, new UGen( name, rate, outputRates, newArgs ));
       results.update( chan, new MultiOutUGen( name, rate, outputRates, newArgs ))
     }
-    val res2 = results flatMap (_.toUGenInputs)
+    val res2 = results flatMap (_.toUGenIns)
     GraphBuilder.seq( res2: _* )
   }
 */
@@ -244,58 +244,81 @@ object UGen {
   }
 
 trait UGen1Args {
-  def apply( rate: Rate, arg1: UGenInput ) : GE
-  protected def arExp( arg1: GE ) : GE = {
-    simplify( for( List( a1 ) <- expand( arg1 )) yield this( audio, a1 ))
-  }
-  protected def krExp( arg1: GE ) : GE = {
-    simplify( for( List( a1 ) <- expand( arg1 )) yield this( control, a1 ))
-  }
+  def apply( rate: Rate, arg1: UGenIn ) : GE
+  private def make( rate: Rate, arg1: GE ) : GE =
+    simplify( for( List( a1 ) <- expand( arg1 )) yield this( rate, a1 ))
+
+  protected def arExp( arg1: GE ) : GE = make( audio, arg1 )
+  protected def krExp( arg1: GE ) : GE = make( control, arg1 )
+  protected def irExp( arg1: GE ) : GE = make( scalar, arg1 )
 }
 
 trait UGen2Args {
-  def apply( rate: Rate, arg1: UGenInput, arg2: UGenInput ) : GE
-  protected def arExp( arg1: GE, arg2: GE ) : GE = {
-    simplify( for( List( a1, a2 ) <- expand( arg1, arg2 )) yield this( audio, a1, a2 ))
-  }
-  protected def krExp( arg1: GE, arg2: GE ) : GE = {
-    simplify( for( List( a1, a2 ) <- expand( arg1, arg2 )) yield this( control, a1, a2 ))
-  }
+  def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn ) : GE
+  private def make( rate: Rate, arg1: GE, arg2: GE ) : GE =
+    simplify( for( List( a1, a2 ) <- expand( arg1, arg2 ))
+      yield this( rate, a1, a2 ))
+
+  protected def arExp( arg1: GE, arg2: GE ) : GE = make( audio, arg1, arg2 )
+  protected def krExp( arg1: GE, arg2: GE ) : GE = make( control, arg1, arg2 )
+  protected def irExp( arg1: GE, arg2: GE ) : GE = make( scalar, arg1, arg2 )
 }
 
 trait UGen3Args {
-  def apply( rate: Rate, arg1: UGenInput, arg2: UGenInput, arg3: UGenInput ) : GE
-  protected def arExp( arg1: GE, arg2: GE, arg3: GE ) : GE = {
-    simplify( for( List( a1, a2, a3 ) <- expand( arg1, arg2, arg3 )) yield this( audio, a1, a2, a3 ))
-  }
-  protected def krExp( arg1: GE, arg2: GE, arg3: GE ) : GE = {
-    simplify( for( List( a1, a2, a3 ) <- expand( arg1, arg2, arg3 )) yield this( control, a1, a2, a3 ))
-  }
+  def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn ) : GE
+  private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE ) : GE =
+    simplify( for( List( a1, a2, a3 ) <- expand( arg1, arg2, arg3 ))
+      yield this( rate, a1, a2, a3 ))
+
+  protected def arExp( arg1: GE, arg2: GE, arg3: GE ) : GE =
+    make( audio, arg1, arg2, arg3 )
+  protected def krExp( arg1: GE, arg2: GE, arg3: GE ) : GE =
+    make( control, arg1, arg2, arg3 )
+  protected def irExp( arg1: GE, arg2: GE, arg3: GE ) : GE =
+    make( scalar, arg1, arg2, arg3 )
 }
 
 trait UGen4Args {
-  def apply( rate: Rate, arg1: UGenInput, arg2: UGenInput, arg3: UGenInput, arg4: UGenInput ) : GE
-  protected def arExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE = {
-    simplify( for( List( a1, a2, a3, a4 ) <- expand( arg1, arg2, arg3, arg4 )) yield this( audio, a1, a2, a3, a4 ))
-  }
-  protected def krExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE = {
-    simplify( for( List( a1, a2, a3, a4 ) <- expand( arg1, arg2, arg3, arg4 )) yield this( control, a1, a2, a3, a4 ))
-  }
+  def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn ) : GE
+  private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE =
+    simplify( for( List( a1, a2, a3, a4 ) <- expand( arg1, arg2, arg3, arg4 ))
+      yield this( rate, a1, a2, a3, a4 ))
+  
+  protected def arExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE =
+    make( audio, arg1, arg2, arg3, arg4 )
+  protected def krExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE =
+    make( control, arg1, arg2, arg3, arg4 )
+  protected def irExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE =
+    make( scalar, arg1, arg2, arg3, arg4 )
 }
 
-abstract class MultiOutUGen( val outputRates: Seq[ Rate ], val inputs: Seq[ UGenInput ])
+trait UGen5Args {
+  def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn, arg5: UGenIn ) : GE
+  private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE ) : GE =
+    simplify( for( List( a1, a2, a3, a4, a5 ) <- expand( arg1, arg2, arg3, arg4, arg5 ))
+      yield this( audio, a1, a2, a3, a4, a5 ))
+  
+  protected def arExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE ) : GE =
+    make( audio, arg1, arg2, arg3, arg4, arg5 )
+  protected def krExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE ) : GE =
+    make( control, arg1, arg2, arg3, arg4, arg5 )
+  protected def irExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE ) : GE =
+    make( scalar, arg1, arg2, arg3, arg4, arg5 )
+}
+
+abstract class MultiOutUGen( val outputRates: Seq[ Rate ], val inputs: Seq[ UGenIn ])
 extends UGen {
 	// a class for UGens with multiple outputs
 	val outputs : Seq[ OutputProxy ] = (0 until outputRates.size) map (i => { 
 			new OutputProxy( this, i ); 
     })
     val numOutputs = outputRates.size
-    def toUGenInputs = outputs
+    def toUGenIns = outputs
 }
 
 //  = List.make( inputs.size, rate )
-abstract class SingleOutUGen( /* override val name: String, */ val inputs: UGenInput* )
-extends UGen with UGenInput {
+abstract class SingleOutUGen( /* override val name: String, */ val inputs: UGenIn* )
+extends UGen with UGenIn {
   def outputRates: Seq[ Rate ] = List( rate )
 
   def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {
@@ -310,11 +333,11 @@ extends UGen with UGenInput {
 }
 
 class OutputProxy( val source: UGen, val channel: Int )
-extends UGenInput with UGenProxy
+extends UGenIn with UGenProxy
 // extends UGen( source.name + "[" + channel + "]", source.rate, List( rate ), Nil )
 {
   val rate = source.rate
-//  def toUGenInputs = List( this )
+//  def toUGenIns = List( this )
 //  val numOutputs = 1
   
 //  override protected def addToSynth {

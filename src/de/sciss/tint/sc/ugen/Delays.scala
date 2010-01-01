@@ -165,8 +165,8 @@ object CombN {
   }
 }
 
-case class CombN( rate: Rate, in: UGenInput, maxDelayTime: UGenInput,
-                  delayTime: UGenInput, decayTime: UGenInput )
+case class CombN( rate: Rate, in: UGenIn, maxDelayTime: UGenIn,
+                  delayTime: UGenIn, decayTime: UGenIn )
 extends SingleOutUGen( in, maxDelayTime, delayTime, decayTime )
 
 object CombL {
@@ -181,8 +181,8 @@ object CombL {
   }
 }
 
-case class CombL( rate: Rate, in: UGenInput, maxDelayTime: UGenInput,
-                  delayTime: UGenInput, decayTime: UGenInput )
+case class CombL( rate: Rate, in: UGenIn, maxDelayTime: UGenIn,
+                  delayTime: UGenIn, decayTime: UGenIn )
 extends SingleOutUGen( in, maxDelayTime, delayTime, decayTime )
 
 object CombC {
@@ -197,8 +197,8 @@ object CombC {
   }
 }
 
-case class CombC( rate: Rate, in: UGenInput, maxDelayTime: UGenInput,
-                  delayTime: UGenInput, decayTime: UGenInput )
+case class CombC( rate: Rate, in: UGenIn, maxDelayTime: UGenIn,
+                  delayTime: UGenIn, decayTime: UGenIn )
 extends SingleOutUGen( in, maxDelayTime, delayTime, decayTime )
 
 object AllpassN {

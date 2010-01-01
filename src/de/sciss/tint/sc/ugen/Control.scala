@@ -8,7 +8,7 @@ package de.sciss.tint.sc.ugen
 import de.sciss.tint.sc._
 
 class Control( val rate: Rate, val values: Seq[ Float ])
-extends MultiOutUGen( List.make( values.size, rate ), Nil )
+extends MultiOutUGen( List.fill( values.size )( rate ), Nil )
 {
 //  override val specialIndex = SynthDef.buildSynthDef.map( _.allocControl( numOutputs )).getOrElse( 0 )
 

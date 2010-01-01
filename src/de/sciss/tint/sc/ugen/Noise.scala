@@ -2,7 +2,7 @@
  *  Noise.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -135,8 +135,8 @@ trait NoiseUGen {
   def kr: SingleOutUGen = this( control )
 
   private def make( make1: => SingleOutUGen, mul: GE ) : GE = {
-    val zipped = List.fill[ UGenInput ]( mul.numOutputs )( make1 ).zip( mul.toUGenInputs )
-    seq( zipped.flatMap( p => (p._1 * p._2).toUGenInputs ): _* )
+    val zipped = List.fill[ UGenIn ]( mul.numOutputs )( make1 ).zip( mul.toUGenIns )
+    seq( zipped.flatMap( p => (p._1 * p._2).toUGenIns ): _* )
   }
 
   def ar( mul: GE ): GE = make( ar, mul )

@@ -2,7 +2,7 @@
  *  BufIO.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -67,11 +67,11 @@ object BufRd {
 
 object BufWr {
 	def ar( inputArray: GE, bufNum: GE = 0, phase: GE = 0, loop: GE = 1 ) : GE = {
-		UGen.multiNew( "BufWr", audio, List( audio ), List( bufNum, phase, loop ) ++ inputArray.toUGenInputs )
+		UGen.multiNew( "BufWr", audio, List( audio ), List( bufNum, phase, loop ) ++ inputArray.toUGenIns )
 	}
 
 	def kr( inputArray: GE, bufNum: GE = 0, phase: GE = 0, loop: GE = 1 ) : GE = {
-		UGen.multiNew( "BufWr", control, List( control ), List( bufNum, phase, loop ) ++ inputArray.toUGenInputs )
+		UGen.multiNew( "BufWr", control, List( control ), List( bufNum, phase, loop ) ++ inputArray.toUGenIns )
 	}
 
 //	checkInputs {
@@ -87,14 +87,14 @@ object RecordBuf {
 			run: GE = 1, loop: GE = 1, trigger: GE = 1, doneAction: GE = 0 ) : GE = {
 		UGen.multiNew( "RecordBuf", audio, List( audio ),
 			List( bufNum, offset, recLevel, preLevel, run, loop, trigger, doneAction ) ++
-				inputArray.toUGenInputs )
+				inputArray.toUGenIns )
 	}
 
 	def kr( inputArray: GE, bufNum: GE = 0, offset: GE = 0, recLevel: GE = 1, preLevel: GE = 0,
 			run: GE = 1, loop: GE = 1, trigger: GE = 1, doneAction: GE = 0 ) : GE = {
 		UGen.multiNew( "RecordBuf", control, List( control ),
 			List( bufNum, offset, recLevel, preLevel, run, loop, trigger, doneAction ) ++
-				inputArray.toUGenInputs )
+				inputArray.toUGenIns )
 	}
 }
 

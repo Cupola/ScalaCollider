@@ -216,7 +216,7 @@ class Env( val levels: Seq[ GE ], val times: Seq[ GE ], val curves: Seq[ GE ],
 		
 	def shapeNumber( shapeName: Symbol ) : Int = {
 //		var shape;
-//		if (shapeName.isValidUGenInput) { ^5 };
+//		if (shapeName.isValidUGenIn) { ^5 };
 //		shape = shapeNames.at(shapeName);
 //		if (shape.notNil) { ^shape };
 //		Error("Env shape not defined.").throw;
@@ -224,7 +224,7 @@ class Env( val levels: Seq[ GE ], val times: Seq[ GE ], val curves: Seq[ GE ],
 	}
  
 	def curveValue( curve: Symbol ) : Float = {
-//		if (curve.isValidUGenInput, { ^curve },{ ^0 });
+//		if (curve.isValidUGenIn, { ^curve },{ ^0 });
 // XXX
        0
 	}

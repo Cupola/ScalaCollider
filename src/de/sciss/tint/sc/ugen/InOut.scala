@@ -63,19 +63,19 @@ object AbstractOut {
  */
 object Out /* extends AbstractOut */ {
   def ar( bus: GE, channelsArray: GE ) : GE = {
-    val args = bus :: channelsArray.toUGenInputs.toList
+    val args = bus :: channelsArray.toUGenIns.toList
     simplify( for( b :: c <- expand( args: _* ))
       yield this( audio, b, c: _* ))
   }
 
   def kr( bus: GE, channelsArray: GE ) : GE = {
-    val args = bus :: channelsArray.toUGenInputs.toList
+    val args = bus :: channelsArray.toUGenIns.toList
     simplify( for( b :: c <- expand( args: _* ))
       yield this( control, b, c: _* ))
   }
 
 //  def ar( bus: GE, channelsArray: GE ) : GE = {
-//    UGen.multiNew( "Out", audio, Nil, List( bus ) ++ channelsArray.toUGenInputs )
+//    UGen.multiNew( "Out", audio, Nil, List( bus ) ++ channelsArray.toUGenIns )
 //    // XXX ^0.0		// Out has no output
 //  }
 
@@ -87,18 +87,18 @@ object Out /* extends AbstractOut */ {
 //	*numFixedArgs { ^1 }
 }
 
-case class Out( rate: Rate, bus: UGenInput, channels: UGenInput* )
+case class Out( rate: Rate, bus: UGenIn, channels: UGenIn* )
 extends UGen {
   def inputs = bus :: channels.toList
   def outputRates = Nil
-  def toUGenInputs = Nil
+  def toUGenIns = Nil
   val numOutputs = 0
 }
 
 object ReplaceOut /* extends AbstractOut */ {
   def ar( bus: GE, channelsArray: GE ) : GE = {
-//    println( "bus : " + bus.toUGenInputs.first )
-    UGen.multiNew( "ReplaceOut", audio, Nil, List( bus ) ++ channelsArray.toUGenInputs )
+//    println( "bus : " + bus.toUGenIns.first )
+    UGen.multiNew( "ReplaceOut", audio, Nil, List( bus ) ++ channelsArray.toUGenIns )
     // XXX ^0.0		// Out has no output
   }
 

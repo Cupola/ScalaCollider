@@ -2,7 +2,7 @@
  *  FSinOsc.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -39,7 +39,7 @@ object FSinOsc extends UGen2Args {
   def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
   def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
 }
-case class FSinOsc( rate: Rate, freq: UGenInput, iphase: UGenInput )
+case class FSinOsc( rate: Rate, freq: UGenIn, iphase: UGenIn )
 extends SingleOutUGen( freq, iphase )
 
 // Klang XXX missing

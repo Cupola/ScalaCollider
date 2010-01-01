@@ -2,7 +2,7 @@
  *  Osc.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -34,150 +34,65 @@ import GraphBuilder._
 
 /**
  *  @author   Hanns Holger Rutz
- *  @version  0.11, 29-Dec-09
+ *  @version  0.11, 01-Jan-10
  */
-object Osc {	
-  def ar( bufNum: GE, freq: GE = 440, phase: GE = 0 ) : GE = {
-    UGen.multiNew( "Osc", audio, List( audio ), List( bufNum, freq, phase ))
-  }
+object Osc extends UGen3Args {
+  def ar( bufNum: GE, freq: GE = 440, phase: GE = 0 ) : GE =
+    arExp( bufNum, freq, phase )
 
-  def kr( bufNum: GE, freq: GE = 440, phase: GE = 0 ) : GE = {
-    UGen.multiNew( "Osc", control, List( control ), List( bufNum, freq, phase ))
-  }
+  def kr( bufNum: GE, freq: GE = 440, phase: GE = 0 ) : GE =
+    krExp( bufNum, freq, phase )
 }
+case class Osc( rate: Rate, bufNum: UGenIn, freq: UGenIn, phase: UGenIn )
+extends SingleOutUGen( bufNum, freq, phase )
 
-// class Osc private ( r: Rate, val bufNum: UGenInput, val freq: UGenInput, val phase: UGenInput )
+// class Osc private ( r: Rate, val bufNum: UGenIn, val freq: UGenIn, val phase: UGenIn )
 // extends UGen( "Osc", r, List( r ), List( bufNum, freq, phase )) {
 // }
 
-object SinOsc {
-  def ar( freq: GE = 440, phase: GE = 0 ) : GE = {
-    simplify( for( List( f, p ) <- expand( freq, phase )) yield this( audio, f, p ))
-  }
-
-  def kr( freq: GE = 440, phase: GE = 0 ) : GE = {
-    simplify( for( List( f, p ) <- expand( freq, phase )) yield this( control, f, p ))
-  }
+object SinOsc extends UGen2Args {
+  def ar( freq: GE = 440, phase: GE = 0 ) : GE = arExp( freq, phase )
+  def kr( freq: GE = 440, phase: GE = 0 ) : GE = krExp( freq, phase )
 }
-
-case class SinOsc( rate: Rate, freq: UGenInput, phase: UGenInput )
+case class SinOsc( rate: Rate, freq: UGenIn, phase: UGenIn )
 extends SingleOutUGen( freq, phase )
 
-object SinOscFB {	
-  def ar : GE = ar( Constant( 440f ), Constants.zero )
-  def ar( freq: GE ) : GE = ar( freq, Constants.zero )
-  
-  def ar( freq: GE, feedback: GE ) : GE = {
-    UGen.multiNew( "SinOscFB", audio, List( audio ), List( freq, feedback ))
-  }
-  
-  def ar( freq: GE, feedback: GE, mul: GE ) : GE = {
-    ar( freq, feedback ).madd( mul, Constants.zero ) 
-  }
-  def ar( freq: GE, feedback: GE, mul: GE, add: GE ) : GE = {
-    ar( freq, feedback ).madd( mul, add ) 
-  }
-
-  def kr : GE = kr( Constant( 440f ), Constants.zero )
-  def kr( freq: GE ) : GE = kr( freq, Constants.zero )
-
-  def kr( freq: GE, feedback: GE ) : GE = {
-    UGen.multiNew( "SinOscFB", control, List( control ), List( freq, feedback ))
-  }
-
-  def kr( freq: GE, feedback: GE, mul: GE ) : GE = {
-    kr( freq, feedback ).madd( mul, Constants.zero )
-  }
-  def kr( freq: GE, feedback: GE, mul: GE, add: GE ) : GE = {
-    kr( freq, feedback ).madd( mul, add )
-  }
+object SinOscFB extends UGen2Args {
+  def ar( freq: GE = 440, feedback: GE = 0 ) : GE = arExp( freq, feedback )
+  def kr( freq: GE = 440, feedback: GE = 0 ) : GE = krExp( freq, feedback )
 }
+case class SinOscFB( rate: Rate, freq: UGenIn, feedback: UGenIn )
+extends SingleOutUGen( freq, feedback )
 
-object OscN {	
-  def ar( bufNum: GE ) : GE = ar( bufNum, Constant( 440f ), Constants.zero )
-  def ar( bufNum: GE, freq: GE ) : GE = ar( bufNum, freq, Constants.zero )
-  
-  def ar( bufNum: GE, freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "OscN", audio, List( audio ), List( bufNum, freq, phase ))
-  }
-  
-  def ar( bufNum: GE, freq: GE, phase: GE, mul: GE ) : GE = {
-    ar( bufNum, freq, phase ).madd( mul, Constants.zero ) 
-  }
-  def ar( bufNum: GE, freq: GE, phase: GE, mul: GE, add: GE ) : GE = {
-    ar( bufNum, freq, phase ).madd( mul, add ) 
-  }
+object OscN extends UGen3Args {
+  def ar( bufNum: GE, freq: GE = 440, phase: GE = 0 ) : GE =
+    arExp( bufNum, freq, phase )
 
-  def kr( bufNum: GE ) : GE = kr( bufNum, Constant( 440f ), Constants.zero )
-  def kr( bufNum: GE, freq: GE ) : GE = kr( bufNum, freq, Constants.zero )
-
-  def kr( bufNum: GE, freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "OscN", control, List( control ), List( bufNum, freq, phase ))
-  }
-
-  def kr( bufNum: GE, freq: GE, phase: GE, mul: GE ) : GE = {
-    kr( bufNum, freq, phase ).madd( mul, Constants.zero )
-  }
-  def kr( bufNum: GE, freq: GE, phase: GE, mul: GE, add: GE ) : GE = {
-    kr( bufNum, freq, phase ).madd( mul, add )
-  }
+  def kr( bufNum: GE, freq: GE = 440, phase: GE = 0 ) : GE =
+    krExp( bufNum, freq, phase )
 }
+case class OscN( rate: Rate, bufNum: UGenIn, freq: UGenIn, phase: UGenIn )
+extends SingleOutUGen( bufNum, freq, phase )
 
-object VOsc {
-  def ar( bufPos: GE ) : GE = ar( bufPos, Constant( 440f ), Constants.zero )
-  def ar( bufPos: GE, freq: GE ) : GE = ar( bufPos, freq, Constants.zero )
-  
-  def ar( bufPos: GE, freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "VOsc", audio, List( audio ), List( bufPos, freq, phase ))
-  }
-  
-  def ar( bufPos: GE, freq: GE, phase: GE, mul: GE ) : GE = {
-    ar( bufPos, freq, phase ).madd( mul, Constants.zero ) 
-  }
-  def ar( bufPos: GE, freq: GE, phase: GE, mul: GE, add: GE ) : GE = {
-    ar( bufPos, freq, phase ).madd( mul, add ) 
-  }
+object VOsc extends UGen3Args {
+  def ar( bufPos: GE, freq: GE = 440, phase: GE = 0 ) : GE =
+    arExp( bufPos, freq, phase )
 
-  def kr( bufPos: GE ) : GE = kr( bufPos, Constant( 440f ), Constants.zero )
-  def kr( bufPos: GE, freq: GE ) : GE = kr( bufPos, freq, Constants.zero )
-
-  def kr( bufPos: GE, freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "VOsc", control, List( control ), List( bufPos, freq, phase ))
-  }
-
-  def kr( bufPos: GE, freq: GE, phase: GE, mul: GE ) : GE = {
-    kr( bufPos, freq, phase ).madd( mul, Constants.zero )
-  }
-  def kr( bufPos: GE, freq: GE, phase: GE, mul: GE, add: GE ) : GE = {
-    kr( bufPos, freq, phase ).madd( mul, add )
-  }
+  def kr( bufPos: GE, freq: GE = 440, phase: GE = 0 ) : GE =
+    krExp( bufPos, freq, phase )
 }
+case class VOsc( rate: Rate, bufPos: UGenIn, freq: UGenIn, phase: UGenIn )
+extends SingleOutUGen( bufPos, freq, phase )
 
-object VOsc3 {
-  def ar( bufPos: GE ) : GE = ar( bufPos, Constant( 110f ), Constant( 220f ), Constant( 440f ))
-  def ar( bufPos: GE, freq1: GE, freq2: GE, freq3: GE ) : GE = {
-    UGen.multiNew( "VOsc3", audio, List( audio ), List( bufPos, freq1, freq2, freq3 ))
-  }
-  
-  def ar( bufPos: GE, freq1: GE, freq2: GE, freq3: GE, mul: GE ) : GE = {
-    ar( bufPos, freq1, freq2, freq3 ).madd( mul, Constants.zero ) 
-  }
-  def ar( bufPos: GE, freq1: GE, freq2: GE, freq3: GE, mul: GE, add: GE ) : GE = {
-    ar( bufPos, freq1, freq2, freq3 ).madd( mul, add ) 
-  }
+object VOsc3 extends UGen4Args {
+  def ar( bufPos: GE, freq1: GE = 110, freq2: GE = 220, freq3: GE = 440 ) : GE =
+    arExp( bufPos, freq1, freq2, freq3 )
 
-  def kr( bufPos: GE ) : GE = kr( bufPos, Constant( 110f ), Constant( 220f ), Constant( 440f ))
-  def kr( bufPos: GE, freq1: GE, freq2: GE, freq3: GE ) : GE = {
-    UGen.multiNew( "VOsc3", control, List( control ), List( bufPos, freq1, freq2, freq3 ))
-  }
-  
-  def kr( bufPos: GE, freq1: GE, freq2: GE, freq3: GE, mul: GE ) : GE = {
-    kr( bufPos, freq1, freq2, freq3 ).madd( mul, Constants.zero ) 
-  }
-  def kr( bufPos: GE, freq1: GE, freq2: GE, freq3: GE, mul: GE, add: GE ) : GE = {
-    kr( bufPos, freq1, freq2, freq3 ).madd( mul, add ) 
-  }
+  def kr( bufPos: GE, freq1: GE = 110, freq2: GE = 220, freq3: GE = 440 ) : GE =
+    krExp( bufPos, freq1, freq2, freq3 )
 }
+case class VOsc3( rate: Rate, bufPos: UGenIn, freq1: UGenIn, freq2: UGenIn, freq3: UGenIn )
+extends SingleOutUGen( bufPos, freq1, freq2, freq3 )
 
 object COsc {
   def ar( bufNum: GE ) : GE = ar( bufNum, Constant( 440f ), Constant( 0.5f ))
@@ -251,7 +166,7 @@ object LFSaw {
   }
 }
 
-case class LFSaw( rate: Rate, freq: UGenInput, iphase: UGenInput )
+case class LFSaw( rate: Rate, freq: UGenIn, iphase: UGenIn )
 extends SingleOutUGen( freq, iphase )
 
 object LFPar {	
@@ -344,37 +259,15 @@ object LFTri {
   }
 }
 
-object LFPulse {	
-  def ar : GE = ar( Constant( 440f ), Constants.zero, Constant( 0.5f ))
-  def ar( freq: GE ) : GE = ar( freq, Constants.zero, Constant( 0.5f ) )
-  def ar( freq: GE, iphase: GE ) : GE = ar( freq, iphase, Constant( 0.5f ) )
+object LFPulse extends UGen3Args {
+  def ar( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
+    arExp( freq, iphase, width )
   
-  def ar( freq: GE, iphase: GE, width: GE ) : GE = {
-    UGen.multiNew( "LFPulse", audio, List( audio ), List( freq, iphase, width ))
-  }
-  
-  def ar( freq: GE, iphase: GE, width: GE, mul: GE ) : GE = {
-    ar( freq, iphase, width ).madd( mul, Constants.zero ) 
-  }
-  def ar( freq: GE, iphase: GE, width: GE, mul: GE, add: GE ) : GE = {
-    ar( freq, iphase, width ).madd( mul, add ) 
-  }
-
-  def kr : GE = kr( Constant( 440f ), Constants.zero, Constant( 0.5f ))
-  def kr( freq: GE ) : GE = kr( freq, Constants.zero, Constant( 0.5f ) )
-  def kr( freq: GE, iphase: GE ) : GE = kr( freq, iphase, Constant( 0.5f ) )
-  
-  def kr( freq: GE, iphase: GE, width: GE ) : GE = {
-    UGen.multiNew( "LFPulse", control, List( control ), List( freq, iphase, width ))
-  }
-  
-  def kr( freq: GE, iphase: GE, width: GE, mul: GE ) : GE = {
-    kr( freq, iphase, width ).madd( mul, Constants.zero ) 
-  }
-  def kr( freq: GE, iphase: GE, width: GE, mul: GE, add: GE ) : GE = {
-    kr( freq, iphase, width ).madd( mul, add ) 
-  }
+  def kr( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
+    krExp( freq, iphase, width )
 }
+case class LFPulse( rate: Rate, freq: UGenIn, iphase: UGenIn, width: UGenIn )
+extends SingleOutUGen( freq, iphase, width )
 
 object VarSaw {	
   def ar : GE = ar( Constant( 440f ), Constants.zero, Constant( 0.5f ))

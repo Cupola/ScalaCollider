@@ -2,7 +2,7 @@
  *  InfoUGens.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -47,57 +47,57 @@ abstract class InfoUGenBase extends SingleOutUGen() { val rate = scalar }
 object SampleRate {
 	def ir: GE = this()
 }
-case class SampleRate extends InfoUGenBase
+case class SampleRate() extends InfoUGenBase
 
 object SampleDur {
 	def ir: GE = this()
 }
-case class SampleDur extends InfoUGenBase
+case class SampleDur() extends InfoUGenBase
 
 object RadiansPerSample {
 	def ir: GE = this()
 }
-case class RadiansPerSample extends InfoUGenBase
+case class RadiansPerSample() extends InfoUGenBase
 
 object ControlRate {
 	def ir: GE = this()
 }
-case class ControlRate extends InfoUGenBase
+case class ControlRate() extends InfoUGenBase
 
 object SubsampleOffset {
 	def ir: GE = this()
 }
-case class SubsampleOffset extends InfoUGenBase
+case class SubsampleOffset() extends InfoUGenBase
 
 object NumOutputBuses {
 	def ir: GE = this()
 }
-case class NumOutputBuses extends InfoUGenBase
+case class NumOutputBuses() extends InfoUGenBase
 
 object NumInputBuses {
 	def ir: GE = this()
 }
-case class NumInputBuses extends InfoUGenBase
+case class NumInputBuses() extends InfoUGenBase
 
 object NumAudioBuses {
 	def ir: GE = this()
 }
-case class NumAudioBuses extends InfoUGenBase
+case class NumAudioBuses() extends InfoUGenBase
 
 object NumControlBuses {
 	def ir: GE = this()
 }
-case class NumControlBuses extends InfoUGenBase
+case class NumControlBuses() extends InfoUGenBase
 
 object NumBuffers {	/* extends InfoUGenBase */
 	def ir: GE = this()
 }
-case class NumBuffers extends InfoUGenBase
+case class NumBuffers() extends InfoUGenBase
 
 object NumRunningSynths {	/* extends InfoUGenBase */
 	def ir: GE = this()
 }
-case class NumRunningSynths extends InfoUGenBase
+case class NumRunningSynths() extends InfoUGenBase
 
 
 /*

@@ -2,7 +2,7 @@
  *  Filter.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -215,7 +215,7 @@ object RLPF {
   }
 }
 
-case class RLPF( rate: Rate, in: UGenInput, freq: UGenInput, rq: UGenInput )
+case class RLPF( rate: Rate, in: UGenIn, freq: UGenIn, rq: UGenIn )
 extends SingleOutUGen( in, freq, rq )
 
 object RHPF {	

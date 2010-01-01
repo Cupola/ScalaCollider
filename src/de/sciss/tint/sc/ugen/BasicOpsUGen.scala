@@ -2,7 +2,7 @@
  *  BasicOpsUGen.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -36,7 +36,7 @@ import scala.math._
 
 object MulAdd {
 //  private def multiNew( name: String, rate: Rate, outputRates: Seq[ Symbol ], inputs: Seq[ GE ]) : GE = {... }
-//  private def findHighestRate( inputs: Seq[ UGenInput ]) : Rate = {
+//  private def findHighestRate( inputs: Seq[ UGenIn ]) : Rate = {
 //    inputs.map(_.rate).max
 //  }
 
@@ -52,10 +52,10 @@ object MulAdd {
     simplify( for( List( i, m, a ) <- expand( in, mul, add )) yield make1( i, m, a ))
   }
 
-  private def make1( in: UGenInput, mul: UGenInput, add: UGenInput ) : GE =
+  private def make1( in: UGenIn, mul: UGenIn, add: UGenIn ) : GE =
     make1( Rates.highest( in.rate, mul.rate, add.rate ), in, mul, add )
 
-  private def make1( rate: Rate, in: UGenInput, mul: UGenInput, add: UGenInput ) : GE =
+  private def make1( rate: Rate, in: UGenIn, mul: UGenIn, add: UGenIn ) : GE =
     (mul, add) match {
       case (c(0), _)     => add
       case (c(1), c(0))  => in
@@ -80,21 +80,21 @@ object MulAdd {
     }
     if( hasZero ) return new GESeq()	// cannot wrap zero size seq
     if( allOne ) {
- //	  val ugenInputs = inputs.flatMap (_.toUGenInputs )
-      val ini  = in.toUGenInputs.head
-      val muli = mul.toUGenInputs.head
-      val addi = add.toUGenInputs.head
+ //	  val UGenIns = inputs.flatMap (_.toUGenIns )
+      val ini  = in.toUGenIns.head
+      val muli = mul.toUGenIns.head
+      val addi = add.toUGenIns.head
       return optimizedNew( ini, muli, addi )
      }
 
     val results = new Array[ GE ]( chanExp )
-//  val ugenInputs = inputs map (_.toUGenInputs)
-    val inis  = in.toUGenInputs
-    val mulis = mul.toUGenInputs
-    val addis = add.toUGenInputs
+//  val UGenIns = inputs map (_.toUGenIns)
+    val inis  = in.toUGenIns
+    val mulis = mul.toUGenIns
+    val addis = add.toUGenIns
         
     for( chan <- (0 until chanExp)) {
-//    val newArgs = ugenInputs map (multiInput => multiInput( chan % ugenInputs.size ))
+//    val newArgs = UGenIns map (multiInput => multiInput( chan % UGenIns.size ))
 //    results.update( chan, new UGen( name, rate, outputRates, newArgs ));
 //	  results.update( chan, optimizedNew( newArgs ))
       val ini  = inis( chan % inis.size )
@@ -102,11 +102,11 @@ object MulAdd {
       val addi = addis( chan % addis.size )
       results.update( chan, optimizedNew( ini, muli, addi ))
     }
-    val res2 = results flatMap (_.toUGenInputs)
+    val res2 = results flatMap (_.toUGenIns)
     GraphBuilder.seq( res2: _* )
   }
   
-  private def optimizedNew( in: UGenInput, mul: UGenInput, add: UGenInput ) : GE = {
+  private def optimizedNew( in: UGenIn, mul: UGenIn, add: UGenIn ) : GE = {
 	// eliminate degenerate cases
     if( mul == Constants.zero ) return add
     val minus = mul == Constants.minusOne
@@ -136,10 +136,10 @@ object MulAdd {
 */
 }
 
-case class MulAdd( rate: Rate, in: UGenInput, mul: UGenInput, add: UGenInput )
+case class MulAdd( rate: Rate, in: UGenIn, mul: UGenIn, add: UGenIn )
 extends SingleOutUGen( in, mul, add )
 
-abstract class BasicOpUGen( override val specialIndex: Int, inputs: UGenInput* )
+abstract class BasicOpUGen( override val specialIndex: Int, inputs: UGenIn* )
 extends SingleOutUGen( inputs: _* )
 
 object UnaryOpUGen {
@@ -155,7 +155,7 @@ object UnaryOpUGen {
     simplify( for( List( ai ) <- expand( a )) yield make1( selector, ai ))
   }
 
-  private def make1( selector: Symbol, a: UGenInput ) : GE = {
+  private def make1( selector: Symbol, a: UGenIn ) : GE = {
     val rate = a.rate
     // replace constants immediately
     a match {
@@ -177,8 +177,8 @@ object UnaryOpUGen {
 	    case 'sqrt => sqrt( aval )
 	    case 'exp => exp( aval )
 	    case 'reciprocal => 1.0f / aval
-	    case 'midicps => 440 * pow( 2, (aval - 69) * 0.083333333333 )
-	    case 'cpsmidi => log( aval * 0.0022727272727 ) / log( 2 ) * 12 + 69
+	    case 'midicps => midicps( aval )
+	    case 'cpsmidi => cpsmidi( aval )
 	    case 'midiratio => pow( 2, aval * 0.083333333333 )
 	    case 'ratiomidi => 12 * log( aval ) / log( 2 )
 	    case 'dbamp => pow( 10, aval * 0.05 )
@@ -223,7 +223,7 @@ object UnaryOpUGen {
   }
 
 /*
-  def determineRate( a: UGenInput, b: UGenInput ) : Rate = {
+  def determineRate( a: UGenIn, b: UGenIn ) : Rate = {
     if( a.rate > b.rate ) a.rate else b.rate
 //    max( a.rate, b.rate )
 //    if( a.rate == 'demand ) return 'demand
@@ -237,7 +237,7 @@ object UnaryOpUGen {
   */
 }
 
-case class UnaryOpUGen( rate: Rate, selector: Symbol, a: UGenInput )
+case class UnaryOpUGen( rate: Rate, selector: Symbol, a: UGenIn )
 extends BasicOpUGen( UnaryOpUGen.selectors( selector ), a )
 
 object BinaryOpUGen {
@@ -254,7 +254,7 @@ object BinaryOpUGen {
     simplify( for( List( ai, bi ) <- expand( a, b )) yield make1( selector, ai, bi ))
   }
 
-  private def make1( selector: Symbol, a: UGenInput, b: UGenInput ) : GE = {
+  private def make1( selector: Symbol, a: UGenIn, b: UGenIn ) : GE = {
     val rate = Rates.highest( a.rate, b.rate )
     (selector, a, b) match {
       case (Symbol( "*" ), c(0), _)  => a
@@ -279,7 +279,7 @@ object BinaryOpUGen {
   }
 
 /*
-  private def determineRate( a: UGenInput, b: UGenInput ) : Rate = {
+  private def determineRate( a: UGenIn, b: UGenIn ) : Rate = {
     if( a.rate > b.rate ) a.rate else b.rate
 //    if( a.rate == 'demand ) return 'demand
 //    if( b.rate == 'demand ) return 'demand
@@ -292,5 +292,5 @@ object BinaryOpUGen {
   */
 }
 
-case class BinaryOpUGen( rate: Rate, selector: Symbol, a: UGenInput, b: UGenInput )
+case class BinaryOpUGen( rate: Rate, selector: Symbol, a: UGenIn, b: UGenIn )
 extends BasicOpUGen( BinaryOpUGen.selectors( selector ), a, b )

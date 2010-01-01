@@ -2,7 +2,7 @@
  *  EnvGen.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -53,6 +53,6 @@ object EnvGen {
 //  }
 }
 
-case class EnvGen( rate: Rate, gate: UGenInput, levelScale: UGenInput, levelBias: UGenInput,
-                   timeScale: UGenInput, doneAction: UGenInput, envSeq: Seq[ UGenInput ])
+case class EnvGen( rate: Rate, gate: UGenIn, levelScale: UGenIn, levelBias: UGenIn,
+                   timeScale: UGenIn, doneAction: UGenIn, envSeq: Seq[ UGenIn ])
 extends SingleOutUGen( (List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envSeq): _* )
