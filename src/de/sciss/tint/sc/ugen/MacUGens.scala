@@ -2,7 +2,7 @@
  *  MacUGens.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -29,40 +29,36 @@
 package de.sciss.tint.sc.ugen
 
 import de.sciss.tint.sc._
-//import Rates._
+import SC._
+import GraphBuilder._
 
-object MouseX {
-	def kr : GE = kr( Constants.zero, Constants.one, Constants.zero, Constant( 0.2f ))
-
-    def kr( minVal: GE ) : GE = kr( minVal, minVal.max( Constants.one ), Constants.zero, Constant( 0.2f ))
-
-    def kr( minVal: GE, maxVal: GE ) : GE = kr( minVal, maxVal, Constants.zero, Constant( 0.2f ))
-
-    def kr( minVal: GE, maxVal: GE, warp: GE ) : GE = kr( minVal, maxVal, warp, Constant( 0.2f ))
-
-	def kr( minVal: GE, maxVal: GE, warp: GE, lag: GE ) : GE = {
-//	  if (warp === 'linear, { warp = 0 });	// XXX
-//	  if (warp === 'exponential, { warp = 1 });	// XXX
-      UGen.multiNew( "MouseX", control, List( control ), List( minVal, maxVal, warp, lag ))
-	}
+/**
+ *  @version  0.11, 01-Jan-10
+ */
+object MouseX extends UGen4RArgs {
+	def kr( minVal: GE = 0, maxVal: GE = 1, warp: GE = 0, lag: GE = 0.2f ) : GE =
+      make( minVal, maxVal, warp, lag )
 }
+case class MouseX( minVal: UGenIn, maxVal: UGenIn, warp: UGenIn, lag: UGenIn )
+extends SingleOutUGen( minVal, maxVal, warp, lag ) with ControlRated
 
-object MouseY {
-	def kr : GE = kr( Constants.zero, Constants.one, Constants.zero, Constant( 0.2f ))
-
-    def kr( minVal: GE ) : GE = kr( minVal, minVal.max( Constants.one ), Constants.zero, Constant( 0.2f ))
-
-    def kr( minVal: GE, maxVal: GE ) : GE = kr( minVal, maxVal, Constants.zero, Constant( 0.2f ))
-
-    def kr( minVal: GE, maxVal: GE, warp: GE ) : GE = kr( minVal, maxVal, warp, Constant( 0.2f ))
-
-	def kr( minVal: GE, maxVal: GE, warp: GE, lag: GE ) : GE = {
-//	  if (warp === 'linear, { warp = 0 });	// XXX
-//	  if (warp === 'exponential, { warp = 1 });	// XXX
-      UGen.multiNew( "MouseY", control, List( control ), List( minVal, maxVal, warp, lag ))
-	}
+object MouseY extends UGen4RArgs {
+	def kr( minVal: GE = 0, maxVal: GE = 1, warp: GE = 0, lag: GE = 0.2f ) : GE =
+      make( minVal, maxVal, warp, lag )
 }
+case class MouseY( minVal: UGenIn, maxVal: UGenIn, warp: UGenIn, lag: UGenIn )
+extends SingleOutUGen( minVal, maxVal, warp, lag ) with ControlRated
 
-// MouseButton XXX
-// KeyState XXX
+object MouseButton extends UGen3RArgs {
+	def kr( minVal: GE = 0, maxVal: GE = 1, lag: GE = 0.2f ) : GE =
+      make( minVal, maxVal, lag )
+}
+case class MouseButton( minVal: UGenIn, maxVal: UGenIn, lag: UGenIn )
+extends SingleOutUGen( minVal, maxVal, lag ) with ControlRated
 
+object KeyState extends UGen4RArgs {
+	def kr( keyCode: GE, minVal: GE = 0, maxVal: GE = 1, lag: GE = 0.2f ) : GE =
+      make( keyCode, minVal, maxVal, lag )
+}
+case class KeyState( keyCode: UGenIn, minVal: UGenIn, maxVal: UGenIn, lag: UGenIn )
+extends SingleOutUGen( keyCode, minVal, maxVal, lag ) with ControlRated

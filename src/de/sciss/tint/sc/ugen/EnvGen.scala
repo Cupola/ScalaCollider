@@ -31,6 +31,52 @@ import de.sciss.tint.sc._
 import SC._
 import GraphBuilder._
 
+/**
+ *  @version  0.10, 01-Jan-10
+ */
+object Done extends UGen1RArgs {
+  def kr( src: GE ) : GE = make( src )
+}
+case class Done( src: UGenIn ) extends SingleOutUGen( src ) with ControlRated
+
+object FreeSelf extends UGen1RArgs {
+  def kr( in: GE ) : GE = make( in ) // we do not return in like sclang does
+}
+case class FreeSelf( in: UGenIn ) extends ZeroOutUGen( in ) with ControlRated
+
+object PauseSelf extends UGen1RArgs {
+  def kr( in: GE ) : GE = make( in ) // we do not return in like sclang does
+}
+case class PauseSelf( in: UGenIn ) extends ZeroOutUGen( in ) with ControlRated
+
+// its output is its input (source)
+object FreeSelfWhenDone extends UGen1RArgs {
+  def kr( src: GE ) : GE = make( src )
+}
+case class FreeSelfWhenDone( src: UGenIn ) extends SingleOutUGen( src )
+with ControlRated
+
+// its output is its input (source)
+object PauseSelfWhenDone extends UGen1RArgs {
+  def kr( src: GE ) : GE = make( src )
+}
+case class PauseSelfWhenDone( src: UGenIn ) extends SingleOutUGen( src )
+with ControlRated
+
+// its output is its input (gate)
+object Pause extends UGen2RArgs {
+  def kr( gate: GE, nodeID: GE ) : GE = make( gate, nodeID )
+}
+case class Pause( gate: UGenIn, nodeID: UGenIn )
+extends SingleOutUGen( gate, nodeID ) with ControlRated
+
+// its output is its input (trig)
+object Free extends UGen2RArgs {
+  def kr( trig: GE, nodeID: GE ) : GE = make( trig, nodeID )
+}
+case class Free( trig: UGenIn, nodeID: UGenIn )
+extends SingleOutUGen( trig, nodeID ) with ControlRated
+
 object EnvGen {
   def ar( envelope: Env, gate: GE = 1, levelScale: GE = 1, levelBias: GE = 0, timeScale: GE = 1, doneAction: GE = 0 ) : GE = {
 //    val exp = expand( gate, levelScale, levelBias, timeScale, doneAction, envelope.toArray: _* )
@@ -56,3 +102,4 @@ object EnvGen {
 case class EnvGen( rate: Rate, gate: UGenIn, levelScale: UGenIn, levelBias: UGenIn,
                    timeScale: UGenIn, doneAction: UGenIn, envSeq: Seq[ UGenIn ])
 extends SingleOutUGen( (List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envSeq): _* )
+

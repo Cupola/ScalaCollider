@@ -1,5 +1,5 @@
 /*
- *  Mix.scala
+ *  FreeVerb.scala
  *  Tintantmare
  *
  *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
@@ -30,36 +30,19 @@ package de.sciss.tint.sc.ugen
 
 import de.sciss.tint.sc._
 import SC._
+import GraphBuilder._
 
 /**
- *	@version	0.10, 09-Dec-09
+ *  @version  0.10, 01-Jan-10
  */
-object Mix {
-	def apply( array: GE ) : GE = {
-		val inputs = array.toUGenIns
-		if( inputs.size == 0 ) {
-			GESeq()
-		} else if( inputs.size == 1 ) {
-			array
-		} else {
-			var i = 0
-			var sum: GE = 0
-			inputs.foreach( inp => {
-				if( i == 0 ) sum = inp else sum += inp
-				i = i + 1
-			})
-			sum
-		}
-	}
+object FreeVerb extends UGen4Args {
+  def ar( in: GE, mix: GE = 0.33f, room: GE = 0.5f, damp: GE = 0.5f ) : GE =
+    arExp( in, mix, room, damp )
 
-	// support this common idiom
-    // (corresponds to fill in sclang)
-	def tabulate( n: Int )( func: (Int) => GE ) : GE = {
-      (0 until n).foldLeft[ GE ]( 0 )( (sum, i) => sum + func( i ))
-	}
-
-    def fill( n: Int )( thunk: => GE ) : GE = {
-      def func() = thunk
-      (0 until n).foldLeft[ GE ]( 0 )( (sum, i) => sum + func() )
-    }
+  def kr( in: GE, mix: GE = 0.33f, room: GE = 0.5f, damp: GE = 0.5f ) : GE =
+    krExp( in, mix, room, damp )
 }
+case class FreeVerb( rate: Rate, in: UGenIn, mix: UGenIn, room: UGenIn, damp: UGenIn )
+extends SingleOutUGen( in, mix, room, damp )
+
+// FreeVerb2 XXX

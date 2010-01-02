@@ -7,30 +7,24 @@ package de.sciss.tint.sc.ugen
 
 import de.sciss.tint.sc._
 import SC._
-//import Rates._
+import GraphBuilder._
 
 /**
- *	@version	0.10, 09-Dec-09
+ *	@version	0.11, 01-Jan-10
  */
-object Pan2 {
-	def ar( in: GE, pos: GE = 0, level: GE = 1 ) : GE = {
-		  UGen.multiNew( "Pan2", audio, List( audio, audio ), List( in, pos, level ))
-	}
-
-	def kr( in: GE, pos: GE = 0, level: GE = 1 ) : GE = {
-		  UGen.multiNew( "Pan2", control, List( control, control ), List( in, pos, level ))
-	}
+object Pan2 extends UGen3Args {
+	def ar( in: GE, pos: GE = 0, level: GE = 1 ) : GE = arExp( in, pos, level )
+	def kr( in: GE, pos: GE = 0, level: GE = 1 ) : GE = krExp( in, pos, level )
 }
+case class Pan2( rate: Rate, in: UGenIn, pos: UGenIn, level: UGenIn )
+extends MultiOutUGen( List( rate, rate ), List( in, pos, level ))
 
-object LinPan2 {
-	def ar( in: GE, pos: GE = 0, level: GE = 1 ) : GE = {
-		  UGen.multiNew( "LinPan2", audio, List( audio, audio ), List( in, pos, level ))
-	}
-
-	def kr( in: GE, pos: GE = 0, level: GE = 1 ) : GE = {
-		  UGen.multiNew( "LinPan2", control, List( control, control ), List( in, pos, level ))
-	}
+object LinPan2 extends UGen3Args {
+	def ar( in: GE, pos: GE = 0, level: GE = 1 ) : GE = arExp( in, pos, level )
+	def kr( in: GE, pos: GE = 0, level: GE = 1 ) : GE = krExp( in, pos, level )
 }
+case class LinPan2( rate: Rate, in: UGenIn, pos: UGenIn, level: UGenIn )
+extends MultiOutUGen( List( rate, rate ), List( in, pos, level ))
 
 object Pan4 {
 	def ar( in: GE, xpos: GE = 0, ypos: GE = 0, level: GE = 1 ) : GE = {

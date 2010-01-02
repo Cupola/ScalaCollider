@@ -58,7 +58,6 @@ object AbstractOut {
 */
 
 /**
- * 	@author		Hanns Holger Rutz
  *	@version	0.10, 15-Jun-08
  */
 object Out /* extends AbstractOut */ {

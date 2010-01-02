@@ -39,7 +39,6 @@ import de.sciss.tint.sc._
 // }
 
 /**
- * 	@author		Hanns Holger Rutz
  *	@version	0.11, 31-Dec-09
  */
 abstract class InfoUGenBase extends SingleOutUGen() { val rate = scalar }
@@ -63,6 +62,11 @@ object ControlRate {
 	def ir: GE = this()
 }
 case class ControlRate() extends InfoUGenBase
+
+object ControlDur {
+	def ir: GE = this()
+}
+case class ControlDur() extends InfoUGenBase
 
 object SubsampleOffset {
 	def ir: GE = this()

@@ -31,7 +31,6 @@ import de.sciss.tint.sc._
 import SC._
 
 /**
- * 	@author		Hanns Holger Rutz
  *	@version	0.11, 16-Jun-09
  */
 object SoundIn {

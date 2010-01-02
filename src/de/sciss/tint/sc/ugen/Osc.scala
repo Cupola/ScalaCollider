@@ -33,7 +33,6 @@ import SC._
 import GraphBuilder._
 
 /**
- *  @author   Hanns Holger Rutz
  *  @version  0.11, 01-Jan-10
  */
 object Osc extends UGen3Args {
@@ -94,170 +93,50 @@ object VOsc3 extends UGen4Args {
 case class VOsc3( rate: Rate, bufPos: UGenIn, freq1: UGenIn, freq2: UGenIn, freq3: UGenIn )
 extends SingleOutUGen( bufPos, freq1, freq2, freq3 )
 
-object COsc {
-  def ar( bufNum: GE ) : GE = ar( bufNum, Constant( 440f ), Constant( 0.5f ))
-  def ar( bufNum: GE, freq: GE ) : GE = ar( bufNum, freq, Constant( 0.5f ))
-  
-  def ar( bufNum: GE, freq: GE, beats: GE ) : GE = {
-    UGen.multiNew( "COsc", audio, List( audio ), List( bufNum, freq, beats ))
-  }
-  
-  def ar( bufNum: GE, freq: GE, beats: GE, mul: GE ) : GE = {
-    ar( bufNum, freq, beats ).madd( mul, Constants.zero ) 
-  }
-  def ar( bufNum: GE, freq: GE, beats: GE, mul: GE, add: GE ) : GE = {
-    ar( bufNum, freq, beats ).madd( mul, add ) 
-  }
-
-  def kr( bufNum: GE ) : GE = kr( bufNum, Constant( 440f ), Constant( 0.5f ))
-  def kr( bufNum: GE, freq: GE ) : GE = kr( bufNum, freq, Constant( 0.5f ))
-
-  def kr( bufNum: GE, freq: GE, beats: GE ) : GE = {
-    UGen.multiNew( "COsc", control, List( control ), List( bufNum, freq, beats ))
-  }
-
-  def kr( bufNum: GE, freq: GE, beats: GE, mul: GE ) : GE = {
-    kr( bufNum, freq, beats ).madd( mul, Constants.zero )
-  }
-  def kr( bufNum: GE, freq: GE, beats: GE, mul: GE, add: GE ) : GE = {
-    kr( bufNum, freq, beats ).madd( mul, add )
-  }
+object COsc extends UGen3Args {
+  def ar( bufNum: GE, freq: GE = 440f, beats: GE = 0.5f ) : GE =
+    arExp( bufNum, freq, beats )
 }
+case class COsc( rate: Rate, bufNum: UGenIn, freq: UGenIn, beats: UGenIn )
+extends SingleOutUGen( bufNum, freq, beats )
 
-object Formant {	
-  def ar : GE = ar( Constant( 440f ), Constant( 1760f ), Constant( 880f ))
-  def ar( fundFreq: GE ) : GE = ar( fundFreq, Constant( 1760f ), Constant( 880f ))
-  def ar( fundFreq: GE, formFreq: GE ) : GE = ar( fundFreq, formFreq, Constant( 880f ))
-  
-  def ar( fundFreq: GE, formFreq: GE, bwFreq: GE ) : GE = {
-    UGen.multiNew( "Formant", audio, List( audio ), List( fundFreq, formFreq, bwFreq ))
-  }
-  
-  def ar( fundFreq: GE, formFreq: GE, bwFreq: GE, mul: GE ) : GE = {
-    ar( fundFreq, formFreq, bwFreq ).madd( mul, Constants.zero ) 
-  }
-  def ar( fundFreq: GE, formFreq: GE, bwFreq: GE, mul: GE, add: GE ) : GE = {
-    ar( fundFreq, formFreq, bwFreq ).madd( mul, add ) 
-  }
+object Formant extends UGen3Args {
+  def ar( fundFreq: GE = 440, formFreq: GE = 1760, bw: GE = 880 ) : GE =
+    arExp( fundFreq, formFreq, bw )
 
-  def kr : GE = kr( Constant( 440f ), Constant( 1760f ), Constant( 880f ))
-  def kr( fundFreq: GE ) : GE = kr( fundFreq, Constant( 1760f ), Constant( 880f ))
-  def kr( fundFreq: GE, formFreq: GE ) : GE = kr( fundFreq, formFreq, Constant( 880f ))
-  
-  def kr( fundFreq: GE, formFreq: GE, bwFreq: GE ) : GE = {
-    UGen.multiNew( "Formant", control, List( control ), List( fundFreq, formFreq, bwFreq ))
-  }
-  
-  def kr( fundFreq: GE, formFreq: GE, bwFreq: GE, mul: GE ) : GE = {
-    kr( fundFreq, formFreq, bwFreq ).madd( mul, Constants.zero ) 
-  }
-  def kr( fundFreq: GE, formFreq: GE, bwFreq: GE, mul: GE, add: GE ) : GE = {
-    kr( fundFreq, formFreq, bwFreq ).madd( mul, add ) 
-  }
+  def kr( fundFreq: GE = 440, formFreq: GE = 1760, bw: GE = 880 ) : GE =
+    krExp( fundFreq, formFreq, bw )
 }
+case class Formant( rate: Rate, fundFreq: UGenIn, formFreq: UGenIn, bw: UGenIn )
+extends SingleOutUGen( fundFreq, formFreq, bw )
 
-object LFSaw {	
-  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = {
-    simplify( for( List( f, p ) <- expand( freq, iphase )) yield this( audio, f, p ))
-  }
-  
-  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = {
-    simplify( for( List( f, p ) <- expand( freq, iphase )) yield this( control, f, p ))
-  }
+object LFSaw extends UGen2Args {
+  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
+  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
 }
-
 case class LFSaw( rate: Rate, freq: UGenIn, iphase: UGenIn )
 extends SingleOutUGen( freq, iphase )
 
-object LFPar {	
-  def ar : GE = ar( Constant( 440f ), Constants.zero )
-  def ar( freq: GE ) : GE = ar( freq, Constants.zero )
-  
-  def ar( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFPar", audio, List( audio ), List( freq, iphase ))
-  }
-  
-  def ar( freq: GE, iphase: GE, mul: GE ) : GE = {
-    ar( freq, iphase ).madd( mul, Constants.zero ) 
-  }
-  def ar( freq: GE, iphase: GE, mul: GE, add: GE ) : GE = {
-    ar( freq, iphase ).madd( mul, add ) 
-  }
-
-  def kr : GE = kr( Constant( 440f ), Constants.zero )
-  def kr( freq: GE ) : GE = kr( freq, Constants.zero )
-
-  def kr( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFPar", control, List( control ), List( freq, iphase ))
-  }
-
-  def kr( freq: GE, iphase: GE, mul: GE ) : GE = {
-    kr( freq, iphase ).madd( mul, Constants.zero )
-  }
-  def kr( freq: GE, iphase: GE, mul: GE, add: GE ) : GE = {
-    kr( freq, iphase ).madd( mul, add )
-  }
+object LFPar extends UGen2Args {
+  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
+  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
 }
+case class LFPar( rate: Rate, freq: UGenIn, iphase: UGenIn )
+extends SingleOutUGen( freq, iphase )
 
-object LFCub {	
-  def ar : GE = ar( Constant( 440f ), Constants.zero )
-  def ar( freq: GE ) : GE = ar( freq, Constants.zero )
-  
-  def ar( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFCub", audio, List( audio ), List( freq, iphase ))
-  }
-  
-  def ar( freq: GE, iphase: GE, mul: GE ) : GE = {
-    ar( freq, iphase ).madd( mul, Constants.zero ) 
-  }
-  def ar( freq: GE, iphase: GE, mul: GE, add: GE ) : GE = {
-    ar( freq, iphase ).madd( mul, add ) 
-  }
-
-  def kr : GE = kr( Constant( 440f ), Constants.zero )
-  def kr( freq: GE ) : GE = kr( freq, Constants.zero )
-
-  def kr( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFCub", control, List( control ), List( freq, iphase ))
-  }
-
-  def kr( freq: GE, iphase: GE, mul: GE ) : GE = {
-    kr( freq, iphase ).madd( mul, Constants.zero )
-  }
-  def kr( freq: GE, iphase: GE, mul: GE, add: GE ) : GE = {
-    kr( freq, iphase ).madd( mul, add )
-  }
+object LFCub extends UGen2Args {
+  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
+  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
 }
+case class LFCub( rate: Rate, freq: UGenIn, iphase: UGenIn )
+extends SingleOutUGen( freq, iphase )
 
-object LFTri {	
-  def ar : GE = ar( Constant( 440f ), Constants.zero )
-  def ar( freq: GE ) : GE = ar( freq, Constants.zero )
-  
-  def ar( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFTri", audio, List( audio ), List( freq, iphase ))
-  }
-  
-  def ar( freq: GE, iphase: GE, mul: GE ) : GE = {
-    ar( freq, iphase ).madd( mul, Constants.zero ) 
-  }
-  def ar( freq: GE, iphase: GE, mul: GE, add: GE ) : GE = {
-    ar( freq, iphase ).madd( mul, add ) 
-  }
-
-  def kr : GE = kr( Constant( 440f ), Constants.zero )
-  def kr( freq: GE ) : GE = kr( freq, Constants.zero )
-
-  def kr( freq: GE, iphase: GE ) : GE = {
-    UGen.multiNew( "LFTri", control, List( control ), List( freq, iphase ))
-  }
-
-  def kr( freq: GE, iphase: GE, mul: GE ) : GE = {
-    kr( freq, iphase ).madd( mul, Constants.zero )
-  }
-  def kr( freq: GE, iphase: GE, mul: GE, add: GE ) : GE = {
-    kr( freq, iphase ).madd( mul, add )
-  }
+object LFTri extends UGen2Args {
+  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
+  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
 }
+case class LFTri( rate: Rate, freq: UGenIn, iphase: UGenIn )
+extends SingleOutUGen( freq, iphase )
 
 object LFPulse extends UGen3Args {
   def ar( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
@@ -269,237 +148,64 @@ object LFPulse extends UGen3Args {
 case class LFPulse( rate: Rate, freq: UGenIn, iphase: UGenIn, width: UGenIn )
 extends SingleOutUGen( freq, iphase, width )
 
-object VarSaw {	
-  def ar : GE = ar( Constant( 440f ), Constants.zero, Constant( 0.5f ))
-  def ar( freq: GE ) : GE = ar( freq, Constants.zero, Constant( 0.5f ) )
-  def ar( freq: GE, iphase: GE ) : GE = ar( freq, iphase, Constant( 0.5f ) )
-  
-  def ar( freq: GE, iphase: GE, width: GE ) : GE = {
-    UGen.multiNew( "VarSaw", audio, List( audio ), List( freq, iphase, width ))
-  }
-  
-  def ar( freq: GE, iphase: GE, width: GE, mul: GE ) : GE = {
-    ar( freq, iphase, width ).madd( mul, Constants.zero ) 
-  }
-  def ar( freq: GE, iphase: GE, width: GE, mul: GE, add: GE ) : GE = {
-    ar( freq, iphase, width ).madd( mul, add ) 
-  }
+object VarSaw extends UGen3Args {
+  def ar( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
+    arExp( freq, iphase, width )
 
-  def kr : GE = kr( Constant( 440f ), Constants.zero, Constant( 0.5f ))
-  def kr( freq: GE ) : GE = kr( freq, Constants.zero, Constant( 0.5f ) )
-  def kr( freq: GE, iphase: GE ) : GE = kr( freq, iphase, Constant( 0.5f ) )
-  
-  def kr( freq: GE, iphase: GE, width: GE ) : GE = {
-    UGen.multiNew( "VarSaw", control, List( control ), List( freq, iphase, width ))
-  }
-  
-  def kr( freq: GE, iphase: GE, width: GE, mul: GE ) : GE = {
-    kr( freq, iphase, width ).madd( mul, Constants.zero ) 
-  }
-  def kr( freq: GE, iphase: GE, width: GE, mul: GE, add: GE ) : GE = {
-    kr( freq, iphase, width ).madd( mul, add ) 
-  }
+  def kr( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
+    krExp( freq, iphase, width )
 }
+case class VarSaw( rate: Rate, freq: UGenIn, iphase: UGenIn, width: UGenIn )
+extends SingleOutUGen( freq, iphase, width )
 
-object Impulse {	
-  def ar : GE = ar( Constant( 440f ), Constants.zero )
-  def ar( freq: GE ) : GE = ar( freq, Constants.zero )
-  
-  def ar( freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "Impulse", audio, List( audio ), List( freq, phase ))
-  }
-  
-  def ar( freq: GE, phase: GE, mul: GE ) : GE = {
-    ar( freq, phase ).madd( mul, Constants.zero ) 
-  }
-  def ar( freq: GE, phase: GE, mul: GE, add: GE ) : GE = {
-    ar( freq, phase ).madd( mul, add ) 
-  }
-
-  def kr : GE = kr( Constant( 440f ), Constants.zero )
-  def kr( freq: GE ) : GE = kr( freq, Constants.zero )
-
-  def kr( freq: GE, phase: GE ) : GE = {
-    UGen.multiNew( "Impulse", control, List( control ), List( freq, phase ))
-  }
-
-  def kr( freq: GE, phase: GE, mul: GE ) : GE = {
-    kr( freq, phase ).madd( mul, Constants.zero )
-  }
-  def kr( freq: GE, phase: GE, mul: GE, add: GE ) : GE = {
-    kr( freq, phase ).madd( mul, add )
-  }
+object Impulse extends UGen2Args {
+  def ar( freq: GE = 440, phase: GE = 0 ) : GE = arExp( freq, phase )
+  def kr( freq: GE = 440, phase: GE = 0 ) : GE = krExp( freq, phase )
 }
+case class Impulse( rate: Rate, freq: UGenIn, phase: UGenIn )
+extends SingleOutUGen( freq, phase )
 
-object SyncSaw {	
-  def ar : GE = ar( Constant( 440f ), Constant( 440f ))
-  def ar( syncFreq: GE ) : GE = ar( syncFreq, Constant( 440f ))
-  
-  def ar( syncFreq: GE, sawFreq: GE ) : GE = {
-    UGen.multiNew( "SyncSaw", audio, List( audio ), List( syncFreq, sawFreq ))
-  }
-  
-  def ar( syncFreq: GE, sawFreq: GE, mul: GE ) : GE = {
-    ar( syncFreq, sawFreq ).madd( mul, Constants.zero ) 
-  }
-  def ar( syncFreq: GE, sawFreq: GE, mul: GE, add: GE ) : GE = {
-    ar( syncFreq, sawFreq ).madd( mul, add ) 
-  }
-
-  def kr : GE = kr( Constant( 440f ), Constant( 440f ))
-  def kr( syncFreq: GE ) : GE = kr( syncFreq, Constant( 440f ))
-
-  def kr( syncFreq: GE, sawFreq: GE ) : GE = {
-    UGen.multiNew( "SyncSaw", control, List( control ), List( syncFreq, sawFreq ))
-  }
-
-  def kr( syncFreq: GE, sawFreq: GE, mul: GE ) : GE = {
-    kr( syncFreq, sawFreq ).madd( mul, Constants.zero )
-  }
-  def kr( syncFreq: GE, sawFreq: GE, mul: GE, add: GE ) : GE = {
-    kr( syncFreq, sawFreq ).madd( mul, add )
-  }
+object SyncSaw extends UGen2Args {
+  def ar( syncFreq: GE = 440, sawFreq: GE = 440 ) : GE = arExp( syncFreq, sawFreq )
+  def kr( syncFreq: GE = 440, sawFreq: GE = 440 ) : GE = krExp( syncFreq, sawFreq )
 }
+case class SyncSaw( rate: Rate, syncFreq: UGenIn, sawFreq: UGenIn )
+extends SingleOutUGen( syncFreq, sawFreq )
 
-object Index {
-  def ar( bufNum: GE ) : GE = ar( bufNum, Constants.zero )
-  
-  def ar( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "Index", audio, List( audio ), List( bufNum, in ))
-  }
-  
-  def ar( bufNum: GE, in: GE, mul: GE ) : GE = {
-    ar( bufNum, in ).madd( mul, Constants.zero ) 
-  }
-  def ar( bufNum: GE, in: GE, mul: GE, add: GE ) : GE = {
-    ar( bufNum, in ).madd( mul, add ) 
-  }
-
-  def kr( bufNum: GE ) : GE = kr( bufNum, Constants.zero )
-  
-  def kr( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "Index", scalar, List( scalar ), List( bufNum, in ))
-  }
-  
-  def kr( bufNum: GE, in: GE, mul: GE ) : GE = {
-    kr( bufNum, in ).madd( mul, Constants.zero ) 
-  }
-  def kr( bufNum: GE, in: GE, mul: GE, add: GE ) : GE = {
-    kr( bufNum, in ).madd( mul, add ) 
-  }
+object Index extends UGen2Args {
+  def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )
+  def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
 }
+case class Index( rate: Rate, bufNum: UGenIn, in: UGenIn )
+extends SingleOutUGen( bufNum, in )
 
-object WrapIndex {
-  def ar( bufNum: GE ) : GE = ar( bufNum, Constants.zero )
-  
-  def ar( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "WrapIndex", audio, List( audio ), List( bufNum, in ))
-  }
-  
-  def ar( bufNum: GE, in: GE, mul: GE ) : GE = {
-    ar( bufNum, in ).madd( mul, Constants.zero ) 
-  }
-  def ar( bufNum: GE, in: GE, mul: GE, add: GE ) : GE = {
-    ar( bufNum, in ).madd( mul, add ) 
-  }
-
-  def kr( bufNum: GE ) : GE = kr( bufNum, Constants.zero )
-  
-  def kr( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "WrapIndex", scalar, List( scalar ), List( bufNum, in ))
-  }
-  
-  def kr( bufNum: GE, in: GE, mul: GE ) : GE = {
-    kr( bufNum, in ).madd( mul, Constants.zero ) 
-  }
-  def kr( bufNum: GE, in: GE, mul: GE, add: GE ) : GE = {
-    kr( bufNum, in ).madd( mul, add ) 
-  }
+object WrapIndex extends UGen2Args {
+  def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )
+  def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
 }
+case class WrapIndex( rate: Rate, bufNum: UGenIn, in: UGenIn )
+extends SingleOutUGen( bufNum, in )
 
-object IndexInBetween {
-  def ar( bufNum: GE ) : GE = ar( bufNum, Constants.zero )
-  
-  def ar( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "IndexInBetween", audio, List( audio ), List( bufNum, in ))
-  }
-  
-  def ar( bufNum: GE, in: GE, mul: GE ) : GE = {
-    ar( bufNum, in ).madd( mul, Constants.zero ) 
-  }
-  def ar( bufNum: GE, in: GE, mul: GE, add: GE ) : GE = {
-    ar( bufNum, in ).madd( mul, add ) 
-  }
-
-  def kr( bufNum: GE ) : GE = kr( bufNum, Constants.zero )
-  
-  def kr( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "IndexInBetween", scalar, List( scalar ), List( bufNum, in ))
-  }
-  
-  def kr( bufNum: GE, in: GE, mul: GE ) : GE = {
-    kr( bufNum, in ).madd( mul, Constants.zero ) 
-  }
-  def kr( bufNum: GE, in: GE, mul: GE, add: GE ) : GE = {
-    kr( bufNum, in ).madd( mul, add ) 
-  }
+object IndexInBetween extends UGen2Args {
+  def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )
+  def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
 }
+case class IndexInBetween( rate: Rate, bufNum: UGenIn, in: UGenIn )
+extends SingleOutUGen( bufNum, in )
 
-object DetectIndex {
-  def ar( bufNum: GE ) : GE = ar( bufNum, Constants.zero )
-  
-  def ar( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "DetectIndex", audio, List( audio ), List( bufNum, in ))
-  }
-  
-  def ar( bufNum: GE, in: GE, mul: GE ) : GE = {
-    ar( bufNum, in ).madd( mul, Constants.zero ) 
-  }
-  def ar( bufNum: GE, in: GE, mul: GE, add: GE ) : GE = {
-    ar( bufNum, in ).madd( mul, add ) 
-  }
-
-  def kr( bufNum: GE ) : GE = kr( bufNum, Constants.zero )
-  
-  def kr( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "DetectIndex", scalar, List( scalar ), List( bufNum, in ))
-  }
-  
-  def kr( bufNum: GE, in: GE, mul: GE ) : GE = {
-    kr( bufNum, in ).madd( mul, Constants.zero ) 
-  }
-  def kr( bufNum: GE, in: GE, mul: GE, add: GE ) : GE = {
-    kr( bufNum, in ).madd( mul, add ) 
-  }
+object DetectIndex extends UGen2Args {
+  def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )
+  def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
 }
+case class DetectIndex( rate: Rate, bufNum: UGenIn, in: UGenIn )
+extends SingleOutUGen( bufNum, in )
 
-object Shaper {
-  def ar( bufNum: GE ) : GE = ar( bufNum, Constants.zero )
-  
-  def ar( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "Shaper", audio, List( audio ), List( bufNum, in ))
-  }
-  
-  def ar( bufNum: GE, in: GE, mul: GE ) : GE = {
-    ar( bufNum, in ).madd( mul, Constants.zero ) 
-  }
-  def ar( bufNum: GE, in: GE, mul: GE, add: GE ) : GE = {
-    ar( bufNum, in ).madd( mul, add ) 
-  }
-
-  def kr( bufNum: GE ) : GE = kr( bufNum, Constants.zero )
-  
-  def kr( bufNum: GE, in: GE ) : GE = {
-    UGen.multiNew( "Shaper", scalar, List( scalar ), List( bufNum, in ))
-  }
-  
-  def kr( bufNum: GE, in: GE, mul: GE ) : GE = {
-    kr( bufNum, in ).madd( mul, Constants.zero ) 
-  }
-  def kr( bufNum: GE, in: GE, mul: GE, add: GE ) : GE = {
-    kr( bufNum, in ).madd( mul, add ) 
-  }
+object Shaper extends UGen2Args {
+  def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )
+  def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
 }
+case class Shaper( rate: Rate, bufNum: UGenIn, in: UGenIn )
+extends SingleOutUGen( bufNum, in )
 
 // IndexL XXX
 // DegreeToKey XXX

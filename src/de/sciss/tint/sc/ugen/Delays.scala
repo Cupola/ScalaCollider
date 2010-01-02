@@ -2,7 +2,7 @@
  *  Delays.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -33,271 +33,119 @@ import SC._
 import GraphBuilder._
 
 /**
- * 	@version	0.11, 16-Jun-09
+ * 	@version	0.12, 01-Jan-10
  */
-object Delay1 {
-	def ar( in: GE ) : GE = {
-		UGen.multiNew( "Delay1", audio, List( audio ), List( in ))
-	}
-
-	def kr( in: GE ) : GE = {
-    	UGen.multiNew( "Delay1", control, List( control ), List( in ))
-	}
+object Delay1 extends UGen1Args {
+	def ar( in: GE ) : GE = arExp( in )
+	def kr( in: GE ) : GE = krExp( in )
 }
+case class Delay1( rate: Rate, in: UGenIn ) extends SingleOutUGen( in )
 
-object Delay2 {
-  def ar( in: GE ) : GE = {
-    UGen.multiNew( "Delay2", audio, List( audio ), List( in ))
-  }
-  
-  def ar( in: GE, mul: GE ) : GE = ar( in ).madd( mul, Constants.zero ) 
-  def ar( in: GE, mul: GE, add: GE ) : GE = ar( in ).madd( mul, add ) 
-
-  def kr( in: GE ) : GE = {
-    UGen.multiNew( "Delay2", control, List( control ), List( in ))
-  }
-
-  def kr( in: GE, mul: GE ) : GE = kr( in ).madd( mul, Constants.zero ) 
-  def kr( in: GE, mul: GE, add: GE ) : GE = kr( in ).madd( mul, add ) 
+object Delay2 extends UGen1Args {
+	def ar( in: GE ) : GE = arExp( in )
+	def kr( in: GE ) : GE = krExp( in )
 }
+case class Delay2( rate: Rate, in: UGenIn ) extends SingleOutUGen( in )
 
-// these delays use real time allocated memory.
+// ---- the following delays use real time allocated memory ----
 
-object DelayN {
-  def ar( in: GE ) : GE = ar( in, Constant( 0.2f ), Constant( 0.2f ))
-  def ar( in: GE, maxDelayTime: GE ) : GE = ar( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )))
-  
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = {
-    UGen.multiNew( "DelayN", audio, List( audio ), List( in, maxDelayTime, delayTime ))
-  }
-  
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE ) : GE = {
-    ar( in, maxDelayTime, delayTime ).madd( mul, Constants.zero )
-  }
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE, add: GE ) : GE = {
-    ar( in, maxDelayTime, delayTime ).madd( mul, add )
-  }
+object DelayN extends UGen3Args {
+	def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f ) : GE =
+      arExp( in, maxDelayTime, delayTime )
 
-  def kr( in: GE ) : GE = kr( in, Constant( 0.2f ), Constant( 0.2f ))
-  def kr( in: GE, maxDelayTime: GE ) : GE = kr( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )))
-  
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = {
-    UGen.multiNew( "DelayN", control, List( control ), List( in, maxDelayTime, delayTime ))
-  }
-  
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE ) : GE = {
-    kr( in, maxDelayTime, delayTime ).madd( mul, Constants.zero )
-  }
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE, add: GE ) : GE = {
-    kr( in, maxDelayTime, delayTime ).madd( mul, add )
-  }
+    def kr( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f ) : GE =
+      krExp( in, maxDelayTime, delayTime )
 }
+case class DelayN( rate: Rate, in: UGenIn, maxDelayTime: UGenIn, delayTime: UGenIn )
+extends SingleOutUGen( in, maxDelayTime, delayTime )
 
-object DelayL {
-  def ar( in: GE ) : GE = ar( in, Constant( 0.2f ), Constant( 0.2f ))
-  def ar( in: GE, maxDelayTime: GE ) : GE = ar( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )))
-  
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = {
-    UGen.multiNew( "DelayL", audio, List( audio ), List( in, maxDelayTime, delayTime ))
-  }
-  
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE ) : GE = {
-    ar( in, maxDelayTime, delayTime ).madd( mul, Constants.zero )
-  }
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE, add: GE ) : GE = {
-    ar( in, maxDelayTime, delayTime ).madd( mul, add )
-  }
+object DelayL extends UGen3Args {
+	def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f ) : GE =
+      arExp( in, maxDelayTime, delayTime )
 
-  def kr( in: GE ) : GE = kr( in, Constant( 0.2f ), Constant( 0.2f ))
-  def kr( in: GE, maxDelayTime: GE ) : GE = kr( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )))
-  
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = {
-    UGen.multiNew( "DelayL", control, List( control ), List( in, maxDelayTime, delayTime ))
-  }
-  
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE ) : GE = {
-    kr( in, maxDelayTime, delayTime ).madd( mul, Constants.zero )
-  }
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE, add: GE ) : GE = {
-    kr( in, maxDelayTime, delayTime ).madd( mul, add )
-  }
+    def kr( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f ) : GE =
+      krExp( in, maxDelayTime, delayTime )
 }
+case class DelayL( rate: Rate, in: UGenIn, maxDelayTime: UGenIn, delayTime: UGenIn )
+extends SingleOutUGen( in, maxDelayTime, delayTime )
 
-object DelayC {
-  def ar( in: GE ) : GE = ar( in, Constant( 0.2f ), Constant( 0.2f ))
-  def ar( in: GE, maxDelayTime: GE ) : GE = ar( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )))
-  
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = {
-    UGen.multiNew( "DelayC", audio, List( audio ), List( in, maxDelayTime, delayTime ))
-  }
-  
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE ) : GE = {
-    ar( in, maxDelayTime, delayTime ).madd( mul, Constants.zero )
-  }
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE, add: GE ) : GE = {
-    ar( in, maxDelayTime, delayTime ).madd( mul, add )
-  }
+object DelayC extends UGen3Args {
+	def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f ) : GE =
+      arExp( in, maxDelayTime, delayTime )
 
-  def kr( in: GE ) : GE = kr( in, Constant( 0.2f ), Constant( 0.2f ))
-  def kr( in: GE, maxDelayTime: GE ) : GE = kr( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )))
-  
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = {
-    UGen.multiNew( "DelayC", control, List( control ), List( in, maxDelayTime, delayTime ))
-  }
-  
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE ) : GE = {
-    kr( in, maxDelayTime, delayTime ).madd( mul, Constants.zero )
-  }
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, mul: GE, add: GE ) : GE = {
-    kr( in, maxDelayTime, delayTime ).madd( mul, add )
-  }
+    def kr( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f ) : GE =
+      krExp( in, maxDelayTime, delayTime )
 }
+case class DelayC( rate: Rate, in: UGenIn, maxDelayTime: UGenIn, delayTime: UGenIn )
+extends SingleOutUGen( in, maxDelayTime, delayTime )
 
-object CombN {
-  def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE = {
-    simplify( for( List( i, m, dl, dc ) <- expand( in, maxDelayTime, delayTime, decayTime ))
-      yield this( audio, i, m, dl, dc ))
-  }
-  
-  def kr( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE = {
-    simplify( for( List( i, m, dl, dc ) <- expand( in, maxDelayTime, delayTime, decayTime ))
-      yield this( control, i, m, dl, dc ))
-  }
+object CombN extends UGen4Args {
+	def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      arExp( in, maxDelayTime, delayTime, decayTime )
+
+    def kr( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      krExp( in, maxDelayTime, delayTime, decayTime )
 }
-
 case class CombN( rate: Rate, in: UGenIn, maxDelayTime: UGenIn,
                   delayTime: UGenIn, decayTime: UGenIn )
 extends SingleOutUGen( in, maxDelayTime, delayTime, decayTime )
 
-object CombL {
-  def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE = {
-    simplify( for( List( i, m, dl, dc ) <- expand( in, maxDelayTime, delayTime, decayTime ))
-      yield this( audio, i, m, dl, dc ))
-  }
+object CombL extends UGen4Args {
+	def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      arExp( in, maxDelayTime, delayTime, decayTime )
 
-  def kr( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE = {
-    simplify( for( List( i, m, dl, dc ) <- expand( in, maxDelayTime, delayTime, decayTime ))
-      yield this( control, i, m, dl, dc ))
-  }
+    def kr( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      krExp( in, maxDelayTime, delayTime, decayTime )
 }
-
 case class CombL( rate: Rate, in: UGenIn, maxDelayTime: UGenIn,
                   delayTime: UGenIn, decayTime: UGenIn )
 extends SingleOutUGen( in, maxDelayTime, delayTime, decayTime )
 
-object CombC {
-  def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE = {
-    simplify( for( List( i, m, dl, dc ) <- expand( in, maxDelayTime, delayTime, decayTime ))
-      yield this( audio, i, m, dl, dc ))
-  }
+object CombC extends UGen4Args {
+	def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      arExp( in, maxDelayTime, delayTime, decayTime )
 
-  def kr( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE = {
-    simplify( for( List( i, m, dl, dc ) <- expand( in, maxDelayTime, delayTime, decayTime ))
-      yield this( control, i, m, dl, dc ))
-  }
+    def kr( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      krExp( in, maxDelayTime, delayTime, decayTime )
 }
-
 case class CombC( rate: Rate, in: UGenIn, maxDelayTime: UGenIn,
                   delayTime: UGenIn, decayTime: UGenIn )
 extends SingleOutUGen( in, maxDelayTime, delayTime, decayTime )
 
-object AllpassN {
-  def ar( in: GE ) : GE = ar( in, Constant( 0.2f ), Constant( 0.2f ), Constants.one )
-  def ar( in: GE, maxDelayTime: GE ) : GE = ar( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )), Constants.one )
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = ar( in, maxDelayTime, delayTime, Constants.one )
-  
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "AllpassN", audio, List( audio ), List( in, maxDelayTime, delayTime, decayTime ))
-  }
-  
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
-    ar( in, maxDelayTime, delayTime, decayTime ).madd( mul, Constants.zero )
-  }
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE, add: GE ) : GE = {
-    ar( in, maxDelayTime, delayTime, decayTime ).madd( mul, add )
-  }
+object AllpassN extends UGen4Args {
+	def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      arExp( in, maxDelayTime, delayTime, decayTime )
 
-  def kr( in: GE ) : GE = kr( in, Constant( 0.2f ), Constant( 0.2f ), Constants.one )
-  def kr( in: GE, maxDelayTime: GE ) : GE = kr( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )), Constants.one )
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = kr( in, maxDelayTime, delayTime, Constants.one )
-  
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "AllpassN", control, List( control ), List( in, maxDelayTime, delayTime, decayTime ))
-  }
-  
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
-    kr( in, maxDelayTime, delayTime, decayTime ).madd( mul, Constants.zero )
-  }
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE, add: GE ) : GE = {
-    kr( in, maxDelayTime, delayTime, decayTime ).madd( mul, add )
-  }
+    def kr( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      krExp( in, maxDelayTime, delayTime, decayTime )
 }
+case class AllpassN( rate: Rate, in: UGenIn, maxDelayTime: UGenIn,
+                     delayTime: UGenIn, decayTime: UGenIn )
+extends SingleOutUGen( in, maxDelayTime, delayTime, decayTime )
 
-object AllpassL {
-  def ar( in: GE ) : GE = ar( in, Constant( 0.2f ), Constant( 0.2f ), Constants.one )
-  def ar( in: GE, maxDelayTime: GE ) : GE = ar( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )), Constants.one )
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = ar( in, maxDelayTime, delayTime, Constants.one )
-  
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "AllpassL", audio, List( audio ), List( in, maxDelayTime, delayTime, decayTime ))
-  }
-  
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
-    ar( in, maxDelayTime, delayTime, decayTime ).madd( mul, Constants.zero )
-  }
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE, add: GE ) : GE = {
-    ar( in, maxDelayTime, delayTime, decayTime ).madd( mul, add )
-  }
+object AllpassL extends UGen4Args {
+	def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      arExp( in, maxDelayTime, delayTime, decayTime )
 
-  def kr( in: GE ) : GE = kr( in, Constant( 0.2f ), Constant( 0.2f ), Constants.one )
-  def kr( in: GE, maxDelayTime: GE ) : GE = kr( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )), Constants.one )
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = kr( in, maxDelayTime, delayTime, Constants.one )
-  
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "AllpassL", control, List( control ), List( in, maxDelayTime, delayTime, decayTime ))
-  }
-  
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
-    kr( in, maxDelayTime, delayTime, decayTime ).madd( mul, Constants.zero )
-  }
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE, add: GE ) : GE = {
-    kr( in, maxDelayTime, delayTime, decayTime ).madd( mul, add )
-  }
+    def kr( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      krExp( in, maxDelayTime, delayTime, decayTime )
 }
+case class AllpassL( rate: Rate, in: UGenIn, maxDelayTime: UGenIn,
+                     delayTime: UGenIn, decayTime: UGenIn )
+extends SingleOutUGen( in, maxDelayTime, delayTime, decayTime )
 
-object AllpassC {
-  def ar( in: GE ) : GE = ar( in, Constant( 0.2f ), Constant( 0.2f ), Constants.one )
-  def ar( in: GE, maxDelayTime: GE ) : GE = ar( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )), Constants.one )
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = ar( in, maxDelayTime, delayTime, Constants.one )
-  
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "AllpassC", audio, List( audio ), List( in, maxDelayTime, delayTime, decayTime ))
-  }
-  
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
-    ar( in, maxDelayTime, delayTime, decayTime ).madd( mul, Constants.zero )
-  }
-  def ar( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE, add: GE ) : GE = {
-    ar( in, maxDelayTime, delayTime, decayTime ).madd( mul, add )
-  }
+object AllpassC extends UGen4Args {
+	def ar( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      arExp( in, maxDelayTime, delayTime, decayTime )
 
-  def kr( in: GE ) : GE = kr( in, Constant( 0.2f ), Constant( 0.2f ), Constants.one )
-  def kr( in: GE, maxDelayTime: GE ) : GE = kr( in, maxDelayTime, maxDelayTime.max( Constant( 0.2f )), Constants.one )
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE ) : GE = kr( in, maxDelayTime, delayTime, Constants.one )
-  
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE ) : GE = {
-    UGen.multiNew( "AllpassC", control, List( control ), List( in, maxDelayTime, delayTime, decayTime ))
-  }
-  
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE ) : GE = {
-    kr( in, maxDelayTime, delayTime, decayTime ).madd( mul, Constants.zero )
-  }
-  def kr( in: GE, maxDelayTime: GE, delayTime: GE, decayTime: GE, mul: GE, add: GE ) : GE = {
-    kr( in, maxDelayTime, delayTime, decayTime ).madd( mul, add )
-  }
+    def kr( in: GE, maxDelayTime: GE = 0.2f, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      krExp( in, maxDelayTime, delayTime, decayTime )
 }
+case class AllpassC( rate: Rate, in: UGenIn, maxDelayTime: UGenIn,
+                     delayTime: UGenIn, decayTime: UGenIn )
+extends SingleOutUGen( in, maxDelayTime, delayTime, decayTime )
 
-// these delays use shared buffers.
+// ---- the following delays use shared buffers ----
 
 // BufDelayN XXX
 // BufDelayL XXX

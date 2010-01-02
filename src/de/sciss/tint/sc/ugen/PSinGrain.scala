@@ -1,5 +1,5 @@
 /*
- *  Mix.scala
+ *  FSinOsc.scala
  *  Tintantmare
  *
  *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
@@ -30,36 +30,14 @@ package de.sciss.tint.sc.ugen
 
 import de.sciss.tint.sc._
 import SC._
+import GraphBuilder._
 
 /**
- *	@version	0.10, 09-Dec-09
+ *	@version	0.10, 01-Jan-10
  */
-object Mix {
-	def apply( array: GE ) : GE = {
-		val inputs = array.toUGenIns
-		if( inputs.size == 0 ) {
-			GESeq()
-		} else if( inputs.size == 1 ) {
-			array
-		} else {
-			var i = 0
-			var sum: GE = 0
-			inputs.foreach( inp => {
-				if( i == 0 ) sum = inp else sum += inp
-				i = i + 1
-			})
-			sum
-		}
-	}
-
-	// support this common idiom
-    // (corresponds to fill in sclang)
-	def tabulate( n: Int )( func: (Int) => GE ) : GE = {
-      (0 until n).foldLeft[ GE ]( 0 )( (sum, i) => sum + func( i ))
-	}
-
-    def fill( n: Int )( thunk: => GE ) : GE = {
-      def func() = thunk
-      (0 until n).foldLeft[ GE ]( 0 )( (sum, i) => sum + func() )
-    }
+object PSinGrain extends UGen3Args {
+  def ar( freq: GE = 440, dur: GE = 0.2f, amp: GE = 1 ) : GE = arExp( freq, dur, amp )
+  def kr( freq: GE = 440, dur: GE = 0.2f, amp: GE = 1 ) : GE = krExp( freq, dur, amp )
 }
+case class PSinGrain( rate: Rate, freq: UGenIn, dur: UGenIn, amp: UGenIn )
+extends SingleOutUGen( freq, dur, amp )

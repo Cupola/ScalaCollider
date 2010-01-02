@@ -2,7 +2,7 @@
  *  Trig.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -25,225 +25,148 @@
  *
  *  Changelog:
  */
+
 package de.sciss.tint.sc.ugen
 
 import de.sciss.tint.sc._
-//import Rates._
+import SC._
+import GraphBuilder._
 
 /**
- *	@version	0.11, 07-Apr-09
+ *	@version	0.12, 02-Jan-10
  */
-
-object Trig1 {
-  def ar( in: GE ) : GE = ar( in, Constant( 0.1f ))
-  def ar( in: GE, dur: GE ) : GE = {
-    UGen.multiNew( "Trig1", audio, List( audio ), List( in, dur ))
-  }
-  
-  def kr( in: GE ) : GE = ar( in, Constant( 0.1f ))
-  def kr( in: GE, dur: GE ) : GE = {
-    UGen.multiNew( "Trig1", control, List( control ), List( in, dur ))
-  }
+object Trig1 extends UGen2Args {
+  def ar( in: GE, dur: GE = 0.1f ) : GE = arExp( in, dur )
+  def kr( in: GE, dur: GE = 0.1f ) : GE = krExp( in, dur )
 }
+case class Trig1( rate: Rate, in: UGenIn, dur: UGenIn )
+extends SingleOutUGen( in, dur )
 
-object Trig {
-  def ar( in: GE ) : GE = ar( in, Constant( 0.1f ))
-  def ar( in: GE, dur: GE ) : GE = {
-    UGen.multiNew( "Trig", audio, List( audio ), List( in, dur ))
-  }
-  
-  def kr( in: GE ) : GE = ar( in, Constant( 0.1f ))
-  def kr( in: GE, dur: GE ) : GE = {
-    UGen.multiNew( "Trig", control, List( control ), List( in, dur ))
-  }
+object Trig extends UGen2Args {
+  def ar( in: GE, dur: GE = 0.1f ) : GE = arExp( in, dur )
+  def kr( in: GE, dur: GE = 0.1f ) : GE = krExp( in, dur )
 }
+case class Trig( rate: Rate, in: UGenIn, dur: UGenIn )
+extends SingleOutUGen( in, dur )
 
-object SendTrig {
-  def ar( in: GE ) : GE = ar( in, Constants.zero )
-  def ar( in: GE, id: GE ) : GE = ar( in, id, Constants.zero )
-  def ar( in: GE, id: GE, value: GE ) : GE = {
-    UGen.multiNew( "SendTrig", audio, List(), List( in, id, value ))
-  }
-  
-  def kr( in: GE ) : GE = kr( in, Constants.zero )
-  def kr( in: GE, id: GE ) : GE = kr( in, id, Constants.zero )
-  def kr( in: GE, id: GE, value: GE ) : GE = {
-    UGen.multiNew( "SendTrig", control, List(), List( in, id, value ))
-  }
+// XXX writeOutputSpecs?
+object SendTrig extends UGen3Args {
+  def ar( in: GE, id: GE = 0, value: GE = 0 ) : GE = arExp( in, id, value )
+  def kr( in: GE, id: GE = 0, value: GE = 0 ) : GE = krExp( in, id, value )
 }
+case class SendTrig( rate: Rate, in: UGenIn, id: UGenIn, value: UGenIn )
+extends ZeroOutUGen( in, id, value )
 
-object TDelay {
-  def ar( in: GE ) : GE = ar( in, Constant( 0.1f ))
-  def ar( in: GE, dur: GE ) : GE = {
-    UGen.multiNew( "TDelay", audio, List( audio ), List( in, dur ))
-  }
-  
-  def kr( in: GE ) : GE = ar( in, Constant( 0.1f ))
-  def kr( in: GE, dur: GE ) : GE = {
-    UGen.multiNew( "TDelay", control, List( control ), List( in, dur ))
-  }
-}
+// XXX SendReply
 
-object Latch {
-  def ar( in: GE, trig: GE ) : GE = {
-    UGen.multiNew( "Latch", audio, List( audio ), List( in, trig ))
-  }
-  
-  def kr( in: GE, trig: GE ) : GE = {
-    UGen.multiNew( "Latch", control, List( control ), List( in, trig ))
-  }
+object TDelay extends UGen2Args {
+  def ar( in: GE, dur: GE = 0.1f ) : GE = arExp( in, dur )
+  def kr( in: GE, dur: GE = 0.1f ) : GE = krExp( in, dur )
 }
+case class TDelay( rate: Rate, in: UGenIn, dur: UGenIn )
+extends SingleOutUGen( in, dur )
 
-object PulseCount {
-  def ar( trig: GE ) : GE = ar( trig, Constants.zero )
-  def ar( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "Peak", audio, List( audio ), List( trig, reset ))
-  }
-  
-  def kr( trig: GE ) : GE = ar( trig, Constants.zero )
-  def kr( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "Peak", control, List( control ), List( trig, reset ))
-  }
+object Latch extends UGen2Args {
+  def ar( in: GE, trig: GE ) : GE = arExp( in, trig )
+  def kr( in: GE, trig: GE ) : GE = krExp( in, trig )
 }
+case class Latch( rate: Rate, in: UGenIn, trig: UGenIn )
+extends SingleOutUGen( in, trig )
 
-object Peak {
-  def ar( trig: GE ) : GE = ar( trig, Constants.zero )
-  def ar( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "Peak", audio, List( audio ), List( trig, reset ))
-  }
-  
-  def kr( trig: GE ) : GE = ar( trig, Constants.zero )
-  def kr( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "Peak", control, List( control ), List( trig, reset ))
-  }
+object Gate extends UGen2Args {
+  def ar( in: GE, trig: GE ) : GE = arExp( in, trig )
+  def kr( in: GE, trig: GE ) : GE = krExp( in, trig )
 }
+case class Gate( rate: Rate, in: UGenIn, trig: UGenIn )
+extends SingleOutUGen( in, trig )
 
-object RunningMin {
-  def ar( trig: GE ) : GE = ar( trig, Constants.zero )
-  def ar( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "RunningMin", audio, List( audio ), List( trig, reset ))
-  }
-  
-  def kr( trig: GE ) : GE = ar( trig, Constants.zero )
-  def kr( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "RunningMin", control, List( control ), List( trig, reset ))
-  }
+object PulseCount extends UGen2Args {
+  def ar( trig: GE, reset: GE = 0 ) : GE = arExp( trig, reset )
+  def kr( trig: GE, reset: GE = 0 ) : GE = krExp( trig, reset )
 }
+case class PulseCount( rate: Rate, trig: UGenIn, reset: UGenIn )
+extends SingleOutUGen( trig, reset )
 
-object RunningMax {
-  def ar( trig: GE ) : GE = ar( trig, Constants.zero )
-  def ar( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "RunningMax", audio, List( audio ), List( trig, reset ))
-  }
-  
-  def kr( trig: GE ) : GE = ar( trig, Constants.zero )
-  def kr( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "RunningMax", control, List( control ), List( trig, reset ))
-  }
+object Peak extends UGen2Args {
+  def ar( in: GE, trig: GE ) : GE = arExp( in, trig )
+  def kr( in: GE, trig: GE ) : GE = krExp( in, trig )
 }
+case class Peak( rate: Rate, in: UGenIn, trig: UGenIn )
+extends SingleOutUGen( in, trig )
 
-object Stepper {
-  def ar( trig: GE ) : GE = ar( trig, Constants.zero )
-  def ar( trig: GE, reset: GE ) : GE = ar( trig, reset, Constants.zero )
-  def ar( trig: GE, reset: GE, min: GE ) : GE = ar( trig, reset, min, Constant( 7 ))
-  def ar( trig: GE, reset: GE, min: GE, max: GE ) : GE = ar( trig, reset, min, max, Constants.one )
-  def ar( trig: GE, reset: GE, min: GE, max: GE, step: GE ) : GE = ar( trig, reset, min, max, step, min )
-  def ar( trig: GE, reset: GE, min: GE, max: GE, step: GE, resetVal: GE ) : GE = {
-    UGen.multiNew( "Stepper", audio, List( audio ), List( trig, reset, min, max, step, resetVal ))
-  }
-  
-  def kr( trig: GE ) : GE = ar( trig, Constants.zero )
-  def kr( trig: GE, reset: GE ) : GE = kr( trig, reset, Constants.zero )
-  def kr( trig: GE, reset: GE, min: GE ) : GE = kr( trig, reset, min, Constant( 7 ))
-  def kr( trig: GE, reset: GE, min: GE, max: GE ) : GE = kr( trig, reset, min, max, Constants.one )
-  def kr( trig: GE, reset: GE, min: GE, max: GE, step: GE ) : GE = kr( trig, reset, min, max, step, min )
-  def kr( trig: GE, reset: GE, min: GE, max: GE, step: GE, resetVal: GE ) : GE = {
-    UGen.multiNew( "Stepper", control, List( control ), List( trig, reset, min, max, step, resetVal ))
-  }
+object RunningMin extends UGen2Args {
+  def ar( in: GE, trig: GE ) : GE = arExp( in, trig )
+  def kr( in: GE, trig: GE ) : GE = krExp( in, trig )
 }
+case class RunningMin( rate: Rate, in: UGenIn, trig: UGenIn )
+extends SingleOutUGen( in, trig )
 
-object PulseDivider {
-  def ar( trig: GE ) : GE = ar( trig, Constant( 2 ))
-  def ar( trig: GE, div: GE ) : GE = ar( trig, div, Constants.zero )
-  def ar( trig: GE, div: GE, start: GE ) : GE = {
-    UGen.multiNew( "PulseDivider", audio, List( audio ), List( trig, div, start ))
-  }
-  
-  def kr( trig: GE ) : GE = kr( trig, Constant( 2 ))
-  def kr( trig: GE, div: GE ) : GE = kr( trig, div, Constants.zero )
-  def kr( trig: GE, div: GE, start: GE ) : GE = {
-    UGen.multiNew( "PulseDivider", control, List( control ), List( trig, div, start ))
-  }
+object RunningMax extends UGen2Args {
+  def ar( in: GE, trig: GE ) : GE = arExp( in, trig )
+  def kr( in: GE, trig: GE ) : GE = krExp( in, trig )
 }
+case class RunningMax( rate: Rate, in: UGenIn, trig: UGenIn )
+extends SingleOutUGen( in, trig )
 
-object SetResetFF {
-  def ar( trig: GE ) : GE = ar( trig, Constants.zero )
-  def ar( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "SetResetFF", audio, List( audio ), List( trig, reset ))
-  }
-  
-  def kr( trig: GE ) : GE = ar( trig, Constants.zero )
-  def kr( trig: GE, reset: GE ) : GE = {
-    UGen.multiNew( "SetResetFF", control, List( control ), List( trig, reset ))
-  }
-}
+object Stepper extends UGen6Args {
+  def ar( trig: GE, reset: GE = 0, min: GE = 0, max: GE = 7, step: GE = 1, resetVal: GE = 0 ) : GE =
+    arExp( trig, reset, min, max, step, resetVal )
 
-object ToggleFF {
-  def ar( trig: GE ) : GE = {
-    UGen.multiNew( "ToggleFF", audio, List( audio ), List( trig ))
-  }
-  
-  def kr( trig: GE ) : GE = {
-    UGen.multiNew( "ToggleFF", control, List( control ), List( trig ))
-  }
+  def kr( trig: GE, reset: GE = 0, min: GE = 0, max: GE = 7, step: GE = 1, resetVal: GE = 0 ) : GE =
+    krExp( trig, reset, min, max, step, resetVal )
 }
+case class Stepper( rate: Rate, trig: UGenIn, reset: UGenIn, min: UGenIn,
+                    max: UGenIn, step: UGenIn, resetVal: UGenIn )
+extends SingleOutUGen( trig, reset, min, max, step, resetVal )
 
-object ZeroCrossing {
-  def ar( in: GE ) : GE = {
-    UGen.multiNew( "ZeroCrossing", audio, List( audio ), List( in ))
-  }
-  
-  def kr( in: GE ) : GE = {
-    UGen.multiNew( "ZeroCrossing", control, List( control ), List( in ))
-  }
+object PulseDivider extends UGen3Args {
+  def ar( trig: GE, div: GE = 2, start: GE = 0 ) : GE = arExp( trig, div, start )
+  def kr( trig: GE, div: GE = 2, start: GE = 0 ) : GE = krExp( trig, div, start )
 }
+case class PulseDivider( rate: Rate, trig: UGenIn, div: UGenIn, start: UGenIn )
+extends SingleOutUGen( trig, div, start )
 
-object Timer {
-  def ar( trig: GE ) : GE = {
-    UGen.multiNew( "Timer", audio, List( audio ), List( trig ))
-  }
-  
-  def kr( trig: GE ) : GE = {
-    UGen.multiNew( "Timer", control, List( control ), List( trig ))
-  }
+object SetResetFF extends UGen2Args {
+  def ar( trig: GE, reset: GE ) : GE = arExp( trig, reset )
+  def kr( trig: GE, reset: GE ) : GE = krExp( trig, reset )
 }
+case class SetResetFF( rate: Rate, trig: UGenIn, reset: UGenIn )
+extends SingleOutUGen( trig, reset )
 
-object Sweep {
-  def ar( trig: GE ) : GE = ar( trig, Constants.one )
-  def ar( trig: GE, rate: GE ) : GE = {
-    UGen.multiNew( "Sweep", audio, List( audio ), List( trig, rate ))
-  }
-  
-  def kr( trig: GE ) : GE = ar( trig, Constants.one )
-  def kr( trig: GE, rate: GE ) : GE = {
-    UGen.multiNew( "Sweep", control, List( control ), List( trig, rate ))
-  }
+object ToggleFF extends UGen1Args {
+  def ar( trig: GE ) : GE = arExp( trig )
+  def kr( trig: GE ) : GE = krExp( trig )
 }
+case class ToggleFF( rate: Rate, trig: UGenIn ) extends SingleOutUGen( trig )
 
-object Phasor {
-  def ar( trig: GE ) : GE = ar( trig, Constants.one )
-  def ar( trig: GE, rate: GE ) : GE = ar( trig, rate, Constants.zero )
-  def ar( trig: GE, rate: GE, start: GE ) : GE = ar( trig, rate, start, Constants.one )
-  def ar( trig: GE, rate: GE, start: GE, end: GE ) : GE = ar( trig, rate, start, end, Constants.zero )
-  def ar( trig: GE, rate: GE, start: GE, end: GE, resetPos: GE ) : GE = {
-    UGen.multiNew( "Phasor", audio, List( audio ), List( trig, rate, start, end, resetPos ))
-  }
-  
-  def kr( trig: GE ) : GE = kr( trig, Constants.one )
-  def kr( trig: GE, rate: GE ) : GE = kr( trig, rate, Constants.zero )
-  def kr( trig: GE, rate: GE, start: GE ) : GE = kr( trig, rate, start, Constants.one )
-  def kr( trig: GE, rate: GE, start: GE, end: GE ) : GE = kr( trig, rate, start, end, Constants.zero )
-  def kr( trig: GE, rate: GE, start: GE, end: GE, resetPos: GE ) : GE = {
-    UGen.multiNew( "Phasor", control, List( control ), List( trig, rate, start, end, resetPos ))
-  }
+object ZeroCrossing extends UGen1Args {
+  def ar( in: GE ) : GE = arExp( in )
+  def kr( in: GE ) : GE = krExp( in )
 }
+case class ZeroCrossing( rate: Rate, in: UGenIn ) extends SingleOutUGen( in )
+
+object Timer extends UGen1Args {
+  def ar( trig: GE ) : GE = arExp( trig )
+  def kr( trig: GE ) : GE = krExp( trig )
+}
+case class Timer( rate: Rate, trig: UGenIn ) extends SingleOutUGen( trig )
+
+object Sweep extends UGen2Args {
+  // note: argument name 'rate' already taken
+  def ar( trig: GE, freq: GE ) : GE = arExp( trig, freq )
+  def kr( trig: GE, freq: GE ) : GE = krExp( trig, freq )
+}
+case class Sweep( rate: Rate, trig: UGenIn, freq: UGenIn )
+extends SingleOutUGen( trig, freq )
+
+object Phasor extends UGen5Args {
+  // note: argument name 'rate' already taken
+  def ar( trig: GE, freq: GE = 1, min: GE = 0, max: GE = 1, resetVal: GE = 0 ) : GE =
+    arExp( trig, freq, min, max, resetVal )
+
+  def kr( trig: GE, freq: GE = 1, min: GE = 0, max: GE = 1, resetVal: GE = 0 ) : GE =
+    krExp( trig, freq, min, max, resetVal )
+}
+case class Phasor( rate: Rate, trig: UGenIn, freq: UGenIn, min: UGenIn,
+                   max: UGenIn, resetVal: UGenIn )
+extends SingleOutUGen( trig, freq, min, max, resetVal )

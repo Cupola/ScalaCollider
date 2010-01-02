@@ -28,7 +28,7 @@
 
 package de.sciss.tint.sc.ugen
 
-import de.sciss.tint.sc._
+import de.sciss.tint.sc.{ Constant => c, _ }
 import SC._
 import GraphBuilder._
 
@@ -42,37 +42,62 @@ object FSinOsc extends UGen2Args {
 case class FSinOsc( rate: Rate, freq: UGenIn, iphase: UGenIn )
 extends SingleOutUGen( freq, iphase )
 
-// Klang XXX missing
-// Klank XXX missing
+object KlangSpec {
+  def fill( n: Int )( thunk: => Tuple3[ GE, GE, GE ]) : List[ KlangSpec ] = {
+    List.fill[ Tuple3[ GE, GE, GE ]]( n )( thunk ).map(
+      (tup) => KlangSpec( tup._1, tup._2, tup._3 ))
+  }
+
+  def tabulate( n: Int )( func: (Int) => Tuple3[ GE, GE, GE ]) : List[ KlangSpec ] = {
+    List.tabulate[ Tuple3[ GE, GE, GE ]]( n )( func ).map(
+      (tup) => KlangSpec( tup._1, tup._2, tup._3 ))
+  }
+}
+case class KlangSpec( freq: GE, amp: GE = 1, decay: GE = 0 ) {
+  def toList = List( freq, amp, decay )
+}
+
+object Klang {
+  def ar( specs: Seq[ KlangSpec ], freqScale: GE = 1, freqOffset: GE = 0 ) : GE = {
+    val exp = expand( (List( freqScale, freqOffset ) ++ specs.flatMap( _.toList )): _* )
+    simplify( for( List( fs, fo, sp @ _* ) <- exp) yield this( audio, fs, fo, sp ))
+  }
+}
+case class Klang( rate: Rate, freqScale: UGenIn, freqOffset: UGenIn, specs: Seq[ UGenIn ])
+extends SingleOutUGen( (List( freqScale, freqOffset ) ++ specs): _* )
+
+object Klank {
+  def ar( specs: Seq[ KlangSpec ], in: GE, freqScale: GE = 1, freqOffset: GE = 0,
+          decayScale: GE = 1 ) : GE = {
+    val exp = expand( (List( in, freqScale, freqOffset, decayScale ) ++
+                      specs.flatMap( _.toList )): _* )
+    simplify( for( List( i, fs, fo, ds, sp @ _* ) <- exp) yield this( audio, i, fs, fo, ds, sp ))
+  }
+}
+case class Klank( rate: Rate, in: UGenIn, freqScale: UGenIn, freqOffset: UGenIn,
+                  decayScale: UGenIn, specs: Seq[ UGenIn ])
+extends SingleOutUGen( (List( in, freqScale, freqOffset, decayScale ) ++ specs): _* )
+
 // DynKlank XXX missing
 // DynKlang XXX missing
 
-object Blip {
-	def ar( freq: GE = 440, numHarm: GE = 200, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "Blip", audio, List( audio ), List( freq, numHarm )).madd( mul, add )
-	}
-
-	def kr( freq: GE = 440, numHarm: GE = 200, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "Blip", control, List( control ), List( freq, numHarm )).madd( mul, add )
-	}
+object Blip extends UGen2Args {
+  def ar( freq: GE = 440, numHarm: GE = 200 ) : GE = arExp( freq, numHarm )
+  def kr( freq: GE = 440, numHarm: GE = 200 ) : GE = krExp( freq, numHarm )
 }
+case class Blip( rate: Rate, freq: UGenIn, numHarm: UGenIn )
+extends SingleOutUGen( freq, numHarm )
 
-object Saw {
-	def ar( freq: GE = 440, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "Saw", audio, List( audio ), List( freq )).madd( mul, add )
-	}
-
-	def kr( freq: GE = 440, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "Saw", control, List( control ), List( freq )).madd( mul, add )
-	}
+object Saw extends UGen1Args {
+  def ar( freq: GE = 440 ) : GE = arExp( freq )
+  def kr( freq: GE = 440 ) : GE = krExp( freq )
 }
+case class Saw( rate: Rate, freq: UGenIn )
+extends SingleOutUGen( freq )
 
-object Pulse {
-	def ar( freq: GE = 440, width: GE = 0.5f, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "Pulse", audio, List( audio ), List( freq, width )).madd( mul, add )
-	}
-
-	def kr( freq: GE = 440, width: GE = 0.5f, mul: GE = 1, add: GE = 1 ) : GE = {
-		UGen.multiNew( "Pulse", control, List( control ), List( freq, width )).madd( mul, add )
-	}
+object Pulse extends UGen2Args {
+  def ar( freq: GE = 440, width: GE = 0.5f ) : GE = arExp( freq, width )
+  def kr( freq: GE = 440, width: GE = 0.5f ) : GE = krExp( freq, width )
 }
+case class Pulse( rate: Rate, freq: UGenIn, width: UGenIn )
+extends SingleOutUGen( freq, width )
