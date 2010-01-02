@@ -170,3 +170,96 @@ object Phasor extends UGen5Args {
 case class Phasor( rate: Rate, trig: UGenIn, freq: UGenIn, min: UGenIn,
                    max: UGenIn, resetVal: UGenIn )
 extends SingleOutUGen( trig, freq, min, max, resetVal )
+
+object PeakFollower extends UGen2Args {
+  def ar( in: GE, decay: GE = 0.999f ) : GE = arExp( in, decay )
+  def kr( in: GE, decay: GE = 0.999f ) : GE = krExp( in, decay )
+}
+case class PeakFollower( rate: Rate, in: UGenIn, decay: UGenIn )
+extends SingleOutUGen( in, decay )
+
+object Pitch {
+  def kr( in: GE, initFreq: GE = 440, minFreq: GE = 60, maxFreq: GE = 4000,
+			execFreq: GE = 100, binsPerOct: GE = 16, median: GE = 1,
+			ampThresh: GE = 0.01f, peakThresh: GE = 0.5f, downSample: GE = 1 ) : GE = {
+
+    simplify( for( List( i, inf, mif, maf, exf, b, m, a, p, d ) <-
+                   expand( in, initFreq, minFreq, maxFreq, execFreq, binsPerOct,
+                           median, ampThresh, peakThresh, downSample ))
+      yield this( i, inf, mif, maf, exf, b, m, a, p, d ))
+  }
+}
+case class Pitch( in: UGenIn, initFreq: UGenIn, minFreq: UGenIn, maxFreq: UGenIn,
+			execFreq: UGenIn, binsPerOct: UGenIn, median: UGenIn,
+			ampThresh: UGenIn, peakThresh: UGenIn, downSample: UGenIn )
+extends MultiOutUGen( List( control, control ), List( in, initFreq, minFreq,
+                      maxFreq, execFreq, binsPerOct, median, ampThresh,
+                      peakThresh, downSample ))
+with ControlRated
+
+object InRange extends UGen3Args {
+  def ar( in: GE, min: GE = 0, max: GE = 0 ) : GE = arExp( in, min, max )
+  def kr( in: GE, min: GE = 0, max: GE = 0 ) : GE = krExp( in, min, max )
+}
+case class InRange( rate: Rate, in: UGenIn, min: UGenIn, max: UGenIn )
+extends SingleOutUGen( in, min, max )
+
+object InRect extends UGen6Args {
+  def ar( x: GE, y: GE, left: GE = 0, top: GE = 0, right: GE = 1, bottom: GE = 1 ) : GE =
+    arExp( x, y, left, top, right, bottom )
+
+  def kr( x: GE, y: GE, left: GE = 0, top: GE = 0, right: GE = 1, bottom: GE = 1 ) : GE =
+    krExp( x, y, left, top, right, bottom )
+}
+case class InRect( rate: Rate, x: UGenIn, y: UGenIn, left: UGenIn, top: UGenIn,
+                   right: UGenIn, bottom: UGenIn )
+extends SingleOutUGen( x, y, left, top, right, bottom )
+
+object Fold extends UGen3Args {
+  def ar( in: GE, min: GE = 0, max: GE = 0 ) : GE = arExp( in, min, max )
+  def kr( in: GE, min: GE = 0, max: GE = 0 ) : GE = krExp( in, min, max )
+}
+case class Fold( rate: Rate, in: UGenIn, min: UGenIn, max: UGenIn )
+extends SingleOutUGen( in, min, max )
+
+object Clip extends UGen3Args {
+  def ar( in: GE, min: GE = 0, max: GE = 0 ) : GE = arExp( in, min, max )
+  def kr( in: GE, min: GE = 0, max: GE = 0 ) : GE = krExp( in, min, max )
+}
+case class Clip( rate: Rate, in: UGenIn, min: UGenIn, max: UGenIn )
+extends SingleOutUGen( in, min, max )
+
+object Wrap extends UGen3Args {
+  def ar( in: GE, min: GE = 0, max: GE = 0 ) : GE = arExp( in, min, max )
+  def kr( in: GE, min: GE = 0, max: GE = 0 ) : GE = krExp( in, min, max )
+}
+case class Wrap( rate: Rate, in: UGenIn, min: UGenIn, max: UGenIn )
+extends SingleOutUGen( in, min, max )
+
+object Schmidt extends UGen3Args {
+  def ar( in: GE, min: GE = 0, max: GE = 0 ) : GE = arExp( in, min, max )
+  def kr( in: GE, min: GE = 0, max: GE = 0 ) : GE = krExp( in, min, max )
+}
+case class Schmidt( rate: Rate, in: UGenIn, min: UGenIn, max: UGenIn )
+extends SingleOutUGen( in, min, max )
+
+object MostChange extends UGen2Args {
+  def ar( a: GE, b: GE ) : GE = arExp( a, b )
+  def kr( a: GE, b: GE ) : GE = krExp( a, b )
+}
+case class MostChange( rate: Rate, a: UGenIn, b: UGenIn )
+extends SingleOutUGen( a, b )
+
+object LeastChange extends UGen2Args {
+  def ar( a: GE, b: GE ) : GE = arExp( a, b )
+  def kr( a: GE, b: GE ) : GE = krExp( a, b )
+}
+case class LeastChange( rate: Rate, a: UGenIn, b: UGenIn )
+extends SingleOutUGen( a, b )
+
+object LastValue extends UGen2Args {
+  def ar( in: GE, thresh: GE = 0.01f ) : GE = arExp( in, thresh )
+  def kr( in: GE, thresh: GE = 0.01f ) : GE = krExp( in, thresh )
+}
+case class LastValue( rate: Rate, in: UGenIn, thresh: UGenIn )
+extends SingleOutUGen( in, thresh )

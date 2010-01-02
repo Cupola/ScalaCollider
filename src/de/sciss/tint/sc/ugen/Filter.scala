@@ -262,10 +262,69 @@ object BRZ2 extends UGen1Args {
 case class BRZ2( rate: Rate, in: UGenIn )
 extends SingleOutUGen( in )
 
-// Median XXX
-// Slew XXX
-// FOS XXX
-// SOS XXX
-// Ringz XXX
-// Formlet XXX
-// DetectSilence XXX
+object Median extends UGen2Args {
+  def ar( length: GE = 3, in: GE ) : GE = arExp( length, in )
+  def kr( length: GE = 3, in: GE ) : GE = krExp( length, in )
+}
+case class Median( rate: Rate, length: UGenIn, in: UGenIn )
+extends SingleOutUGen( length, in )
+
+object Slew extends UGen3Args {
+  def ar( in: GE, up: GE = 1, down: GE = 1 ) : GE = arExp( in, up, down )
+  def kr( in: GE, up: GE = 1, down: GE = 1 ) : GE = krExp( in, up, down )
+}
+case class Slew( rate: Rate, in: UGenIn, up: UGenIn, down: UGenIn )
+extends SingleOutUGen( in, up, down )
+
+object FOS extends UGen4Args {
+  def ar( in: GE, a0: GE = 0, a1: GE = 0, b1: GE = 0 ) : GE =
+    arExp( in, a0, a1, b1 )
+
+  def kr( in: GE, a0: GE = 0, a1: GE = 0, b1: GE = 0 ) : GE =
+    krExp( in, a0, a1, b1 )
+}
+case class FOS( rate: Rate, in: UGenIn, a0: UGenIn, a1: UGenIn, b1: UGenIn )
+extends SingleOutUGen( in, a0, a1, b1)
+
+object SOS extends UGen6Args {
+  def ar( in: GE, a0: GE = 0, a1: GE = 0, a2: GE = 0, b1: GE = 0, b2: GE = 0 ) : GE =
+    arExp( in, a0, a1, a2, b1, b2 )
+
+  def kr( in: GE, a0: GE = 0, a1: GE = 0, a2: GE = 0, b1: GE = 0, b2: GE = 0 ) : GE =
+    krExp( in, a0, a1, a2, b1, b2 )
+}
+case class SOS( rate: Rate, in: UGenIn, a0: UGenIn, a1: UGenIn, a2: UGenIn,
+                b1: UGenIn, b2: UGenIn )
+extends SingleOutUGen( in, a0, a1, a2, b1, b2 )
+
+object Ringz extends UGen4Args {
+  def ar( in: GE, freq: GE = 440, attack: GE = 1, decay: GE = 1 ) : GE =
+    arExp( in, freq, attack, decay )
+
+  def kr( in: GE, freq: GE = 440, attack: GE = 1, decay: GE = 1 ) : GE =
+    krExp( in, freq, attack, decay )
+}
+case class Ringz( rate: Rate, in: UGenIn, freq: UGenIn, attack: UGenIn, decay: UGenIn )
+extends SingleOutUGen( in, freq, attack, decay )
+
+object Formlet extends UGen4Args {
+  def ar( in: GE, freq: GE = 440, attack: GE = 1, decay: GE = 1 ) : GE =
+    arExp( in, freq, attack, decay )
+
+  def kr( in: GE, freq: GE = 440, attack: GE = 1, decay: GE = 1 ) : GE =
+    krExp( in, freq, attack, decay )
+}
+case class Formlet( rate: Rate, in: UGenIn, freq: UGenIn, attack: UGenIn, decay: UGenIn )
+extends SingleOutUGen( in, freq, attack, decay )
+
+object DetectSilence extends UGen4Args {
+  def ar( in: GE, amp: GE = 0.0001f, time: GE = 0.1f, doneAction: GE = 0 ) : GE =
+    arExp( in, amp, time, doneAction )
+
+  def kr( in: GE, amp: GE = 0.0001f, time: GE = 0.1f, doneAction: GE = 0 ) : GE =
+    krExp( in, amp, time, doneAction )
+}
+case class DetectSilence( rate: Rate, in: UGenIn, amp: UGenIn, time: UGenIn,
+                          doneAction: UGenIn )
+extends SingleOutUGen( in, amp, time, doneAction )
+

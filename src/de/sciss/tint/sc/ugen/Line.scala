@@ -35,20 +35,20 @@ import SC._
  * 	@version	0.12, 01-Jan-10
  */
 object Line extends UGen4Args {
-	def ar( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = 0 ) : GE =
+	def ar( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = doNothing ) : GE =
       arExp( start, end, dur, doneAction )
 
-	def kr( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = 0 ) : GE =
+	def kr( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = doNothing ) : GE =
       krExp( start, end, dur, doneAction )
 }
 case class Line( rate: Rate, start: UGenIn, end: UGenIn, dur: UGenIn, doneAction: UGenIn )
 extends SingleOutUGen( start, end, dur, doneAction )
 
 object XLine extends UGen4Args {
-	def ar( start: GE = 1, end: GE = 2, dur: GE = 1, doneAction: GE = 0 ) : GE =
+	def ar( start: GE = 1, end: GE = 2, dur: GE = 1, doneAction: GE = doNothing ) : GE =
       arExp( start, end, dur, doneAction )
 
-	def kr( start: GE = 1, end: GE = 2, dur: GE = 1, doneAction: GE = 0 ) : GE =
+	def kr( start: GE = 1, end: GE = 2, dur: GE = 1, doneAction: GE = doNothing ) : GE =
       krExp( start, end, dur, doneAction )
 }
 case class XLine( rate: Rate, start: UGenIn, end: UGenIn, dur: UGenIn, doneAction: UGenIn )

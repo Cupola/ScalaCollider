@@ -28,7 +28,7 @@
 
 package de.sciss.tint.sc
 
-import _root_.scala.actors.Actor.self
+//import _root_.scala.actors.Actor.self
 import _root_.scala.math._
 
 // CCC
@@ -41,15 +41,16 @@ import _root_.scala.math._
  */
 object SC {
   // GEs
+  implicit def doneAction2GE( x: DoneAction ) = Constant( x.id )
   implicit def float2GE( x: Float ) = Constant( x )
   implicit def int2GE( x: Int ) = Constant( x.toFloat )
   implicit def double2GE( x: Double ) = Constant( x.toFloat )
   implicit def seqOfGE2GESeq( x: Seq[ GE ]) = new GESeq( (x flatMap (_.toUGenIns)): _* )
 
 	// why these are necessary now??
-  implicit def seqOfFloat2GESeq( x: Seq[ Float ]) = new GESeq( (x map (Constant( _ ))): _* )
-  implicit def seqOfInt2GESeq( x: Seq[ Int ]) = new GESeq( (x map (i => Constant( i.toFloat ))): _* )
-  implicit def seqOfDouble2GESeq( x: Seq[ Double ]) = new GESeq( (x map (d => Constant( d.toFloat ))): _* )
+//  implicit def seqOfFloat2GESeq( x: Seq[ Float ]) = new GESeq( (x map (Constant( _ ))): _* )
+//  implicit def seqOfInt2GESeq( x: Seq[ Int ]) = new GESeq( (x map (i => Constant( i.toFloat ))): _* )
+//  implicit def seqOfDouble2GESeq( x: Seq[ Double ]) = new GESeq( (x map (d => Constant( d.toFloat ))): _* )
  
   implicit def string2ControlName( name: String ) = ControlName( name )
   implicit def string2GE( name: String ) : ControlDesc = {

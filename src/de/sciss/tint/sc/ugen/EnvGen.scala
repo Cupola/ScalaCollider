@@ -78,7 +78,8 @@ case class Free( trig: UGenIn, nodeID: UGenIn )
 extends SingleOutUGen( trig, nodeID ) with ControlRated
 
 object EnvGen {
-  def ar( envelope: Env, gate: GE = 1, levelScale: GE = 1, levelBias: GE = 0, timeScale: GE = 1, doneAction: GE = 0 ) : GE = {
+  def ar( envelope: Env, gate: GE = 1, levelScale: GE = 1, levelBias: GE = 0,
+          timeScale: GE = 1, doneAction: GE = doNothing ) : GE = {
 //    val exp = expand( gate, levelScale, levelBias, timeScale, doneAction, envelope.toArray: _* )
     val exp = expand( (List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envelope.toArray): _* )
     simplify( for( List( g, ls, lb, t, d, e @ _* ) <- exp) yield this( audio, g, ls, lb, t, d, e ))
@@ -89,7 +90,8 @@ object EnvGen {
 //  	UGen.multiNew( "EnvGen", audio, List( audio ), List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envArray )
 //  }
   
-  def kr( envelope: Env, gate: GE = 1, levelScale: GE = 1, levelBias: GE = 0, timeScale: GE = 1, doneAction: GE = 0 ) : GE = {
+  def kr( envelope: Env, gate: GE = 1, levelScale: GE = 1, levelBias: GE = 0,
+          timeScale: GE = 1, doneAction: GE = doNothing ) : GE = {
     val exp = expand( (List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envelope.toArray): _* )
     simplify( for( List( g, ls, lb, t, d, e @ _* ) <- exp) yield this( control, g, ls, lb, t, d, e ))
   }
