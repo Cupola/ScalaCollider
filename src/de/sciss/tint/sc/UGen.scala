@@ -273,6 +273,17 @@ trait UGen1Args {
   protected def irExp( arg1: GE ) : GE = make( scalar, arg1 )
 }
 
+//trait UGen1VArgs {
+//  def apply( rate: Rate, arg1: UGenIn, more: Seq[ UGenIn ]) : GE
+//  private def make( rate: Rate, arg1: GE, more: Seq[ GE ]) : GE =
+//    simplify( for( List( a1, m @ _* ) <- expand( (arg1 :: more.toList): _* ))
+//                yield this( rate, a1, m ))
+//
+//  protected def arExp( arg1: GE, more: Seq[ GE ]) : GE = make( audio, arg1, more )
+//  protected def krExp( arg1: GE, more: Seq[ GE ]) : GE = make( control, arg1, more )
+//  protected def irExp( arg1: GE, more: Seq[ GE ]) : GE = make( scalar, arg1, more )
+//}
+
 trait UGen1RArgs { // single rate
   def apply( arg1: UGenIn ) : GE
   protected def make( arg1: GE ) : GE =

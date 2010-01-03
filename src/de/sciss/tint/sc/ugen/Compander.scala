@@ -66,3 +66,17 @@ object CompanderD {
     Compander.ar( DelayN.ar( in, attack, attack ), in, thresh,
                   ratioBelow, ratioAbove, attack, release )
 }
+
+object Normalizer extends UGen3Args {
+  def ar( in: GE, level: GE = 1, dur: GE = 0.01f ) = arExp( in, level, dur )
+  def kr( in: GE, level: GE = 1, dur: GE = 0.01f ) = krExp( in, level, dur )
+}
+case class Normalizer( rate: Rate, in: UGenIn, level: UGenIn, dur: UGenIn )
+extends SingleOutUGen( in, level, dur )
+
+object Limiter extends UGen3Args {
+  def ar( in: GE, level: GE = 1, dur: GE = 0.01f ) = arExp( in, level, dur )
+  def kr( in: GE, level: GE = 1, dur: GE = 0.01f ) = krExp( in, level, dur )
+}
+case class Limiter( rate: Rate, in: UGenIn, level: UGenIn, dur: UGenIn )
+extends SingleOutUGen( in, level, dur )

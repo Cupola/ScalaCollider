@@ -1,8 +1,8 @@
 /*
- *  Constant.scala
- *  InOut
+ *  InOut.scala
+ *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -32,145 +32,108 @@ import de.sciss.tint.sc._
 import SC._
 import GraphBuilder._
 
-//import Rates._
-
-/*
-object AbstractOut {
-//	numOutputs { ^0 }
-//	writeOutputSpecs {}
-                
-/* XXX
- 	checkInputs {
- 		if (rate == audio', {
- 			for(this.class.numFixedArgs, inputs.size - 1, { arg i;
- 				if (inputs.at(i).rate != audio', {
- 					^(" input at index " + i + 
- 						"(" + inputs.at(i) + ") is not audio rate");
- 				});
- 			});
- 		});
- 		^this.checkValidInputs
- 	}
-*/
-
-// 	*isOutputUGen { ^true }
-}
-*/
-
 /**
- *	@version	0.10, 15-Jun-08
- */
-object Out /* extends AbstractOut */ {
-  def ar( bus: GE, channelsArray: GE ) : GE = {
-    val args = bus :: channelsArray.toUGenIns.toList
-    simplify( for( b :: c <- expand( args: _* ))
-      yield this( audio, b, c: _* ))
-  }
-
-  def kr( bus: GE, channelsArray: GE ) : GE = {
-    val args = bus :: channelsArray.toUGenIns.toList
-    simplify( for( b :: c <- expand( args: _* ))
-      yield this( control, b, c: _* ))
-  }
-
-//  def ar( bus: GE, channelsArray: GE ) : GE = {
-//    UGen.multiNew( "Out", audio, Nil, List( bus ) ++ channelsArray.toUGenIns )
-//    // XXX ^0.0		// Out has no output
-//  }
-
-//  def kr( bus: GE, channelsArray: Seq[ GE ]) : GE = {
-//    UGen.multiNew( "Out", control, Nil, List( bus ) ++ channelsArray )
-//    // XXX ^0.0		// Out has no output
-//  }
-
-//	*numFixedArgs { ^1 }
-}
-
-case class Out( rate: Rate, bus: UGenIn, channels: UGenIn* )
-extends UGen {
-  def inputs = bus :: channels.toList
-  def outputRates = Nil
-  def toUGenIns = Nil
-  val numOutputs = 0
-}
-
-object ReplaceOut /* extends AbstractOut */ {
-  def ar( bus: GE, channelsArray: GE ) : GE = {
-//    println( "bus : " + bus.toUGenIns.first )
-    UGen.multiNew( "ReplaceOut", audio, Nil, List( bus ) ++ channelsArray.toUGenIns )
-    // XXX ^0.0		// Out has no output
-  }
-
-  def kr( bus: GE, channelsArray: Seq[ GE ]) : GE = {
-    UGen.multiNew( "ReplaceOut", control, Nil, List( bus ) ++ channelsArray )
-    // XXX ^0.0		// Out has no output
-  }
-
-//	*numFixedArgs { ^1 }
-}
-
-// AbstractIn : MultiOutUGen {
-//  	*isInputUGen { ^true }
-// }
-
-object In { /* AbstractIn */
-	def ar( bus: GE ) : GE = ar( bus, 1 )
-	  
-	def ar( bus: GE, numChannels: Int ) : GE = {
-	  UGen.multiNew( "In", audio, dup( audio, numChannels ), List( bus ))
-	}
-
- 	def kr( bus: GE ) : GE = kr( bus, 1 )
-
- 	def kr( bus: GE, numChannels: Int ) : GE = {
-	  UGen.multiNew( "In", control, dup( control, numChannels ), List( bus ))
-	}
-  
-//	init { arg numChannels ... argBus;
-//		inputs = argBus.asArray;
-//		^this.initOutputs(numChannels, rate)
-//	}
-}
-
-/**
- *	A descriptor class for a control
- *	UGen, similar to SClang's ControlName class.
- *	Note that the <code>lag</code> parameter
- *	is currently unused.
- *
- *  @author		Hanns Holger Rutz
- *  @version	0.31, 08-Oct-07
+ *	@version	0.11, 03-Jan-10
  */
 
-/*
-case class ControlDesc( val name: Symbol, val rate: Symbol, val defaultValue: Float, val lag: Float ) {
-//  def this( name: Symbol, rate: Symbol, defaultValue: Float ) = this( name, rate, defaultValue, 0f )
+object In {
+  def ar( bus: GE, numChannels: Int = 1 ) : GE = make( audio, bus, numChannels )
+  def kr( bus: GE, numChannels: Int = 1 ) : GE = make( control, bus, numChannels )
+
+  protected def make( rate: Rate, bus: GE, numChannels: Int ) : GE = {
+    simplify( for( List( b ) <- expand( bus )) yield this( rate, b, numChannels ))
+  }
+}
+case class In( rate: Rate, bus: UGenIn, numChannels: Int )
+extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ), List( bus ))
+
+object LocalIn {
+  def ar( numChannels: Int = 1 ) : GE = this( audio, numChannels )
+  def kr( numChannels: Int = 1 ) : GE = this( control, numChannels )
+}
+case class LocalIn( rate: Rate, numChannels: Int )
+extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ), Nil )
+
+object LagIn {
+  def kr( bus: GE, numChannels: Int = 1, lag: GE = 0.1f ) : GE = {
+    simplify( for( List( b, l ) <- expand( bus, lag ))
+      yield this( b, numChannels, l ))
+  }
+}
+case class LagIn( bus: UGenIn, numChannels: Int, lag: UGenIn )
+extends MultiOutUGen( List.fill[ Rate ]( numChannels )( audio ), List( bus, lag ))
+with ControlRated
+
+object InFeedback {
+  def ar( bus: GE, numChannels: Int = 1 ) : GE = {
+    simplify( for( List( b ) <- expand( bus )) yield this( b, numChannels ))
+  }
+}
+case class InFeedback( bus: UGenIn, numChannels: Int )
+extends MultiOutUGen( List.fill[ Rate ]( numChannels )( audio ), List( bus ))
+with AudioRated
+
+object InTrig {
+  def kr( bus: GE, numChannels: Int = 1 ) : GE = {
+    simplify( for( List( b ) <- expand( bus )) yield this( b, numChannels ))
+  }
+}
+case class InTrig( bus: UGenIn, numChannels: Int )
+extends MultiOutUGen( List.fill[ Rate ]( numChannels )( audio ), List( bus ))
+with ControlRated
+
+abstract class AbstractOut {
+  def ar( bus: GE, multi: GE ) : GE = make( audio, bus, multi )
+  def kr( bus: GE, multi: GE ) : GE = make( control, bus, multi )
+
+  private def make( rate: Rate, bus: GE, multi: GE ) : GE = {
+    val args = bus :: replaceZeroesWithSilence( multi ).toUGenIns.toList
+    simplify( for( b :: m <- expand( args: _* ))
+      yield this( rate, b, m ))
+  }
+
+  def apply( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ]) : GE
 }
 
-object Control {
-	private def named( name: Symbol, rate: Symbol, values: Seq[ Float ]) : GE = {
-		val synthDef = SynthDef.buildSynthDef.get
-//		val index = synthDef.controlIndex
+object Out extends AbstractOut
+case class Out( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ])
+extends ZeroOutUGen( (bus :: multi.toList): _* )
 
-		synthDef.addControlDesc(
-		  ControlDesc( name, /* index + i, */ rate, values.first, 0f ))
-		UGen.multiNew( "Control", rate, dup( rate, values.length ), Nil )
-	}
- 
-	def kr( name: Symbol, values: Float* ) : GE = named( name, control, values )
- 
-	def ir( name: Symbol, values: Float* ) : GE = named( name, 'scalar, values )
- 
-//	init { arg ... argValues;
-//		values = argValues;
-//		if (synthDef.notNil) {
-//			specialIndex = synthDef.controls.size;
-//			synthDef.controls = synthDef.controls.addAll(values);
-//			synthDef.controlIndex = synthDef.controlIndex + values.size;
-//		};
-//		^this.initOutputs(values.size, rate)
-//	}
+object ReplaceOut extends AbstractOut
+case class ReplaceOut( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ])
+extends ZeroOutUGen( (bus :: multi.toList): _* )
 
-//	*isControlUGen { ^true }
+object OffsetOut {
+  def ar( bus: GE, multi: GE ) : GE = {
+    val args = bus :: replaceZeroesWithSilence( multi ).toUGenIns.toList
+    simplify( for( b :: m <- expand( args: _* ))
+      yield this( b, m ))
+  }
 }
-*/
+case class OffsetOut( bus: UGenIn, multi: Seq[ UGenIn ])
+extends ZeroOutUGen( (bus :: multi.toList): _* ) with AudioRated
+
+object LocalOut {
+  def ar( multi: GE ) : GE = make( audio, multi )
+  def kr( multi: GE ) : GE = make( control, multi )
+
+  private def make( rate: Rate, multi: GE ) : GE = {
+    val ins = replaceZeroesWithSilence( multi ).toUGenIns
+    this( rate, ins )
+  }
+}
+case class LocalOut( rate: Rate, multi: Seq[ UGenIn ])
+extends ZeroOutUGen( multi: _* )
+
+object XOut {
+  def ar( bus: GE, xfade: GE, multi: GE ) : GE = make( audio, bus, xfade, multi )
+  def kr( bus: GE, xfade: GE, multi: GE ) : GE = make( control, bus, xfade, multi )
+
+  private def make( rate: Rate, bus: GE, xfade: GE, multi: GE ) : GE = {
+    val args = bus :: xfade :: replaceZeroesWithSilence( multi ).toUGenIns.toList
+    simplify( for( b :: x :: m <- expand( args: _* ))
+      yield this( rate, b, x, m ))
+  }
+}
+case class XOut( rate: Rate, bus: UGenIn, xfade: UGenIn, multi: Seq[ UGenIn ])
+extends ZeroOutUGen( (bus :: xfade :: multi.toList): _* )

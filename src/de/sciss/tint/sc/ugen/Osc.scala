@@ -138,6 +138,19 @@ object LFTri extends UGen2Args {
 case class LFTri( rate: Rate, freq: UGenIn, iphase: UGenIn )
 extends SingleOutUGen( freq, iphase )
 
+object LFGauss extends UGen5Args {
+  def ar( dur: GE = 1, width: GE = 0.1f, iphase: GE = 0, loop: GE = 1,
+          doneAction: GE = doNothing ) : GE =
+    arExp( dur, width, iphase, loop, doneAction )
+
+  def kr( dur: GE = 1, width: GE = 0.1f, iphase: GE = 0, loop: GE = 1,
+          doneAction: GE = doNothing ) : GE =
+    krExp( dur, width, iphase, loop, doneAction )
+}
+case class LFGauss( rate: Rate, dur: UGenIn, width: UGenIn, iphase: UGenIn,
+                    loop: UGenIn, doneAction: UGenIn )
+extends SingleOutUGen( dur, width, iphase, loop, doneAction )
+
 object LFPulse extends UGen3Args {
   def ar( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
     arExp( freq, iphase, width )
@@ -208,8 +221,42 @@ case class Shaper( rate: Rate, bufNum: UGenIn, in: UGenIn )
 extends SingleOutUGen( bufNum, in )
 
 // IndexL XXX
-// DegreeToKey XXX
-// Select XXX
-// Vibrato XXX
+
+object DegreeToKey extends UGen3Args {
+  def ar( bufNum: GE, in: GE, octave: GE = 12 ) : GE = arExp( bufNum, in, octave )
+  def kr( bufNum: GE, in: GE, octave: GE = 12 ) : GE = krExp( bufNum, in, octave )
+}
+case class DegreeToKey( rate: Rate, bufNum: UGenIn, in: UGenIn, octave: UGenIn )
+extends SingleOutUGen( bufNum, in, octave )
+
+object Select {
+  def ar( index: GE, multi: GE ) : GE = make( audio, index, multi )
+  def kr( index: GE, multi: GE ) : GE = make( control, index, multi )
+
+  private def make( rate: Rate, index: GE, multi: GE ) : GE =
+    simplify( for( List( i, m @ _* ) <-
+                     expand( (index :: multi.toUGenIns.toList): _* ))
+                yield this( rate, i, m ))
+}
+case class Select( rate: Rate, index: UGenIn, multi: Seq[ UGenIn ])
+extends SingleOutUGen( (index :: multi.toList): _* )
+
+object Vibrato {
+  // note: 'rate' argument already taken, using 'beat' instead
+  private def make( rate: Rate, freq: GE = 440, beat: GE = 6, depth: GE = 0.02f,
+                    delay: GE = 0, onset: GE = 0, rateVar: GE = 0.04f,
+                    depthVar: GE = 0.1f, iphase: GE = 0 ) : GE = {
+
+    simplify( for( List( f, b, d, dly, o, rv, dv, p ) <-
+                   expand( freq, beat, depth, delay, onset, rateVar, depthVar,
+                           iphase ))
+      yield this( rate, f, b, d, dly, o, rv, dv, p ))
+  }
+}
+case class Vibrato( rate: Rate, freq: UGenIn, beat: UGenIn, depth: UGenIn,
+                    delay: UGenIn, onset: UGenIn, rateVar: UGenIn,
+                    depthVar: UGenIn, iphase: UGenIn )
+extends SingleOutUGen( freq, beat, depth, delay, onset, rateVar, depthVar, iphase )
+
 // TChoose XXX
 // TWChoose XXX

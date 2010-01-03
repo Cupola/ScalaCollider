@@ -140,7 +140,7 @@ object GraphBuilder {
     def seq( elements: UGenIn* ) : GE = {
       if( elements.size == 1 ) elements.head else new GESeq( elements: _* )
     }
-
+/*
  	def replaceZeroesWithSilence( input: GE ) : GE = {
 		input match {
 //			case x: OutputProxy => input
@@ -171,7 +171,7 @@ object GraphBuilder {
 			case _ => input
 		}
  	}
-  
+*/
 /*
     def rateForElem( elem: GE ) : Symbol = {
       if( elem.isInstanceOf[ UGenIn ])
@@ -259,5 +259,23 @@ object GraphBuilder {
     } else {
       seqOfGE2GESeq( res )
     }
+  }
+
+  def replaceZeroesWithSilence( ge: GE ) : GE = {
+    val ins = ge.toUGenIns
+    val numZeroes = ins.foldLeft( 0 )( (sum, in) => in match {
+        case Constant( 0 ) => sum + 1
+        case _ => sum
+    })
+    if( numZeroes == 0 ) {
+      ge
+    } else {
+      val silent = Silent.ar( numZeroes ).toUGenIns.iterator
+      val res = ins map (in => in match {
+          case Constant( 0 ) => silent.next
+          case _ => in
+      })
+      simplify( res )
+   }
   }
 }

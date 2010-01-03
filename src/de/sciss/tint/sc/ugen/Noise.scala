@@ -108,7 +108,20 @@ object CoinGate extends UGen2Args {
 case class CoinGate( rate: Rate, prob: UGenIn, in: UGenIn )
 extends SingleOutUGen( prob, in )
 
-// TWindex XXX missing
+object TWindex {
+  def ar( trig: GE, list: GE, normalize: GE = 0 ) : GE =
+    make( audio, trig, list, normalize )
+
+  def kr( trig: GE, list: GE, normalize: GE = 0 ) : GE =
+    make( control, trig, list, normalize )
+
+  private def make( rate: Rate, trig: GE, list: GE, normalize: GE ) : GE =
+    simplify( for( List( t, n, l @ _* ) <-
+                     expand( (trig :: normalize :: list.toUGenIns.toList): _* ))
+                yield this( rate, t, l, n ))
+}
+case class TWindex( rate: Rate, trig: UGenIn, list: Seq[ UGenIn ], normalize: UGenIn )
+extends SingleOutUGen( (trig :: normalize :: list.toList): _* )
 
 trait NoiseUGen {
 //  type noiseType <: UGen

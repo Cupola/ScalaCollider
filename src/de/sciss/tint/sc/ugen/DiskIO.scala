@@ -30,50 +30,37 @@ package de.sciss.tint.sc.ugen
 
 import de.sciss.tint.sc._
 import SC._
-//import Rates._
+import GraphBuilder._
 
 /**
- * 	@version	0.10, 19-Jul-09
+ * 	@version	0.11, 03-Jan-10
  */
-object DiskOut {	
-	def ar( bufNum: GE, channelsArray: GE ) : GE = {
-    	UGen.multiNew( "DiskOut", audio, Nil, bufNum :: channelsArray.toUGenIns.toList )
-	}
+object DiskOut {
+  def ar( bufNum: GE, multi: GE ) : GE =
+    simplify( for( List( b, m @ _* ) <-
+                     expand( (bufNum :: multi.toUGenIns.toList): _* ))
+                yield this( b, m ))
 }
+case class DiskOut( bufNum: UGenIn, multi: Seq[ UGenIn ])
+extends SingleOutUGen( (bufNum :: multi.toList): _* ) with AudioRated
 
 object DiskIn {
-	def ar( numChannels: Int, bufNum: GE, loop: GE = 0 ) : GE = {
-    	UGen.multiNew( "DiskIn", audio, dup( audio, numChannels ), List( bufNum, loop ))
-	}
-
-	def ar( buf: Buffer ) : GE = {
-		ar( buf, 0 )
-	}
-	
-	def ar( buf: Buffer, loop: GE ) : GE = {
-		UGen.multiNew( "DiskIn", audio, dup( audio, buf.numChannels ), List( buf.bufNum, loop ))
-	}
+  def ar( numChannels: Int, bufNum: GE, loop: GE = 0 ) =
+    simplify( for( List( b, l ) <- expand( bufNum, loop ))
+      yield this( numChannels, b, l ))
 }
+case class DiskIn( numChannels: Int, bufNum: UGenIn, loop: UGenIn )
+extends MultiOutUGen( List.fill[ Rate ]( numChannels )( audio ),
+                      List( bufNum, loop )) with AudioRated
 
-object VDiskIn {	
-	def ar( numChannels: Int, bufNum: GE, rate: GE = 1, loop: GE = 0, sendID: GE = 0 ) : GE = {
-    	UGen.multiNew( "VDiskIn", audio, dup( audio, numChannels ), List( bufNum, rate, loop, sendID ))
-	}
-
-	// unfortunately we cannot define two ar methods with default args...
-	def ar( buf: Buffer ) : GE = {
-		ar( buf, 1, 0, 0 )
-	}
-	
-	def ar( buf: Buffer, rate: GE ) : GE = {
-		ar( buf, rate, 0, 0 )
-	}
-	
-	def ar( buf: Buffer, rate: GE, loop: GE ) : GE = {
-		ar( buf, rate, loop, 0 )
-	}
-	
-	def ar( buf: Buffer, rate: GE, loop: GE, sendID: GE ) : GE = {
-		UGen.multiNew( "VDiskIn", audio, dup( audio, buf.numChannels ), List( buf.bufNum, rate, loop, sendID ))
-	}
+object VDiskIn {
+  // note: argument 'rate' renamed to 'speed'
+  def ar( numChannels: Int, bufNum: GE, speed: GE = 1, loop: GE = 0, sendID: GE = 0 ) =
+    simplify( for( List( b, s, l, i ) <- expand( bufNum, speed, loop, sendID ))
+      yield this( numChannels, b, s, l, i ))
 }
+case class VDiskIn( numChannels: Int, bufNum: UGenIn, speed: UGenIn,
+                    loop: UGenIn, sendID: UGenIn )
+extends MultiOutUGen( List.fill[ Rate ]( numChannels )( audio ),
+                      List( bufNum, speed, loop, sendID )) with AudioRated
+ 

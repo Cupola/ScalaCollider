@@ -26,35 +26,32 @@ object LinPan2 extends UGen3Args {
 case class LinPan2( rate: Rate, in: UGenIn, pos: UGenIn, level: UGenIn )
 extends MultiOutUGen( List( rate, rate ), List( in, pos, level ))
 
-object Pan4 {
-	def ar( in: GE, xpos: GE = 0, ypos: GE = 0, level: GE = 1 ) : GE = {
-		  UGen.multiNew( "Pan4", audio, List( audio, audio, audio, audio ), List( in, xpos, ypos, level ))
-	}
+object Pan4 extends UGen4Args {
+	def ar( in: GE, xpos: GE = 0, ypos: GE = 0, level: GE = 1 ) : GE =
+      arExp( in, xpos, ypos, level )
 
-	def kr( in: GE, xpos: GE = 0, ypos: GE = 0, level: GE = 1 ) : GE = {
-		  UGen.multiNew( "Pan4", control, List( control, control, control, control ), List( in, xpos, ypos, level ))
-	}
+	def kr( in: GE, xpos: GE = 0, ypos: GE = 0, level: GE = 1 ) : GE =
+      krExp( in, xpos, ypos, level )
 }
+case class Pan4( rate: Rate, in: UGenIn, xpos: UGenIn, ypos: UGenIn, level: UGenIn )
+extends MultiOutUGen( List( rate, rate, rate, rate ), List( in, xpos, ypos, level ))
 
-object Balance2 {
-	def ar( left: GE, right: GE, pos: GE = 0, level: GE = 1 ) : GE = {
-		  UGen.multiNew( "Balance2", audio, List( audio, audio ), List( left, right, pos, level ))
-	}
+object Balance2 extends UGen4Args {
+	def ar( left: GE, right: GE, pos: GE = 0, level: GE = 1 ) : GE =
+      arExp( left, right, pos, level )
 
-	def kr( left: GE, right: GE, pos: GE = 0, level: GE = 1 ) : GE = {
-		  UGen.multiNew( "Balance2", control, List( control, control ), List( left, right, pos, level ))
-	}
+	def kr( left: GE, right: GE, pos: GE = 0, level: GE = 1 ) : GE =
+      krExp( left, right, pos, level )
 }
+case class Balance2( rate: Rate, left: UGenIn, right: UGenIn, pos: UGenIn, level: UGenIn )
+extends MultiOutUGen( List( rate, rate ), List( left, right, pos, level ))
 
-object Rotate2 {
-	def ar( x: GE, y: GE, pos: GE = 0 ) : GE = {
-		  UGen.multiNew( "Rotate2", audio, List( audio, audio ), List( x, y, pos ))
-	}
-
-	def kr( x: GE, y: GE, pos: GE = 0 ) : GE = {
-		  UGen.multiNew( "Rotate2", control, List( control, control ), List( x, y, pos ))
-	}
+object Rotate2 extends UGen3Args {
+	def ar( x: GE, y: GE, pos: GE = 0 ) : GE = arExp( x, y, pos )
+	def kr( x: GE, y: GE, pos: GE = 0 ) : GE = krExp( x, y, pos )
 }
+case class Rotate2( rate: Rate, x: UGenIn, y: UGenIn, pos: UGenIn )
+extends MultiOutUGen( List( rate, rate ), List( x, y, pos ))
 
 // XXX PanB missing
 // XXX PanB2 missing
@@ -62,31 +59,41 @@ object Rotate2 {
 // XXX DecodeB2 missing
 
 object PanAz {
-	def ar( numChans: Int, in: GE, pos: GE = 0, level: GE = 1, width: GE = 2, orientation: GE = 0.5f ) : GE = {
-		  UGen.multiNew( "PanAz", audio, dup( audio, numChans ), List( in, pos, level, width, orientation ))
-	}
+  private def make( rate: Rate, numChannels: Int, in: GE, pos: GE, level: GE,
+                    width: GE, orient: GE ) : GE =
+    simplify( for( List( i, p, l, w, o ) <-
+                  expand( in, pos, level, width, orient ))
+      yield this( rate, numChannels, i, p, l, w, o ))
 
-	def kr( numChans: Int, in: GE, pos: GE = 0, level: GE = 1, width: GE = 2, orientation: GE = 0.5f ) : GE = {
-		  UGen.multiNew( "PanAz", control, dup( control, numChans ), List( in, pos, level, width, orientation ))
-	}
+	def ar( numChannels: Int, in: GE, pos: GE = 0, level: GE = 1, width: GE = 2,
+            orient: GE = 0.5f ) : GE =
+      make( audio, numChannels, in, pos, level, width, orient )
+
+	def kr( numChannels: Int, in: GE, pos: GE = 0, level: GE = 1, width: GE = 2,
+            orient: GE = 0.5f ) : GE =
+      make( control, numChannels, in, pos, level, width, orient )
 }
+case class PanAz( rate: Rate, numChannels: Int, in: UGenIn, pos: UGenIn,
+                  level: UGenIn, width: UGenIn, orient: UGenIn )
+extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ),
+                      List( in, pos, level, width, orient ))
 
-object XFade2 {
-	def ar( inA: GE, inB: GE = 0, pan: GE = 0, level: GE = 1 ) : GE = {
-		  UGen.multiNew( "XFade2", audio, List( audio ), List( inA, inB, pan, level ))
-	}
+object XFade2 extends UGen4Args {
+	def ar( inA: GE, inB: GE = 0, pan: GE = 0, level: GE = 1 ) : GE =
+      arExp( inA, inB, pan, level )
 
-	def kr( inA: GE, inB: GE = 0, pan: GE = 0, level: GE = 1 ) : GE = {
-		  UGen.multiNew( "XFade2", control, List( control ), List( inA, inB, pan, level ))
-	}
+	def kr( inA: GE, inB: GE = 0, pan: GE = 0, level: GE = 1 ) : GE =
+      krExp( inA, inB, pan, level )
 }
+case class XFade2( rate: Rate, inA: UGenIn, inB: UGenIn, pan: UGenIn, level: UGenIn )
+extends SingleOutUGen( inA, inB, pan, level )
 
-object LinXFade2 {
-	def ar( inA: GE, inB: GE = 0, pan: GE = 0, level: GE = 1 ) : GE = {
-		  UGen.multiNew( "LinXFade2", audio, List( audio ), List( inA, inB, pan, level ))
-	}
+object LinXFade2 extends UGen4Args {
+	def ar( inA: GE, inB: GE = 0, pan: GE = 0, level: GE = 1 ) : GE =
+      arExp( inA, inB, pan, level )
 
-	def kr( inA: GE, inB: GE = 0, pan: GE = 0, level: GE = 1 ) : GE = {
-		  UGen.multiNew( "LinXFade2", control, List( control ), List( inA, inB, pan, level ))
-	}
+	def kr( inA: GE, inB: GE = 0, pan: GE = 0, level: GE = 1 ) : GE =
+      krExp( inA, inB, pan, level )
 }
+case class LinXFade2( rate: Rate, inA: UGenIn, inB: UGenIn, pan: UGenIn, level: UGenIn )
+extends SingleOutUGen( inA, inB, pan, level )

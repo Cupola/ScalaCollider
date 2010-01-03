@@ -105,3 +105,15 @@ case class EnvGen( rate: Rate, gate: UGenIn, levelScale: UGenIn, levelBias: UGen
                    timeScale: UGenIn, doneAction: UGenIn, envSeq: Seq[ UGenIn ])
 extends SingleOutUGen( (List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envSeq): _* )
 
+object Linen extends UGen5Args {
+	def ar( gate: GE = 1, attack: GE = 0.01f, sustain: GE = 1, release: GE = 1,
+            doneAction: GE = doNothing ) : GE =
+      arExp( gate, attack, sustain, release, doneAction )
+
+	def kr( gate: GE = 1, attack: GE = 0.01f, sustain: GE = 1, release: GE = 1,
+            doneAction: GE = doNothing ) : GE =
+      krExp( gate, attack, sustain, release, doneAction )
+}
+case class Linen( rate: Rate, gate: UGenIn, attack: UGenIn, sustain: UGenIn,
+                  release: UGenIn, doneAction: UGenIn )
+extends SingleOutUGen( gate, attack, sustain, release, doneAction )

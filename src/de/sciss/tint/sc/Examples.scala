@@ -24,13 +24,13 @@ object Examples {
 		options.port.value = 57110
 		val s = new Server( "local", options, 1 )
 		
-		val ssp = new gui.ServerStatusPanel( s )
-		val frame1 = ssp.makeWindow
-		frame1.setVisible( true )
+//		val ssp = new gui.ServerStatusPanel( s )
+//		val frame1 = ssp.makeWindow
+//		frame1.setVisible( true )
 		
-		val ntp = new gui.NodeTreePanel( s )
-		val frame2 = ntp.makeWindow
-		frame2.setVisible( true )
+//		val ntp = new gui.NodeTreePanel( s )
+//		val frame2 = ntp.makeWindow
+//		frame2.setVisible( true )
 		
 		s.start
 //		s.register()
