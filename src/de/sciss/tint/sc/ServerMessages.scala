@@ -41,23 +41,28 @@ trait OSCMessageCodec {
 
 object ServerCodec extends OSCPacketCodec {
 	private val msgDecoders = Map[ String, (String, ByteBuffer) => OSCMessage ](
-		"status.reply"	-> decodeStatusReply,
+		"/status.reply"	-> decodeStatusReply,
 		"/n_go"			-> decodeNodeChange,
 		"/n_end"		-> decodeNodeChange,
 		"/n_off"		-> decodeNodeChange,
 		"/n_on"			-> decodeNodeChange,
 		"/n_move"		-> decodeNodeChange,
-		"/n_info"		-> decodeNodeChange
+		"/n_info"		-> decodeNodeChange,
+		"status.reply"	-> decodeStatusReply
 	)
-	
+
+    private val superDecoder: (String, ByteBuffer ) => OSCMessage =
+      (name, b) => super.decodeMessage( name, b )
+
 	override protected def decodeMessage( name: String, b: ByteBuffer ) : OSCMessage = {
-		val dec = msgDecoders.get( name )
+        msgDecoders.getOrElse( name, superDecoder ).apply( name, b )
+/*		val dec = msgDecoders.get( name )
 		if( dec.isDefined ) {
 			dec.get.apply( name, b )
 		} else {
 			super.decodeMessage( name, b )
 		}
-	}
+*/	}
 	
 	private def decodeFail : Nothing = throw new OSCException( OSCException.DECODE, null )
 	

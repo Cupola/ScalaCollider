@@ -4,7 +4,7 @@ Please check out the "licenses" folder for license information.
 
 PREREQUISITES
 
-Java 1.5 / Scala 2.8 / SuperCollider 3.3.1 / JUNG 2.0 / ScalaOSC (included).
+Java 1.5 / Scala 2.8 / SuperCollider 3.3.1 / JUNG 2.0 (---CURRENTLY NOT NEEDED---) / ScalaOSC (included).
 
 INSTALLATION
 

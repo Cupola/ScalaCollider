@@ -38,7 +38,7 @@ import _root_.scala.math._
 
 /**
  *	@author		Hanns Holger Rutz
- * 	@version	0.11, 01-Oct-08
+ * 	@version	0.12, 12-Jan-10
  */
 object Server {
 //  var default: Option[Server] = None //	= new Server( "local" );
@@ -50,25 +50,33 @@ object Server {
     println( name + " : " )
     t.printStackTrace
   }
+
+  case object Running
+  case object Booting
+  case object Offline
+  case class Counts( c: OSCStatusReplyMessage )
+  private case object Terminating
+  private case object NoPending
 }
 
 class Server( val name: String, val options: ServerOptions = new ServerOptions, val clientID: Int = 0 )
-extends Object
+extends Model
 {
-  protected val syncBootThread						= new Object
+  import Server._
+
+  private val   syncBootThread						= new AnyRef
   private var	aliveThread: Option[StatusWatcher]	= None
   private var	bootThread: Option[BootThread]		= None
   private var	countsObj							= new OSCStatusReplyMessage( 0, 0, 0, 0, 0f, 0f, 0.0, 0.0 )
-  private val	listeners							= new ListBuffer[ (Server, Symbol) => Any ]()
+//  private val	listeners							= new ListBuffer[ (Server, Symbol) => Any ]()
   private val	collBootCompletion					= new ListBuffer[ (Server) => Any ]()
-  private var	conditionVar 						= 'offline
-  private var	pendingConditionVar					= 'none
+  private var	conditionVar: AnyRef 				= Offline
+  protected[sc] var	pendingCondition: AnyRef		= NoPending
   private var   bufferAllocator : ContiguousBlockAllocator = null
   
   var latency = 0.2f
 
   // ---- constructor ----
-  import Server._
   all += this
   if( default == null ) default = this
   private val host = InetAddress.getByName( options.host.value )
@@ -88,8 +96,9 @@ extends Object
 //  resetBufferAutoInfo
     
   def isConnected = c.isConnected
-  def isRunning = conditionVar == 'running
-  def isBooting = conditionVar == 'booting
+  def isRunning = conditionVar == Running
+  def isBooting = conditionVar == Booting
+  def isOffline = conditionVar == Offline
   def getBufferAllocator = bufferAllocator
 
 //  try { c.connect }
@@ -125,13 +134,12 @@ extends Object
 //	addr.sendMsg( p: _* )
   }
   
-  def sendMsg( msg: OSCMessage ) : Server = {
+  def sendMsg( msg: OSCMessage ) {
 //    println( "sending msg " + msg.getName )
 //    for( i <- (0 until msg.getArgCount) ) {
 //      println( "arg#" + i + " = " + msg.getArg( i ))
 //    }
     c.send( msg )
-    this
   }
 
 //  def sendBundle( bndl: OSCBundle ) : Server = {
@@ -202,64 +210,56 @@ extends Object
 //  }
   
   def counts = countsObj
-  
-  def counts_=( newCounts: OSCStatusReplyMessage ) : Server = {
+  def counts_=( newCounts: OSCStatusReplyMessage ) {
     countsObj = newCounts
-    changed( 'counts )
-    this
+    dispatch( Counts( newCounts ))
   }
   
   def dumpTree {
     new Group( this, 0 ).dumpTree
   }
   
-  def condition = conditionVar
-  def condition_=( newCondition: Symbol ) : Server = {
+  protected[sc] def condition = conditionVar
+  protected[sc] def condition_=( newCondition: AnyRef ) {
     if( newCondition != conditionVar ) {
       newCondition match {
-        case 'offline => conditionVar = 'offline; pendingConditionVar match {
-          case 'terminating => {
-            pendingCondition = 'none
-            changed( 'offline )
-          }
-          case 'none => {
-            changed( 'offline )
-          }
+        case Offline => {
+            conditionVar = Offline
+            pendingCondition match {
+              case Terminating => {
+                pendingCondition = NoPending
+                dispatch( Offline )
+              }
+              case NoPending => dispatch( Offline )
+            }
         }
-        case 'running => conditionVar = 'running; pendingConditionVar match {
-          case 'booting => {
-            pendingCondition = 'none
-//            println( "exec" )
-            collBootCompletion.foreach( func => func( this ))
-            collBootCompletion.clear
-            changed( 'running )
-          }
-          case 'none => {
-            changed( 'running )
-          }
+        case Running => {
+            conditionVar = Running
+            pendingCondition match {
+              case Booting => {
+                pendingCondition = NoPending
+                collBootCompletion.foreach( func => func( this ))
+                collBootCompletion.clear
+                dispatch( Running )
+              }
+              case NoPending => dispatch( Running )
+            }
         }
-        case _ => throw new IllegalArgumentException( newCondition.name )
       }
     }
-    this
   }
   
-  def pendingCondition = pendingConditionVar
-  def pendingCondition_=( newCondition: Symbol ) : Server = {
-    if( newCondition != pendingConditionVar ) {
-      pendingConditionVar = newCondition
-      changed( newCondition )
-    }
-    this
-  }
+//  private def pendingCondition = pendingCondition
+//  private def pendingCondition_=( newCondition: AnyRef ) {
+//    if( newCondition != pendingCondition ) {
+//      pendingCondition = newCondition
+//      dispatch( newCondition )
+//    }
+//  }
   
-  def getMultiResponder = multi
+  protected[sc] def getMultiResponder = multi
   
-  def startAliveThread : Server = {
-    startAliveThread( 2.0f, 0.7f, 4 )
-  }
-
-  def startAliveThread( delay: Float, period: Float, deathBounces: Int ) : Server = {
+  def startAliveThread( delay: Float = 2f, period: Float = 0.7f, deathBounces: Int = 4 ) {
 //    synchronized( syncBootThread ) {
       if( aliveThread.isEmpty ) {
         val statusWatcher = new StatusWatcher( this, delay, period, deathBounces )
@@ -267,17 +267,13 @@ extends Object
         statusWatcher.start
       }
 //    }
-      this
   }
 
-  def stopAliveThread : Server = {
+  def stopAliveThread {
 //  synchronized( syncBootThread ) {
-      if( aliveThread.isDefined ) {
-        aliveThread.get.stop
-        aliveThread = None
-      }
+    aliveThread.foreach( _.stop )
+    aliveThread = None
 //  }
-    this
   }
 
 /*
@@ -286,7 +282,7 @@ extends Object
       if( this.serverRunning != serverRunning ) {
         this.serverRunning = serverRunning;
         if( !serverRunning ) {
-// XXX          changed( ServerEvent.STOPPED );
+// XXX          dispatch( ServerEvent.STOPPED );
           if( bootThread.isDefined ) {
             try {
               bootThread.get.keepRunning = false
@@ -298,49 +294,48 @@ extends Object
 //          while( !collBootCompletion.isEmpty() ) {
 //            ((CompletionAction) collBootCompletion.remove( 0 )).completion( this );
 //          }
-// XXX          changed( ServerEvent.RUNNING );
+// XXX          dispatch( ServerEvent.RUNNING );
         }
       }
 //    }
       this
   }
 */
-  def queryCounts : Server = {
+  def queryCounts {
     sendMsg( Server.statusMsg )
   }
   
-  private def changed( what: Symbol ) : Server = {
-    listeners.foreach { func => func.apply( this, what )}
-    this
-  }
-  
-  def addListener( func: (Server, Symbol) => Any ) : Server = {
-    listeners += func
-    this
-  }
- 
-  def removeListener( func: (Server, Symbol) => Any ) : Server = {
-    listeners -= func
-    this
-  }
+//  private def dispatch( what: Symbol ) : Server = {
+//    listeners.foreach { func => func.apply( this, what )}
+//    this
+//  }
+//
+//  def addListener( func: (Server, Symbol) => Any ) : Server = {
+//    listeners += func
+//    this
+//  }
+//
+//  def removeListener( func: (Server, Symbol) => Any ) : Server = {
+//    listeners -= func
+//    this
+//  }
 
-  def register( notified: Boolean = true ) : Server = {
+  def register( notified: Boolean = true ) {
   	sendMsg( OSCMessage( "/notify", if( notified ) 1 else 0 ))
   }
 
-  def boot : Server = boot( true )
-  
-  def boot( startAliveThread: Boolean ): Server = {
-    if( pendingCondition != 'none ) {
+  def boot: Unit = boot( true )
+  def boot( startAliveThread: Boolean ) {
+    if( pendingCondition != NoPending ) {
       println( "Server:boot - ongoing operations" )
-      return this
+      return
     }
-    if( condition == 'running ) {
+    if( conditionVar == Running ) {
       println( "Server:boot - already running" )
-      return this
+      return
     }
     
-    if( !isLocal ) throw new IllegalStateException( "Server.boot : only allowed for local servers!" );
+    if( !isLocal ) throw new IllegalStateException( "Server.boot : only allowed for local servers!" )
       
     val whenBooted = (s: Server) => { 
       try {
@@ -349,7 +344,7 @@ extends Object
 //          s.dumpOSC( s.getDumpMode() );
 //        }
 //        if( s.isNotified() ) {
-          println( "notification is on" );
+          println( "notification is on" )
           s.register()
 //        } else {
 //          println( "notification is off" );
@@ -359,7 +354,7 @@ extends Object
       catch { case e: IOException => printError( "Server.boot", e )}
     }
 
-    pendingCondition = 'booting
+    pendingCondition = Booting
 
     try {
       createNewAllocators
@@ -375,42 +370,38 @@ extends Object
       }
       catch { case e: IOException => printError( "Server.boot", e )}
 //      setBooting( false )
-      pendingCondition = 'none
+      pendingCondition = NoPending
       throw e
     }
-    this
   }
   
-  def bootThreadTerminated : Server = {
+  protected[sc] def bootThreadTerminated {
     bootThread = None
     stopAliveThread
-    condition = 'offline
-    this
+    condition = Offline
   }
   
   // note: we do _not_ reset the nodeIDallocator here
   def initTree {
-    println( "initTree" )
+//    println( "initTree" )
     sendMsg( OSCMessage( "/g_new", 1, 0, 0 ))
   }
   
-  def addDoWhenBooted( action: (Server) => Any ) : Server = {
+  def addDoWhenBooted( action: (Server) => Any ) {
     collBootCompletion += action
-    this
   }
   
-  def removeDoWhenBooted( action: (Server) => Any ) : Server = {
+  def removeDoWhenBooted( action: (Server) => Any ) {
     collBootCompletion -= action
-    this
   }
  
-  private def createNewAllocators : Unit = {
+  private def createNewAllocators {
     nodes.reset
     busses.reset
     bufferAllocator = new ContiguousBlockAllocator( options.audioBuffers.value )
   }
 
-  private def bootServerApp( startAliveThread: Boolean ) : Server = {
+  private def bootServerApp( startAliveThread: Boolean ) {
     if( bootThread.isEmpty ) {
 //    println( "about to boot " + this.name + "; '" + this.options.program.value + "'" )
       var thread	= new BootThread( this, startAliveThread )
@@ -418,16 +409,15 @@ extends Object
 //    condition		= 'booting
       thread.start
     }
-    this 
   }
   
-  def quit : Server = {
+  def quit {
     sendMsg( OSCMessage( "/quit" ))
-    println( "/quit sent" );
+    println( "/quit sent" )
     cleanUpAfterQuit
   }
 
-  private def cleanUpAfterQuit : Server = {
+  private def cleanUpAfterQuit {
     try {
       stopAliveThread
 //    dumpMode		= 0;
@@ -436,10 +426,9 @@ extends Object
 //      condition = 'offline
 //createNewAllocators
 // XXX resetBufferAutoInfo
-      pendingCondition = 'terminating
+      pendingCondition = Terminating
     }
     catch { case e: IOException => printError( "Server.cleanUpAfterQuit", e )}
-    this
   }
   
   def start {
@@ -453,7 +442,7 @@ extends Thread {
   
 //  private val folder = new File( "/Users/rutz/Documents/devel/fromSVN/SuperCollider3/build" )
   private val program = server.options.program.value
-  println( "program = '" + program + "'" )
+  println( "Booting '" + program + "'" )
   private val file = new File( program )
   private val processArgs = server.options.toProcessArgs.toArray
   private val pb = new ProcessBuilder( processArgs: _* )
@@ -476,7 +465,7 @@ extends Thread {
           try {
             server.start
             cStarted = true
-            if( startAliveThread ) server.startAliveThread( 2.0f, 0.7f, 8 );
+            if( startAliveThread ) server.startAliveThread( 2.0f, 0.7f, 8 )
           }
           // thrown when in TCP mode and socket not yet available
           catch { case e: ConnectException => }
@@ -520,6 +509,8 @@ extends Thread {
 
 private class StatusWatcher( server: Server, delay: Float, period: Float, deathBounces: Int )
 extends Object /* with OSCListener */ with ActionListener {
+  import Server._
+
   private var	alive			= 0
   private val	delayMillis		= (delay * 1000).toInt  
   private val	periodMillis	= (period * 1000).toInt
@@ -541,12 +532,12 @@ extends Object /* with OSCListener */ with ActionListener {
 		
   def actionPerformed( e: ActionEvent ) {
     if( alive > 0 ) {
-      server.condition = 'running
+      server.condition = Running
       alive = alive - 1
     } else {
-      server.condition = 'offline
+      server.condition = Offline
     }
-    if( (server.pendingCondition == 'booting) && (server.options.protocol.value.name == 'tcp) &&
+    if( (server.pendingCondition == Booting) && (server.options.protocol.value == 'tcp) &&
         !server.isConnected ) {
       try {
         server.start

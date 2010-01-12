@@ -36,17 +36,16 @@ object Examples {
 //		s.register()
 		s.c.dumpOutgoingOSC( 1, System.out )
 		s.c.dumpIncomingOSC( 1, System.out )
-		s.startAliveThread
-		s.addListener( (server, what) => what match {
-			case 'running => {
+		s.startAliveThread()
+		s.addListener( msg => msg match {
+			case Server.Running => {
 				println( "RUNNING!" )
-				server.register()
-				server.initTree
+				s.register()
+				s.initTree
 				val synth = babblingBrook
-				server.nodeMgr.register( synth ) // XXX should be automatic
+				s.nodeMgr.register( synth ) // XXX should be automatic
 				println( synth )
 			}
-			case _ =>
 		})
 		Thread.sleep( 10000 )
 	}

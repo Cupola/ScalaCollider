@@ -29,11 +29,11 @@ package de.sciss.tint.sc.gui
 
 import _root_.java.awt.{ Color, Component, Container, Dimension, Graphics, Font }
 import _root_.javax.swing.{ BorderFactory, BoxLayout, JComponent, JFrame, JLabel, JPanel,
-	WindowConstants }
-import _root_.javax.swing.SwingConstants._
+	SwingConstants, WindowConstants }
+import SwingConstants._
 import _root_.javax.swing.event.{ AncestorEvent, AncestorListener }
 
-import _root_.de.sciss.tint.sc.{ Server }
+import _root_.de.sciss.tint.sc.{ OSCStatusReplyMessage, Server }
 
 /**
  *	@author		Hanns Holger Rutz
@@ -75,12 +75,13 @@ class ServerStatusPanel( server: Server ) extends JPanel {
 		addAncestorListener( new AncestorListener {
 			def ancestorAdded( e: AncestorEvent ) {
 				addListener
-				updateCounts	
+//				updateCounts
 			}
 			
 			def ancestorRemoved( e: AncestorEvent ) {
 				removeListener
-				updateCounts			
+                clearCounts
+//				updateCounts
 			}
 			
 			def ancestorMoved( e: AncestorEvent ) {}
@@ -126,22 +127,17 @@ class ServerStatusPanel( server: Server ) extends JPanel {
 //		}
 //	}
 	
-	private def serverUpdate( s: Server, what: Symbol ) {
-		if( isShowing && what == 'counts ) updateCounts 
+	private def serverUpdate( msg: AnyRef ) : Unit = msg match {
+      case Server.Counts( cnt ) if isShowing => updateCounts( cnt )
+      case Server.Offline => clearCounts
 	}
 	
-	private def updateCounts {
-		if( isShowing ) {
-			if( server.isRunning ) {
-				val counts = server.counts
-				lbCPU.update( counts.avgCPU / 100, counts.peakCPU / 100 )
-				lbNumUGens.setText( counts.numUGens.toString )
-				lbNumSynths.setText( counts.numSynths.toString )
-				lbNumGroups.setText( counts.numGroups.toString )
-				lbNumDefs.setText( counts.numDefs.toString )
-			}
-			else clearCounts
-		} else clearCounts
+	private def updateCounts( cnt: OSCStatusReplyMessage ) {
+		lbCPU.update( cnt.avgCPU / 100, cnt.peakCPU / 100 )
+		lbNumUGens.setText( cnt.numUGens.toString )
+		lbNumSynths.setText( cnt.numSynths.toString )
+		lbNumGroups.setText( cnt.numGroups.toString )
+		lbNumDefs.setText( cnt.numDefs.toString )
 	}
 	
 	private def clearCounts {
