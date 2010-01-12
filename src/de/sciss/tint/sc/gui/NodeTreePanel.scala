@@ -34,6 +34,7 @@ import _root_.javax.swing.event.{ AncestorEvent, AncestorListener }
 
 import _root_.de.sciss.tint.sc.{ Node, Server }
 
+/*
 import _root_.edu.uci.ics.jung.algorithms.layout.{ BalloonLayout, DAGLayout, FRLayout,
 	ISOMLayout, StaticLayout, TreeLayout }
 import _root_.edu.uci.ics.jung.algorithms.layout.util.VisRunner
@@ -46,7 +47,7 @@ import _root_.edu.uci.ics.jung.visualization.decorators.ToStringLabeller
 import _root_.edu.uci.ics.jung.visualization.layout.LayoutTransition
 import _root_.edu.uci.ics.jung.visualization.renderers.Renderer
 import _root_.edu.uci.ics.jung.visualization.util.Animator
-
+*/
 import _root_.scala.math._
 
 /**
@@ -55,8 +56,9 @@ import _root_.scala.math._
  */
 class NodeTreePanel( server: Server )
 extends JPanel
-with GraphEventListener[ Node, Long ] {
-//	private val graph = server.nodeMgr.graph
+/* with GraphEventListener[ Node, Long ] */
+{
+/*
 	private val smartLayout = new FRLayout( server.nodeMgr.ograph )
 //	private val forest = new DelegateTree( server.nodeMgr.graph )
 //	println( "forest roots = " + TreeUtils.getRoots( server.nodeMgr.graph ))
@@ -132,6 +134,11 @@ with GraphEventListener[ Node, Long ] {
 		}
 	}
 
+	// ---- GraphListener interface ----
+	def handleGraphEvent( e: GraphEvent[ Node, Long ]) {
+		updateLayout
+	}
+*/
 	def makeWindow: JFrame = {
 		val frame = new JFrame( "Nodes" )
 //		frame.setResizable( false )
@@ -140,10 +147,5 @@ with GraphEventListener[ Node, Long ] {
 		frame.pack()
 		frame.setVisible( true )
 		frame
-	}
-
-	// ---- GraphListener interface ----
-	def handleGraphEvent( e: GraphEvent[ Node, Long ]) {
-		updateLayout
 	}
 }

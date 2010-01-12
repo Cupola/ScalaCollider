@@ -89,6 +89,7 @@ extends Object
     
   def isConnected = c.isConnected
   def isRunning = conditionVar == 'running
+  def isBooting = conditionVar == 'booting
   def getBufferAllocator = bufferAllocator
 
 //  try { c.connect }
