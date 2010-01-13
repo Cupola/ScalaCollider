@@ -4,4 +4,5 @@ fsc -cp libraries/ScalaOSC.jar:libraries/jung-algorithms-2.0.jar:libraries/jung-
 echo "Archiving..."
 mkdir dist
 jar cf dist/ScalaCollider.jar -C build/classes/ .
+jar uf dist/ScalaCollider.jar -C resources/ .
 echo "Done."

@@ -27,17 +27,19 @@
  */
 package de.sciss.tint.sc.gui
 
-import _root_.java.awt.{ Color, Component, Container, Dimension, Graphics, Font }
-import _root_.javax.swing.{ BorderFactory, BoxLayout, JComponent, JFrame, JLabel, JPanel,
-	SwingConstants, WindowConstants }
+import java.awt.{ Color, Component, Container, Dimension, FlowLayout, Font,
+                 Graphics, Toolkit }
+import javax.swing.{ BorderFactory, Box, BoxLayout, ImageIcon, JComponent,
+                    JFrame, JLabel, JPanel, SwingConstants, WindowConstants }
 import SwingConstants._
-import _root_.javax.swing.event.{ AncestorEvent, AncestorListener }
+import javax.swing.event.{ AncestorEvent, AncestorListener }
+import scala.math._
 
-import _root_.de.sciss.tint.sc.{ OSCStatusReplyMessage, Server }
+import de.sciss.tint.sc.{ OSCStatusReplyMessage, Server }
 
 /**
  *	@author		Hanns Holger Rutz
- *	@version	0.10, 26-Nov-09
+ *	@version	0.11, 12-Jan-10
  */
 class ServerStatusPanel( server: Server ) extends JPanel {
 	private val lbCPU		= new CPUIndicator
@@ -49,22 +51,42 @@ class ServerStatusPanel( server: Server ) extends JPanel {
 	// ---- constructor ----
 	{
 		setLayout( new BoxLayout( this, BoxLayout.X_AXIS ))
+//		setLayout( new FlowLayout( FlowLayout.TRAILING, 4, 4 ))
 //		add( new JLabel( "avg CPU : ", RIGHT ))
 //		add( lbCntAvgCPU )
 //		add( new JLabel( "peak CPU : ", RIGHT ))
 //		add( lbCntPeakCPU )
-		lbCPU.setPreferredSize( new Dimension( 80, 16 ))
-		add( lbCPU )
-		add( new JLabel( " G : " ))
+//		lbCPU.setPreferredSize( new Dimension( 80, 16 ))
+
+//        val tk = Toolkit.getDefaultToolkit
+        val icnGroup = new ImageIcon( getClass.getResource( "path_group_16.png" ))
+        val icnSynth = new ImageIcon( getClass.getResource( "path_synth_16.png" ))
+        val icnUGen  = new ImageIcon( getClass.getResource( "path_ugen_16.png" ))
+        val icnDef   = new ImageIcon( getClass.getResource( "path_def_16.png" ))
+
+        def flushImages {
+          icnGroup.getImage.flush
+          icnSynth.getImage.flush
+          icnUGen.getImage.flush
+          icnDef.getImage.flush
+        }
+
+        def addS( c: Component, gap: Int = 4 ) {
+          add( c )
+          add( Box.createHorizontalStrut( gap ))
+        }
+
+		addS( lbCPU, 8 )
+		addS( new JLabel( icnGroup ))
 		lbNumGroups.setPreferredSize( new Dimension( 40, 16 ))
-		add( lbNumGroups )
-		add( new JLabel( "S : " ))
+		addS( lbNumGroups )
+		addS( new JLabel( icnSynth ))
 		lbNumSynths.setPreferredSize( new Dimension( 40, 16 ))
-		add( lbNumSynths )
-		add( new JLabel( "U : " ))
+		addS( lbNumSynths )
+		addS( new JLabel( icnUGen ))
 		lbNumUGens.setPreferredSize( new Dimension( 40, 16 ))
-		add( lbNumUGens )
-		add( new JLabel( "D : " ))
+		addS( lbNumUGens )
+		addS( new JLabel( icnDef ))
 		lbNumDefs.setPreferredSize( new Dimension( 40, 16 ))
 		add( lbNumDefs )
 		
@@ -81,6 +103,7 @@ class ServerStatusPanel( server: Server ) extends JPanel {
 			def ancestorRemoved( e: AncestorEvent ) {
 				removeListener
                 clearCounts
+                flushImages
 //				updateCounts
 			}
 			
@@ -141,6 +164,7 @@ class ServerStatusPanel( server: Server ) extends JPanel {
 	}
 	
 	private def clearCounts {
+		lbCPU.update( 0, 0 )
 		lbNumUGens.setText( null )
 		lbNumSynths.setText( null )
 		lbNumGroups.setText( null )
@@ -156,37 +180,68 @@ class ServerStatusPanel( server: Server ) extends JPanel {
 	}
 	
 	private class CPUIndicator extends JComponent {
-		private var avgCPU = 0f
-		private var peakCPU = 0f
-		private var avgW = 0
-		private var peakX = 0
+//		private var avgCPU  = 0f
+//		private var peakCPU = 0f
+//		private var avgW    = 0
+//		private var peakX   = 0
+		private var peakCPU = 0 // 0...17
+
+        private val imgGaugeEmpty = Toolkit.getDefaultToolkit.createImage( getClass.getResource( "gauge_empty.png" ))
+        private val imgGaugeFull  = Toolkit.getDefaultToolkit.createImage( getClass.getResource( "gauge_full.png" ))
+
+        // ---- constructor ----
+        {
+          addAncestorListener( new AncestorListener {
+            def ancestorAdded( e: AncestorEvent ) {}
+            def ancestorMoved( e: AncestorEvent ) {}
+            def ancestorRemoved( e: AncestorEvent ) {
+               imgGaugeEmpty.flush
+               imgGaugeFull.flush
+            }
+          })
+//          setPreferredSize( new Dimension( 73, 23 ))
+          setPreferredSize( new Dimension( 54, 20 ))
+        }
 		
 		def update( newAvgCPU: Float, newPeakCPU: Float ) {
-			avgCPU  = newAvgCPU
-			peakCPU = newPeakCPU
-			val oldAvgW = avgW
-			val oldPeakX = peakX
-			updateScreenCoords
-			if( (oldAvgW != avgW) || (oldPeakX != peakX) ) repaint() // could use dirty rect
+
+//            val newPeakPix = max( 0, min( 73, (newPeakCPU * 73 + 0.5f).toInt ))
+//            val newPeakPix = max( 0, min( 73, ((newPeakCPU * 18 + 0.5f).toInt * 4.06f).toInt ))
+            val newPeakPix = max( 0, min( 54, (newPeakCPU * 18 + 0.5f).toInt * 3 ))
+
+            if( newPeakPix != peakCPU ) {
+              peakCPU = newPeakPix
+              repaint() // could use dirty rec
+            }
+
+//			avgCPU  = newAvgCPU
+//			peakCPU = newPeakCPU
+//			val oldAvgW = avgW
+//			val oldPeakX = peakX
+//			updateScreenCoords
+//			if( (oldAvgW != avgW) || (oldPeakX != peakX) ) repaint() // could use dirty rect
 		}
 		
 		override def paintComponent( g: Graphics ) {
-//			val g2 = g.asInstanceOf[ Graphics2D ]
-			g.setColor( Color.black )
-			val w = getWidth
-			val h = getHeight
-//			g.drawRect(  0, 0, w - 1, h - 1 )
-			g.fillRect(  0, 0, w, h )
-			updateScreenCoords
-			g.setColor( Color.yellow /* Color.blue */)
-			g.fillRect( 1, 1, avgW, h - 2 )
-			g.drawLine( peakX, 1, peakX, h - 2 )
+//			g.setColor( Color.black )
+//			val w = getWidth
+//			val h = getHeight
+//			g.fillRect(  0, 0, w, h )
+//			updateScreenCoords
+//			g.setColor( Color.yellow /* Color.blue */)
+//			g.fillRect( 1, 1, avgW, h - 2 )
+//			g.drawLine( peakX, 1, peakX, h - 2 )
+            
+            g.drawImage( imgGaugeFull, 0, 0, peakCPU, 23, 0, 0, peakCPU, 23,
+                         Color.black, this )
+            g.drawImage( imgGaugeEmpty, peakCPU, 0, 73, 23, peakCPU, 0, 73, 23,
+                         Color.black, this )
 		}
 		
-		private def updateScreenCoords {
-			val w = getWidth
-			avgW  = (avgCPU  * (w - 2)).toInt // + 1
-			peakX = (peakCPU * (w - 2)).toInt + 1
-		}
+//		private def updateScreenCoords {
+//			val w = getWidth
+//			avgW  = (avgCPU  * (w - 2)).toInt // + 1
+//			peakX = (peakCPU * (w - 2)).toInt + 1
+//		}
 	}
 }
