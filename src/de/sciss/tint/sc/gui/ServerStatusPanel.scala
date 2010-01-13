@@ -28,7 +28,7 @@
 package de.sciss.tint.sc.gui
 
 import java.awt.{ Color, Component, Container, Dimension, FlowLayout, Font,
-                 Graphics, Toolkit }
+                 Graphics, Image, Toolkit }
 import java.awt.event.{ ActionEvent }
 import javax.swing.{ AbstractAction, BorderFactory, Box, BoxLayout, ImageIcon, JButton,
                     JComponent, JFrame, JLabel, JPanel, JProgressBar,
@@ -89,10 +89,11 @@ class ServerStatusPanel( flags: Int ) extends JPanel {
 	{
 		setLayout( new BoxLayout( this, BoxLayout.X_AXIS ))
 
-        val icnGroup = new ImageIcon( getClass.getResource( "path_group_16.png" ))
-        val icnSynth = new ImageIcon( getClass.getResource( "path_synth_16.png" ))
-        val icnUGen  = new ImageIcon( getClass.getResource( "path_ugen_16.png" ))
-        val icnDef   = new ImageIcon( getClass.getResource( "path_def_16.png" ))
+        val clz = classOf[ ServerStatusPanel ]
+        val icnGroup = new ImageIcon( clz.getResource( "path_group_16.png" ))
+        val icnSynth = new ImageIcon( clz.getResource( "path_synth_16.png" ))
+        val icnUGen  = new ImageIcon( clz.getResource( "path_ugen_16.png" ))
+        val icnDef   = new ImageIcon( clz.getResource( "path_def_16.png" ))
 
         def flushImages {
           icnGroup.getImage.flush
@@ -170,6 +171,8 @@ class ServerStatusPanel( flags: Int ) extends JPanel {
 			def ancestorMoved( e: AncestorEvent ) {}
 		})
 	}
+
+    protected def couldBoot: Boolean = server.isDefined
 
     private var frame: Option[ JFrame ] = None
 
@@ -283,8 +286,11 @@ class ServerStatusPanel( flags: Int ) extends JPanel {
 //		private var peakX   = 0
 		private var peakCPU = 0 // 0...17
 
-        private val imgGaugeEmpty = Toolkit.getDefaultToolkit.createImage( getClass.getResource( "gauge_empty.png" ))
-        private val imgGaugeFull  = Toolkit.getDefaultToolkit.createImage( getClass.getResource( "gauge_full.png" ))
+        private def getImageResource( name: String ) : Image =
+          Toolkit.getDefaultToolkit.createImage( classOf[ CPUIndicator ].getResource( name ))
+
+        private val imgGaugeEmpty = getImageResource( "gauge_empty.png" )
+        private val imgGaugeFull  = getImageResource( "gauge_full.png" )
 
 //        private val ins = getInsets()
 
@@ -388,7 +394,7 @@ class ServerStatusPanel( flags: Int ) extends JPanel {
           case Server.Offline => {
               cond = msg
               ggBoot.setText( txtBoot )
-              ggBoot.setEnabled( server.isDefined )
+              ggBoot.setEnabled( couldBoot )
               ggBusy.setVisible( false )
           }
           case Server.Booting => {
