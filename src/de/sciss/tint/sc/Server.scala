@@ -69,10 +69,12 @@ extends Model
   private var	bootThread: Option[BootThread]		= None
   private var	countsObj							= new OSCStatusReplyMessage( 0, 0, 0, 0, 0f, 0f, 0.0, 0.0 )
 //  private val	listeners							= new ListBuffer[ (Server, Symbol) => Any ]()
-  private val	collBootCompletion					= new ListBuffer[ (Server) => Any ]()
+  private val	collBootCompletion					= new ListBuffer[ (Server) => Unit ]()
   private var	conditionVar: AnyRef 				= Offline
   protected[sc] var	pendingCondition: AnyRef		= NoPending
   private var   bufferAllocator : ContiguousBlockAllocator = null
+  val rootNode      = new Group( this, 0 )
+  val defaultGroup  = new Group( this, 1 )
   
   var latency = 0.2f
 
@@ -210,7 +212,7 @@ extends Model
 //  }
   
   def counts = countsObj
-  def counts_=( newCounts: OSCStatusReplyMessage ) {
+  protected[sc] def counts_=( newCounts: OSCStatusReplyMessage ) {
     countsObj = newCounts
     dispatch( Counts( newCounts ))
   }
@@ -219,47 +221,34 @@ extends Model
     new Group( this, 0 ).dumpTree
   }
   
-  protected[sc] def condition = conditionVar
+  def condition = conditionVar
   protected[sc] def condition_=( newCondition: AnyRef ) {
     if( newCondition != conditionVar ) {
-      newCondition match {
-        case Offline => {
-            conditionVar = Offline
-            pendingCondition match {
-              case Terminating => {
+        conditionVar = newCondition
+        if( newCondition == Offline ) {
+//            if( pendingCondition == Terminating ) {
                 pendingCondition = NoPending
-                dispatch( Offline )
-              }
-              case NoPending => dispatch( Offline )
-            }
-        }
-        case Running => {
-            conditionVar = Running
-            pendingCondition match {
-              case Booting => {
+//            }
+        } else if( newCondition == Running ) {
+            if( pendingCondition == Booting ) {
                 pendingCondition = NoPending
-                collBootCompletion.foreach( func => func( this ))
+                collBootCompletion.foreach( _.apply( this ))
                 collBootCompletion.clear
-                dispatch( Running )
-              }
-              case NoPending => dispatch( Running )
             }
         }
+        dispatch( newCondition )
       }
-    }
   }
   
-//  private def pendingCondition = pendingCondition
-//  private def pendingCondition_=( newCondition: AnyRef ) {
-//    if( newCondition != pendingCondition ) {
-//      pendingCondition = newCondition
-//      dispatch( newCondition )
-//    }
+//  def pendingCondition = pendingConditionVar
+//  def pendingCondition_=( newCondition: AnyRef ) {
+//    println( "pending now " + newCondition )
+//    pendingConditionVar = newCondition
 //  }
   
   protected[sc] def getMultiResponder = multi
   
-  def startAliveThread( delay: Float = 2f, period: Float = 0.7f, deathBounces: Int = 4 ) {
+  def startAliveThread( delay: Float = 0.25f, period: Float = 0.25f, deathBounces: Int = 25 ) {
 //    synchronized( syncBootThread ) {
       if( aliveThread.isEmpty ) {
         val statusWatcher = new StatusWatcher( this, delay, period, deathBounces )
@@ -355,6 +344,7 @@ extends Model
     }
 
     pendingCondition = Booting
+    condition = Booting
 
     try {
       createNewAllocators
@@ -363,16 +353,17 @@ extends Model
       addDoWhenBooted( whenBooted )
       bootServerApp( startAliveThread )
     }
-    catch { case e: IOException =>
+    catch { case e /*: IOException*/ => {
+
       removeDoWhenBooted( whenBooted )
       try {
         stopAliveThread
       }
-      catch { case e: IOException => printError( "Server.boot", e )}
+      catch { case e /*: IOException*/ => printError( "Server.boot", e )}
 //      setBooting( false )
-      pendingCondition = NoPending
+      condition = Offline // pendingCondition = NoPending
       throw e
-    }
+    }}
   }
   
   protected[sc] def bootThreadTerminated {
@@ -384,14 +375,15 @@ extends Model
   // note: we do _not_ reset the nodeIDallocator here
   def initTree {
 //    println( "initTree" )
-    sendMsg( OSCMessage( "/g_new", 1, 0, 0 ))
+    sendMsg( defaultGroup.newMsg( rootNode, addToHead ))
+//    sendMsg( OSCMessage( "/g_new", 1, 0, 0 ))
   }
   
-  def addDoWhenBooted( action: (Server) => Any ) {
+  def addDoWhenBooted( action: (Server) => Unit ) {
     collBootCompletion += action
   }
   
-  def removeDoWhenBooted( action: (Server) => Any ) {
+  def removeDoWhenBooted( action: (Server) => Unit ) {
     collBootCompletion -= action
   }
  
@@ -434,6 +426,8 @@ extends Model
   def start {
     c.start
   }
+
+  override def toString = "Server( " + name + " )"
 }
 
 private class BootThread( server: Server, startAliveThread: Boolean )
@@ -459,13 +453,16 @@ extends Thread {
     try {
       val p			= pb.start
       val inStream	= new BufferedInputStream( p.getInputStream )
-//	  val errStream	= new BufferedInputStream( p.getErrorStream )
       while( keepRunning && pRunning ) {
         if( !cStarted ) {
           try {
             server.start
             cStarted = true
-            if( startAliveThread ) server.startAliveThread( 2.0f, 0.7f, 8 )
+            // note that we optimistically assume that if we boot the server, it
+            // will not die (exhausting deathBounces). if it crashes, the boot
+            // thread's process will know anyway. this way we avoid stupid
+            // server offline notifications when using slow asynchronous commands
+            if( startAliveThread ) server.startAliveThread( 1.0f, 0.25f, Int.MaxValue )
           }
           // thrown when in TCP mode and socket not yet available
           catch { case e: ConnectException => }
@@ -511,10 +508,10 @@ private class StatusWatcher( server: Server, delay: Float, period: Float, deathB
 extends Object /* with OSCListener */ with ActionListener {
   import Server._
 
-  private var	alive			= 0
+  private var	alive			= deathBounces
   private val	delayMillis		= (delay * 1000).toInt  
   private val	periodMillis	= (period * 1000).toInt
-  private val	resp			= new OSCResponderNode( server, "status.reply", messageReceived )
+  private val	resp			= new OSCResponderNode( server, "/status.reply", messageReceived )
   private val	timer			= new SwingTimer( periodMillis, this )
   
   // ---- constructor ----
@@ -531,12 +528,6 @@ extends Object /* with OSCListener */ with ActionListener {
   }
 		
   def actionPerformed( e: ActionEvent ) {
-    if( alive > 0 ) {
-      server.condition = Running
-      alive = alive - 1
-    } else {
-      server.condition = Offline
-    }
     if( (server.pendingCondition == Booting) && (server.options.protocol.value == 'tcp) &&
         !server.isConnected ) {
       try {
@@ -544,6 +535,10 @@ extends Object /* with OSCListener */ with ActionListener {
       }
       catch { case e: IOException => Server.printError( "Server.status", e )}
     } else {
+      alive -= 1
+      if( alive < 0 ) {
+        server.condition = Offline
+      }
       try {
         server.queryCounts
       }
@@ -555,7 +550,8 @@ extends Object /* with OSCListener */ with ActionListener {
   private def messageReceived( msg: OSCMessage, sender: SocketAddress, time: Long ) {
 	  msg match {
 	 	  case statusReply: OSCStatusReplyMessage => {
-	 	 	  alive = deathBounces
+              alive = deathBounces
+	 	 	  server.condition = Running
 	 	 	  server.counts = statusReply
 	 	  }
 	 	  case _ =>

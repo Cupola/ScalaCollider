@@ -28,31 +28,23 @@
 
 package de.sciss.tint.sc
 
-import _root_.java.util.Arrays
-import _root_.scala.collection.immutable.HashMap
-import _root_.scala.collection.mutable.ListBuffer
+import scala.collection.immutable.HashMap
+import collection.mutable.ListBuffer
 
-import _root_.de.sciss.scalaosc.OSCMessage
+import de.sciss.scalaosc.OSCMessage
 
 /**
  * 	@author		Hanns Holger Rutz
- *	@version	0.12, 09-Dec-09
+ *	@version	0.13, 13-Jan-10
  */
-object Nodes {
-  private val addActions = HashMap[ Symbol, Int ](
-    'addToHead -> 0,
-    'addToTail -> 1,
-    'addBefore -> 2,
-    'addAfter -> 3,
-    'addReplace -> 4,
-    'h -> 0,
-    't -> 1
-//    0 -> 0, 1 -> 1, 2 -> 2, 3 -> 3, 4 -> 4
-  );
-  def actionNumberFor( addAction: Symbol ) : Int = {
-    addActions( addAction );
-  }
-}
+
+sealed abstract class AddAction( val id: Int )
+
+case object addToHead   extends AddAction( 0 )
+case object addToTail   extends AddAction( 1 )
+case object addBefore   extends AddAction( 2 )
+case object addAfter    extends AddAction( 3 )
+case object addReplace  extends AddAction( 4 )
 
 /**
  * 	@author		Hanns Holger Rutz

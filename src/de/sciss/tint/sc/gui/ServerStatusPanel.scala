@@ -29,8 +29,10 @@ package de.sciss.tint.sc.gui
 
 import java.awt.{ Color, Component, Container, Dimension, FlowLayout, Font,
                  Graphics, Toolkit }
-import javax.swing.{ BorderFactory, Box, BoxLayout, ImageIcon, JComponent,
-                    JFrame, JLabel, JPanel, SwingConstants, WindowConstants }
+import java.awt.event.{ ActionEvent }
+import javax.swing.{ AbstractAction, BorderFactory, Box, BoxLayout, ImageIcon, JButton,
+                    JComponent, JFrame, JLabel, JPanel, JProgressBar,
+                    OverlayLayout, SwingConstants, WindowConstants }
 import SwingConstants._
 import javax.swing.event.{ AncestorEvent, AncestorListener }
 import scala.math._
@@ -41,24 +43,52 @@ import de.sciss.tint.sc.{ OSCStatusReplyMessage, Server }
  *	@author		Hanns Holger Rutz
  *	@version	0.11, 12-Jan-10
  */
-class ServerStatusPanel( server: Server ) extends JPanel {
+object ServerStatusPanel {
+  val COUNTS      = 0x01
+  val BOOT_BUTTON = 0x02
+}
+
+class ServerStatusPanel( flags: Int ) extends JPanel {
+  import ServerStatusPanel._
+  
+    def this( s: Server, flags: Int ) {
+      this( flags )
+      server = Some( s )
+    }
+
+    def this( s: Server ) {
+      this( s, 0x03 ) // XXX weird scala bug... does not see COUNTS and BOOT_BUTTON
+    }
+
+   private val actionBoot   = new ActionBoot()
+   private val ggBoot       = new JButton( actionBoot )
+   private val ggBusy       = new JProgressBar()
+
+   // subclasses may override this
+   protected def txtBoot    = "Boot"  // XXX getResource
+   protected def txtStop    = "Stop"  // XXX getResource
+   protected def frameTitle = "Server Status"
+
 	private val lbCPU		= new CPUIndicator
-	private val lbNumUGens	= new JLabel
-	private val lbNumSynths	= new JLabel
-	private val lbNumGroups	= new JLabel
-	private val lbNumDefs	= new JLabel
+	private val lbNumUGens	= new CountLabel
+	private val lbNumSynths	= new CountLabel
+	private val lbNumGroups	= new CountLabel
+	private val lbNumDefs	= new CountLabel
+
+    private var serverVar: Option[ Server ] = None
+    def server = serverVar
+    def server_=( s: Option[ Server ]) {
+       val wasListening = listening
+       if( wasListening ) stopListening
+       serverVar = s
+       updateFrameTitle
+       if( wasListening ) startListening
+    }
 		
 	// ---- constructor ----
 	{
 		setLayout( new BoxLayout( this, BoxLayout.X_AXIS ))
-//		setLayout( new FlowLayout( FlowLayout.TRAILING, 4, 4 ))
-//		add( new JLabel( "avg CPU : ", RIGHT ))
-//		add( lbCntAvgCPU )
-//		add( new JLabel( "peak CPU : ", RIGHT ))
-//		add( lbCntPeakCPU )
-//		lbCPU.setPreferredSize( new Dimension( 80, 16 ))
 
-//        val tk = Toolkit.getDefaultToolkit
         val icnGroup = new ImageIcon( getClass.getResource( "path_group_16.png" ))
         val icnSynth = new ImageIcon( getClass.getResource( "path_synth_16.png" ))
         val icnUGen  = new ImageIcon( getClass.getResource( "path_ugen_16.png" ))
@@ -76,33 +106,63 @@ class ServerStatusPanel( server: Server ) extends JPanel {
           add( Box.createHorizontalStrut( gap ))
         }
 
-		addS( lbCPU, 8 )
-		addS( new JLabel( icnGroup ))
-		lbNumGroups.setPreferredSize( new Dimension( 40, 16 ))
-		addS( lbNumGroups )
-		addS( new JLabel( icnSynth ))
-		lbNumSynths.setPreferredSize( new Dimension( 40, 16 ))
-		addS( lbNumSynths )
-		addS( new JLabel( icnUGen ))
-		lbNumUGens.setPreferredSize( new Dimension( 40, 16 ))
-		addS( lbNumUGens )
-		addS( new JLabel( icnDef ))
-		lbNumDefs.setPreferredSize( new Dimension( 40, 16 ))
-		add( lbNumDefs )
-		
-		setBorder( BorderFactory.createEmptyBorder( 2, 2, 2, 2 ))
-		val fntGUI = new Font( "Lucida Grande", Font.PLAIN, 9 )
-		setDeepFont( this, fntGUI )
+        if( (flags & BOOT_BUTTON) != 0 ) {
+    		ggBoot.setFocusable( false )	// prevent user from accidentally starting/stopping server
+            ggBoot.putClientProperty( "JButton.buttonType", "bevel" )
+            ggBoot.putClientProperty( "JComponent.sizeVariant", "small" )
+            ggBoot.setText( txtStop )
+            val d1 = ggBoot.getPreferredSize()
+            ggBoot.setText( txtBoot )
+            val d2 = ggBoot.getPreferredSize()
+            ggBoot.setPreferredSize( new Dimension( max( d1.width, d2.width ),
+                                                    max( d1.height, d2.height )))
+
+            ggBusy.setIndeterminate( true )
+            val busyDim = new Dimension( 24, 24 )
+            ggBusy.setPreferredSize( busyDim )
+            ggBusy.putClientProperty( "JProgressBar.style", "circular" )
+
+            addS( ggBoot, 2 )
+            val busyBox = new JPanel()
+            busyBox.setLayout( new OverlayLayout( busyBox ))
+            busyBox.add( Box.createRigidArea( busyDim ))
+            busyBox.add( ggBusy )
+            addS( busyBox, 6 )
+
+    		setBorder( BorderFactory.createEmptyBorder( 0, 2, 0, 2 ))
+        } else {
+    		setBorder( BorderFactory.createEmptyBorder( 1, 2, 1, 2 ))
+        }
+        
+        if( (flags & COUNTS) != 0 ) {
+    		addS( lbCPU, 8 )
+            def addCount( icn: ImageIcon, lb: JLabel, s: Int = 4 ) {
+                val lb2 = new JLabel( icn )
+                lb2.putClientProperty( "JComponent.sizeVariant", "small" )
+            	addS( lb2 )
+        		addS( lb, s )
+            }
+            addCount( icnGroup, lbNumGroups )
+            addCount( icnSynth, lbNumSynths )
+            addCount( icnUGen,  lbNumUGens )
+            addCount( icnDef,   lbNumDefs, 0 )
+        }
+
+//        serverUpdate( server.map( _.condition ) getOrElse Server.Offline )
+
+//        val fntName = if( System.getProperty( "os.name" ).indexOf( "Mac OS X" ) >= 0 )
+//          "Lucida Grande" else "SansSerif"
+//		val fntGUI = new Font( fntName, Font.PLAIN, 9 )
+//		setDeepFont( this, fntGUI )
 		
 		addAncestorListener( new AncestorListener {
 			def ancestorAdded( e: AncestorEvent ) {
-				addListener
+				startListening
 //				updateCounts
 			}
 			
 			def ancestorRemoved( e: AncestorEvent ) {
-				removeListener
-                clearCounts
+				stopListening
                 flushImages
 //				updateCounts
 			}
@@ -110,30 +170,50 @@ class ServerStatusPanel( server: Server ) extends JPanel {
 			def ancestorMoved( e: AncestorEvent ) {}
 		})
 	}
-	
+
+    private var frame: Option[ JFrame ] = None
+
+    private def updateFrameTitle {
+       frame.foreach( _.setTitle( if( server.isDefined ) {
+         frameTitle + " (" + server.get.name + ")"
+       } else {
+         frameTitle
+       }))
+    }
+
 	def makeWindow: JFrame = {
-		val frame = new JFrame( "Counts" )
-		frame.setResizable( false )
-		frame.setDefaultCloseOperation( WindowConstants.DO_NOTHING_ON_CLOSE )
-		frame.getContentPane.add( this )
-		frame.pack()
-		frame.setVisible( true )
-		frame
+        val f = frame getOrElse {
+    		val fr = new JFrame()
+        	fr.setResizable( false )
+            fr.setDefaultCloseOperation( WindowConstants.DO_NOTHING_ON_CLOSE )
+      		fr.getContentPane.add( this )
+        	fr.pack()
+            fr.setLocation( 50, 50 )
+            frame = Some( fr )
+            updateFrameTitle
+            fr
+        }
+		f.setVisible( true )
+		f
 	}
 	
-	private var addedListener = false
+	private var listening = false
 	
-	private def addListener {
-		if( !addedListener ) {
-			addedListener = true
-			server.addListener( serverUpdate )
+	private def startListening {
+		if( !listening ) {
+//println("startListening")
+			listening = true
+			serverVar.foreach(_.addListener( serverUpdate ))
+            serverUpdate( server.map( _.condition ) getOrElse Server.Offline )
 		}
 	}
 	
-	private def removeListener {
-		if( !addedListener ) {
-			server.removeListener( serverUpdate )
-			addedListener = false
+	private def stopListening {
+		if( listening ) {
+//println("stopListening")
+			serverVar.foreach(_.removeListener( serverUpdate ))
+			listening = false
+            clearCounts
 		}
 	}
 	
@@ -141,18 +221,22 @@ class ServerStatusPanel( server: Server ) extends JPanel {
 //	def server = srv
 //	def server_=( newServer: Option[ Server ]) {
 //		if( srv == newServer ) return
-//		val wasAdded = addedListener
-//		removeListener
+//		val wasAdded = listening
+//		stopListening
 //		srv = newServer
 //		if( isShowing ) {
 //			updateCounts
-//			if( srv.isDefined ) addListener
+//			if( srv.isDefined ) startListening
 //		}
 //	}
 	
 	private def serverUpdate( msg: AnyRef ) : Unit = msg match {
       case Server.Counts( cnt ) if isShowing => updateCounts( cnt )
-      case Server.Offline => clearCounts
+      case Server.Offline => {
+          clearCounts
+          actionBoot.serverUpdate( msg )
+      }
+      case _ => actionBoot.serverUpdate( msg )
 	}
 	
 	private def updateCounts( cnt: OSCStatusReplyMessage ) {
@@ -171,13 +255,26 @@ class ServerStatusPanel( server: Server ) extends JPanel {
 		lbNumDefs.setText( null )
 	}
 	
-	private def setDeepFont( c: Component, fnt: Font ) {
-		c.setFont( fnt )
-		c match {
-			case con: Container => con.getComponents.foreach( setDeepFont( _, fnt ))
-			case _ =>
-		}
-	}
+//	private def setDeepFont( c: Component, fnt: Font ) {
+//		c.setFont( fnt )
+//		c match {
+//			case con: Container => con.getComponents.foreach( setDeepFont( _, fnt ))
+//			case _ =>
+//		}
+//	}
+
+    private class CountLabel extends JLabel() {
+        putClientProperty( "JComponent.sizeVariant", "small" )
+
+        override def getPreferredSize() : Dimension = {
+          val dim = super.getPreferredSize()
+          dim.width = 40
+          dim
+        }
+
+        override def getMinimumSize() : Dimension = getPreferredSize()
+        override def getMaximumSize() : Dimension = getPreferredSize()
+    }
 	
 	private class CPUIndicator extends JComponent {
 //		private var avgCPU  = 0f
@@ -188,6 +285,8 @@ class ServerStatusPanel( server: Server ) extends JPanel {
 
         private val imgGaugeEmpty = Toolkit.getDefaultToolkit.createImage( getClass.getResource( "gauge_empty.png" ))
         private val imgGaugeFull  = Toolkit.getDefaultToolkit.createImage( getClass.getResource( "gauge_full.png" ))
+
+//        private val ins = getInsets()
 
         // ---- constructor ----
         {
@@ -200,7 +299,9 @@ class ServerStatusPanel( server: Server ) extends JPanel {
             }
           })
 //          setPreferredSize( new Dimension( 73, 23 ))
-          setPreferredSize( new Dimension( 54, 20 ))
+          val dim = new Dimension( 56, 22 )
+          setPreferredSize( dim )
+          setMaximumSize( dim )
         }
 		
 		def update( newAvgCPU: Float, newPeakCPU: Float ) {
@@ -221,7 +322,11 @@ class ServerStatusPanel( server: Server ) extends JPanel {
 //			updateScreenCoords
 //			if( (oldAvgW != avgW) || (oldPeakX != peakX) ) repaint() // could use dirty rect
 		}
-		
+
+//        private val colrBorder = new Color( 0, 0, 0, 0xB4 )
+//        private val colrEdge   = new Color( 0, 0, 0, 0x7F )
+        private val colrBorder = new Color( 0, 0, 0, 0x35 )
+
 		override def paintComponent( g: Graphics ) {
 //			g.setColor( Color.black )
 //			val w = getWidth
@@ -231,10 +336,15 @@ class ServerStatusPanel( server: Server ) extends JPanel {
 //			g.setColor( Color.yellow /* Color.blue */)
 //			g.fillRect( 1, 1, avgW, h - 2 )
 //			g.drawLine( peakX, 1, peakX, h - 2 )
-            
-            g.drawImage( imgGaugeFull, 0, 0, peakCPU, 23, 0, 0, peakCPU, 23,
+            g.setColor( colrBorder )
+            g.drawRect( 0, 0, 55, 21 )
+            g.drawRect( 1, 0, 53, 21 )
+            g.drawRect( 0, 1, 55, 19 )
+            g.drawImage( imgGaugeFull, 1, 1,
+                         peakCPU + 1, 21, 0, 0, peakCPU, 20,
                          Color.black, this )
-            g.drawImage( imgGaugeEmpty, peakCPU, 0, 73, 23, peakCPU, 0, 73, 23,
+            g.drawImage( imgGaugeEmpty, peakCPU + 1, 1,
+                         55, 21, peakCPU, 0, 54, 20,
                          Color.black, this )
 		}
 		
@@ -244,4 +354,51 @@ class ServerStatusPanel( server: Server ) extends JPanel {
 //			peakX = (peakCPU * (w - 2)).toInt + 1
 //		}
 	}
+
+    // subclasses may override this
+    protected def bootServer {
+      server.foreach( _.boot )
+    }
+
+    // subclasses may override this
+    protected def stopServer {
+      server.foreach( _.quit )
+    }
+
+	private class ActionBoot extends AbstractAction {
+       import Server._
+
+       private var cond: AnyRef = Offline
+
+		def actionPerformed( e: ActionEvent ) {
+			if( cond == Offline ) {
+				bootServer
+			} else if( cond == Running ) {
+				stopServer
+			}
+		}
+
+      def serverUpdate( msg: AnyRef ) : Unit = msg match {
+          case Server.Running => {
+              cond = msg
+              ggBoot.setText( txtStop )
+              ggBoot.setEnabled( true )
+              ggBusy.setVisible( false )
+          }
+          case Server.Offline => {
+              cond = msg
+              ggBoot.setText( txtBoot )
+              ggBoot.setEnabled( server.isDefined )
+              ggBusy.setVisible( false )
+          }
+          case Server.Booting => {
+              cond = msg
+              ggBoot.setEnabled( false )
+              ggBusy.setVisible( true )
+          }
+//          case SuperColliderClient.ServerChanged( server ) => {
+//            serverPanel.server = server
+//          }
+      }
+	} // class actionBootClass
 }

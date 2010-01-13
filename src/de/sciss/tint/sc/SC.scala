@@ -110,7 +110,7 @@ object SC {
   
   def play( f: => GE ) : Synth = {
 	def func() = f
-    playFunc( func, new Group( Server.default, 1 ), 0, Some(0.02f), 'addToHead )
+    playFunc( func, new Group( Server.default, 1 ), 0, Some(0.02f), addToHead )
 //	  play( f, target, 0, Some(0.02f), 'addToHead )
   }
 
@@ -133,12 +133,12 @@ object SC {
   */
   def play( target: Node = new Group( Server.default, 1 ), outBus: Int,
            fadeTime: Option[Float] = Some( 0.02f ),
-           addAction: Symbol = 'addToHead )( f: => GE ) : Synth = {
+           addAction: AddAction = addToHead )( f: => GE ) : Synth = {
 	def func() = f
 	playFunc( func, target, outBus, fadeTime, addAction )
   }
 
-  private def playFunc( func: () => GE, target: => Node, outBus: Int, fadeTime: Option[Float], addAction: Symbol ) : Synth = {
+  private def playFunc( func: () => GE, target: Node, outBus: Int, fadeTime: Option[Float], addAction: AddAction ) : Synth = {
     // arg target, outbus = 0, fadeTime=0.02, addAction='addToHead;
 
 //		target = target.asTarget;
@@ -168,5 +168,5 @@ object SC {
   
   // Int
   implicit def int2Node( id: Int ) : Node = new Group( Server.default, id )
-  implicit def server2Node( s: Server ) : Node = new Group( Server.default, 1 )
+  implicit def server2Group( s: Server ) : Group = s.defaultGroup
 }

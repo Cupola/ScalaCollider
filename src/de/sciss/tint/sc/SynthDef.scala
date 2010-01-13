@@ -167,7 +167,7 @@ class SynthDef( val name: String, ugenGraphFunc: () => GE, rates: Seq[Any] = Nil
   def loadMsg( dir: String ) =
 	  OSCMessage( "/d_load", dir + name + ".scsyndef" )
 
-    def play( target: Node = Server.default, args: Seq[ Tuple2[ String, Float ]] = Nil, addAction: Symbol = 'addToHead ) : Synth = {
+    def play( target: Node = Server.default, args: Seq[ Tuple2[ String, Float ]] = Nil, addAction: AddAction = addToHead ) : Synth = {
 //		target = target.asTarget
 		val synth	= new Synth( name, target.server )
 		val msg		= synth.newMsg( target, args, addAction )

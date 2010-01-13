@@ -28,49 +28,49 @@
 
 package de.sciss.tint.sc
 
-import _root_.de.sciss.scalaosc.OSCMessage
+import de.sciss.scalaosc.OSCMessage
 
 /**
  *	@author		Hanns Holger Rutz
- *	@version	0.11, 24-Nov-09
+ *	@version	0.12, 13-Jan-10
  */
 object Group {
     def spawn: Group = {
-		head( new Group( Server.default, 0 ))
+		head( Server.default.defaultGroup )
 	}
 
-	def after( target: => Node ): Group = {
-	  	val group = new Group( target.server );
-	  	group.server.sendMsg( group.newMsg( target, 'addAfter ));
+	def after( target: Node ): Group = {
+	  	val group = new Group( target.server )
+	  	group.server.sendMsg( group.newMsg( target, addAfter ))
 	  	group
 	}
  
-	def before( target: => Node ): Group = {
+	def before( target: Node ): Group = {
 	  	val group = new Group( target.server )
-	  	group.server.sendMsg( group.newMsg( target, 'addBefore ))
+	  	group.server.sendMsg( group.newMsg( target, addBefore ))
         group
 	}
  
-	def head( target: => Node ): Group = {
+	def head( target: Group ): Group = {
 		val group = new Group( target.server )
-		group.server.sendMsg( group.newMsg( target, 'addToHead ))
+		group.server.sendMsg( group.newMsg( target, addToHead ))
         group
 	}
 
-	def tail( target: => Node ): Group = {
+	def tail( target: Group ): Group = {
 	  	val group = new Group( target.server )
-	  	group.server.sendMsg( group.newMsg( target, 'addToTail ))
+	  	group.server.sendMsg( group.newMsg( target, addToTail ))
         group
 	}
  
-	def replace( target: => Node ): Group = {
+	def replace( target: Node ): Group = {
 	  	val group = new Group( target.server )
-	  	group.server.sendMsg( group.newMsg( target, 'addReplace ))
+	  	group.server.sendMsg( group.newMsg( target, addReplace ))
         group
 	}
 }
 
-class Group( override val server: Server, override val id: Int )
+class Group( server: Server, id: Int )
 extends Node( server, id ) {
 	def this( server: Server ) = {
 		this( server, server.nodes.nextID )
@@ -80,16 +80,16 @@ extends Node( server, id ) {
 		this( Server.default )
 	}
 
-	def newMsg( target: => Node, addAction: Symbol ) : OSCMessage = {
-		OSCMessage( "/g_new", id, Nodes.actionNumberFor( addAction ), target )
+	def newMsg( target: Node, addAction: AddAction ) : OSCMessage = {
+		OSCMessage( "/g_new", id, addAction.id, target.id )
 	}
 
-	def dumpTree() : Unit = dumpTree( false )
-  
+    def dumpTree: Unit = dumpTree( false )
 	def dumpTree( postControls: Boolean ) {
 		server.sendMsg( "/g_dumpTree", id, if( postControls ) 1 else 0 )
 	}
-  
+
+    def freeAll: Unit = server.sendMsg( freeAllMsg )
 	def freeAllMsg = OSCMessage( "/g_freeAll", id )
   
 	def moveNodeToHeadMsg( node: Node ) : OSCMessage = {

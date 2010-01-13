@@ -125,7 +125,8 @@ class OSCMultiResponder( server: Server ) extends Object /* with OSCListener */ 
 	  }
 	  
 	  // old stylee
-	  val specialNodes = mapCmdToNodes.get( msg.name )
+      val cmdName = if( msg.name.charAt( 0 ) == 47 ) msg.name else "/" + msg.name
+	  val specialNodes = mapCmdToNodes.get( cmdName )
       if( specialNodes == null ) return
       val numResps = specialNodes.size
       resps = specialNodes.toArray( resps )
