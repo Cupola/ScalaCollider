@@ -56,12 +56,12 @@ object Examples {
 	 */
 	def babblingBrook : Synth = {
 		(SynthDef( "test" ) {
-            val st: GE = List( 1, 1 )
-            Out.ar( 0, (RHPF.ar( OnePole.ar( BrownNoise.ar( st ), 0.99 ),
-                              LPF.ar( BrownNoise.ar( st ), 14 )
+//            val st: GE = List( 1, 1 )
+            Out.ar( 0, (RHPF.ar( OnePole.ar( BrownNoise.ar( List( 1, 1 )), 0.99 ),
+                              LPF.ar( BrownNoise.ar( List( 1, 1 )), 14 )
                         * 400 + 500, 0.03 ) * 0.003) +
-                    (RHPF.ar( OnePole.ar( BrownNoise.ar( st ), 0.99),
-                              LPF.ar( BrownNoise.ar( st ), 20 )
+                    (RHPF.ar( OnePole.ar( BrownNoise.ar( List( 1, 1 )), 0.99),
+                              LPF.ar( BrownNoise.ar( List( 1, 1 )), 20 )
                         * 800 + 1000, 0.03 ) * 0.005) )
 		}).play( Server.default )
 	}
