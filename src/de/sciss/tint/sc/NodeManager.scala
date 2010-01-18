@@ -2,7 +2,7 @@
  *  NodeManager.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -33,15 +33,25 @@ import _root_.edu.uci.ics.jung.graph.{ DelegateTree, DirectedGraph, DirectedSpar
 import _root_.edu.uci.ics.jung.graph.util.Graphs
 */
 
-import _root_.scala.collection.immutable.IntMap
-import _root_.scala.collection.mutable.ListBuffer
+import scala.collection.immutable.IntMap
+import scala.collection.mutable.ListBuffer
 
 /**
- *	@version	0.10, 27-Nov-09
+ *	@version	0.11, 18-Jan-10
  *	@author		Hanns Holger Rutz
  */
-class NodeManager( server: Server ) {
+object NodeManager {
+    case class NodeGo(  node: Node, msg: OSCNodeChange )
+    case class NodeEnd( node: Node, msg: OSCNodeChange )
+    case class NodeOn(  node: Node, msg: OSCNodeChange )
+    case class NodeOff( node: Node, msg: OSCNodeChange )
+    case class NodeMove( node: Node, msg: OSCNodeChange )
+}
 
+class NodeManager( server: Server ) extends Model {
+
+    import NodeManager._
+    
 /*
 	val graph: DirectedGraph[ Node, Long ] = Graphs.synchronizedDirectedGraph( new DirectedSparseGraph() )
 	val ograph = new ObservableGraph( graph )
@@ -52,18 +62,18 @@ class NodeManager( server: Server ) {
 	
 	// ---- constructor ----
 	{
-		val rootNode = new Group( server, 0 )
+		val rootNode = server.rootNode // new Group( server, 0 )
 /*
 		ograph.addVertex( rootNode )
 */
 		nodes += rootNode.id -> rootNode
-		val baseNode = new Group( server, 1 )
+//		val baseNode = server.defaultGroup // new Group( server, 1 )
 //		dtree.addChild( (rootNode.id.toLong << 32) | (baseNode.id.toLong & 0xFFFFFFFF), rootNode, baseNode )
 /*
 		ograph.addVertex( baseNode )
 		ograph.addEdge( (rootNode.id.toLong << 32) | (baseNode.id.toLong & 0xFFFFFFFF), rootNode, baseNode )
 */
-		nodes += baseNode.id -> baseNode
+//		nodes += baseNode.id -> baseNode
 		// XXX
 //		dtree.addChild( edgeID, parent, node )
 	}
@@ -107,6 +117,8 @@ class NodeManager( server: Server ) {
 				ograph.addEdge( edgeID, parent, node )
 			}
 */		})
+
+        dispatch( NodeGo( node, e ))
 	}
 	
 	private def nodeEnd( node: Node, e: OSCNodeChange ) {
@@ -118,18 +130,20 @@ class NodeManager( server: Server ) {
 			val edgeID = (parent.id.toLong << 32) | (node.id.toLong & 0xFFFFFF)
 		})
 /*		ograph.removeVertex( node )*/
+
+        dispatch( NodeEnd( node, e ))
 	}
 
 	private def nodeOff( node: Node, e: OSCNodeChange ) {
-		
+        dispatch( NodeOff( node, e ))
 	}
 
 	private def nodeOn( node: Node, e: OSCNodeChange ) {
-		
+        dispatch( NodeOn( node, e ))
 	}
 
 	private def nodeMove( node: Node, e: OSCNodeChange ) {
-		
+        dispatch( NodeMove( node, e ))
 	}
 	
 	// eventually this should be done automatically

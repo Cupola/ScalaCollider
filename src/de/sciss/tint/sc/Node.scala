@@ -57,11 +57,23 @@ extends Object
 	var isPlaying	= false
 	var isRunning = false
 
-	def register : Node = register( false )
-	def register( assumePlaying: Boolean ) : Node = {
-  		NodeWatcher.register( this, assumePlaying )
-  		this
+	def register: Unit = register( false )
+	def register( assumePlaying: Boolean ) {
+//  	NodeWatcher.register( this, assumePlaying )
+       server.nodeMgr.register( this )
   	}
+
+    def onEnd( thunk: => Unit ) {
+        val nm = server.nodeMgr
+        nm.register( this )
+        def l( msg: AnyRef ) : Unit = msg match {
+            case NodeManager.NodeEnd( _, _ ) => {
+                nm.removeListener( l )
+                thunk
+            }
+        }
+        nm.addListener( l )
+    }
 
 	def free : Node = free( true )
 

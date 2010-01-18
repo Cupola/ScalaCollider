@@ -2,7 +2,7 @@
  *  Buffer.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -27,57 +27,87 @@
  */
 package de.sciss.tint.sc
 
-import _root_.de.sciss.scalaosc.OSCMessage
+import de.sciss.scalaosc.OSCMessage
 
 /**
- * 	@version	0.13, 24-Nov-09
+ * 	@version	0.14, 18-Jan-10
  */
 //object Buffer {
 //  
 //}
 
-class Buffer( val server: Server = Server.default, val numFrames: Int, val numChannels: Int = 1 )( val bufNum: Int = server.getBufferAllocator.alloc( 1 )) {
+class Buffer( val server: Server, val numFrames: Int, val numChannels: Int, val bufNum: Int ) {
+    def this( server: Server, numFrames: Int ) =
+      this( server, numFrames, 1, server.getBufferAllocator.alloc( 1 ))
+
+    def this( server: Server, numFrames: Int, numChannels: Int ) =
+      this( server, numFrames, numChannels, server.getBufferAllocator.alloc( 1 ))
+
 //	def this( server: Server = Server.default, numFrames: Int, numChannels: Int = 1 ) = this( server, numFrames, numChannels, server.getBufferAllocator.alloc( 1 ))
 //	val bufNum = if( bufNumPreliminary >= 0 ) bufNumPreliminary else server.getBufferAllocator.alloc( 1 )
-			
-	def free( completionMessage: Option[ Buffer => OSCMessage ] = None ) {
+
+    def free { server.sendMsg( freeMsg )}
+
+	def free( completionMessage: OSCMessage ) {
 		server.sendMsg( freeMsg( completionMessage ))
 	}
- 
-	def freeMsg( completionMessage: Option[ Buffer => OSCMessage ] = None ) : OSCMessage = {
+
+	def free( completionMessage: Buffer => OSCMessage ): Unit =
+       free( completionMessage.apply( this ))
+
+    def freeMsg: OSCMessage = {
 		uncache
 		server.getBufferAllocator.free( bufNum )
-		if( completionMessage.isDefined ) {
-			OSCMessage( "/b_free", bufNum, completionMessage.get.apply( this ))
-		} else {
-			OSCMessage( "/b_free", bufNum )
-		}
+		OSCMessage( "/b_free", bufNum )
+    }
+
+	def freeMsg( completionMessage: OSCMessage ) : OSCMessage = {
+		uncache
+		server.getBufferAllocator.free( bufNum )
+		OSCMessage( "/b_free", bufNum, completionMessage )
 	}
- 
-	def close( completionMessage: Option[ Buffer => OSCMessage ] = None ) : Unit = {
+
+	def freeMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
+       freeMsg( completionMessage.apply( this ))
+
+    def close { server.sendMsg( closeMsg )}
+
+    def close( completionMessage: OSCMessage ) {
 		server.sendMsg( closeMsg( completionMessage ))
 	}
+
+    def close( completionMessage: Buffer => OSCMessage ): Unit =
+       close( completionMessage.apply( this ))
  
-	def closeMsg( completionMessage: Option[ Buffer => OSCMessage ] = None ) : OSCMessage = {
-		if( completionMessage.isDefined ) {
-			OSCMessage( "/b_close", bufNum, completionMessage.get.apply( this ))
-		} else {
-			OSCMessage( "/b_close", bufNum )
-		}
-	}
+	def closeMsg = OSCMessage( "/b_close", bufNum )
+
+	def closeMsg( completionMessage: OSCMessage ) =
+      OSCMessage( "/b_close", bufNum, completionMessage )
+
+	def closeMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
+      closeMsg( completionMessage.apply( this ))
  
-	def alloc( completionMessage: Option[ Buffer => OSCMessage ] = None ) : Unit = {
+	def alloc { server.sendMsg( allocMsg )}
+
+	def alloc( completionMessage: OSCMessage ) {
 		server.sendMsg( allocMsg( completionMessage ))
 	}
  
-	def allocMsg( completionMessage: Option[ Buffer => OSCMessage ] = None ) : OSCMessage = {
+	def alloc( completionMessage: Buffer => OSCMessage ): Unit =
+      alloc( completionMessage.apply( this ))
+
+	def allocMsg: OSCMessage = {
 		cache
-		if( completionMessage.isDefined ) {
-			OSCMessage( "/b_alloc", bufNum, numFrames, numChannels, completionMessage.get.apply( this ))
-		} else {
-			OSCMessage( "/b_alloc", bufNum, numFrames, numChannels )
-		}
+		OSCMessage( "/b_alloc", bufNum, numFrames, numChannels )
 	}
+
+	def allocMsg( completionMessage: OSCMessage ) : OSCMessage = {
+		cache
+		OSCMessage( "/b_alloc", bufNum, numFrames, numChannels, completionMessage )
+	}
+
+	def allocMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
+      allocMsg( completionMessage.apply( this ))
 
  	def cueSoundFileMsg( path: String, startFrame: Int = 0, completionMessage: Option[ Buffer => OSCMessage ] = None ) : OSCMessage = {
 		if( completionMessage.isDefined ) {

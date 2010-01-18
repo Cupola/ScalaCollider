@@ -553,8 +553,11 @@ extends Object /* with OSCListener */ with ActionListener {
 	  msg match {
 	 	  case statusReply: OSCStatusReplyMessage => {
               alive = deathBounces
-	 	 	  server.condition = Running
+              // note: put the counts before running
+              // because that way e.g. the sampleRate
+              // is instantly available
 	 	 	  server.counts = statusReply
+	 	 	  server.condition = Running
 	 	  }
 	 	  case _ =>
 	  }
