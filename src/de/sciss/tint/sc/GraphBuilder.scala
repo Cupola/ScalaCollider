@@ -39,6 +39,8 @@ trait GE {
   val numOutputs : Int
   def toUGenIns : Seq[ UGenIn ]
 
+  def apply( idx: Int ) : UGenIn = toUGenIns( idx )
+
   // binary ops
   def +( b: GE ) : GE     = BinOp.make( Symbol( "+" ), this, b )
   def -( b: GE ) : GE     = BinOp.make( Symbol( "-" ), this, b )
@@ -128,7 +130,7 @@ trait GE {
 case class GESeq( elements: UGenIn* ) extends GE
 {
   val numOutputs = elements.size
-  def getOutputAt( idx: Int ) = elements( idx )
+//  def getOutputAt( idx: Int ) = elements( idx )
   def toUGenIns : Seq[ UGenIn ] = elements
 
   override def toString = elements.mkString( "[ ", ", ", " ]" )
