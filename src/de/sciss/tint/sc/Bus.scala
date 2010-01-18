@@ -2,7 +2,7 @@
  *  Bus.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -27,32 +27,35 @@
  */
 package de.sciss.tint.sc
 
+class AllocatorExhaustedException( reason: String )
+extends RuntimeException( reason )
+
+import de.sciss.tint.sc.{ control => kr, audio => ar } // name conflict
+
 /**
- *	@version	0.11, 16-Jun-09
+ *	@version	0.12, 18-Jan-10
  */
 object Bus {
 	def control( server: Server = Server.default, numChannels: Int = 1 ) : Bus = {
 		val alloc = server.busses.allocControl( numChannels )
 		if( alloc == -1 ) {
-			println( "Meta_Bus:control: failed to get a control bus allocated."
-				+ "numChannels:" + numChannels + "server:" + server.name )
-			return null
+            throw new AllocatorExhaustedException( "Bus.control: failed to get a bus allocated (" +
+				+ numChannels + " channels on " + server.name + ")" )
 		}
-		new Bus( 'control, alloc, numChannels, server )
+		new Bus( kr, alloc, numChannels, server )
 	}
   
 	def audio( server: Server = Server.default, numChannels: Int = 1 ) : Bus = {
 		val alloc = server.busses.allocAudio( numChannels )
 		if( alloc == -1 ) {
-			println("Meta_Bus:audio: failed to get an audio bus allocated."
-				+ "numChannels:" + numChannels + "server:" + server.name )
-			return null
+            throw new AllocatorExhaustedException( "Bus.audio: failed to get a bus allocated (" +
+				+ numChannels + " channels on " + server.name + ")" )
 		}
-		new Bus( 'audio, alloc, numChannels, server )
+		new Bus( ar, alloc, numChannels, server )
 	}
 }
 
-case class Bus( rate: Symbol, index: Int, numChannels: Int, server: Server ) {
+case class Bus( rate: Rate, index: Int, numChannels: Int, server: Server ) {
 	private var freed = false
 
 	def free {
@@ -61,7 +64,7 @@ case class Bus( rate: Symbol, index: Int, numChannels: Int, server: Server ) {
 	     return
 	  }
 
-	  if( rate == 'audio ) {
+	  if( rate == audio ) {
 		  server.busses.freeAudio( index )
 	  } else {
 		  server.busses.freeControl( index )

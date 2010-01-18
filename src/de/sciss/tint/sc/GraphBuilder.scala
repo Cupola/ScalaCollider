@@ -2,7 +2,7 @@
  *  Constant.scala
  *  GraphBuilder
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -33,7 +33,7 @@ import ugen.{ BinaryOpUGen => BinOp, EnvGen, MulAdd, Silent, Out, UnaryOpUGen =>
 //import Rates._
 
 /**
- * 	@version	0.12, 09-Dec-09
+ * 	@version	0.13, 18-Jan-10
  */
 trait GE {
   val numOutputs : Int
@@ -218,7 +218,7 @@ object GraphBuilder {
 //			}
 		}
 //		val res =
-			new SynthDef( name, fullFunc )
+			new SynthDef( name )( fullFunc )
 //		res.writeDefFile
 //		res
 	}

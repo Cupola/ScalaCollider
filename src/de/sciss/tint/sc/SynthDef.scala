@@ -2,7 +2,7 @@
  *  SynthDef.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -41,9 +41,9 @@ import SC._
 
 /**
  * 	@author		Hanns Holger Rutz
- *	@version	0.15, 09-Dec-09
+ *	@version	0.16, 18-Jan-10
  */
-class SynthDef( val name: String, ugenGraphFunc: () => GE, rates: Seq[Any] = Nil, prependArgs: Seq[Any] = Nil, var variants: Seq[Any] = Nil ) {
+class SynthDef( val name: String, rates: Seq[Any] = Nil, prependArgs: Seq[Any] = Nil, var variants: Seq[Any] = Nil )( ugenGraphFunc: () => GE ) {
 //  private def ugenGraphFunc() = func
 //  private var controlIndex								= 0
 	private val controlValues							= new ListBuffer[ Float ]()
@@ -490,6 +490,10 @@ object SynthDef {
   var synthDefDir = "/tmp/"	// XXX
   
 //  def apply( name: String, func: => Any ) = new SynthDef( name, func, Nil, Nil, Nil )
+  def apply( name: String, rates: Seq[Any] = Nil, prependArgs: Seq[Any] = Nil, variants: Seq[Any] = Nil )( thunk: => GE ) : SynthDef = {
+     def func() = thunk
+     new SynthDef( name, rates, prependArgs, variants )( func )
+  }
   
   def wrap( ugenGraphFunc: () => GE, rates: Seq[Any], prependArgs: Seq[Any] ) : GE = {
 	if( buildSynthDef.isEmpty ) { 

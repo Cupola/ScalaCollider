@@ -2,7 +2,7 @@
  *  Server.scala
  *  Tintantmare
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -217,8 +217,10 @@ extends Model
     dispatch( Counts( newCounts ))
   }
   
-  def dumpTree {
-    new Group( this, 0 ).dumpTree
+  def dumpTree : Unit = dumpTree( false )
+
+  def dumpTree( controls: Boolean ) {
+    rootNode.dumpTree( controls )
   }
   
   def condition = conditionVar

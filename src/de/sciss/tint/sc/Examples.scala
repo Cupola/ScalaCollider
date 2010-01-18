@@ -1,7 +1,7 @@
 package de.sciss.tint.sc
 
 import SC._
-import _root_.scala.Predef._
+// import _root_.scala.Predef._
 import ugen._
 
 object Examples {
@@ -52,17 +52,17 @@ object Examples {
 	
 	/*
 	 *	A babbling brook example, by James McCartney 2007. See
-	 *	http://www.create.ucsb.edu/pipermail/sc-users/2007-April/033231.html
+	 *	http://supercollider.sourceforge.net/audiocode-examples/
 	 */
 	def babblingBrook : Synth = {
-		new SynthDef( "test", () => {
-			val st = Constants.one // MULTICHANNEL BROKEN XXX List[ GE ]( 1, 1 ) // GESeq( List( Constants.one, Constants.one ))
-			Out.ar( 0, List( 0, 1 ).map[ GE, List[ GE ]]( (i) => { 
-			RHPF.ar( OnePole.ar( BrownNoise.ar( st ), 0.99 ),
-			         LPF.ar( BrownNoise.ar( st ), 14 ) * 400 + 500, 0.03 ) * 0.012 +
-			RHPF.ar( OnePole.ar( BrownNoise.ar( st ), 0.99 ),
-			         LPF.ar( BrownNoise.ar( st ), 20 ) * 800 + 1000, 0.03 ) * 0.020
-			}))
+		(SynthDef( "test" ) {
+            val st: GE = List( 1, 1 )
+            Out.ar( 0, (RHPF.ar( OnePole.ar( BrownNoise.ar( st ), 0.99 ),
+                              LPF.ar( BrownNoise.ar( st ), 14 )
+                        * 400 + 500, 0.03 ) * 0.003) +
+                    (RHPF.ar( OnePole.ar( BrownNoise.ar( st ), 0.99),
+                              LPF.ar( BrownNoise.ar( st ), 20 )
+                        * 800 + 1000, 0.03 ) * 0.005) )
 		}).play( Server.default )
 	}
 }
