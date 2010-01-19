@@ -38,13 +38,13 @@ import _root_.scala.math._
 
 /**
  *	@author		Hanns Holger Rutz
- * 	@version	0.12, 12-Jan-10
+ * 	@version	0.12, 19-Jan-10
  */
 object Server {
 //  var default: Option[Server] = None //	= new Server( "local" );
   var default: Server = null
   val all = new HashSet[ Server ]()
-  val statusMsg = OSCMessage( "/status" )
+//  val statusMsg = OSCStatusMessage
   
   def printError( name: String, t: Throwable ) {
     println( name + " : " )
@@ -88,7 +88,7 @@ extends Model
   
   val nodeMgr = new NodeManager( this )
   private val multi	= new OSCMultiResponder( this )
-  c.target_=( addr )
+  c.target = addr
 
 //  private val host = addr.getAddress
 //  if( host == null ) throw new IOException( "Server.new : unresolved network address " + addr );
@@ -293,7 +293,7 @@ extends Model
   }
 */
   def queryCounts {
-    sendMsg( Server.statusMsg )
+    sendMsg( OSCStatusMessage )
   }
   
 //  private def dispatch( what: Symbol ) : Server = {
@@ -313,6 +313,17 @@ extends Model
 
   def register( notified: Boolean = true ) {
   	sendMsg( OSCMessage( "/notify", if( notified ) 1 else 0 ))
+  }
+
+  def dumpOSC( mode: Int = OSCChannel.DUMP_TEXT ) {
+     c.dumpIncomingOSC( mode, filter = _ match {
+        case m: OSCStatusReplyMessage => false
+        case _ => true
+     })
+     c.dumpOutgoingOSC( mode, filter = _ match {
+        case OSCStatusMessage => false
+        case _ => true
+     })
   }
 
   def boot: Unit = boot( true )
