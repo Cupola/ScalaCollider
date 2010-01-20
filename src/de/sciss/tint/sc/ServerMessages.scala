@@ -117,7 +117,7 @@ class OSCStatusReplyMessage( val numUGens: Int, val numSynths: Int, val numGroup
                              val sampleRate: Double, val actualSampleRate: Double )
 extends OSCMessage( "/status.reply", 1, numUGens, numSynths, numGroups, numDefs, avgCPU, peakCPU, sampleRate, actualSampleRate )
 
-object OSCStatusMessage extends OSCMessage( "/status")
+object OSCStatusMessage extends OSCMessage( "/status" )
 
 trait OSCNodeChange {
 	def name: String // aka command (/n_go, /n_end, /n_off, /n_on, /n_move, /n_info)

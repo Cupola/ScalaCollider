@@ -321,7 +321,9 @@ extends Model
         case _ => true
      })
      c.dumpOutgoingOSC( mode, filter = _ match {
-        case OSCStatusMessage => false
+// fucking match doesn not work, need case object here eventually!
+//        case m: OSCStatusMessage.type => false
+        case OSCMessage( "/status" ) => false
         case _ => true
      })
   }
@@ -510,7 +512,7 @@ extends Thread {
         val i = min( buf.length, stream.available )
         stream.read( buf, 0, i )
 //      printStream.write( buf, 0, i )
-        println( new String( buf, 0, i ))
+        print( new String( buf, 0, i ))
       }
     }
     catch { case e: IOException => } // ignored XXX

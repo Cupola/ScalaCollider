@@ -63,10 +63,12 @@ extends Object
        server.nodeMgr.register( this )
   	}
 
+    // XXX maybe Node should extends Model?
+    // which is better?
     def onEnd( thunk: => Unit ) {
         val nm = server.nodeMgr
         nm.register( this )
-        def l( msg: AnyRef ) : Unit = msg match {
+        lazy val l: (AnyRef) => Unit = _ match {
             case NodeManager.NodeEnd( _, _ ) => {
                 nm.removeListener( l )
                 thunk
