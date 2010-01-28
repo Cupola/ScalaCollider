@@ -53,6 +53,8 @@ case object addReplace  extends AddAction( 4 )
 class Node( val server: Server, val id: Int )
 extends Object
 {
+   thisNode =>
+
 	var group : Group = null
 	var isPlaying	= false
 	var isRunning = false
@@ -69,7 +71,8 @@ extends Object
         val nm = server.nodeMgr
         nm.register( this )
         lazy val l: (AnyRef) => Unit = _ match {
-            case NodeManager.NodeEnd( _, _ ) => {
+            case NodeManager.NodeEnd( n, _ ) if( n == thisNode ) => {
+//println( "n_end for " + thisNode )
                 nm.removeListener( l )
                 thunk
             }
