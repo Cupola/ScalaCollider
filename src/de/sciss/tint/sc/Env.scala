@@ -1,8 +1,8 @@
 /*
  *  Env.scala
- *  Tintantmare
+ *  (ScalaCollider)
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -24,240 +24,126 @@
  *
  *
  *  Changelog:
+ *    28-Jan-10   integrated IEnv
  */
-package de.sciss.tint.sc
+package de.sciss.tint
+package sc
 
+import scala.collection.mutable.{ ListBuffer }
 import SC._
 
-object Env {
-	val shapeNames = Map( 'step -> 0, 'lin -> 1, 'linear -> 1, 'exp -> 2, 'exponential -> 2, 'sin -> 3, 'sine -> 3, 'wel -> 4, 'welch -> 4, 'sqr -> 6, 'squared -> 6, 'cub -> 7, 'cubed -> 7 )
- 
-//	def newClear( numSegments: Int ) : Env = {
-//		^this.new(Array.fill(numSegments+1,0), Array.fill(numSegments,1))
-//	}
+trait EnvShape { val id: GE; val curveValue: GE = 0 }
+case class varShape( override id: GE, override curveValue: GE = int2GE( 0 )) extends EnvShape
+case object stepShape extends EnvShape { val id: GE = 0 }
+case object linearShape extends EnvShape { val id: GE = 1 }
+case object exponentialShape extends EnvShape { val id: GE = 2 }
+case object sineShape extends EnvShape { val id: GE = 3 }
+case object welchShape extends EnvShape { val id: GE = 4 }
+case class  curveShape( override curveValue: GE ) extends EnvShape { val id: GE = 5 }
+case object squaredShape extends EnvShape { val id: GE = 6 }
+case object cubedShape extends EnvShape { val id: GE = 7 }
+
+case class EnvSeg( dur: GE, targetLevel: GE, shape: EnvShape = linearShape )
+
+import sc.{ EnvSeg => S }
+
+trait AbstractEnvFactory[ T <: AbstractEnv ] {
+   protected def create( startLevel: GE, segments: S* ) : T
 
 	// fixed duration envelopes
-	def triangle() : Env = triangle( 1.0f, 1.0f )
-	def triangle( dur: Float ) : Env = triangle( dur, 1.0f )
-	def triangle( dur: Float, level: Float ) : Env =  {
-	  val durH = dur * 0.5f;
-	  new Env( List( 0f, level, 0f ), List( dur, dur ), List( 1, 1 ), -99, -99 )
+	def triangle( dur: GE = 1, level: GE = 1 ) : T =  {
+	  val durH = dur * 0.5f
+	  create( 0, S( durH, level ), S( durH, 0 ))
 	}
- 
-	def sine() : Env = sine( 1.0f, 1.0f )
-	def sine( dur: Float ) : Env = sine( dur, 1.0f )
-	def sine( dur: Float, level: Float ) : Env =  {
-	  val durH = dur * 0.5f;
-	  new Env( List( 0f, level, 0f ), List( dur, dur ), List( 3, 3 ), -99, -99 )
+
+	def sine( dur: GE = 1, level: GE = 1 ) : T = {
+	  val durH = dur * 0.5f
+	  create( 0, S( durH, level, sineShape ), S( durH, 0, sineShape ))
 	}
- 
-//	*perc { arg attackTime=0.01, releaseTime=1.0, level=1.0, curve = -4.0;
-//		^this.new(
-//			[0, level, 0],
-//			[attackTime, releaseTime], 
-//			curve
-//		)
-//	} 
-//	*linen { arg attackTime=0.01, sustainTime=1.0, releaseTime=1.0, level=1.0, curve = 'lin;
-//		^this.new(
-//			[0, level, level, 0],
-//			[attackTime, sustainTime, releaseTime], 
-//			curve
-//		)
-//	}
-//	
-//	
-//	// envelopes with sustain
-//	*cutoff { arg releaseTime = 0.1, level = 1.0, curve = 'lin;
-//		^this.new([level, 0], [releaseTime], curve, 0)
-//	}
-//	*dadsr { arg delayTime=0.1, attackTime=0.01, decayTime=0.3, 
-//			sustainLevel=0.5, releaseTime=1.0,
-//				peakLevel=1.0, curve = -4.0, bias = 0.0;
-//		^this.new(
-//			[0, 0, peakLevel, peakLevel * sustainLevel, 0] + bias,
-//			[delayTime, attackTime, decayTime, releaseTime], 
-//			curve,
-//			3
-//		)
-//	}
-//	*adsr { arg attackTime=0.01, decayTime=0.3, 
-//			sustainLevel=0.5, releaseTime=1.0,
-//				peakLevel=1.0, curve = -4.0, bias = 0.0;
-//		^this.new(
-//			[0, peakLevel, peakLevel * sustainLevel, 0] + bias,
-//			[attackTime, decayTime, releaseTime], 
-//			curve,
-//			2
-//		)
-//	}
-//	
-//	*asr { arg attackTime=0.01, sustainLevel=1.0, releaseTime=1.0, curve = -4.0;
-//		^this.new(
-//			[0, sustainLevel, 0],
-//			[attackTime, releaseTime], 
-//			curve,
-//			1
-//		)
-//	}
+
+	def perc( attack: GE = 0.01f, release: GE = 1, level: GE = 1,
+             shape: EnvShape = curveShape( -4 )) : T =
+      create( 0, S( attack, level, shape ), S( release, 0, shape ))
+
+	def linen( attack: GE = 0.01f, sustain: GE = 1, release: GE = 1,
+              level: GE = 1, shape: EnvShape = linearShape ) : T =
+		create( 0, S( attack, level, shape ), S( sustain, level, shape ),
+                 S( release, 0, shape ))
 }
 
-class Env( val levels: Seq[ GE ], val times: Seq[ GE ], val curves: Seq[ GE ],
-		   val releaseNode: Int = -99, val loopNode: Int = -99 ) {
-  
-//  def this( levels: Seq[ GE ], times: Seq[ GE ], curves: Symbol ) =
-//    this( levels, times, dup( curves, times.length ), -99, -99 )
+object Env extends AbstractEnvFactory[ Env ] {
+   protected def create( startLevel: GE, segments: S* ) =
+      new Env( startLevel, segments )
 
-//	var <array;
-
-//	levels_ { arg z; 
-//		levels = z;
-//		array = nil;
-//	} 
-//	times_ { arg z; 
-//		times = z;
-//		array = nil;
-//	} 
-//	curves_ { arg z; 
-//		curves = z;
-//		array = nil;
-//	} 
-//	releaseNode_ { arg z; 
-//		releaseNode = z;
-//		array = nil;
-//	} 
-//	loopNode_ { arg z; 
-//		loopNode = z;
-//		array = nil;
-//	}
- 
-//	== { arg that;
-//		^this.compareObject(that,['levels','times','curves','releaseNode','loopNode'])
-//	}
-	
-	def toArray : Array[ GE ] = {
-//		if (array.isNil) { array = this.prAsArray }
-//		^array
-		val contents = new scala.collection.mutable.ListBuffer[ GE ]
-		                                                        
-        contents += levels( 0 )
-        contents += times.size.toFloat
-        contents += releaseNode.toFloat
-        contents += loopNode.toFloat 
-		for( i <- (0 until times.size) ) {
-			contents += levels( i + 1 )
-			contents += times( i )
-			contents +=	curves( i ) // shapeNumber( curves( i ))
-			contents += 0 // XXX curveValue( curves( i ))
-		}
-		contents.toArray
+	// envelopes with sustain
+	def cutoff( release: GE = 0.1f, level: GE = 1, shape: EnvShape = linearShape ) : Env = {
+      val releaseLevel: GE = shape match {
+         case `exponentialShape` => 1e-05f // dbamp( -100 )
+         case _ => 0
+      }
+		new Env( level, List( S( release, releaseLevel, shape )), 0 )
 	}
+
+	def dadsr( delay: GE = 0.1f, attack: GE = 0.01f, decay: GE = 0.3,
+         	  sustainLevel: GE = 0.5f, release: GE = 1,
+  				  peakLevel: GE = 1, shape: EnvShape = curveShape( -4 ),
+              bias: GE = 0 ) =
+      new Env( bias, List( S( delay,   bias, shape ),
+                           S( attack,  peakLevel + bias, shape ),
+                           S( decay,   peakLevel * sustainLevel + bias, shape ),
+                           S( release, bias, shape )), 3 )
+
+	def adsr( attack: GE = 0.01f, decay: GE = 0.3f, sustainLevel: GE = 0.5f,
+             release: GE = 1, peakLevel: GE = 1, shape: EnvShape = curveShape( -4 ),
+             bias: GE = 0 ) =
+		new Env( bias, List( S( attack, bias, shape ),
+                           S( decay, peakLevel * sustainLevel + bias, shape ),
+                           S( release, bias, shape )), 2 )
+
+	def asr( attack: GE = 0.01f, level: GE = 1, release: GE = 1,
+            shape: EnvShape = curveShape( -4 )) =
+		new Env( 0, List( S( attack, level, shape ), S( release, 0, shape )), 1 )
+}
+
+trait AbstractEnv {
+   val startLevel: GE
+   val segments: Seq[ EnvSeg ]
+   def isSustained : Boolean
+// note: we do not define toSeq because the format is
+// significantly different so there is little sense in doing so
+//	def toSeq : Seq[ GE ] ...
+}
+
+case class Env( startLevel: GE, segments: Seq[ EnvSeg ],
+                releaseNode: GE = -99, loopNode: GE = -99 )
+extends AbstractEnv {
+  
+	def toList : List[ GE ] =
+      List[ GE ]( startLevel, segments.size, releaseNode, loopNode ) :::
+      segments.toList.flatMap( seg =>
+         List( seg.targetLevel, seg.dur, seg.shape.id, seg.shape.curveValue ))
 	
 //	at { arg time;
 //		^this.asArray.envAt(time)
 //	}
 //	
-//	asPseg {
-//		var c = if(curves.isSequenceableCollection.not) { curves } { Pseq(curves) };
-//		^Pseg(Pseq(levels), Pseq(times ++ [1.0]), c) // last time is a dummy
-//	}
-//	
-	
-//	releaseTime {
-//		if(releaseNode.notNil,{
-//			^times.copyRange(releaseNode,times.size - 1).sum
-//		},{
-//			^0.0 // ?
-//		})
-//	}
 
-//	// blend two envelopes
-//	blend { arg argAnotherEnv, argBlendFrac=0.5;
-//		^this.class.new(
-//			levels.blend(argAnotherEnv.levels, argBlendFrac),
-//			times.blend(argAnotherEnv.times, argBlendFrac),
-//			curves.blend(argAnotherEnv.curves, argBlendFrac),
-//			releaseNode,
-//			loopNode
-//		)
-//	}
-//	
-//	// delay the onset of the envelope
-//	delay { arg delay;
-//		^Env([levels[0]] ++ levels,
-//			[delay] ++ times,
-//			if (curves.isArray) {['lin] ++ curves} {curves},
-//			if(releaseNode.notNil) {releaseNode = releaseNode + 1},
-//			if(loopNode.notNil) {loopNode = loopNode + 1}
-//		)
-//	}
-//	
-//	// connect releaseNode (or end) to first node of envelope
-//	circle { arg timeFromLastToFirst = 0.0, curve = 'lin';
-//		var first0Then1 = Latch.kr(1.0, Impulse.kr(0.0));
-//		if(releaseNode.isNil) {
-//			levels = [0.0]++ levels ++ 0.0;
-//			curves = [curve]++ curves.asArray.wrapExtend(times.size) ++ 'lin';
-//			times  = [first0Then1 * timeFromLastToFirst] ++ times ++ inf;
-//			releaseNode = levels.size - 2;
-//		} {
-//			levels = [0.0]++ levels;
-//			curves = [curve]++ curves.asArray.wrapExtend(times.size);
-//			times  = [first0Then1 * timeFromLastToFirst] ++ times;
-//			releaseNode = releaseNode + 1;
-//		};
-//		loopNode = 0;
-//	}
-//	
+   def isSustained = releaseNode != Constant( -99 )
+}
 
-//	isSustained {
-//		^releaseNode.notNil
-//	}
-		
-	def shapeNumber( shapeName: Symbol ) : Int = {
-//		var shape;
-//		if (shapeName.isValidUGenIn) { ^5 };
-//		shape = shapeNames.at(shapeName);
-//		if (shape.notNil) { ^shape };
-//		Error("Env shape not defined.").throw;
- 	   Env.shapeNames( shapeName )
-	}
- 
-	def curveValue( curve: Symbol ) : Float = {
-//		if (curve.isValidUGenIn, { ^curve },{ ^0 });
-// XXX
-       0
-	}
-	
+object IEnv extends AbstractEnvFactory[ IEnv ] {
+   protected def create( startLevel: GE, segments: S* ) =
+      new IEnv( startLevel, segments )
+}
 
-//	test { arg releaseTime = 3.0;
-//		var id, name, s;
-//		s = Server.default;
-//		id = s.nextNodeID;
-//		name = "env_test_" ++ id;
-//		SynthDef(name, { arg gate=1;
-//			Out.ar(0,
-//				SinOsc.ar(800, pi/2, 0.3) * EnvGen.ar(this, gate, doneAction:2)
-//			)
-//		}).send(s);
-//		SystemClock.sched(0.2, {
-//			s.sendBundle(s.latency, [9, name, id]);
-//			if(this.isSustained) { s.sendBundle(s.latency + releaseTime, [15, id, 0, 0]) };
-//			nil
-//		});
-//	}
-	
-//	discretize {arg n = 1024;
-//		^this.asSignal(n);
-//	}	
-//
-//	range { |lo=0, hi=1|
-//		^this.class.new(levels.linlin(levels.minItem, levels.maxItem, lo, hi), 
-//			times, curves, releaseNode, loopNode)
-//	}
-//
-//	exprange { |lo=0, hi=1|
-//		^this.class.new(levels.linexp(levels.minItem, levels.maxItem, lo, hi), 
-//			times, curves, releaseNode, loopNode)
-//	}
+case class IEnv( startLevel: GE, segments: Seq[ EnvSeg ], offset: GE = 0 )
+extends AbstractEnv {
+	def toList : List[ GE ] = {
+      val totalDur = segments.foldLeft[ GE ]( 0 )( (sum, next) => sum + next.dur )
+      List[ GE ]( offset, startLevel, segments.size, totalDur ) :::
+      segments.toList.flatMap( seg =>
+         List( seg.dur, seg.shape.id, seg.shape.curveValue, seg.targetLevel ))
+   }
+
+   def isSustained = false
 }

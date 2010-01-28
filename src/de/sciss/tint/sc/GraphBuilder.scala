@@ -226,12 +226,10 @@ object GraphBuilder {
 	}
 
 	def makeFadeEnv( fadeTime: Float ) : GE = {
-//		val dt			= ControlName( "fadeTime" ).kr( fadeTime )
 		val dt			= "fadeTime".kr( fadeTime )
-//		val gate		= ControlName( "gate" ).kr( 1 )
-		val gate		= "gate".kr( 1 )
+		val gate       = "gate".kr( 1 )
 		val startVal	= (dt <= 0)
-		EnvGen.kr( new Env( List( startVal, 1, 0 ), List( 1, 1 ), List( 1, 1 ), 1 ), gate, 1, 0, dt, 2 )
+		EnvGen.kr( Env( startVal, List( EnvSeg( 1, 1 ), EnvSeg( 1, 0 )), 1 ), gate, 1, 0, dt, 2 )
 	}
 
   def expand( args: GE* ): Seq[ List[ UGenIn ]] = {

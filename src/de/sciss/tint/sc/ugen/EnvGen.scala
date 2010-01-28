@@ -1,6 +1,6 @@
 /*
  *  EnvGen.scala
- *  Tintantmare
+ *  (ScalaCollider)
  *
  *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
@@ -80,30 +80,35 @@ extends SingleOutUGen( trig, nodeID ) with ControlRated
 object EnvGen {
   def ar( envelope: Env, gate: GE = 1, levelScale: GE = 1, levelBias: GE = 0,
           timeScale: GE = 1, doneAction: GE = doNothing ) : GE = {
-//    val exp = expand( gate, levelScale, levelBias, timeScale, doneAction, envelope.toArray: _* )
-    val exp = expand( (List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envelope.toArray): _* )
+    val exp = expand( (List( gate, levelScale, levelBias, timeScale, doneAction ) ::: envelope.toList): _* )
     simplify( for( List( g, ls, lb, t, d, e @ _* ) <- exp) yield this( audio, g, ls, lb, t, d, e ))
-//  ar( envelope.toArray, gate, levelScale, levelBias, timeScale, doneAction )
   }
-  
-//  def ar( envArray: Array[ GE ], gate: GE, levelScale: GE, levelBias: GE, timeScale: GE, doneAction: GE ) : GE = {
-//  	UGen.multiNew( "EnvGen", audio, List( audio ), List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envArray )
-//  }
   
   def kr( envelope: Env, gate: GE = 1, levelScale: GE = 1, levelBias: GE = 0,
           timeScale: GE = 1, doneAction: GE = doNothing ) : GE = {
-    val exp = expand( (List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envelope.toArray): _* )
+    val exp = expand( (List( gate, levelScale, levelBias, timeScale, doneAction ) ::: envelope.toList): _* )
     simplify( for( List( g, ls, lb, t, d, e @ _* ) <- exp) yield this( control, g, ls, lb, t, d, e ))
   }
-  
-//  def kr( envArray: Array[ GE ], gate: GE, levelScale: GE, levelBias: GE, timeScale: GE, doneAction: GE ) : GE = {
-//  	UGen.multiNew( "EnvGen", control, List( control ), List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envArray )
-//  }
 }
 
 case class EnvGen( rate: Rate, gate: UGenIn, levelScale: UGenIn, levelBias: UGenIn,
                    timeScale: UGenIn, doneAction: UGenIn, envSeq: Seq[ UGenIn ])
 extends SingleOutUGen( (List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envSeq): _* )
+
+object IEnvGen {
+  def ar( envelope: IEnv, index: GE ) : GE = {
+    val exp = expand( (List( index ) ::: envelope.toList): _* )
+    simplify( for( List( i, e @ _* ) <- exp) yield this( audio, i, e ))
+  }
+
+  def kr( envelope: IEnv, index: GE ) : GE = {
+    val exp = expand( (List( index ) ::: envelope.toList): _* )
+    simplify( for( List( i, e @ _* ) <- exp) yield this( control, i, e ))
+  }
+}
+
+case class IEnvGen( rate: Rate, index: UGenIn, ienvSeq: Seq[ UGenIn ])
+extends SingleOutUGen( (List( index ) ++ ienvSeq): _* )
 
 object Linen extends UGen5Args {
 	def ar( gate: GE = 1, attack: GE = 0.01f, sustain: GE = 1, release: GE = 1,
