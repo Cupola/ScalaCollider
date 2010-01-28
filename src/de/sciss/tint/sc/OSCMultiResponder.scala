@@ -24,14 +24,20 @@
  *
  *
  *  Changelog:
+ *    28-Jan-10   dispatching messages from the AWT event thread,
+ *                at least at the moment where kontur needs to get
+ *                some more determinism. Later we ought to use
+ *                actors or so
  */
 package de.sciss.tint.sc
 
-import _root_.java.io.IOException
-import _root_.java.net.SocketAddress
-import _root_.java.util.{ ArrayList, HashMap, List, Map }
+import java.awt.EventQueue
+import java.io.IOException
+import java.net.SocketAddress
+import java.util.{ ArrayList, HashMap, List, Map }
+import scala.collection.immutable.{ Queue }
 
-import _root_.de.sciss.scalaosc.{ OSCClient, OSCMessage }
+import de.sciss.scalaosc.{ OSCClient, OSCMessage }
 
 /**
  *	Despite the name, the <code>OSCMultiResponder</code>
@@ -60,7 +66,7 @@ import _root_.de.sciss.scalaosc.{ OSCClient, OSCMessage }
  *  @author		Hanns Holger Rutz
  *  @version	0.34, 26-Nov-09
  */
-class OSCMultiResponder( server: Server ) extends Object /* with OSCListener */ {
+class OSCMultiResponder( server: Server ) extends Runnable /* with OSCListener */ {
 
   private val allNodes			= new ArrayList[ OSCResponderNode ]()
   private val mapCmdToNodes		= new HashMap[ String, List[ OSCResponderNode ]]()
@@ -68,10 +74,11 @@ class OSCMultiResponder( server: Server ) extends Object /* with OSCListener */ 
 //	private static final boolean		debug				= false; 
 	
   private var	resps				= new Array[OSCResponderNode]( 2 )
-  private val	sync				= new Object
+  private val	sync				= new AnyRef
 
   // ---- constructor ----
 //  c.addOSCListener( this )
+//  server.c.action_=( messageReceived )
   server.c.action_=( messageReceived )
 
   def getSync = sync
@@ -116,7 +123,30 @@ class OSCMultiResponder( server: Server ) extends Object /* with OSCListener */ 
 
   private def ignoreMessage( msg: OSCMessage, sender: SocketAddress, time: Long ) {}
 
-  private def messageReceived( msg: OSCMessage, sender: SocketAddress, time: Long ) {
+   private var msgQueue: Queue[ ReceivedMessage ] = Queue.Empty
+   private var msgInvoked = false
+
+   private def messageReceived( msg: OSCMessage, sender: SocketAddress, time: Long ) {
+      sync.synchronized {
+         msgQueue = msgQueue.enqueue( ReceivedMessage( msg, sender, time ))
+         if( !msgInvoked ) {
+            msgInvoked = true
+            EventQueue.invokeLater( this )
+         }
+      }
+   }
+
+   def run {
+      val toProcess = sync.synchronized {
+         msgInvoked = false
+         val result = msgQueue
+         msgQueue = Queue.Empty
+         result
+      }
+      toProcess.foreach( rm => dispatchMessage( rm.msg, rm.sender, rm.time ))
+   }
+
+  private def dispatchMessage( msg: OSCMessage, sender: SocketAddress, time: Long ) {
 //  synchronized( sync ) {
 	  // new stylee
 	  msg match {
@@ -141,4 +171,6 @@ class OSCMultiResponder( server: Server ) extends Object /* with OSCListener */ 
       i = i + 1
     }
   }
+
+   private case class ReceivedMessage( msg: OSCMessage, sender: SocketAddress, time: Long )
 }
