@@ -8,7 +8,8 @@ object Examples {
 	def main( args: Array[ String ]) {
 //		LiveCoding.startInterpreting
 //		example1
-		debug
+//		debug
+      debug2
 	}
 
 	def debug {
@@ -65,4 +66,25 @@ object Examples {
                         * 800 + 1000, 0.03 ) * 0.005) )
 		}).play( Server.default )
 	}
+
+   def debug2 {
+      val numChannels = 1
+            val synDef = SynthDef( "disk_" + numChannels ) {
+                 val out        = "out".kr
+                 val i_bufNum   = "i_bufNum".ir
+                 val i_dur      = "i_dur".ir
+//                 val i_fadeIn   = "i_fadeIn".ir
+//                 val i_fadeOut  = "i_fadeOut".ir
+                 val amp        = "amp".kr( 1 )
+//                 val i_finTyp   = "i_finTyp".ir( 1 )
+//                 val i_foutTyp  = "i_foutTyp".ir( 1 )
+
+//                 val env = new Env( List( 0, 1, 1, 0 ),
+//				          List( i_fadeIn, i_dur - (i_fadeIn + i_fadeOut), i_fadeOut ),
+//				          List( i_finTyp, 1, i_foutTyp ))
+//                 val envGen = EnvGen.kr( env, doneAction = freeSelf ) * amp
+val envGen = Line.kr( amp, amp, i_dur, doneAction = freeSelf )
+				Out.ar( out, DiskIn.ar( numChannels, i_bufNum ) /* * envGen */)
+			 }
+   }
 }

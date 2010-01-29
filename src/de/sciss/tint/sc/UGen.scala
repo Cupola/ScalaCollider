@@ -409,10 +409,11 @@ trait UGen7Args {
 abstract class MultiOutUGen( val outputRates: Seq[ Rate ], val inputs: Seq[ UGenIn ])
 extends UGen {
 	// a class for UGens with multiple outputs
-	val outputs : Seq[ OutputProxy ] = (0 until outputRates.size) map (i => { 
-			new OutputProxy( this, i ); 
+   val numOutputs = outputRates.size
+   // WARNING: lazy because proxy read source rate
+	lazy val outputs : Seq[ OutputProxy ] = (0 until numOutputs) map (i => {
+			new OutputProxy( this, i )
     })
-    val numOutputs = outputRates.size
     def toUGenIns = outputs
 }
 
@@ -433,8 +434,10 @@ extends UGen with UGenIn {
 }
 
 abstract class ZeroOutUGen( val inputs: UGenIn* )
-extends UGen with UGenIn {
+extends UGen {
   def outputRates = Nil
+  def toUGenIns: Seq[ UGenIn ] = Nil
+  val numOutputs = 0
 
   // XXX code shared with SingleOutUGen
   def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {

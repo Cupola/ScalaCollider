@@ -39,7 +39,15 @@ trait GE {
   val numOutputs : Int
   def toUGenIns : Seq[ UGenIn ]
 
-  def apply( idx: Int ) : UGenIn = toUGenIns( idx )
+// this is awfully dangerous, because
+// with the implicit conversions in action
+// a line like
+//      "amp".kr( 1 )
+// will be seen by the compiler as
+// ControlName( "amp" ).kr.apply( 1 )
+// !!
+//  def apply( idx: Int ) : UGenIn = toUGenIns( idx )
+   def `\\`( idx: Int ) : UGenIn = toUGenIns( idx )
 
   // binary ops
   def +( b: GE ) : GE     = BinOp.make( Symbol( "+" ), this, b )
