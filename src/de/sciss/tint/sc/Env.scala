@@ -30,18 +30,81 @@ package de.sciss.tint
 package sc
 
 import scala.collection.mutable.{ ListBuffer }
+import scala.math.{ max => cmax, _ }
 import SC._
 
-trait EnvShape { val id: GE; val curveValue: GE = 0 }
-case class varShape( override id: GE, override curveValue: GE = int2GE( 0 )) extends EnvShape
-case object stepShape extends EnvShape { val id: GE = 0 }
-case object linearShape extends EnvShape { val id: GE = 1 }
-case object exponentialShape extends EnvShape { val id: GE = 2 }
-case object sineShape extends EnvShape { val id: GE = 3 }
-case object welchShape extends EnvShape { val id: GE = 4 }
-case class  curveShape( override curveValue: GE ) extends EnvShape { val id: GE = 5 }
-case object squaredShape extends EnvShape { val id: GE = 6 }
-case object cubedShape extends EnvShape { val id: GE = 7 }
+trait EnvShape {
+   def idGE: GE
+   def curvatureGE: GE
+}
+
+trait ConstEnvShape extends EnvShape {
+   val id: Int
+   val curvature: Float = 0f
+   def idGE: GE = int2GE( id )
+   val curvatureGE: GE = float2GE( curvature )
+
+   def levelAt( pos: Float, y1: Float, y2: Float ) : Float
+}
+case object stepShape extends ConstEnvShape {
+   val id = 0
+   def levelAt( pos: Float, y1: Float, y2: Float ) =
+      if( pos < 1f ) y1 else y2
+}
+case object linearShape extends ConstEnvShape {
+   val id = 1
+   def levelAt( pos: Float, y1: Float, y2: Float ) =
+      pos * (y2 - y1) + y1
+}
+case object exponentialShape extends ConstEnvShape {
+   val id = 2
+   def levelAt( pos: Float, y1: Float, y2: Float ) = {
+      val y1Lim = cmax( 0.0001f, y1 )
+      (y1Lim * pow( y2 / y1Lim, pos )).toFloat
+   }
+}
+case object sineShape extends ConstEnvShape {
+   val id = 3
+   def levelAt( pos: Float, y1: Float, y2: Float ) =
+      (y1 + (y2 - y1) * (-cos( Pi * pos ) * 0.5 + 0.5)).toFloat
+}
+case object welchShape extends ConstEnvShape {
+   val id = 4
+   def levelAt( pos: Float, y1: Float, y2: Float ) = if( y1 < y2 ) {
+      (y1 + (y2 - y1) * sin( Pi * 0.5 * pos )).toFloat
+   } else {
+      (y2 - (y2 - y1) * sin( Pi * 0.5 * (1 - pos) )).toFloat
+   }
+}
+case class curveShape( override curvature: Float ) extends ConstEnvShape {
+   val id = 5
+   def levelAt( pos: Float, y1: Float, y2: Float ) = if( abs( curvature ) < 0.0001f ) {
+      pos * (y2 - y1) + y1
+   } else {
+      val denom	= 1.0 - exp( curvature )
+      val numer	= 1.0 - exp( pos * curvature )
+      (y1 + (y2 - y1) * (numer / denom)).toFloat
+   }
+}
+case object squaredShape extends ConstEnvShape {
+   val id = 6
+   def levelAt( pos: Float, y1: Float, y2: Float ) = {
+      val y1Pow2	= sqrt( y1 )
+      val y2Pow2	= sqrt( y2 )
+      val yPow2	= pos * (y2Pow2 - y1Pow2) + y1Pow2
+      (yPow2 * yPow2).toFloat
+   }
+}
+case object cubedShape extends ConstEnvShape {
+   val id = 7
+   def levelAt( pos: Float, y1: Float, y2: Float ) = {
+      val y1Pow3	= Math.pow( y1, 0.3333333 )
+      val y2Pow3	= Math.pow( y2, 0.3333333 )
+      val yPow3	= pos * (y2Pow3 - y1Pow3) + y1Pow3
+      (yPow3 * yPow3 * yPow3).toFloat
+   }
+}
+case class varShape( override idGE: GE, override curvatureGE: GE = int2GE( 0 )) extends EnvShape
 
 case class EnvSeg( dur: GE, targetLevel: GE, shape: EnvShape = linearShape )
 
@@ -121,7 +184,7 @@ extends AbstractEnv {
 	def toList : List[ GE ] =
       List[ GE ]( startLevel, segments.size, releaseNode, loopNode ) :::
       segments.toList.flatMap( seg =>
-         List( seg.targetLevel, seg.dur, seg.shape.id, seg.shape.curveValue ))
+         List( seg.targetLevel, seg.dur, seg.shape.idGE, seg.shape.curvatureGE ))
 	
 //	at { arg time;
 //		^this.asArray.envAt(time)
@@ -142,7 +205,7 @@ extends AbstractEnv {
       val totalDur = segments.foldLeft[ GE ]( 0 )( (sum, next) => sum + next.dur )
       List[ GE ]( offset, startLevel, segments.size, totalDur ) :::
       segments.toList.flatMap( seg =>
-         List( seg.dur, seg.shape.id, seg.shape.curveValue, seg.targetLevel ))
+         List( seg.dur, seg.shape.idGE, seg.shape.curvatureGE, seg.targetLevel ))
    }
 
    def isSustained = false
