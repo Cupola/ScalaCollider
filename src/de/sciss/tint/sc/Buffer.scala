@@ -116,23 +116,39 @@ class Buffer( val server: Server, val numFrames: Int, val numChannels: Int, val 
 //	def allocMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
 //      allocMsg( completionMessage.apply( this ))
 
-   def cueSoundFileMsg( path: String, startFrame: Long = 0L, completionMessage: Option[ OSCMessage ] = None ) = {
+   def cueSoundFileMsg( path: String, startFrame: Int = 0, completionMessage: Option[ OSCMessage ] = None ) = {
       completionMessage.map( msg => {
                    OSCMessage( "/b_read", bufNum, path, startFrame, numFrames, 0, 1, msg )
       }) getOrElse OSCMessage( "/b_read", bufNum, path, startFrame, numFrames, 0, 1 )
 	}
 
-   def read( path: String, fileStartFrame: Long = 0L, numFrames: Int = -1, bufStartFrame: Int = 0,
+   def read( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
              leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage ] = None ) {
       server.sendMsg( readMsg( path, fileStartFrame, numFrames, bufStartFrame, leaveOpen, completionMessage ))
    }
 
-   def readMsg( path: String, fileStartFrame: Long = 0L, numFrames: Int = -1, bufStartFrame: Int = 0,
+   def readMsg( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
                 leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage ] = None ) = {
       val loi = if( leaveOpen ) 1 else 0
       completionMessage.map( msg => {
                    OSCMessage( "/b_read", bufNum, path, fileStartFrame, numFrames, bufStartFrame, loi, msg )
       }) getOrElse OSCMessage( "/b_read", bufNum, path, fileStartFrame, numFrames, bufStartFrame, loi )
+   }
+
+   def readChannel( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
+             leaveOpen: Boolean = false, channels: Seq[ Int ],
+             completionMessage: Option[ OSCMessage ] = None ) {
+      server.sendMsg( readChannelMsg( path, fileStartFrame, numFrames, bufStartFrame, leaveOpen,
+         channels, completionMessage ))
+   }
+
+   def readChannelMsg( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
+                leaveOpen: Boolean = false, channels: Seq[ Int ],
+                completionMessage: Option[ OSCMessage ] = None ) = {
+      val loi = if( leaveOpen ) 1 else 0
+      val args = List( bufNum, path, fileStartFrame, numFrames, bufStartFrame, loi ) ::: channels.toList :::
+         completionMessage.map( msg => List( msg )).getOrElse( Nil )
+      OSCMessage( "/b_readChannel", args: _* )
    }
 
    def zero { server.sendMsg( zeroMsg )}
