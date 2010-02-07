@@ -30,92 +30,124 @@ package de.sciss.tint.sc
 import de.sciss.scalaosc.OSCMessage
 
 /**
- * 	@version	0.14, 18-Jan-10
+ * 	@version	0.15, 07-Feb-10
  */
 //object Buffer {
 //  
 //}
 
 class Buffer( val server: Server, val numFrames: Int, val numChannels: Int, val bufNum: Int ) {
-    def this( server: Server, numFrames: Int ) =
+   def this( server: Server, numFrames: Int ) =
       this( server, numFrames, 1, server.getBufferAllocator.alloc( 1 ))
 
-    def this( server: Server, numFrames: Int, numChannels: Int ) =
+   def this( server: Server, numFrames: Int, numChannels: Int ) =
       this( server, numFrames, numChannels, server.getBufferAllocator.alloc( 1 ))
 
 //	def this( server: Server = Server.default, numFrames: Int, numChannels: Int = 1 ) = this( server, numFrames, numChannels, server.getBufferAllocator.alloc( 1 ))
 //	val bufNum = if( bufNumPreliminary >= 0 ) bufNumPreliminary else server.getBufferAllocator.alloc( 1 )
 
-    def free { server.sendMsg( freeMsg )}
+   def free { server.sendMsg( freeMsg )}
 
-	def free( completionMessage: OSCMessage ) {
+	def free( completionMessage: Option[ OSCMessage ]) {
 		server.sendMsg( freeMsg( completionMessage ))
 	}
 
-	def free( completionMessage: Buffer => OSCMessage ): Unit =
-       free( completionMessage.apply( this ))
+//	def free( completionMessage: Buffer => OSCMessage ): Unit =
+//       free( completionMessage.apply( this ))
 
-    def freeMsg: OSCMessage = {
-		uncache
-		server.getBufferAllocator.free( bufNum )
-		OSCMessage( "/b_free", bufNum )
-    }
+   def freeMsg: OSCMessage = {
+      uncache
+      server.getBufferAllocator.free( bufNum )
+      OSCMessage( "/b_free", bufNum )
+   }
 
-	def freeMsg( completionMessage: OSCMessage ) : OSCMessage = {
-		uncache
-		server.getBufferAllocator.free( bufNum )
-		OSCMessage( "/b_free", bufNum, completionMessage )
+	def freeMsg( completionMessage: Option[ OSCMessage ]) : OSCMessage = {
+      completionMessage.map( msg => {
+         uncache
+         server.getBufferAllocator.free( bufNum )
+         OSCMessage( "/b_free", bufNum, msg )
+      }) getOrElse freeMsg
 	}
 
-	def freeMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
-       freeMsg( completionMessage.apply( this ))
+//	def freeMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
+//       freeMsg( completionMessage.apply( this ))
 
-    def close { server.sendMsg( closeMsg )}
+   def close { server.sendMsg( closeMsg )}
 
-    def close( completionMessage: OSCMessage ) {
-		server.sendMsg( closeMsg( completionMessage ))
-	}
+   def close( completionMessage: Option[ OSCMessage ]) {
+      server.sendMsg( closeMsg( completionMessage ))
+   }
 
-    def close( completionMessage: Buffer => OSCMessage ): Unit =
-       close( completionMessage.apply( this ))
+//    def close( completionMessage: Buffer => OSCMessage ): Unit =
+//       close( completionMessage.apply( this ))
  
 	def closeMsg = OSCMessage( "/b_close", bufNum )
 
-	def closeMsg( completionMessage: OSCMessage ) =
-      OSCMessage( "/b_close", bufNum, completionMessage )
+	def closeMsg( completionMessage: Option[ OSCMessage ]) : OSCMessage = {
+      completionMessage.map( msg => {
+         OSCMessage( "/b_close", bufNum, msg )
+      }) getOrElse closeMsg
+   }
 
-	def closeMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
-      closeMsg( completionMessage.apply( this ))
+//	def closeMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
+//      closeMsg( completionMessage.apply( this ))
  
 	def alloc { server.sendMsg( allocMsg )}
 
-	def alloc( completionMessage: OSCMessage ) {
+	def alloc( completionMessage: Option[ OSCMessage ]) {
 		server.sendMsg( allocMsg( completionMessage ))
 	}
  
-	def alloc( completionMessage: Buffer => OSCMessage ): Unit =
-      alloc( completionMessage.apply( this ))
+//	def alloc( completionMessage: Buffer => OSCMessage ): Unit =
+//      alloc( completionMessage.apply( this ))
 
 	def allocMsg: OSCMessage = {
 		cache
 		OSCMessage( "/b_alloc", bufNum, numFrames, numChannels )
 	}
 
-	def allocMsg( completionMessage: OSCMessage ) : OSCMessage = {
-		cache
-		OSCMessage( "/b_alloc", bufNum, numFrames, numChannels, completionMessage )
+	def allocMsg( completionMessage: Option[ OSCMessage ]) : OSCMessage = {
+      completionMessage.map( msg => {
+         cache
+         OSCMessage( "/b_alloc", bufNum, numFrames, numChannels, msg )
+      }) getOrElse allocMsg
 	}
 
-	def allocMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
-      allocMsg( completionMessage.apply( this ))
+//	def allocMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
+//      allocMsg( completionMessage.apply( this ))
 
- 	def cueSoundFileMsg( path: String, startFrame: Int = 0, completionMessage: Option[ Buffer => OSCMessage ] = None ) : OSCMessage = {
-		if( completionMessage.isDefined ) {
-			OSCMessage( "/b_read", bufNum, path, startFrame, numFrames, 0, 1, completionMessage.get.apply( this ))
-		} else {
-			OSCMessage( "/b_read", bufNum, path, startFrame, numFrames, 0, 1 )
-		}
+   def cueSoundFileMsg( path: String, startFrame: Long = 0L, completionMessage: Option[ OSCMessage ] = None ) = {
+      completionMessage.map( msg => {
+                   OSCMessage( "/b_read", bufNum, path, startFrame, numFrames, 0, 1, msg )
+      }) getOrElse OSCMessage( "/b_read", bufNum, path, startFrame, numFrames, 0, 1 )
 	}
+
+   def read( path: String, fileStartFrame: Long = 0L, numFrames: Int = -1, bufStartFrame: Int = 0,
+             leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage ] = None ) {
+      server.sendMsg( readMsg( path, fileStartFrame, numFrames, bufStartFrame, leaveOpen, completionMessage ))
+   }
+
+   def readMsg( path: String, fileStartFrame: Long = 0L, numFrames: Int = -1, bufStartFrame: Int = 0,
+                leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage ] = None ) = {
+      val loi = if( leaveOpen ) 1 else 0
+      completionMessage.map( msg => {
+                   OSCMessage( "/b_read", bufNum, path, fileStartFrame, numFrames, bufStartFrame, loi, msg )
+      }) getOrElse OSCMessage( "/b_read", bufNum, path, fileStartFrame, numFrames, bufStartFrame, loi )
+   }
+
+   def zero { server.sendMsg( zeroMsg )}
+
+   def zero( completionMessage: Option[ OSCMessage ]) {
+      server.sendMsg( zeroMsg( completionMessage ))
+   }
+
+	def zeroMsg = OSCMessage( "/b_zero", bufNum )
+
+	def zeroMsg( completionMessage: Option[ OSCMessage ]) : OSCMessage = {
+      completionMessage.map( msg => {
+         OSCMessage( "/b_zero", bufNum, msg )
+      }) getOrElse zeroMsg
+   }
 
 	// cache Buffers for easy info updating
 	private def cache {

@@ -28,12 +28,8 @@
 
 package de.sciss.tint.sc
 
-//import _root_.scala.actors.Actor.self
+import de.sciss.scalaosc.{ OSCMessage }
 import _root_.scala.math._
-
-// CCC
-//import _root_.scala.continuations.cps
-//import _root_.scala.continuations.ControlContext.suspendable
 
 /**
  *	@author		Hanns Holger Rutz
@@ -62,8 +58,9 @@ object SC {
   }
 
   // mixed number / GE binops
-  def max( a: GE, b: GE ) = a.max( b )
-  def min( a: GE, b: GE ) = a.min( b )
+  // these conflict with scala.math, so we commented them out
+//  def max( a: GE, b: GE ) = a.max( b )
+//  def min( a: GE, b: GE ) = a.min( b )
 
   // Misc
   implicit def string2Option( x: String ) = Some( x )
@@ -71,20 +68,28 @@ object SC {
 //  var res = new Array[T]( num );
     (1 to num) map (y => x)
   }
-  
-  def ampdb( amp: Float ) = (log10( amp ) * 20).toFloat
-  def dbamp( db: Float ) = (exp( db / 20 * log( 10 ))).toFloat
-  def midicps( midi: Float ) = (440 * pow( 2, (midi - 69) * 0.083333333333 )).toFloat
-  def cpsmidi( freq: Float ) = (log( freq * 0.0022727272727 ) / log( 2 ) * 12 + 69).toFloat
+
+   // Buffer convenience
+   implicit def message2Option( msg: OSCMessage ) = Some( msg )
+
+   // Nodes
+   implicit def int2Node( id: Int ) : Node = new Group( Server.default, id )
+   implicit def server2Group( s: Server ) : Group = s.defaultGroup
+
+   // Maths conversions
+   def ampdb( amp: Float ) = (log10( amp ) * 20).toFloat
+   def dbamp( db: Float ) = (exp( db / 20 * log( 10 ))).toFloat
+   def midicps( midi: Float ) = (440 * pow( 2, (midi - 69) * 0.083333333333 )).toFloat
+   def cpsmidi( freq: Float ) = (log( freq * 0.0022727272727 ) / log( 2 ) * 12 + 69).toFloat
   
 //  implicit def stringToStringOrInt( x: String ) = new StringOrInt( x )
 //  implicit def intToStringOrInt( x: Int ) = new StringOrInt( x )
   
-  // String
-  def warn( s: String ) : String = {
-    println( "WARNING:\n" + s )
-    s
-  }
+   // String
+   def warn( s: String ) : String = {
+      println( "WARNING:\n" + s )
+      s
+   }
   
   // Function
   // XXX
@@ -165,8 +170,4 @@ object SC {
 		}
 		synth
 	}
-  
-  // Int
-  implicit def int2Node( id: Int ) : Node = new Group( Server.default, id )
-  implicit def server2Group( s: Server ) : Group = s.defaultGroup
 }
