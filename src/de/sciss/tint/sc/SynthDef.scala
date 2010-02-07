@@ -74,7 +74,9 @@ class SynthDef( val name: String, rates: Seq[Any] = Nil, prependArgs: Seq[Any] =
     this( name, ugenGraphFunc, Nil, Nil, Nil )
   }
 */
-  
+
+   def freeMsg: OSCMessage = OSCMessage( "/d_free", name )
+
   def getControlDesc( name: String ) = controlDescMap( name )
   def getConstantIndex( c: Constant ) = constants.indexOf( c ) // XXX not efficient, should be a map?
 //  def getUGenIndex( u: UGen ) = ugens.indexOf( u )

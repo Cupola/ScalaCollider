@@ -41,14 +41,15 @@ trait OSCMessageCodec {
 
 object ServerCodec extends OSCPacketCodec {
 	private val msgDecoders = Map[ String, (String, ByteBuffer) => OSCMessage ](
-		"/status.reply"	-> decodeStatusReply,
-		"/n_go"			-> decodeNodeChange,
-		"/n_end"		-> decodeNodeChange,
-		"/n_off"		-> decodeNodeChange,
-		"/n_on"			-> decodeNodeChange,
-		"/n_move"		-> decodeNodeChange,
-		"/n_info"		-> decodeNodeChange,
-		"status.reply"	-> decodeStatusReply
+		"/status.reply"   -> decodeStatusReply,
+		"/n_go"			   -> decodeNodeChange,
+		"/n_end"		      -> decodeNodeChange,
+		"/n_off"		      -> decodeNodeChange,
+		"/n_on"			   -> decodeNodeChange,
+		"/n_move"		   -> decodeNodeChange,
+		"/n_info"		   -> decodeNodeChange,
+      "/synced"         -> decodeSynced,
+		"status.reply"	   -> decodeStatusReply
 	)
 
     private val superDecoder: (String, ByteBuffer ) => OSCMessage =
@@ -86,6 +87,16 @@ object ServerCodec extends OSCPacketCodec {
 		                           avgCPU, peakCPU, sampleRate, actualSampleRate )
 	}
 
+   private def decodeSynced( name: String, b: ByteBuffer ) : OSCMessage = {
+      // ",i"
+      if( b.getShort() != 0x2C69 ) decodeFail
+      skipToValues( b )
+
+      val id = b.getInt()
+
+      new OSCSyncedMessage( id )
+   }
+
 	private def decodeNodeChange( name: String, b: ByteBuffer ) : OSCMessage = {
 		// ",iiiii[ii]"
 		if( (b.getInt() != 0x2C696969) || (b.getShort() != 0x6969) ) decodeFail
@@ -111,6 +122,9 @@ object ServerCodec extends OSCPacketCodec {
 	}
 }
 // val nodeID: Int, val parentID: Int, val predID: Int, val succID: Int, val headID: Int, val tailID: Int )
+
+class OSCSyncMessage( val id: Int ) extends OSCMessage( "/sync", id )
+class OSCSyncedMessage( val id: Int ) extends OSCMessage( "/synced", id )
 
 class OSCStatusReplyMessage( val numUGens: Int, val numSynths: Int, val numGroups: Int,
                              val numDefs: Int, val avgCPU: Float, val peakCPU: Float,

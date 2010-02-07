@@ -190,7 +190,7 @@ extends Model
 
   	def sync( delta: Double = -1, bundles: Seq[ OSCMessage ] = Nil ) {
   		val id		= UniqueID.next
-  		var bndl2	= bundles ++ List( new OSCMessage( "/sync", Array( id.asInstanceOf[ AnyRef ])))
+  		var bndl2	= bundles ++ List( new OSCSyncMessage( id ))
   		val cond	= new AnyRef
   		val resp	= new OSCResponderNode( this, "/synced", (msg, addr, when) =>
   			(if( msg( 0 ) == id ) cond.synchronized { cond.notify })
@@ -201,6 +201,9 @@ extends Model
   	  		cond.wait
   	  	}
   	}
+
+//   def syncMsg( id: Int ) : OSCMessage =
+//      new OSCMessage( "/sync", id ) with Async
   
 //  def listSendMsg( p: Seq[ Any ]) {
 //    c.send( new OSCMessage( cmd, p.map( _.asInstanceOf[ AnyRef ]).toArray )) 
@@ -311,9 +314,14 @@ extends Model
 //    this
 //  }
 
-  def register( notified: Boolean = true ) {
-  	sendMsg( OSCMessage( "/notify", if( notified ) 1 else 0 ))
-  }
+   // note: this is called register instead of
+   // notify to avoid conflict with notify in java.lang.Object
+   def register( onOff: Boolean = true ) {
+      sendMsg( notifyMsg( onOff ))
+   }
+
+   def notifyMsg( onOff: Boolean = true ) : OSCMessage =
+      OSCMessage( "/notify", if( onOff ) 1 else 0 )
 
   def dumpOSC( mode: Int = OSCChannel.DUMP_TEXT ) {
      c.dumpIncomingOSC( mode, filter = _ match {
@@ -419,10 +427,12 @@ extends Model
   }
   
   def quit {
-    sendMsg( OSCMessage( "/quit" ))
+    sendMsg( quitMsg )
     println( "/quit sent" )
     cleanUpAfterQuit
   }
+
+  def quitMsg = OSCMessage( "/quit" )
 
   private def cleanUpAfterQuit {
     try {
