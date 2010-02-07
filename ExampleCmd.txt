@@ -133,7 +133,7 @@ val x = play {
 val x = play {
     val z = RLPF.ar(
         Pulse.ar(
-            max( SinOsc.kr(4).madd(1, 80),
+            SinOsc.kr(4).madd(1, 80).max(
                 Decay.ar(LFPulse.ar(0.1, 0, 0.05) * Impulse.ar(8) * 500, 2)
             ), 
             LFNoise1.kr(0.157).madd(0.4, 0.5)
@@ -307,7 +307,7 @@ val x = play {
         val excitation = PinkNoise.ar(
             // if amplitude is below zero it is clipped
             // density determines the probability of being above zero
-            max(0, LFNoise1.kr(8).madd(dmul, dadd)) 
+            LFNoise1.kr(8).madd(dmul, dadd).max(0)
         )
 
         val freq = Lag.kr(             // lag the pitch so it glissandos between pitches
