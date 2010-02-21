@@ -65,6 +65,21 @@ extends Object
        server.nodeMgr.register( this )
   	}
 
+   // XXX maybe Node should extends Model?
+   // which is better?
+   def onGo( thunk: => Unit ) {
+       val nm = server.nodeMgr
+       nm.register( this )
+       lazy val l: (AnyRef) => Unit = _ match {
+           case NodeManager.NodeGo( n, _ ) if( n == thisNode ) => {
+//println( "n_go for " + thisNode )
+               nm.removeListener( l )
+               thunk
+           }
+       }
+       nm.addListener( l )
+   }
+
     // XXX maybe Node should extends Model?
     // which is better?
     def onEnd( thunk: => Unit ) {
