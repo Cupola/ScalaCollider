@@ -460,10 +460,10 @@ extends Thread {
   var keepRunning = true
   
 //  private val folder = new File( "/Users/rutz/Documents/devel/fromSVN/SuperCollider3/build" )
-  private val program = server.options.program.value
+  private val program = server.options.programPath.value
   println( "Booting '" + program + "'" )
   private val file = new File( program )
-  private val processArgs = server.options.toProcessArgs.toArray
+  private val processArgs = server.options.toRealtimeArgs.toArray
   private val pb = new ProcessBuilder( processArgs: _* )
     .directory( file.getParentFile )
     .redirectErrorStream( true )
