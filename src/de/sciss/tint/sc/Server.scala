@@ -163,6 +163,10 @@ extends Model
 	      }
 	  )
 	}
+
+   def sendBundle( bndl: OSCBundle ) {
+      c.send( bndl )
+   }
   
 //	def sync( condition: Cond = new Cond, bundles: List[ List[ _ ]], latency : Float ) : Unit = { // array of bundles that cause async action
 //		if( bundles.isEmpty ) {

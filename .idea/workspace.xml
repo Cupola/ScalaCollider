@@ -3,11 +3,10 @@
   <component name="ChangeListManager" verified="true">
     <list default="true" readonly="true" id="01886865-ff38-4eb7-a79d-92e783f03245" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/ServerOptions.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/ServerOptions.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/Server.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/Server.scala" />
     </list>
-    <ignored path=".idea/workspace.xml" />
     <ignored path="ScalaCollider.iws" />
+    <ignored path=".idea/workspace.xml" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,7 +66,7 @@
       <file leaf-file-name="Server.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Server.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="76" column="6" selection-start="2745" selection-end="2757" vertical-scroll-proportion="0.7600596">
+            <state line="167" column="20" selection-start="5605" selection-end="5605" vertical-scroll-proportion="0.79880774">
               <folding />
             </state>
           </provider>
@@ -76,7 +75,7 @@
       <file leaf-file-name="ServerOptions.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/ServerOptions.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="32" column="17" selection-start="1049" selection-end="1049" vertical-scroll-proportion="-3.4615386">
+            <state line="32" column="17" selection-start="1049" selection-end="1049" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -106,8 +105,8 @@
         <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/ugen/Hilbert.scala" />
         <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/Buffer.scala" />
         <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/Node.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/Server.scala" />
         <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/ServerOptions.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/Server.scala" />
       </list>
     </option>
   </component>
@@ -146,8 +145,9 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Favorites" />
       <pane id="PackagesPane" />
+      <pane id="Favorites" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -186,7 +186,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -380,25 +379,25 @@
     <supportedVersion>125</supportedVersion>
   </component>
   <component name="ToolWindowManager">
-    <frame x="3" y="22" width="1389" height="860" extended-state="0" />
+    <frame x="9" y="22" width="1389" height="860" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32972974" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32910448" sideWeight="0.6608108" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32910448" sideWeight="0.6608108" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32972974" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32972974" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24981357" sideWeight="0.6608108" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -498,28 +497,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Node.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="70" column="41" selection-start="1978" selection-end="1978" vertical-scroll-proportion="0.021067416">
-          <folding />
-        </state>
+        <state line="70" column="41" selection-start="1978" selection-end="1978" vertical-scroll-proportion="0.021067416" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Buffer.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="40" column="70" selection-start="1267" selection-end="1303" vertical-scroll-proportion="0.021520803">
-          <folding />
-        </state>
+        <state line="40" column="70" selection-start="1267" selection-end="1303" vertical-scroll-proportion="0.021520803" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/ServerOptions.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="17" selection-start="1049" selection-end="1049" vertical-scroll-proportion="-3.4615386">
-          <folding />
-        </state>
+        <state line="32" column="17" selection-start="1049" selection-end="1049" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Server.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="76" column="6" selection-start="2745" selection-end="2757" vertical-scroll-proportion="0.7600596">
+        <state line="167" column="20" selection-start="5605" selection-end="5605" vertical-scroll-proportion="0.79880774">
           <folding />
         </state>
       </provider>
