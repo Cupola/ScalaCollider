@@ -37,15 +37,16 @@ import scala.collection.immutable.IntMap
 import scala.collection.mutable.ListBuffer
 
 /**
- *	@version	0.11, 18-Jan-10
+ *	@version    0.11, 03-Mar-10
  *	@author		Hanns Holger Rutz
  */
 object NodeManager {
-    case class NodeGo(  node: Node, msg: OSCNodeChange )
-    case class NodeEnd( node: Node, msg: OSCNodeChange )
-    case class NodeOn(  node: Node, msg: OSCNodeChange )
-    case class NodeOff( node: Node, msg: OSCNodeChange )
-    case class NodeMove( node: Node, msg: OSCNodeChange )
+   trait NodeChange { def node: Node; def msg: OSCNodeChange }
+   case class NodeGo(   node: Node, msg: OSCNodeChange ) extends NodeChange
+   case class NodeEnd(  node: Node, msg: OSCNodeChange ) extends NodeChange
+   case class NodeOn(   node: Node, msg: OSCNodeChange ) extends NodeChange
+   case class NodeOff(  node: Node, msg: OSCNodeChange ) extends NodeChange
+   case class NodeMove( node: Node, msg: OSCNodeChange ) extends NodeChange
 }
 
 class NodeManager( server: Server ) extends Model {
@@ -67,6 +68,11 @@ class NodeManager( server: Server ) extends Model {
 		ograph.addVertex( rootNode )
 */
 		nodes += rootNode.id -> rootNode
+      if( server.isRunning ) {
+         val defaultGroup = server.defaultGroup
+         nodes += defaultGroup.id -> defaultGroup
+      }
+      
 //		val baseNode = server.defaultGroup // new Group( server, 1 )
 //		dtree.addChild( (rootNode.id.toLong << 32) | (baseNode.id.toLong & 0xFFFFFFFF), rootNode, baseNode )
 /*
@@ -108,17 +114,17 @@ class NodeManager( server: Server ) extends Model {
 	}
 
 	private def nodeGo( node: Node, e: OSCNodeChange ) {
-		val parentO = nodes.get( e.parentID )
-		
-		parentO.foreach( parent => {
-			val edgeID = (parent.id.toLong << 32) | (node.id.toLong & 0xFFFFFF)
-/*			if( !ograph.containsVertex( node )) {
-				ograph.addVertex( node )
-				ograph.addEdge( edgeID, parent, node )
-			}
-*/		})
+//		val parentO = nodes.get( e.parentID )
+//
+//		parentO.foreach( parent => {
+//			val edgeID = (parent.id.toLong << 32) | (node.id.toLong & 0xFFFFFF)
+///*			if( !ograph.containsVertex( node )) {
+//				ograph.addVertex( node )
+//				ograph.addEdge( edgeID, parent, node )
+//			}
+//*/		})
 
-        dispatch( NodeGo( node, e ))
+      dispatchBoth( NodeGo( node, e ))
 	}
 	
 	private def nodeEnd( node: Node, e: OSCNodeChange ) {
@@ -126,25 +132,30 @@ class NodeManager( server: Server ) extends Model {
 		
 		nodes -= node.id
 		
-		parentO.foreach( parent => {
-			val edgeID = (parent.id.toLong << 32) | (node.id.toLong & 0xFFFFFF)
-		})
+//		parentO.foreach( parent => {
+//			val edgeID = (parent.id.toLong << 32) | (node.id.toLong & 0xFFFFFF)
+//		})
 /*		ograph.removeVertex( node )*/
 
-        dispatch( NodeEnd( node, e ))
+      dispatchBoth( NodeEnd( node, e ))
 	}
 
 	private def nodeOff( node: Node, e: OSCNodeChange ) {
-        dispatch( NodeOff( node, e ))
+      dispatchBoth( NodeOff( node, e ))
 	}
 
 	private def nodeOn( node: Node, e: OSCNodeChange ) {
-        dispatch( NodeOn( node, e ))
+      dispatchBoth( NodeOn( node, e ))
 	}
 
 	private def nodeMove( node: Node, e: OSCNodeChange ) {
-        dispatch( NodeMove( node, e ))
+      dispatchBoth( NodeMove( node, e ))
 	}
+
+   private def dispatchBoth( change: NodeChange ) {
+      dispatch( change )
+      change.node.updated( change )
+   }
 	
 	// eventually this should be done automatically
 	// by the message dispatch management

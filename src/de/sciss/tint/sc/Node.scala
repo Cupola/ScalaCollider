@@ -48,13 +48,11 @@ case object addReplace  extends AddAction( 4 )
 
 /**
  * 	@author		Hanns Holger Rutz
- *	@version	0.12, 24-Nov-09
+ *    @version    0.13, 03-Mar-10
  */
 class Node( val server: Server, val id: Int )
-extends Object
+extends Model
 {
-   thisNode =>
-
 	var group : Group = null
 	var isPlaying	= false
 	var isRunning = false
@@ -65,35 +63,32 @@ extends Object
        server.nodeMgr.register( this )
   	}
 
-   // XXX maybe Node should extends Model?
-   // which is better?
    def onGo( thunk: => Unit ) {
-       val nm = server.nodeMgr
-       nm.register( this )
-       lazy val l: (AnyRef) => Unit = _ match {
-           case NodeManager.NodeGo( n, _ ) if( n == thisNode ) => {
-//println( "n_go for " + thisNode )
-               nm.removeListener( l )
-               thunk
-           }
-       }
-       nm.addListener( l )
+      register
+      lazy val l: (AnyRef) => Unit = _ match {
+         case NodeManager.NodeGo( _, _ ) => {
+            removeListener( l )
+            thunk
+         }
+      }
+      addListener( l )
    }
 
-    // XXX maybe Node should extends Model?
-    // which is better?
-    def onEnd( thunk: => Unit ) {
-        val nm = server.nodeMgr
-        nm.register( this )
-        lazy val l: (AnyRef) => Unit = _ match {
-            case NodeManager.NodeEnd( n, _ ) if( n == thisNode ) => {
-//println( "n_end for " + thisNode )
-                nm.removeListener( l )
-                thunk
-            }
-        }
-        nm.addListener( l )
-    }
+   def onEnd( thunk: => Unit ) {
+      register
+      lazy val l: (AnyRef) => Unit = _ match {
+         case NodeManager.NodeEnd( _, _ ) => {
+            removeListener( l )
+            thunk
+         }
+      }
+      addListener( l )
+   }
+
+   protected[sc] def updated( change: NodeManager.NodeChange ) {
+      // XXX need to update isPlaying, isRunning etc.
+      dispatch( change )
+   }
 
 	def free : Node = free( true )
 

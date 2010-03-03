@@ -34,7 +34,7 @@ package de.sciss.tint.sc
 import java.awt.EventQueue
 import java.io.IOException
 import java.net.SocketAddress
-import java.util.{ ArrayList, HashMap, List, Map }
+//import java.util.{ ArrayList, HashMap, List, Map }
 import scala.collection.immutable.{ Queue }
 
 import de.sciss.scalaosc.{ OSCClient, OSCMessage }
@@ -64,16 +64,22 @@ import de.sciss.scalaosc.{ OSCClient, OSCMessage }
  *	a multi responder for its address upon instantiation.
  *
  *  @author		Hanns Holger Rutz
- *  @version	0.34, 26-Nov-09
+ *  @version	0.35, 03-Mar-10
  */
-class OSCMultiResponder( server: Server ) extends Runnable /* with OSCListener */ {
+object OSCMultiResponder {
+   private val emptySet = Set.empty[ OSCResponderNode ]
+   private def ignoreMessage( msg: OSCMessage, sender: SocketAddress, time: Long ) {}
+}
 
-  private val allNodes			= new ArrayList[ OSCResponderNode ]()
-  private val mapCmdToNodes		= new HashMap[ String, List[ OSCResponderNode ]]()
+class OSCMultiResponder( server: Server ) extends Runnable /* with OSCListener */ {
+   import OSCMultiResponder._
+
+//  private val allNodes			= new ArrayList[ OSCResponderNode ]()
+  private var mapCmdToNodes   = Map.empty[ String, Set[ OSCResponderNode ]]
 
 //	private static final boolean		debug				= false; 
 	
-  private var	resps				= new Array[OSCResponderNode]( 2 )
+//  private var	resps				= new Array[OSCResponderNode]( 2 )
   private val	sync				= new AnyRef
 
   // ---- constructor ----
@@ -85,26 +91,21 @@ class OSCMultiResponder( server: Server ) extends Runnable /* with OSCListener *
 
   def addNode( node: OSCResponderNode ) {
 //  synchronized( sync ) {
-      allNodes.add( node );
-      var specialNodes = mapCmdToNodes.get( node.getCommandName )
-      if( specialNodes == null ) {
-        specialNodes = new ArrayList[ OSCResponderNode ]( 4 )
-        mapCmdToNodes.put( node.getCommandName, specialNodes )
-      }
-      specialNodes.add( node )
+//      allNodes.add( node );
+      mapCmdToNodes += node.name -> (mapCmdToNodes.getOrElse( node.name, emptySet ) + node)
 //	}
   }
 
   def removeNode( node: OSCResponderNode ) {
 //  synchronized( sync ) {
-      val specialNodes = mapCmdToNodes.get( node.getCommandName )
-      if( specialNodes != null ) {
-        specialNodes.remove( node )
-        allNodes.remove( node )
-        if( allNodes.isEmpty ) {
-          mapCmdToNodes.clear
+     mapCmdToNodes.get( node.name ).foreach( set => {
+        val setNew = set - node
+        if( setNew.isEmpty ) {
+           mapCmdToNodes -= node.name
+        } else {
+           mapCmdToNodes += node.name -> setNew
         }
-      }
+     })
 //	}
   }
 	
@@ -112,16 +113,14 @@ class OSCMultiResponder( server: Server ) extends Runnable /* with OSCListener *
 //  synchronized( sync ) {
 //      c.removeOSCListener( this )
       server.c.action_=( ignoreMessage )
-      allNodes.clear
-      mapCmdToNodes.clear
+//      allNodes.clear
+      mapCmdToNodes = Map.empty
 //    if( debug ) System.err.println( "OSCMultiResponder( client = " + c +"; hash = " + hashCode() + " ): dispose" );			
 	  server.c.dispose
 //  }
   }
 
 // ------------ OSCListener interface ------------
-
-  private def ignoreMessage( msg: OSCMessage, sender: SocketAddress, time: Long ) {}
 
    private var msgQueue: Queue[ ReceivedMessage ] = Queue.Empty
    private var msgInvoked = false
@@ -146,31 +145,17 @@ class OSCMultiResponder( server: Server ) extends Runnable /* with OSCListener *
       toProcess.foreach( rm => dispatchMessage( rm.msg, rm.sender, rm.time ))
    }
 
-  private def dispatchMessage( msg: OSCMessage, sender: SocketAddress, time: Long ) {
-//  synchronized( sync ) {
-	  // new stylee
-	  msg match {
-	 	  case nodeMsg: OSCNodeChange => server.nodeMgr.nodeChange( nodeMsg )
-	 	  case _ =>
-	  }
-	  
-	  // old stylee
-      val cmdName = if( msg.name.charAt( 0 ) == 47 ) msg.name else "/" + msg.name
-	  val specialNodes = mapCmdToNodes.get( cmdName )
-      if( specialNodes == null ) return
-      val numResps = specialNodes.size
-      resps = specialNodes.toArray( resps )
-//	}
+   private def dispatchMessage( msg: OSCMessage, sender: SocketAddress, time: Long ) {
+      server.messageReceived( msg, sender, time )
 
-    var i = 0
-    while( i < numResps ) {
-      try {
-        resps( i ).messageReceived( msg, sender, time )
-      } catch { case e: Exception => Server.printError( "messageReceived", e )}
-      resps( i ) = null  // remove references, so gc can work
-      i = i + 1
-    }
-  }
+	   // old stylee
+      val cmdName = if( msg.name.charAt( 0 ) == 47 ) msg.name else "/" + msg.name
+	   mapCmdToNodes.get( cmdName ).foreach( _.foreach( resp => {
+         try {
+            resp.messageReceived( msg, sender, time )
+         } catch { case e: Exception => Server.printError( "messageReceived", e )}
+      }))
+   }
 
    private case class ReceivedMessage( msg: OSCMessage, sender: SocketAddress, time: Long )
 }

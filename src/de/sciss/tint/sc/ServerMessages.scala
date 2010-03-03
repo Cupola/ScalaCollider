@@ -27,9 +27,10 @@
  */
 package de.sciss.tint.sc
 
-import _root_.de.sciss.scalaosc.{ OSCException, OSCMessage, OSCPacketCodec }
-import _root_.de.sciss.scalaosc.OSCPacket._
-import _root_.java.nio.ByteBuffer
+import de.sciss.scalaosc.{ OSCException, OSCMessage, OSCPacketCodec }
+import de.sciss.scalaosc.OSCPacket._
+import java.nio.ByteBuffer
+import scala.collection.mutable.{ ListBuffer }
 
 /**
  *	@author		Hanns Holger Rutz
@@ -49,6 +50,7 @@ object ServerCodec extends OSCPacketCodec {
 		"/n_move"		   -> decodeNodeChange,
 		"/n_info"		   -> decodeNodeChange,
       "/synced"         -> decodeSynced,
+      "/b_info"         -> decodeBufferInfo,
 		"status.reply"	   -> decodeStatusReply
 	)
 
@@ -120,6 +122,24 @@ object ServerCodec extends OSCPacketCodec {
 			new OSCGroupChangeMessage( name, nodeID, parentID, predID, succID, headID, tailID )
 		} else decodeFail
 	}
+
+   private def decodeBufferInfo( name: String, b: ByteBuffer ) : OSCMessage = {
+      // ",[iiif]*N"
+      if( b.get() != 0x2C ) decodeFail
+      var cnt = 0
+      var tag = b.getShort()
+      while( tag != 0x0000 ) {
+         if( (tag != 0x6969) || (b.getShort() != 0x6966) ) decodeFail
+         cnt += 1
+         tag = b.getShort()
+      }
+      skipToAlign( b )
+      var infos = new ListBuffer[ OSCBufferInfo ]
+      var i = 0; while( i < cnt ) {
+         infos += OSCBufferInfo( b.getInt(), b.getInt(), b.getInt(), b.getFloat() )
+      }
+      new OSCBufferInfoMessage( infos: _* )
+   }
 }
 // val nodeID: Int, val parentID: Int, val predID: Int, val succID: Int, val headID: Int, val tailID: Int )
 
@@ -153,3 +173,9 @@ extends OSCMessage( name, nodeID, parentID, predID, succID, 0 ) with OSCSynthCha
 
 class OSCGroupChangeMessage( name: String, val nodeID: Int, val parentID: Int, val predID: Int, val succID: Int, val headID: Int, val tailID: Int )
 extends OSCMessage( name, nodeID, parentID, predID, succID, 1, headID, tailID ) with OSCGroupChange
+
+case class OSCBufferInfo( bufID: Int, numFrames: Int, numChannels: Int, sampleRate: Float )
+
+class OSCBufferInfoMessage( val infos: OSCBufferInfo* )
+extends OSCMessage( "/b_info", infos.flatMap( info =>
+   List( info.bufID, info.numFrames, info.numChannels, info.sampleRate )): _* )

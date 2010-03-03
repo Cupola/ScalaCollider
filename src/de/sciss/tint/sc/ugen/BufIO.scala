@@ -29,50 +29,65 @@ package de.sciss.tint.sc.ugen
 
 import de.sciss.tint.sc._
 import SC._
-// import _root_.scala.Predef.error
-//import Rates._
+import GraphBuilder._
 
 /**
- * 	@version	0.11, 16-Jun-09
+ * 	@version	0.12, 03-Mar-10
  */
 object PlayBuf {
-	def ar( numChannels: Int, bufNum: GE = 0, rate: GE = 1, trigger: GE = 1, startPos: GE = 0, loop: GE = 1, doneAction: GE = 0 ) : GE = {
-		UGen.multiNew( "PlayBuf", audio, dup( audio, numChannels ), List( bufNum, rate, trigger, startPos, loop, doneAction ))
-	}
+   // note: argument 'rate' renamed to 'speed'
+   def ar( numChannels: Int, bufNum: GE, speed: GE = 1, trig: GE = 1, startPos: GE = 0, loop: GE = 1,
+           doneAction: GE = doNothing ) : GE =
+      make( audio, numChannels, bufNum, speed, trig, startPos, loop, doneAction )
 
-	def kr( numChannels: Int, bufNum: GE = 0, rate: GE = 1, trigger: GE = 1, startPos: GE = 0, loop: GE = 1, doneAction: GE = 0 ) : GE = {
-		UGen.multiNew( "PlayBuf", control, dup( control, numChannels ), List( bufNum, rate, trigger, startPos, loop, doneAction ))
-	}
+   def kr( numChannels: Int, bufNum: GE, speed: GE = 1, trig: GE = 1, startPos: GE = 0, loop: GE = 1,
+           doneAction: GE = doNothing ) : GE =
+      make( control, numChannels, bufNum, speed, trig, startPos, loop, doneAction )
+
+   private def make( rate: Rate, numChannels: Int, bufNum: GE, speed: GE, trig: GE, startPos: GE, loop: GE,
+                       doneAction: GE ) =
+      simplify( for( List( b, s, t, p, l, d ) <- expand( bufNum, speed, trig, startPos, loop, doneAction ))
+         yield this( rate, numChannels, b, s, t, p, l, d ))
 }
+case class PlayBuf( rate: Rate, numChannels: Int, bufNum: UGenIn, speed: UGenIn, trig: UGenIn, startPos: UGenIn,
+                    loop: UGenIn, doneAction: UGenIn )
+extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ), List( bufNum, speed, trig, startPos, loop, doneAction ))
 
 object TGrains {
-	def ar( numChannels: Int, trigger: GE = 0, bufNum: GE = 0, rate: GE = 1, centerPos: GE = 0, dur: GE = 0.1f, pan: GE = 0, amp: GE = 0.1f, interp: GE = 4 ) : GE = {
-		if( numChannels < 2 ) {
-			 error( "TGrains needs at least two channels." )
-		}
-		UGen.multiNew( "TGrains", audio, dup( audio, numChannels ),
-			List( trigger, bufNum, rate, centerPos, dur, pan, amp, interp ))
-	}
+   // note: argument 'rate' renamed to 'speed'
+   def ar( numChannels: Int, trig: GE, bufNum: GE, speed: GE = 1, centerPos: GE = 0, dur: GE = 0.1f, pan: GE = 0,
+           amp: GE = 0.1f, interp: GE = 4 ) : GE =
+      simplify( for( List( b, s, c, d, p, a, i ) <- expand( bufNum, speed, centerPos, dur, pan, amp, interp ))
+         yield this( audio, numChannels, b, s, c, d, p, a, i ))
 }
+case class TGrains( rate: Rate, numChannels: Int, bufNum: UGenIn, speed: UGenIn, centerPos: UGenIn, dur: UGenIn,
+                    pan: UGenIn, amp: UGenIn, interp: UGenIn )
+extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ), List( bufNum, speed, centerPos, dur, pan, amp, interp ))
 
 object BufRd {
-	def ar( numChannels: Int, bufNum: GE = 0, phase: GE = 0, loop: GE = 1, interpolation: GE = 2 ) : GE = {
-		UGen.multiNew( "BufRd", audio, dup( audio, numChannels ), List( bufNum, phase, loop, interpolation ))
-	}
+   def ar( numChannels: Int, bufNum: GE, phase: GE = 0, loop: GE = 1, interp: GE = 2 ) : GE =
+      make( audio, numChannels, bufNum, phase, loop, interp )
 
-	def kr( numChannels: Int, bufNum: GE = 0, phase: GE = 0, loop: GE = 1, interpolation: GE = 2 ) : GE = {
-		UGen.multiNew( "BufRd", control, dup( control, numChannels ), List( bufNum, phase, loop, interpolation ))
-	}
+   def kr( numChannels: Int, bufNum: GE, phase: GE = 0, loop: GE = 1, interp: GE = 2 ) : GE =
+      make( control, numChannels, bufNum, phase, loop, interp )
+
+   private def make( rate: Rate, numChannels: Int, bufNum: GE, phase: GE, loop: GE, interp: GE ) =
+      simplify( for( List( b, p, l, i ) <- expand( bufNum, phase, loop, interp ))
+         yield this( rate, numChannels, b, p, l, i ))
 }
+case class BufRd( rate: Rate, numChannels: Int, bufNum: UGenIn, phase: UGenIn, loop: UGenIn, interp: UGenIn )
+extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ), List( bufNum, phase, loop, interp ))
 
 object BufWr {
-	def ar( inputArray: GE, bufNum: GE = 0, phase: GE = 0, loop: GE = 1 ) : GE = {
-		UGen.multiNew( "BufWr", audio, List( audio ), List( bufNum, phase, loop ) ++ inputArray.toUGenIns )
-	}
+   def ar( multi: GE, bufNum: GE, phase: GE = 0, loop: GE = 1 ) : GE =
+      make( audio, multi, bufNum, phase, loop )
 
-	def kr( inputArray: GE, bufNum: GE = 0, phase: GE = 0, loop: GE = 1 ) : GE = {
-		UGen.multiNew( "BufWr", control, List( control ), List( bufNum, phase, loop ) ++ inputArray.toUGenIns )
-	}
+   def kr( multi: GE, bufNum: GE, phase: GE = 0, loop: GE = 1 ) : GE =
+      make( control, multi, bufNum, phase, loop )
+
+   private def make( rate: Rate, multi: GE, bufNum: GE, phase: GE, loop: GE ) =
+      simplify( for( List( b, p, l, m @ _* ) <- expand( (bufNum :: phase :: loop :: multi.toUGenIns.toList) :_* ))
+         yield this( rate, b, p, l, m ))
 
 //	checkInputs {
 // 		if (rate == audio' and: {inputs.at(1).rate != audio'}, {
@@ -81,30 +96,35 @@ object BufWr {
 // 		^this.checkValidInputs
 // 	}
 }
+case class BufWr( rate: Rate, bufNum: UGenIn, phase: UGenIn, loop: UGenIn, multi: Seq[ UGenIn ])
+extends SingleOutUGen( (bufNum :: phase :: loop :: multi.toList): _* )
 
 object RecordBuf {
-	def ar( inputArray: GE, bufNum: GE = 0, offset: GE = 0, recLevel: GE = 1, preLevel: GE = 0,
-			run: GE = 1, loop: GE = 1, trigger: GE = 1, doneAction: GE = 0 ) : GE = {
-		UGen.multiNew( "RecordBuf", audio, List( audio ),
-			List( bufNum, offset, recLevel, preLevel, run, loop, trigger, doneAction ) ++
-				inputArray.toUGenIns )
-	}
+   def ar( multi: GE, bufNum: GE, offset: GE = 0, recLevel: GE = 1, preLevel: GE = 0,
+			run: GE = 1, loop: GE = 1, trig: GE = 1, doneAction: GE = doNothing ) : GE =
+      make( audio, multi, bufNum, offset, recLevel, preLevel, run, loop, trig, doneAction )
 
-	def kr( inputArray: GE, bufNum: GE = 0, offset: GE = 0, recLevel: GE = 1, preLevel: GE = 0,
-			run: GE = 1, loop: GE = 1, trigger: GE = 1, doneAction: GE = 0 ) : GE = {
-		UGen.multiNew( "RecordBuf", control, List( control ),
-			List( bufNum, offset, recLevel, preLevel, run, loop, trigger, doneAction ) ++
-				inputArray.toUGenIns )
-	}
-}
+   def kr( multi: GE, bufNum: GE, offset: GE = 0, recLevel: GE = 1, preLevel: GE = 0,
+			run: GE = 1, loop: GE = 1, trig: GE = 1, doneAction: GE = doNothing ) : GE =
+      make( control, multi, bufNum, offset, recLevel, preLevel, run, loop, trig, doneAction )
 
-object Tap {
-	// Warning: different arg order than sclang!
-	def ar( numChannels: Int = 1, bufNum: GE = 0, delayTime: GE = 0.2f ) : GE = {
-		val n = delayTime * SampleRate.ir.neg; // this depends on the session sample rate, not buffer.
-		PlayBuf.ar( numChannels, bufNum, 1, 0, n, 1 )
-	}
+   private def make( rate: Rate, multi: GE, bufNum: GE, offset: GE, recLevel: GE, preLevel: GE, run: GE,
+                       loop: GE, trig: GE, doneAction: GE ) =
+      simplify( for( List( b, o, r, p, n, l, t, d, m @ _* ) <- expand( (bufNum :: offset :: recLevel :: preLevel ::
+                     run :: loop :: trig :: doneAction :: multi.toUGenIns.toList) :_* ))
+         yield this( rate, b, o, r, p, n, l, t, d, m ))
 }
+case class RecordBuf( rate: Rate, bufNum: UGenIn, offset: UGenIn, recLevel: UGenIn, preLevel: UGenIn,
+                      run: UGenIn, loop: UGenIn, trig: UGenIn, doneAction: UGenIn, multi: Seq[ UGenIn ])
+extends SingleOutUGen( (bufNum :: offset :: recLevel :: preLevel :: run :: loop :: trig :: doneAction :: multi.toList): _* )
+
+//object Tap {
+//	// Warning: different arg order than sclang!
+//	def ar( numChannels: Int = 1, bufNum: GE = 0, delayTime: GE = 0.2f ) : GE = {
+//		val n = delayTime * SampleRate.ir.neg; // this depends on the session sample rate, not buffer.
+//		PlayBuf.ar( numChannels, bufNum, 1, 0, n, 1 )
+//	}
+//}
 
 // ScopeOut
 // LocalBuf

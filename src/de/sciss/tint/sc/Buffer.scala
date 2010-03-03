@@ -30,21 +30,64 @@ package de.sciss.tint.sc
 import de.sciss.scalaosc.OSCMessage
 
 /**
- * 	@version	0.15, 07-Feb-10
+ * 	@version	0.16, 03-Mar-10
  */
-//object Buffer {
-//  
-//}
+object Buffer {
+   def alloc( server: Server = Server.default, numFrames: Int, numChannels: Int = 1, completionMessage: Option[ OSCMessage ] = None ) : Buffer = {
+      val b = new Buffer( server, numFrames, numChannels )
+      b.alloc( completionMessage )
+      b
+   }
 
-class Buffer( val server: Server, val numFrames: Int, val numChannels: Int, val bufNum: Int ) {
+   def read( server: Server = Server.default, path: String, startFrame: Int = 0, numFrames: Int = -1,
+             action: Function1[ Buffer, Unit ] = b => () ) : Buffer = {
+      val b = new Buffer( server )
+//      b.doOnInfo = action
+//      b.cache
+      b.allocRead( path, startFrame, numFrames, Some( b.queryMsg ))
+      b
+   }
+}
+
+class Buffer private( val id: Int, val server: Server ) extends Model {
+   private var numFramesVar   = -1
+   private var numChannelsVar = -1
+   private var sampleRateVar  = 0f
+//   var doOnInfo = (buf: Buffer) => ()
+
+   def numFrames   = numFramesVar
+   def numChannels = numChannelsVar
+   def sampleRate  = sampleRateVar
+
+   protected[sc] def updated( change: BufferManager.BufferInfo ) {
+      val info       = change.info
+      numFramesVar   = info.numFrames
+      numChannelsVar = info.numChannels
+      sampleRateVar  = info.sampleRate
+      dispatch( change )
+   }
+
+   def this( server: Server, numFrames: Int, numChannels: Int, id: Int ) = {
+      this( id, server )
+      numFramesVar   = numFrames
+      numChannelsVar = numChannels
+      sampleRateVar  = server.counts.sampleRate.toFloat
+   }
+
+   def this( server: Server ) =
+      this( server.bufferAllocator.alloc( 1 ), server )
+
    def this( server: Server, numFrames: Int ) =
-      this( server, numFrames, 1, server.getBufferAllocator.alloc( 1 ))
+      this( server, numFrames, 1, server.bufferAllocator.alloc( 1 ))
 
    def this( server: Server, numFrames: Int, numChannels: Int ) =
-      this( server, numFrames, numChannels, server.getBufferAllocator.alloc( 1 ))
+      this( server, numFrames, numChannels, server.bufferAllocator.alloc( 1 ))
+
 
 //	def this( server: Server = Server.default, numFrames: Int, numChannels: Int = 1 ) = this( server, numFrames, numChannels, server.getBufferAllocator.alloc( 1 ))
-//	val bufNum = if( bufNumPreliminary >= 0 ) bufNumPreliminary else server.getBufferAllocator.alloc( 1 )
+//	val id = if( bufNumPreliminary >= 0 ) bufNumPreliminary else server.getBufferAllocator.alloc( 1 )
+
+   def queryMsg = OSCMessage( "/b_query", id )
 
    def free { server.sendMsg( freeMsg )}
 
@@ -56,16 +99,16 @@ class Buffer( val server: Server, val numFrames: Int, val numChannels: Int, val 
 //       free( completionMessage.apply( this ))
 
    def freeMsg: OSCMessage = {
-      uncache
-      server.getBufferAllocator.free( bufNum )
-      OSCMessage( "/b_free", bufNum )
+//      uncache
+      server.bufferAllocator.free( id )  // XXX
+      OSCMessage( "/b_free", id )
    }
 
 	def freeMsg( completionMessage: Option[ OSCMessage ]) : OSCMessage = {
       completionMessage.map( msg => {
-         uncache
-         server.getBufferAllocator.free( bufNum )
-         OSCMessage( "/b_free", bufNum, msg )
+//         uncache
+         server.bufferAllocator.free( id )  // XXX
+         OSCMessage( "/b_free", id, msg )
       }) getOrElse freeMsg
 	}
 
@@ -81,11 +124,11 @@ class Buffer( val server: Server, val numFrames: Int, val numChannels: Int, val 
 //    def close( completionMessage: Buffer => OSCMessage ): Unit =
 //       close( completionMessage.apply( this ))
  
-	def closeMsg = OSCMessage( "/b_close", bufNum )
+	def closeMsg = OSCMessage( "/b_close", id )
 
 	def closeMsg( completionMessage: Option[ OSCMessage ]) : OSCMessage = {
       completionMessage.map( msg => {
-         OSCMessage( "/b_close", bufNum, msg )
+         OSCMessage( "/b_close", id, msg )
       }) getOrElse closeMsg
    }
 
@@ -102,24 +145,39 @@ class Buffer( val server: Server, val numFrames: Int, val numChannels: Int, val 
 //      alloc( completionMessage.apply( this ))
 
 	def allocMsg: OSCMessage = {
-		cache
-		OSCMessage( "/b_alloc", bufNum, numFrames, numChannels )
+//		cache
+		OSCMessage( "/b_alloc", id, numFrames, numChannels )
 	}
 
 	def allocMsg( completionMessage: Option[ OSCMessage ]) : OSCMessage = {
       completionMessage.map( msg => {
-         cache
-         OSCMessage( "/b_alloc", bufNum, numFrames, numChannels, msg )
+//         cache
+         OSCMessage( "/b_alloc", id, numFrames, numChannels, msg )
       }) getOrElse allocMsg
 	}
 
 //	def allocMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
 //      allocMsg( completionMessage.apply( this ))
 
+   def allocRead( path: String, startFrame: Int = 0, numFrames: Int = -1,
+                  completionMessage: Option[ OSCMessage ] = None ) {
+//      path = argpath;
+      server.sendMsg( allocReadMsg( path, startFrame, numFrames, completionMessage ))
+   }
+
+   def allocReadMsg( path: String, startFrame: Int = 0, numFrames: Int = -1,
+                     completionMessage: Option[ OSCMessage ] = None ) : OSCMessage = {
+//      this.cache;
+//      path = argpath;
+      completionMessage.map( msg => {
+                   OSCMessage( "/b_allocRead", id, path, startFrame, numFrames, msg )
+      }) getOrElse OSCMessage( "/b_allocRead", id, path, startFrame, numFrames )
+   }
+
    def cueSoundFileMsg( path: String, startFrame: Int = 0, completionMessage: Option[ OSCMessage ] = None ) = {
       completionMessage.map( msg => {
-                   OSCMessage( "/b_read", bufNum, path, startFrame, numFrames, 0, 1, msg )
-      }) getOrElse OSCMessage( "/b_read", bufNum, path, startFrame, numFrames, 0, 1 )
+                   OSCMessage( "/b_read", id, path, startFrame, numFrames, 0, 1, msg )
+      }) getOrElse OSCMessage( "/b_read", id, path, startFrame, numFrames, 0, 1 )
 	}
 
    def read( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
@@ -131,8 +189,8 @@ class Buffer( val server: Server, val numFrames: Int, val numChannels: Int, val 
                 leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage ] = None ) = {
       val loi = if( leaveOpen ) 1 else 0
       completionMessage.map( msg => {
-                   OSCMessage( "/b_read", bufNum, path, fileStartFrame, numFrames, bufStartFrame, loi, msg )
-      }) getOrElse OSCMessage( "/b_read", bufNum, path, fileStartFrame, numFrames, bufStartFrame, loi )
+                   OSCMessage( "/b_read", id, path, fileStartFrame, numFrames, bufStartFrame, loi, msg )
+      }) getOrElse OSCMessage( "/b_read", id, path, fileStartFrame, numFrames, bufStartFrame, loi )
    }
 
    def readChannel( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
@@ -146,7 +204,7 @@ class Buffer( val server: Server, val numFrames: Int, val numChannels: Int, val 
                 leaveOpen: Boolean = false, channels: Seq[ Int ],
                 completionMessage: Option[ OSCMessage ] = None ) = {
       val loi = if( leaveOpen ) 1 else 0
-      val args = List( bufNum, path, fileStartFrame, numFrames, bufStartFrame, loi ) ::: channels.toList :::
+      val args = List( id, path, fileStartFrame, numFrames, bufStartFrame, loi ) ::: channels.toList :::
          completionMessage.map( msg => List( msg )).getOrElse( Nil )
       OSCMessage( "/b_readChannel", args: _* )
    }
@@ -157,32 +215,32 @@ class Buffer( val server: Server, val numFrames: Int, val numChannels: Int, val 
       server.sendMsg( zeroMsg( completionMessage ))
    }
 
-	def zeroMsg = OSCMessage( "/b_zero", bufNum )
+	def zeroMsg = OSCMessage( "/b_zero", id )
 
 	def zeroMsg( completionMessage: Option[ OSCMessage ]) : OSCMessage = {
       completionMessage.map( msg => {
-         OSCMessage( "/b_zero", bufNum, msg )
+         OSCMessage( "/b_zero", id, msg )
       }) getOrElse zeroMsg
    }
 
-	// cache Buffers for easy info updating
-	private def cache {
-//		Buffer.initServerCache(server);
-//		serverCaches[server][bufnum] = this;
-	}
- 
-	private def uncache {
-//		if(serverCaches[server].notNil,{
-//			serverCaches[server].removeAt(bufnum);
-//		});
-//		if(serverCaches[server].size == 1) {
-//			// the 1 item would be the responder
-//			// if there is more than 1 item then the rest are cached buffers
-//			// else we can remove.
-//			// cx: tho i don't see why its important. it will just have to be added
-//			// back when the next buffer is added and the responder is removed when
-//			// the server reboots
-//			Buffer.clearServerCaches(server);
-//		}
-	}
+//	// cache Buffers for easy info updating
+//	private def cache {
+////		Buffer.initServerCache(server);
+////		serverCaches[server][id] = this;
+//	}
+//
+//	private def uncache {
+////		if(serverCaches[server].notNil,{
+////			serverCaches[server].removeAt(id);
+////		});
+////		if(serverCaches[server].size == 1) {
+////			// the 1 item would be the responder
+////			// if there is more than 1 item then the rest are cached buffers
+////			// else we can remove.
+////			// cx: tho i don't see why its important. it will just have to be added
+////			// back when the next buffer is added and the responder is removed when
+////			// the server reboots
+////			Buffer.clearServerCaches(server);
+////		}
+//	}
 }

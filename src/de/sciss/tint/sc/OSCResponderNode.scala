@@ -44,7 +44,7 @@ import _root_.de.sciss.scalaosc.OSCMessage
  *  @author		Hanns Holger Rutz
  *  @version	0.11, 24-Nov-09
  */
-class OSCResponderNode( server: Server, cmdName: String, action: (OSCMessage, SocketAddress, Long) => Unit )
+class OSCResponderNode( server: Server, val name: String, action: (OSCMessage, SocketAddress, Long) => Unit )
 extends Object /* with OSCListener */ {
   
     private val		multi			= server.getMultiResponder			
@@ -60,7 +60,7 @@ extends Object /* with OSCListener */ {
 	 *	@return	the name of the OSC command to which this
 	 *			responder listens
 	 */
-	def getCommandName = cmdName
+//	def getCommandName = cmdName
 
 	/**
 	 *	Adds the node to the list of actively listening nodes.

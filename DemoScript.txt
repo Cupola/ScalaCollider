@@ -10,6 +10,6 @@ import de.sciss.tint.sc._
 import SC._
 import de.sciss.tint.sc.ugen._
 val s = new Server( "Default" )
-s.options.program.value = "/Users/rutz/Documents/devel/fromSVN/SuperCollider3/build/scsynth"
+s.options.programPath.value = "/Users/rutz/Documents/devel/fromSVN/SuperCollider3/build/scsynth"
 //new gui.NodeTreePanel( s ).makeWindow
 new gui.ServerStatusPanel( s ).makeWindow

@@ -72,7 +72,7 @@ extends Model
   private val	collBootCompletion					= new ListBuffer[ (Server) => Unit ]()
   private var	conditionVar: AnyRef 				= Offline
   protected[sc] var	pendingCondition: AnyRef		= NoPending
-  private var   bufferAllocator : ContiguousBlockAllocator = null
+  private var   bufferAllocatorVar : ContiguousBlockAllocator = null
   val rootNode      = new Group( this, 0 )
   val defaultGroup  = new Group( this, 1 )
   
@@ -86,7 +86,8 @@ extends Model
   /* XXX private */ val c = OSCClient( options.protocol.value, 0, host.isLoopbackAddress, ServerCodec )
   c.bufferSize = 0x10000
   
-  val nodeMgr = new NodeManager( this )
+  val nodeMgr  = new NodeManager( this )
+  val bufMgr   = new BufferManager( this )
   private val multi	= new OSCMultiResponder( this )
   c.target = addr
 
@@ -101,7 +102,8 @@ extends Model
   def isRunning = conditionVar == Running
   def isBooting = conditionVar == Booting
   def isOffline = conditionVar == Offline
-  def getBufferAllocator = bufferAllocator
+//  def getBufferAllocator = bufferAllocator
+  def bufferAllocator = bufferAllocatorVar
 
 //  try { c.connect }
   
@@ -192,19 +194,19 @@ extends Model
 //		// maybe needed: a timeout
 //	}
 
-  	def sync( delta: Double = -1, bundles: Seq[ OSCMessage ] = Nil ) {
-  		val id		= UniqueID.next
-  		var bndl2	= bundles ++ List( new OSCSyncMessage( id ))
-  		val cond	= new AnyRef
-  		val resp	= new OSCResponderNode( this, "/synced", (msg, addr, when) =>
-  			(if( msg( 0 ) == id ) cond.synchronized { cond.notify })
-  		)
-  		cond.synchronized {
-  	  		resp.add
-  	  		sendBundle( delta, bndl2 :_* )
-  	  		cond.wait
-  	  	}
-  	}
+//  	def sync( delta: Double = -1, bundles: Seq[ OSCMessage ] = Nil ) {
+//  		val id		= UniqueID.next
+//  		var bndl2	= bundles ++ List( new OSCSyncMessage( id ))
+//  		val cond	= new AnyRef
+//  		val resp	= new OSCResponderNode( this, "/synced", (msg, addr, when) =>
+//  			(if( msg( 0 ) == id ) cond.synchronized { cond.notify })
+//  		)
+//  		cond.synchronized {
+//  	  		resp.add
+//  	  		sendBundle( delta, bndl2 :_* )
+//  	  		cond.wait
+//  	  	}
+//  	}
 
 //   def syncMsg( id: Int ) : OSCMessage =
 //      new OSCMessage( "/sync", id ) with Async
@@ -256,7 +258,16 @@ extends Model
 //  }
   
   protected[sc] def getMultiResponder = multi
-  
+
+  protected[sc] def messageReceived( msg: OSCMessage, sender: SocketAddress, time: Long ) {
+     msg match {
+        case nodeMsg:         OSCNodeChange           => nodeMgr.nodeChange( nodeMsg )
+        case statusReplyMsg:  OSCStatusReplyMessage   => aliveThread.foreach( _.statusReply( statusReplyMsg ))
+//        case bufInfoMsg:      OSCBufferInfoMessage    => bufMgr.bufferInfo( bufInfoMsg )
+        case _ =>
+     }
+  }
+
   def startAliveThread( delay: Float = 0.25f, period: Float = 0.25f, deathBounces: Int = 25 ) {
 //    synchronized( syncBootThread ) {
       if( aliveThread.isEmpty ) {
@@ -417,7 +428,7 @@ extends Model
   private def createNewAllocators {
     nodes.reset
     busses.reset
-    bufferAllocator = new ContiguousBlockAllocator( options.audioBuffers.value )
+    bufferAllocatorVar = new ContiguousBlockAllocator( options.audioBuffers.value )
   }
 
   private def bootServerApp( startAliveThread: Boolean ) {
@@ -540,20 +551,20 @@ extends Object /* with OSCListener */ with ActionListener {
   private var	alive			= deathBounces
   private val	delayMillis		= (delay * 1000).toInt  
   private val	periodMillis	= (period * 1000).toInt
-  private val	resp			= new OSCResponderNode( server, "/status.reply", messageReceived )
+//  private val	resp			= new OSCResponderNode( server, "/status.reply", messageReceived )
   private val	timer			= new SwingTimer( periodMillis, this )
   
   // ---- constructor ----
   timer.setInitialDelay( delayMillis )
   
   def start {
-    resp.add
+//    resp.add
     timer.restart
   }
 
   def stop {
     timer.stop
-    resp.remove
+//    resp.remove
   }
 		
   def actionPerformed( e: ActionEvent ) {
@@ -574,20 +585,29 @@ extends Object /* with OSCListener */ with ActionListener {
       catch { case e: IOException => Server.printError( "Server.status", e )}
     }
   }
+
+   def statusReply( msg: OSCStatusReplyMessage ) {
+      alive = deathBounces
+      // note: put the counts before running
+      // because that way e.g. the sampleRate
+      // is instantly available
+      server.counts = msg
+      server.condition = Running
+   }
 		
-  // XXX create specific osc message decoder
-  private def messageReceived( msg: OSCMessage, sender: SocketAddress, time: Long ) {
-	  msg match {
-	 	  case statusReply: OSCStatusReplyMessage => {
-              alive = deathBounces
-              // note: put the counts before running
-              // because that way e.g. the sampleRate
-              // is instantly available
-	 	 	  server.counts = statusReply
-	 	 	  server.condition = Running
-	 	  }
-	 	  case _ =>
-	  }
+//  // XXX create specific osc message decoder
+//  private def messageReceived( msg: OSCMessage, sender: SocketAddress, time: Long ) {
+//	  msg match {
+//	 	  case statusReply: OSCStatusReplyMessage => {
+//              alive = deathBounces
+//              // note: put the counts before running
+//              // because that way e.g. the sampleRate
+//              // is instantly available
+//	 	 	  server.counts = statusReply
+//	 	 	  server.condition = Running
+//	 	  }
+//	 	  case _ =>
+//	  }
 	  
 //    if( msg.length < 9 ) return
 //    
@@ -607,7 +627,7 @@ extends Object /* with OSCListener */ with ActionListener {
 //      )
 //    }
 //    catch { case e: ClassCastException => Server.printError( "StatusWatcher.messageReceived", e )}
-  }
+//  }
 }
 
 //case class Counts( numUGens: Int, numSynths: Int, numGroups: Int, numSynthDefs: Int,
