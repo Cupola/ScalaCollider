@@ -330,3 +330,25 @@ val x = play {
     for(i <- 1 to 5) { signal = AllpassN.ar(signal, 0.05, List(Rand(0,0.05),Rand(0,0.05)), 1) }
     LeakDC.ar( signal, 0.995)    // delays build up a lot of DC, so leak it out here.
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+// based on record scratcher by Josh Parmenter (2007)
+
+// path to a mono soundfile here
+val buf = Buffer.read(s, "sounds/a11wlk01.wav");
+val x = play {
+    var speed = MouseX.kr(-10, 10)
+    speed = speed - DelayN.kr(speed, 0.1, 0.1)
+    speed = MouseButton.kr(1, 0, 0.3) + speed
+    val sig = PlayBuf.ar(1, buf.id, speed * BufRateScale.kr(buf.id), loop = 1)
+    List( sig, sig )
+}
+
+// move mouse to scrub the record.
+// press mouse button to 'stop the record', you can scrub while it is stopped.
+
+// stop the synth
+x.release
+// free the Buffer
+buf.free

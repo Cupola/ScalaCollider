@@ -40,8 +40,16 @@ object Buffer {
    }
 
    def read( server: Server = Server.default, path: String, startFrame: Int = 0, numFrames: Int = -1,
-             action: Function1[ Buffer, Unit ] = b => () ) : Buffer = {
+             action: Buffer => Unit = _ => () ) : Buffer = {
       val b = new Buffer( server )
+      b.register
+      lazy val l: (AnyRef) => Unit = _ match {
+         case BufferManager.BufferInfo( _, _ ) => {
+            b.removeListener( l )
+            action( b )
+         }
+      }
+      b.addListener( l )
 //      b.doOnInfo = action
 //      b.cache
       b.allocRead( path, startFrame, numFrames, Some( b.queryMsg ))
@@ -54,18 +62,6 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
    private var numChannelsVar = -1
    private var sampleRateVar  = 0f
 //   var doOnInfo = (buf: Buffer) => ()
-
-   def numFrames   = numFramesVar
-   def numChannels = numChannelsVar
-   def sampleRate  = sampleRateVar
-
-   protected[sc] def updated( change: BufferManager.BufferInfo ) {
-      val info       = change.info
-      numFramesVar   = info.numFrames
-      numChannelsVar = info.numChannels
-      sampleRateVar  = info.sampleRate
-      dispatch( change )
-   }
 
    def this( server: Server, numFrames: Int, numChannels: Int, id: Int ) = {
       this( id, server )
@@ -82,6 +78,23 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
 
    def this( server: Server, numFrames: Int, numChannels: Int ) =
       this( server, numFrames, numChannels, server.bufferAllocator.alloc( 1 ))
+
+   def numFrames   = numFramesVar
+   def numChannels = numChannelsVar
+   def sampleRate  = sampleRateVar
+
+   def register {
+//  	NodeWatcher.register( this, assumePlaying )
+       server.bufMgr.register( this )
+     }
+
+   protected[sc] def updated( change: BufferManager.BufferInfo ) {
+      val info       = change.info
+      numFramesVar   = info.numFrames
+      numChannelsVar = info.numChannels
+      sampleRateVar  = info.sampleRate
+      dispatch( change )
+   }
 
 
 //	def this( server: Server = Server.default, numFrames: Int, numChannels: Int = 1 ) = this( server, numFrames, numChannels, server.getBufferAllocator.alloc( 1 ))

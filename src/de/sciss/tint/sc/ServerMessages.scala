@@ -135,8 +135,9 @@ object ServerCodec extends OSCPacketCodec {
       }
       skipToAlign( b )
       var infos = new ListBuffer[ OSCBufferInfo ]
-      var i = 0; while( i < cnt ) {
+      while( cnt > 0 ) {
          infos += OSCBufferInfo( b.getInt(), b.getInt(), b.getInt(), b.getFloat() )
+         cnt -= 1
       }
       new OSCBufferInfoMessage( infos: _* )
    }

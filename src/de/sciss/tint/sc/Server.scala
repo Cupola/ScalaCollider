@@ -263,7 +263,7 @@ extends Model
      msg match {
         case nodeMsg:         OSCNodeChange           => nodeMgr.nodeChange( nodeMsg )
         case statusReplyMsg:  OSCStatusReplyMessage   => aliveThread.foreach( _.statusReply( statusReplyMsg ))
-//        case bufInfoMsg:      OSCBufferInfoMessage    => bufMgr.bufferInfo( bufInfoMsg )
+        case bufInfoMsg:      OSCBufferInfoMessage    => bufMgr.bufferInfo( bufInfoMsg )
         case _ =>
      }
   }
