@@ -27,9 +27,9 @@
  */
 package de.sciss.tint.sc
 
-import _root_.java.io.IOException
-import _root_.java.net.SocketAddress
-import _root_.de.sciss.scalaosc.OSCMessage
+import java.io.IOException
+import java.net.SocketAddress
+import de.sciss.scalaosc.OSCMessage
 
 /**
  *	Similar operation as the SClang class
@@ -42,13 +42,12 @@ import _root_.de.sciss.scalaosc.OSCMessage
  *	and <code>OSCMultiResponder</code>). So you may need to update old code.
  *
  *  @author		Hanns Holger Rutz
- *  @version	0.11, 24-Nov-09
+ *  @version	0.12, 08-Mar-10
  */
-class OSCResponderNode( server: Server, val name: String, action: (OSCMessage, SocketAddress, Long) => Unit )
-extends Object /* with OSCListener */ {
+class OSCResponderNode( server: Server, val name: String, action: (OSCMessage, SocketAddress, Long) => Unit ) {
   
-    private val		multi			= server.getMultiResponder			
-	private val		sync			= multi.getSync
+// private val		multi			= server.getMultiResponder
+// private val		sync			= multi.getSync
 
 	private var		removeWhenDoneVal	= false
 	private var		listening			= false		
@@ -78,13 +77,11 @@ extends Object /* with OSCListener */ {
 	 */
 	def add : OSCResponderNode = {
 //	  synchronized( sync ) {
-	    if( listening ) {
-//	      throw new IllegalStateException( "OSCResponderNode.add() : duplicate call" )
-	      return this
-	    }
-        multi.addNode( this )
-        listening = true
-        return this
+	    if( !listening ) {
+           server.addResponderNode( this )
+           listening = true
+       }
+       this
 //	  }
 	}
 	
@@ -95,11 +92,7 @@ extends Object /* with OSCListener */ {
 	 *				(was added), <code>false</code> otherwise
 	 *				(newly created node or removed)
 	 */
-	def isListening : Boolean = {
-//		synchronized( sync ) {
-			return listening
-//		}
-	}
+	def isListening = listening
 
 	/**
 	 *	Tags the node to remove itself after the next
@@ -112,7 +105,7 @@ extends Object /* with OSCListener */ {
 	 */
 	def removeWhenDone : OSCResponderNode = {
 		removeWhenDoneVal = true
-		return this
+		this
 	}
 	
 	/**
@@ -128,7 +121,7 @@ extends Object /* with OSCListener */ {
 	def messageReceived( msg: OSCMessage, sender: SocketAddress, time: Long ) {
 		if( listening ) {
 			try {
-				action.apply( msg, sender, time )
+				action( msg, sender, time )
 			} catch { case e: Exception => Server.printError( "messageReceived", e )}
 			if( removeWhenDoneVal ) {
 				try {
@@ -150,8 +143,8 @@ extends Object /* with OSCListener */ {
 	def remove : OSCResponderNode = {
 //	  synchronized( sync ) {
         listening = false
-        multi.removeNode( this )
-        return this
+        server.removeResponderNode( this )
+        this
 //    }
 	}
 }

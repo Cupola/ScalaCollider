@@ -9,7 +9,7 @@ import scala.math._
 import de.sciss.tint.sc._
 import SC._
 import de.sciss.tint.sc.ugen._
-val s = new Server( "Default" )
+val s = new swing.AWTServer( "Default" )
 s.options.programPath.value = "/Users/rutz/Documents/devel/fromSVN/SuperCollider3/build/scsynth"
-//new gui.NodeTreePanel( s ).makeWindow
-new gui.ServerStatusPanel( s ).makeWindow
+//new swing.NodeTreePanel( s ).makeWindow
+new swing.ServerStatusPanel( s ).makeWindow

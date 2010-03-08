@@ -143,7 +143,14 @@ object SC {
 	playFunc( func, target, outBus, fadeTime, addAction )
   }
 
-  private def playFunc( func: () => GE, target: Node, outBus: Int, fadeTime: Option[Float], addAction: AddAction ) : Synth = {
+   private var uniqueIDCnt = 0
+   private def uniqueID {
+      val result = uniqueIDCnt
+      uniqueIDCnt += 1
+      uniqueIDCnt
+   }
+
+   private def playFunc( func: () => GE, target: Node, outBus: Int, fadeTime: Option[Float], addAction: AddAction ) : Synth = {
     // arg target, outbus = 0, fadeTime=0.02, addAction='addToHead;
 
 //		target = target.asTarget;
@@ -153,7 +160,7 @@ object SC {
 //			throw new IllegalStateException( "server '" + server.name + "' not running." )
 //		}
 //		val defName = "temp__" + abs( func.hashCode )
-		val defName = "temp_" + UniqueID.next // why risk a hashcode clash?
+		val defName = "temp_" + uniqueID // why risk a hashcode clash?
 		val synthDef = GraphBuilder.wrapOut( defName, func, fadeTime );
 		val synth = new Synth( synthDef.name, server )
 		val bytes = synthDef.toBytes

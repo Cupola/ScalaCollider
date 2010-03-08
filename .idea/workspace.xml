@@ -2,19 +2,38 @@
 <project version="4">
   <component name="ChangeListManager" verified="true">
     <list default="true" readonly="true" id="01886865-ff38-4eb7-a79d-92e783f03245" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/makejar.sh" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/resources/de/sciss/tint/sc/gui/path_group_16.png" afterPath="$PROJECT_DIR$/resources/de/sciss/tint/sc/swing/path_group_16.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/swing/AWTServer.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/SC.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/SC.scala" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/OSCMultiResponder.scala" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/compile.sh" afterPath="$PROJECT_DIR$/compile.sh" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/nbproject/build-impl.xml" afterPath="" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/resources/de/sciss/tint/sc/gui/path_ugen_16.png" afterPath="$PROJECT_DIR$/resources/de/sciss/tint/sc/swing/path_ugen_16.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/resources/de/sciss/tint/sc/gui/path_def_16.png" afterPath="$PROJECT_DIR$/resources/de/sciss/tint/sc/swing/path_def_16.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/resources/de/sciss/tint/sc/gui/gauge_full.png" afterPath="$PROJECT_DIR$/resources/de/sciss/tint/sc/swing/gauge_full.png" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/nbproject/project.xml" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/Routine.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/Routine.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/compile_fsc.sh" afterPath="$PROJECT_DIR$/compile_fsc.sh" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/NodeListener.scala" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/NodeEvent.scala" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DemoScript.txt" afterPath="$PROJECT_DIR$/DemoScript.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/Buffer.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/Buffer.scala" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/gui/NodeTreePanel.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/swing/NodeTreePanel.scala" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/manifest.mf" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ugen_list.scd" afterPath="$PROJECT_DIR$/ugen_list.scd" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/ServerMessages.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/ServerMessages.scala" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/resources/de/sciss/tint/sc/gui/gauge_empty.png" afterPath="$PROJECT_DIR$/resources/de/sciss/tint/sc/swing/gauge_empty.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/gui/ServerStatusPanel.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/swing/ServerStatusPanel.scala" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/nbproject/private/private.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/nbproject/genfiles.properties" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/nbproject/project.properties" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/LiveCoding.scala" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/nbproject/private/config.properties" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/nbproject/private/private.properties" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DemoScript.txt" afterPath="$PROJECT_DIR$/DemoScript.txt" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/resources/de/sciss/tint/sc/gui/path_synth_16.png" afterPath="$PROJECT_DIR$/resources/de/sciss/tint/sc/swing/path_synth_16.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/Examples.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/Examples.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/OSCResponderNode.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/OSCResponderNode.scala" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/NetAddr.scala" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/Server.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/Server.scala" />
     </list>
-    <ignored path=".idea/workspace.xml" />
     <ignored path="ScalaCollider.iws" />
+    <ignored path=".idea/workspace.xml" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,82 +90,10 @@
   <component name="FileColors" enabled="true" enabledForTabs="true" />
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="OSCMultiResponder.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/OSCMultiResponder.scala">
+      <file leaf-file-name="Routine.scala" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Routine.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="156" column="21" selection-start="5441" selection-end="5441" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Server.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Server.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="265" column="0" selection-start="8963" selection-end="8963" vertical-scroll-proportion="-10.307693">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BufferManager.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/BufferManager.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="53" column="13" selection-start="1671" selection-end="1678" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Buffer.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Buffer.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="42" column="43" selection-start="1477" selection-end="1477" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SC.scala" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/SC.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="37" column="7" selection-start="1126" selection-end="1126" vertical-scroll-proportion="-2.0530972">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ServerMessages.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/ServerMessages.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="139" column="17" selection-start="4597" selection-end="4597" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NodeManager.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/NodeManager.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="168" column="0" selection-start="4838" selection-end="5042" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Model.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Model.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="9" column="6" selection-start="178" selection-end="178" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Node.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Node.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="64" column="1" selection-start="1663" selection-end="1838" vertical-scroll-proportion="-5.076923">
+            <state line="38" column="0" selection-start="1279" selection-end="1279" vertical-scroll-proportion="0.252809">
               <folding />
             </state>
           </provider>
@@ -162,22 +109,22 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/UGen.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/ugen/Hilbert.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/ServerOptions.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/ugen/InOut.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/ugen/BufIO.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/NodeWatcher.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/OSCResponderNode.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/OSCMultiResponder.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/NodeEvent.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/NodeManager.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/Node.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/BufferManager.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/Server.scala" />
         <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/NodeListener.scala" />
         <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/ServerMessages.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/NetAddr.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/swing/Server.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/swing/ServerStatusPanel.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/swing/NodeTreePanel.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/swing/SCSwingServer.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/Server.scala" />
         <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/Buffer.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/Examples.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/MixedBundle.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/OSCMultiResponder.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/OSCResponderNode.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/SC.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/Synth.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/tint/sc/Routine.scala" />
       </list>
     </option>
   </component>
@@ -216,9 +163,8 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
       <pane id="Favorites" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -255,21 +201,40 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="build" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="GoToFile.includeJavaFiles" value="false" />
     <property name="project.structure.last.edited" value="Modules" />
-    <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="project.structure.proportion" value="0.0" />
+    <property name="options.splitter.main.proportions" value="0.3" />
     <property name="MemberChooser.sorted" value="false" />
     <property name="recentsLimit" value="5" />
-    <property name="MemberChooser.showClasses" value="true" />
-    <property name="GoToClass.includeLibraries" value="false" />
+    <property name="options.lastSelected" value="project.scopes" />
     <property name="project.structure.side.proportion" value="0.0" />
     <property name="MemberChooser.copyJavadoc" value="false" />
+    <property name="GoToClass.toSaveIncludeLibraries" value="false" />
+    <property name="MemberChooser.showClasses" value="true" />
+    <property name="GoToClass.includeLibraries" value="false" />
+    <property name="options.searchVisible" value="true" />
+    <property name="options.splitter.details.proportions" value="0.2" />
     <property name="dynamic.classpath" value="false" />
   </component>
   <component name="RunManager" selected="Application.ScalaCollider">
@@ -456,6 +421,7 @@
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32972974" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32972974" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -468,7 +434,6 @@
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32972974" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24981357" sideWeight="0.6608108" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -506,114 +471,107 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/ugen/FSinOsc.scala">
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Node.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="72" column="32" selection-start="2594" selection-end="2596" vertical-scroll-proportion="0.4606414">
+        <state line="64" column="1" selection-start="1663" selection-end="1838" vertical-scroll-proportion="0.021067416">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/ugen/BufIO.scala">
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Env.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="68" column="6" selection-start="3048" selection-end="3048" vertical-scroll-proportion="-0.4390244">
+        <state line="170" column="6" selection-start="5842" selection-end="5842" vertical-scroll-proportion="3.0126405">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/ugen/InOut.scala">
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/ControlDesc.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="116" column="29" selection-start="3924" selection-end="3928" vertical-scroll-proportion="0.6355685">
+        <state line="30" column="14" selection-start="1004" selection-end="1004" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/ugen/DiskIO.scala">
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/swing/ServerStatusPanel.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="11" selection-start="31" selection-end="33" vertical-scroll-proportion="0.02186589">
+        <state line="151" column="60" selection-start="5393" selection-end="5393" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="jar://$PROJECT_DIR$/libraries/ScalaOSC.jar!/de/sciss/scalaosc/OSCPacket.class">
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/swing/NodeTreePanel.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="6" selection-start="1294" selection-end="1294" vertical-scroll-proportion="0.36585367">
+        <state line="32" column="0" selection-start="1165" selection-end="1165" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/OSCResponderNode.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="61" column="34" selection-start="2136" selection-end="2136" vertical-scroll-proportion="-11.807693">
+        <state line="45" column="78" selection-start="1639" selection-end="1639" vertical-scroll-proportion="0.33621934">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/OSCMultiResponder.scala">
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/NodeIDAllocator.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="156" column="21" selection-start="5441" selection-end="5441" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/NodeManager.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="168" column="0" selection-start="4838" selection-end="5042" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/BufferManager.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="53" column="13" selection-start="1671" selection-end="1678" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Node.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="64" column="1" selection-start="1663" selection-end="1838" vertical-scroll-proportion="-5.076923">
+        <state line="36" column="6" selection-start="1108" selection-end="1108" vertical-scroll-proportion="0.21645021">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Server.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="265" column="0" selection-start="8963" selection-end="8963" vertical-scroll-proportion="-10.307693">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Model.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="6" selection-start="178" selection-end="178" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/ServerMessages.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="139" column="17" selection-start="4597" selection-end="4597" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Routine.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="56" column="6" selection-start="1863" selection-end="1863" vertical-scroll-proportion="0.33333334">
+        <state line="90" column="0" selection-start="3438" selection-end="3438" vertical-scroll-proportion="0.20943953">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Buffer.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="42" column="43" selection-start="1477" selection-end="1477" vertical-scroll-proportion="0.0">
+        <state line="99" column="30" selection-start="3179" selection-end="3179" vertical-scroll-proportion="0.20373027">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Examples.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="25" column="24" selection-start="520" selection-end="520" vertical-scroll-proportion="0.20646067">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/MixedBundle.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="76" column="27" selection-start="2713" selection-end="2713" vertical-scroll-proportion="0.3258427">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/swing/AWTServer.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="14" column="11" selection-start="419" selection-end="419" vertical-scroll-proportion="0.30612245">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/SC.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="37" column="7" selection-start="1126" selection-end="1126" vertical-scroll-proportion="-2.0530972">
+        <state line="156" column="34" selection-start="5529" selection-end="5529" vertical-scroll-proportion="0.3758967">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Synth.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="98" column="31" selection-start="3284" selection-end="3284" vertical-scroll-proportion="0.8278336">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/tint/sc/Routine.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="38" column="0" selection-start="1279" selection-end="1279" vertical-scroll-proportion="0.252809">
           <folding />
         </state>
       </provider>
@@ -659,7 +617,13 @@
       <state key="ScopeChooserConfigurable.UI">
         <UIState>
           <splitter-proportions>
-            <SplitterProportionsDataImpl />
+            <SplitterProportionsDataImpl>
+              <option name="proportions">
+                <list>
+                  <option value="0.2" />
+                </list>
+              </option>
+            </SplitterProportionsDataImpl>
           </splitter-proportions>
           <settings />
         </UIState>

@@ -20,36 +20,36 @@ object Examples {
 		}
 	}
 	
-	def example1 {
-		val options = new ServerOptions
-		options.port.value = 57110
-		val s = new Server( "local", options, 1 )
-		
-//		val ssp = new gui.ServerStatusPanel( s )
-//		val frame1 = ssp.makeWindow
-//		frame1.setVisible( true )
-		
-//		val ntp = new gui.NodeTreePanel( s )
-//		val frame2 = ntp.makeWindow
-//		frame2.setVisible( true )
-		
-		s.start
-//		s.register()
-		s.c.dumpOutgoingOSC( 1, System.out )
-		s.c.dumpIncomingOSC( 1, System.out )
-		s.startAliveThread()
-		s.addListener( msg => msg match {
-			case Server.Running => {
-				println( "RUNNING!" )
-				s.register()
-				s.initTree
-				val synth = babblingBrook
-				s.nodeMgr.register( synth ) // XXX should be automatic
-				println( synth )
-			}
-		})
-		Thread.sleep( 10000 )
-	}
+//	def example1 {
+//		val options = new ServerOptions
+//		options.port.value = 57110
+//		val s = new swing.AWTServer( "local", options, 1 )
+//
+////		val ssp = new swing.ServerStatusPanel( s )
+////		val frame1 = ssp.makeWindow
+////		frame1.setVisible( true )
+//
+////		val ntp = new swing.NodeTreePanel( s )
+////		val frame2 = ntp.makeWindow
+////		frame2.setVisible( true )
+//
+//		s.start
+////		s.register()
+//		s.c.dumpOutgoingOSC( 1, System.out )
+//		s.c.dumpIncomingOSC( 1, System.out )
+//		s.startAliveThread()
+//		s.addListener( msg => msg match {
+//			case Server.Running => {
+//				println( "RUNNING!" )
+//				s.register()
+//				s.initTree
+//				val synth = babblingBrook
+//				s.nodeMgr.register( synth ) // XXX should be automatic
+//				println( synth )
+//			}
+//		})
+//		Thread.sleep( 10000 )
+//	}
 	
 	/*
 	 *	A babbling brook example, by James McCartney 2007. See

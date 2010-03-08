@@ -25,7 +25,7 @@
  *
  *  Changelog:
  */
-package de.sciss.tint.sc.gui
+package de.sciss.tint.sc.swing
 
 import java.awt.{ Color, Component, Container, Dimension, FlowLayout, Font,
                  Graphics, Image, Toolkit }

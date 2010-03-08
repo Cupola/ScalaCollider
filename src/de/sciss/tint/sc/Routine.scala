@@ -36,8 +36,8 @@ import _root_.scala.math._
 //import _root_.scala.continuations.cps
 //import _root_.scala.continuations.ControlContext.{ shift, reset, suspendable }
 
-case class Reschedule( delta: Long, who: Actor )
-case object Awake
+
+
 //case class Scheduled( when: Long, what: Actor ) extends Ordered[Scheduled] {
 //    def compare( that: Scheduled ) = when.compare( that.when )
 //}

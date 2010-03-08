@@ -25,14 +25,13 @@
  *
  *  Changelog:
  */
-package de.sciss.tint.sc.gui
+package de.sciss.tint.sc.swing
 
-import _root_.java.awt.{ BorderLayout, Color, Dimension }
-import _root_.java.awt.event.{ ComponentAdapter, ComponentEvent }
-import _root_.javax.swing.{ JFrame, JPanel, WindowConstants }
-import _root_.javax.swing.event.{ AncestorEvent, AncestorListener }
+import java.awt.{ BorderLayout, Color, Dimension }
+import java.awt.event.{ ComponentAdapter, ComponentEvent }
+import javax.swing.{ JFrame, JPanel, WindowConstants }
 
-import _root_.de.sciss.tint.sc.{ Node, Server }
+import de.sciss.tint.sc.{ Server }
 
 /*
 import _root_.edu.uci.ics.jung.algorithms.layout.{ BalloonLayout, DAGLayout, FRLayout,
