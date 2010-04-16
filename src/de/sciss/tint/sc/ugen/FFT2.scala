@@ -14,14 +14,14 @@ object Convolution extends UGen3Args {
    def ar( in: GE, kernel: GE, frameSize: GE ) : GE = arExp( in, kernel, frameSize )
 }
 case class Convolution( rate: Rate, in: UGenIn, kernel: UGenIn, frameSize: UGenIn )
-extends SingleOutUGen( in, kernel, frameSize )
+extends SingleOutUGen( in, kernel, frameSize ) // with SideEffectUGen
 
 // triggered convolution in freq domain
 object Convolution2 extends UGen4Args {
    def ar( in: GE, kernel: GE, trig: GE, frameSize: GE ) : GE = arExp( in, kernel, trig, frameSize )
 }
 case class Convolution2( rate: Rate, in: UGenIn, kernel: UGenIn, trig: UGenIn, frameSize: UGenIn )
-extends SingleOutUGen( in, kernel, trig, frameSize )
+extends SingleOutUGen( in, kernel, trig, frameSize ) // with SideEffectUGen
 
 // triggered cross-faded convolution in freq domain
 object Convolution2L extends UGen5Args {
@@ -29,7 +29,7 @@ object Convolution2L extends UGen5Args {
       arExp( in, kernel, trig, frameSize, fadePeriods )
 }
 case class Convolution2L( rate: Rate, in: UGenIn, kernel: UGenIn, trig: UGenIn, frameSize: UGenIn, fadePeriods: UGenIn )
-extends SingleOutUGen( in, kernel, trig, frameSize, fadePeriods )
+extends SingleOutUGen( in, kernel, trig, frameSize, fadePeriods ) // with SideEffectUGen
 
 // triggered cross-faded stereo convolution in freq domain
 // StereoConvolution2L XXX

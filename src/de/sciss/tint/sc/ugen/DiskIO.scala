@@ -33,7 +33,7 @@ import SC._
 import GraphBuilder._
 
 /**
- * 	@version	0.11, 03-Jan-10
+ * 	@version	0.12, 16-Apr-10
  */
 object DiskOut {
   def ar( bufNum: GE, multi: GE ) : GE =
@@ -42,7 +42,7 @@ object DiskOut {
                 yield this( b, m ))
 }
 case class DiskOut( bufNum: UGenIn, multi: Seq[ UGenIn ])
-extends SingleOutUGen( (bufNum :: multi.toList): _* ) with AudioRated
+extends SingleOutUGen( (bufNum :: multi.toList): _* ) with AudioRated // with SideEffectUGen
 
 object DiskIn {
   def ar( numChannels: Int, bufNum: GE, loop: GE = 0 ) =
@@ -51,7 +51,7 @@ object DiskIn {
 }
 case class DiskIn( numChannels: Int, bufNum: UGenIn, loop: UGenIn )
 extends MultiOutUGen( List.fill[ Rate ]( numChannels )( audio ),
-                      List( bufNum, loop )) with AudioRated
+                      List( bufNum, loop )) with AudioRated // with SideEffectUGen // side-effect: advancing sf offset
 
 object VDiskIn {
   // note: argument 'rate' renamed to 'speed'
@@ -61,6 +61,6 @@ object VDiskIn {
 }
 case class VDiskIn( numChannels: Int, bufNum: UGenIn, speed: UGenIn,
                     loop: UGenIn, sendID: UGenIn )
-extends MultiOutUGen( List.fill[ Rate ]( numChannels )( audio ),
-                      List( bufNum, speed, loop, sendID )) with AudioRated
+extends MultiOutUGen( List.fill[ Rate ]( numChannels )( audio ), List( bufNum, speed, loop, sendID ))
+with AudioRated // with SideEffectUGen
  

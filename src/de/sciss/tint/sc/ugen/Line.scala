@@ -32,7 +32,7 @@ import SC._
 //import Rates._
 
 /**
- * 	@version	0.12, 01-Jan-10
+ * 	@version	0.13, 16-Apr-10
  */
 object Line extends UGen4Args {
 	def ar( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = doNothing ) : GE =
@@ -43,6 +43,7 @@ object Line extends UGen4Args {
 }
 case class Line( rate: Rate, start: UGenIn, end: UGenIn, dur: UGenIn, doneAction: UGenIn )
 extends SingleOutUGen( start, end, dur, doneAction )
+// with SideEffectUGen // side-effect: done-flag
 
 object XLine extends UGen4Args {
 	def ar( start: GE = 1, end: GE = 2, dur: GE = 1, doneAction: GE = doNothing ) : GE =
@@ -53,6 +54,7 @@ object XLine extends UGen4Args {
 }
 case class XLine( rate: Rate, start: UGenIn, end: UGenIn, dur: UGenIn, doneAction: UGenIn )
 extends SingleOutUGen( start, end, dur, doneAction )
+// with SideEffectUGen // side-effect: done-flag
 
 object LinExp extends UGen5Args {
 	def ar( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE =

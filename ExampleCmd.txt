@@ -142,10 +142,10 @@ val x = play {
         0.2)
     val y = z * 0.6
     z + List(
-          CombL.ar(y, 0.06, LFNoise1.kr(0.3.rand).madd(0.025, 0.035), 1) 
-        + CombL.ar(y, 0.06, LFNoise1.kr(0.3.rand).madd(0.025, 0.035), 1),
-          CombL.ar(y, 0.06, LFNoise1.kr(0.3.rand).madd(0.025, 0.035), 1)
-        + CombL.ar(y, 0.06, LFNoise1.kr(0.3.rand).madd(0.025, 0.035), 1)
+          CombL.ar(y, 0.06, LFNoise1.kr(Rand(0, 0.3)).madd(0.025, 0.035), 1) 
+        + CombL.ar(y, 0.06, LFNoise1.kr(Rand(0, 0.3)).madd(0.025, 0.035), 1),
+          CombL.ar(y, 0.06, LFNoise1.kr(Rand(0, 0.3)).madd(0.025, 0.035), 1)
+        + CombL.ar(y, 0.06, LFNoise1.kr(Rand(0, 0.3)).madd(0.025, 0.035), 1)
     )
 }
 
@@ -313,7 +313,7 @@ val x = play {
         val freq = Lag.kr(             // lag the pitch so it glissandos between pitches
             LFNoise0.kr(               // use low freq step noise as a pitch control
                 Array(1, 0.5, 0.25)(   // choose a frequency of pitch change
-                    scala.util.Random.nextInt(3))).madd(
+                    util.Random.nextInt(3))).madd(
                 7,                     // +/- 7 semitones
                 IRand(36, 96)          // random center note
             ).round(1),                // round to nearest semitone

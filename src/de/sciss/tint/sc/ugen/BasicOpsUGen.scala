@@ -32,8 +32,11 @@ import de.sciss.tint.sc.{ Constant => c, _ }
 import SC._
 import GraphBuilder._
 
-import scala.math._
+import math._
 
+/**
+ *    @version 0.11, 16-Apr-10
+ */
 object MulAdd {
 //  private def multiNew( name: String, rate: Rate, outputRates: Seq[ Symbol ], inputs: Seq[ GE ]) : GE = {... }
 //  private def findHighestRate( inputs: Seq[ UGenIn ]) : Rate = {
@@ -143,84 +146,122 @@ abstract class BasicOpUGen( override val specialIndex: Int, inputs: UGenIn* )
 extends SingleOutUGen( inputs: _* )
 
 object UnaryOpUGen {
-  private val selectors = Map( List(
-    'neg, 'not, 'isNil, 'notNil, 'bitNot, 'abs, 'asFloat, 'asInteger, 'ceil, 'floor, 'frac, 'sign,
-    'squared, 'cubed, 'sqrt, 'exp, 'reciprocal, 'midicps, 'cpsmidi, 'midiratio, 'ratiomidi,
-    'dbamp, 'ampdb, 'octcps, 'cpsoct, 'log, 'log2, 'log10, 'sin, 'cos, 'tan, 'asin, 'acos, 'atan,
-    'sinh, 'cosh, 'tanh, 'rand, 'rand2, 'linrand, 'bilinrand, 'sum3rand, 'distort, 'softclip,
-    'coin, 'digitValue, 'silence, 'GAGA, 'rectWindow, 'hanWindow, 'welWindow, 'triWindow, 'ramp, 'scurve
-  ).zipWithIndex: _* )
+   sealed abstract class Op( val id: Int ) {
+      def make( a: GE ) : GE = UnaryOpUGen.make( this, a )
 
-  protected[sc] def make( selector: Symbol, a: GE ) : GE = {
-    simplify( for( List( ai ) <- expand( a )) yield make1( selector, ai ))
-  }
-
-  private def make1( selector: Symbol, a: UGenIn ) : GE = {
-    val rate = a.rate
-    // replace constants immediately
-    a match {
-      case c(aval) => try { c( (selector match {
-	    case 'neg => -aval
-	//  case 'not =>
-	    case 'isNil => 0f
-	    case 'notNil => 1f
-	    case 'bitNot => aval.toInt ^ -1
-	    case 'abs => abs( aval )
-	    case 'asFloat => aval
-	    case 'asInteger => aval.toInt
-	    case 'ceil => ceil( aval )
-	    case 'floor => floor( aval )
-	    case 'frac => aval % 1.0	// XXX OK for negative values?
-	    case 'sign => if( aval == 0 ) 0 else if( aval < 0 ) -1 else 1
-	    case 'squared => aval * aval
-	    case 'cubed => aval * aval * aval
-	    case 'sqrt => sqrt( aval )
-	    case 'exp => exp( aval )
-	    case 'reciprocal => 1.0f / aval
-	    case 'midicps => midicps( aval )
-	    case 'cpsmidi => cpsmidi( aval )
-	    case 'midiratio => pow( 2, aval * 0.083333333333 )
-	    case 'ratiomidi => 12 * log( aval ) / log( 2 )
-	    case 'dbamp => pow( 10, aval * 0.05 )
-	    case 'ampdb => log( aval ) / log( 10 )* 20
-	    case 'octcps => 440 * pow( 2, aval - 4.75 )
-	    case 'cpsoct => log( aval * 0.0022727272727 ) / log( 2 ) + 4.75
-	    case 'log => log( aval )
-	    case 'log2 => log( aval ) / log( 2 )
-	    case 'log10 => log( aval ) / log( 10 )
-	    case 'sin => sin( aval )
-	    case 'cos => cos( aval )
-	    case 'tan => tan( aval )
-	    case 'asin => asin( aval )
-	    case 'acos => acos( aval )
-	    case 'atan => atan( aval )
-//	    case 'sinh => Math.sinh( aval )	// XXX
-//	    case 'cosh => Math.cosh( aval )	// XXX
-//	    case 'tanh => Math.tanh( aval )	// XXX
-//	    case 'rand => Math.rand( aval ) // XXX seed / Routine
-//	    case 'rand2 => Math.rand( -aval, aval ) // XXX seed / Routine
-	//  case 'linrand =>	// XXX
-	//  case 'bilinrand =>	// XXX
-	//  case 'sum3rand =>	// XXX
-	    case 'distort => aval / (1 + abs( aval ))
-	    case 'softclip =>	{ val absx = abs( aval ); if( absx <= 0.5 ) aval; else (absx - 0.25) / aval }
-//	    case 'coin => if( Math.rand() < aval ) 1 else 0	// XXXX
-	//  case 'digitValue =>	// XXX
-	    case 'silence => 0f
-	    case 'thru => aval
-        case 'rectWindow => if( (aval < 0) || (aval > 1) ) 0 else 1
-        case 'hanWindow => if( (aval < 0) || (aval > 1) ) 0 else 0.5 - 0.5 * cos( aval * Pi * 2 )
-	    case 'welWindow => if( (aval < 0) || (aval > 1) ) 0 else sin( aval * Pi )
-        case 'triWindow => if( (aval < 0) || (aval > 1) ) 0 else if( aval < 0.5 ) 2 * aval else -2 * aval + 2
-	    case 'ramp =>	if( aval <= 0 ) 0 else if( aval >= 1 ) 1 else aval
-	    case 'scurve => if( aval <= 0 ) 0 else if( aval > 1 ) 1 else aval * aval * (3 - 2 * aval)
-//        case _ => this( rate, selector, a )
-      }).toFloat )} catch {
-        case e: MatchError => this( rate, selector, a )
+      def name = { val cn = getClass.getName
+         val sz   = cn.length
+         val i    = cn.lastIndexOf( '.' ) + 1
+         cn.charAt( i ).toLower + cn.substring( i + 1, if( cn.charAt( sz - 1 ) == '$' ) sz - 1 else sz )
       }
-      case _ => this( rate, selector, a )
-    }
-  }
+   }
+   case object Neg         extends Op(  0 )
+   case object Not         extends Op(  1 )
+// case object IsNil       extends Op(  2 )
+// case object NotNil      extends Op(  3 )
+// case object BitNot      extends Op(  4 )
+   case object Abs         extends Op(  5 )
+// case object ToFloat     extends Op(  6 )
+// case object ToInt       extends Op(  7 )
+   case object Ceil        extends Op(  8 )
+   case object Floor       extends Op(  9 )
+   case object Frac        extends Op( 10 )
+   case object Signum      extends Op( 11 )
+   case object Squared     extends Op( 12 )
+   case object Cubed       extends Op( 13 )
+   case object Sqrt        extends Op( 14 )
+   case object Exp         extends Op( 15 )
+   case object Reciprocal  extends Op( 16 )
+   case object Midicps     extends Op( 17 )
+   case object Cpsmidi     extends Op( 18 )
+   case object Midiratio   extends Op( 19 )
+   case object Ratiomidi   extends Op( 20 )
+   case object Dbamp       extends Op( 21 )
+   case object Ampdb       extends Op( 22 )
+   case object Octcps      extends Op( 23 )
+   case object Cpsoct      extends Op( 24 )
+   case object Log         extends Op( 25 )
+   case object Log2        extends Op( 26 )
+   case object Log10       extends Op( 27 )
+   case object Sin         extends Op( 28 )
+   case object Cos         extends Op( 29 )
+   case object Tan         extends Op( 30 )
+   case object Asin        extends Op( 31 )
+   case object Acos        extends Op( 32 )
+   case object Atan        extends Op( 33 )
+   case object Sinh        extends Op( 34 )
+   case object Cosh        extends Op( 35 )
+   case object Tanh        extends Op( 36 )
+// class Rand              extends Op( 37 )
+// class Rand2             extends Op( 38 )
+// class Linrand           extends Op( 39 )
+// class Bilinrand         extends Op( 40 )
+// class Sum3rand          extends Op( 41 )
+   case object Distort     extends Op( 42 )
+   case object Softclip    extends Op( 43 )
+// class Coin              extends Op( 44 )
+// case object DigitValue  extends Op( 45 )
+// case object Silence     extends Op( 46 )
+// case object Thru        extends Op( 47 )
+// case object RectWindow  extends Op( 48 )
+// case object HanWindow   extends Op( 49 )
+// case object WelWindow   extends Op( 50 )
+// case object TriWindow   extends Op( 51 )
+   case object Ramp        extends Op( 52 )
+   case object Scurve      extends Op( 53 )
+
+   protected[sc] def make( selector: Op, a: GE ) : GE = {
+      simplify( for( List( ai ) <- expand( a )) yield make1( selector, ai ))
+   }
+
+   private def cn( f: Float )  = c( f )
+   private def cn( d: Double ) = c( d.toFloat )
+
+   private def make1( selector: Op, a: UGenIn ) : GE = {
+      // replace constants immediately
+      a match {
+         case c( aval ) => selector match {
+            case Neg       => cn( -aval )
+         // case Not       =>
+            case Abs       => cn( abs( aval ))
+            case Ceil      => cn( ceil( aval ))
+            case Floor     => cn( floor( aval ))
+            case Frac      => cn( aval % 1.0	)
+            case Signum    => cn( if( aval == 0 ) 0 else if( aval < 0 ) -1 else 1 )
+            case Squared   => cn( aval * aval )
+            case Cubed     => cn( aval * aval * aval )
+            case Sqrt      => cn( sqrt( aval ))
+            case Exp       => cn( exp( aval ))
+            case Reciprocal=> cn( 1.0f / aval )
+            case Midicps   => cn( midicps( aval ))
+            case Cpsmidi   => cn( cpsmidi( aval ))
+            case Midiratio => cn( pow( 2, aval * 0.083333333333 ))
+            case Ratiomidi => cn( 12 * log( aval ) / log( 2 ))
+            case Dbamp     => cn( pow( 10, aval * 0.05 ))
+            case Ampdb     => cn( log10( aval )* 20 )
+            case Octcps    => cn( 440 * pow( 2, aval - 4.75 ))
+            case Cpsoct    => cn( log( aval * 0.0022727272727 ) / log( 2 ) + 4.75 )
+            case Log       => cn( log( aval ))
+            case Log2      => cn( log( aval ) / log( 2 ))
+            case Log10     => cn( log10( aval ))
+            case Sin       => cn( sin( aval ))
+            case Cos       => cn( cos( aval ))
+            case Tan       => cn( tan( aval ))
+            case Asin      => cn( asin( aval ))
+            case Acos      => cn( acos( aval ))
+            case Atan      => cn( atan( aval ))
+            case Sinh      => cn( sinh( aval ))
+            case Cosh      => cn( cosh( aval ))
+            case Tanh      => cn( tanh( aval ))
+            case Distort   => cn( aval / (1 + abs( aval )))
+            case Softclip  =>	{ val absx = abs( aval ); cn( if( absx <= 0.5f ) aval else (absx - 0.25f) / aval )}
+            case Ramp      => cn( if( aval <= 0 ) 0 else if( aval >= 1 ) 1 else aval )
+            case Scurve    => cn( if( aval <= 0 ) 0 else if( aval > 1 ) 1 else aval * aval * (3 - 2 * aval))
+            case _         => this( a.rate, selector, a )
+         }
+         case _            => this( a.rate, selector, a )
+      }
+   }
 
 /*
   def determineRate( a: UGenIn, b: UGenIn ) : Rate = {
@@ -237,8 +278,9 @@ object UnaryOpUGen {
   */
 }
 
-case class UnaryOpUGen( rate: Rate, selector: Symbol, a: UGenIn )
-extends BasicOpUGen( UnaryOpUGen.selectors( selector ), a )
+// Note: only deterministic selectors are implemented!!
+case class UnaryOpUGen( rate: Rate, selector: UnaryOpUGen.Op, a: UGenIn )
+extends BasicOpUGen( selector.id, a )
 
 object BinaryOpUGen {
   private val selectors = Map( List(
@@ -251,7 +293,8 @@ object BinaryOpUGen {
   ).zipWithIndex: _* )
 
   protected[sc] def make( selector: Symbol, a: GE, b: GE ) : GE = {
-    simplify( for( List( ai, bi ) <- expand( a, b )) yield make1( selector, ai, bi ))
+     val made = for( List( ai, bi ) <- expand( a, b )) yield make1( selector, ai, bi )
+     simplify( made )
   }
 
   private def make1( selector: Symbol, a: UGenIn, b: UGenIn ) : GE = {
@@ -292,5 +335,6 @@ object BinaryOpUGen {
   */
 }
 
+// Note: only deterministic selectors are implemented!!
 case class BinaryOpUGen( rate: Rate, selector: Symbol, a: UGenIn, b: UGenIn )
 extends BasicOpUGen( BinaryOpUGen.selectors( selector ), a, b )

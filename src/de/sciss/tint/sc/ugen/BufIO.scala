@@ -32,7 +32,7 @@ import SC._
 import GraphBuilder._
 
 /**
- * 	@version	0.12, 03-Mar-10
+ * 	@version	0.13, 16-Apr-10
  */
 object PlayBuf {
    // note: argument 'rate' renamed to 'speed'
@@ -52,6 +52,7 @@ object PlayBuf {
 case class PlayBuf( rate: Rate, numChannels: Int, bufNum: UGenIn, speed: UGenIn, trig: UGenIn, startPos: UGenIn,
                     loop: UGenIn, doneAction: UGenIn )
 extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ), List( bufNum, speed, trig, startPos, loop, doneAction ))
+// with SideEffectUGen // side-effect: done flag
 
 object TGrains {
    // note: argument 'rate' renamed to 'speed'
@@ -76,7 +77,10 @@ object BufRd {
          yield this( rate, numChannels, b, p, l, i ))
 }
 case class BufRd( rate: Rate, numChannels: Int, bufNum: UGenIn, phase: UGenIn, loop: UGenIn, interp: UGenIn )
+//class BufRd( val rate: Rate, val numChannels: Int, val bufNum: UGenIn, val phase: UGenIn, val loop: UGenIn,
+//             val interp: UGenIn )
 extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ), List( bufNum, phase, loop, interp ))
+// with SideEffectUGen // side-effect: done-flag
 
 object BufWr {
    def ar( multi: GE, bufNum: GE, phase: GE = 0, loop: GE = 1 ) : GE =
@@ -97,7 +101,7 @@ object BufWr {
 // 	}
 }
 case class BufWr( rate: Rate, bufNum: UGenIn, phase: UGenIn, loop: UGenIn, multi: Seq[ UGenIn ])
-extends SingleOutUGen( (bufNum :: phase :: loop :: multi.toList): _* )
+extends SingleOutUGen( (bufNum :: phase :: loop :: multi.toList): _* ) // with SideEffectUGen
 
 object RecordBuf {
    def ar( multi: GE, bufNum: GE, offset: GE = 0, recLevel: GE = 1, preLevel: GE = 0,
@@ -112,11 +116,12 @@ object RecordBuf {
                        loop: GE, trig: GE, doneAction: GE ) =
       simplify( for( List( b, o, r, p, n, l, t, d, m @ _* ) <- expand( (bufNum :: offset :: recLevel :: preLevel ::
                      run :: loop :: trig :: doneAction :: multi.toUGenIns.toList) :_* ))
-         yield this( rate, b, o, r, p, n, l, t, d, m ))
+         yield this( rate, b, o, r, p, n, l, t, d, m, SynthDef.individuate ))
 }
 case class RecordBuf( rate: Rate, bufNum: UGenIn, offset: UGenIn, recLevel: UGenIn, preLevel: UGenIn,
-                      run: UGenIn, loop: UGenIn, trig: UGenIn, doneAction: UGenIn, multi: Seq[ UGenIn ])
+                      run: UGenIn, loop: UGenIn, trig: UGenIn, doneAction: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )
 extends SingleOutUGen( (bufNum :: offset :: recLevel :: preLevel :: run :: loop :: trig :: doneAction :: multi.toList): _* )
+// with SideEffectUGen
 
 //object Tap {
 //	// Warning: different arg order than sclang!

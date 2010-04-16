@@ -7,6 +7,8 @@ package de.sciss.tint.sc.ugen
 
 import de.sciss.tint.sc._
 
+// YYY could be a case class if specialIndex
+// was passed as a parameter
 class Control( val rate: Rate, val values: Seq[ Float ])
 extends MultiOutUGen( List.fill( values.size )( rate ), Nil )
 {

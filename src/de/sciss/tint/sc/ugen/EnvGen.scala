@@ -94,6 +94,7 @@ object EnvGen {
 case class EnvGen( rate: Rate, gate: UGenIn, levelScale: UGenIn, levelBias: UGenIn,
                    timeScale: UGenIn, doneAction: UGenIn, envSeq: Seq[ UGenIn ])
 extends SingleOutUGen( (List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envSeq): _* )
+// with SideEffectUGen  // side-effect: setting done flag
 
 object IEnvGen {
   def ar( envelope: IEnv, index: GE ) : GE = {
@@ -122,3 +123,4 @@ object Linen extends UGen5Args {
 case class Linen( rate: Rate, gate: UGenIn, attack: UGenIn, sustain: UGenIn,
                   release: UGenIn, doneAction: UGenIn )
 extends SingleOutUGen( gate, attack, sustain, release, doneAction )
+// with SideEffectUGen // side-effect: done-flag

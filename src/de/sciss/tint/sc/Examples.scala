@@ -9,7 +9,7 @@ object Examples {
 //		LiveCoding.startInterpreting
 //		example1
 //		debug
-      debug2
+      debug3
 	}
 
 	def debug {
@@ -86,5 +86,9 @@ object Examples {
 val envGen = Line.kr( amp, amp, i_dur, doneAction = freeSelf )
 				Out.ar( out, DiskIn.ar( numChannels, i_bufNum ) /* * envGen */)
 			 }
+   }
+
+   def debug3 {
+      val d = SynthDef( "scr" ) { (BrownNoise.ar(List(0.5,0.5))-0.49) }
    }
 }

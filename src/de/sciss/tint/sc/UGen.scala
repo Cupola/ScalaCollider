@@ -100,6 +100,9 @@ trait UGenProxy {
    def outputIndex : Int
 }
 
+//trait ExclusiveUGen     // marker trait: UGen can only occur once in a synthdef
+//trait SideEffectUGen    // marker trait: UGen has side effects
+
 abstract class UGen
 extends RatedGE with UGenProxy {
 //   var synthIndex = -1
@@ -155,37 +158,59 @@ extends RatedGE with UGenProxy {
    }
 }
 
-trait UGen1Args {
-  def apply( rate: Rate, arg1: UGenIn ) : GE
-  private def make( rate: Rate, arg1: GE ) : GE =
-    simplify( for( List( a1 ) <- expand( arg1 )) yield this( rate, a1 ))
+//trait UGenIndiv {
+//   protected def individuate: Int = SynthDef.graphBuilder.map( _.individuate ) getOrElse 0
+//}
 
-  protected def arExp( arg1: GE ) : GE = make( audio, arg1 )
-  protected def krExp( arg1: GE ) : GE = make( control, arg1 )
-  protected def irExp( arg1: GE ) : GE = make( scalar, arg1 )
+trait UGen1Args {
+   def apply( rate: Rate, arg1: UGenIn ) : GE
+   private def make( rate: Rate, arg1: GE ) : GE =
+      simplify( for( List( a1 ) <- expand( arg1 )) yield this( rate, a1 ))
+
+   protected def arExp( arg1: GE ) : GE = make( audio, arg1 )
+   protected def krExp( arg1: GE ) : GE = make( control, arg1 )
+   protected def irExp( arg1: GE ) : GE = make( scalar, arg1 )
 }
 
 trait UGen1RArgs { // single rate
-  def apply( arg1: UGenIn ) : GE
-  protected def make( arg1: GE ) : GE =
-    simplify( for( List( a1 ) <- expand( arg1 )) yield this( a1 ))
+   def apply( arg1: UGenIn ) : GE
+   protected def make( arg1: GE ) : GE =
+      simplify( for( List( a1 ) <- expand( arg1 )) yield this( a1 ))
+}
+
+trait UGen1ArgsIndiv {
+   def apply( rate: Rate, arg1: UGenIn, _indiv: Int ) : GE
+   def apply( rate: Rate, arg1: UGenIn ) : GE =
+      apply( rate, arg1, SynthDef.individuate )
 }
 
 trait UGen2Args {
-  def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn ) : GE
-  private def make( rate: Rate, arg1: GE, arg2: GE ) : GE =
-    simplify( for( List( a1, a2 ) <- expand( arg1, arg2 ))
-      yield this( rate, a1, a2 ))
+   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn ) : GE
+   private def make( rate: Rate, arg1: GE, arg2: GE ) : GE =
+      simplify( for( List( a1, a2 ) <- expand( arg1, arg2 ))
+         yield this( rate, a1, a2 ))
 
-  protected def arExp( arg1: GE, arg2: GE ) : GE = make( audio, arg1, arg2 )
-  protected def krExp( arg1: GE, arg2: GE ) : GE = make( control, arg1, arg2 )
-  protected def irExp( arg1: GE, arg2: GE ) : GE = make( scalar, arg1, arg2 )
+   protected def arExp( arg1: GE, arg2: GE ) : GE = make( audio, arg1, arg2 )
+   protected def krExp( arg1: GE, arg2: GE ) : GE = make( control, arg1, arg2 )
+   protected def irExp( arg1: GE, arg2: GE ) : GE = make( scalar, arg1, arg2 )
 }
 
 trait UGen2RArgs { // single rate
   def apply( arg1: UGenIn, arg2: UGenIn ) : GE
   protected def make( arg1: GE, arg2: GE ) : GE =
     simplify( for( List( a1, a2 ) <- expand( arg1, arg2 )) yield this( a1, a2 ))
+}
+
+trait UGen2ArgsIndiv {
+   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, _indiv: Int ) : GE
+   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn ) : GE =
+      apply( rate, arg1, arg2, SynthDef.individuate )
+}
+
+trait UGen2RArgsIndiv {
+   def apply( arg1: UGenIn, arg2: UGenIn, _indiv: Int ) : GE
+   def apply( arg1: UGenIn, arg2: UGenIn ) : GE =
+      apply( arg1, arg2, SynthDef.individuate )
 }
 
 trait UGen3Args {
@@ -207,6 +232,18 @@ trait UGen3RArgs { // single rate
   protected def make( arg1: GE, arg2: GE, arg3: GE ) : GE =
     simplify( for( List( a1, a2, a3 ) <- expand( arg1, arg2, arg3 ))
       yield this( a1, a2, a3 ))
+}
+
+trait UGen3ArgsIndiv {
+   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, _indiv: Int ) : GE
+   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn ) : GE =
+      apply( rate, arg1, arg2, arg3, SynthDef.individuate )
+}
+
+trait UGen3RArgsIndiv {
+   def apply( arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, _indiv: Int ) : GE
+   def apply( arg1: UGenIn, arg2: UGenIn, arg3: UGenIn ) : GE =
+      apply( arg1, arg2, arg3, SynthDef.individuate )
 }
 
 trait UGen4Args {
@@ -312,7 +349,7 @@ extends UGen with UGenIn {
 }
 
 abstract class ZeroOutUGen( val inputs: UGenIn* )
-extends UGen {
+extends UGen /* with SideEffectUGen */ {
   final def outputRates = Nil
   final def toUGenIns: Seq[ UGenIn ] = Nil
   final def numOutputs = 0

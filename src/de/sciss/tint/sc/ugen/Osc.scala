@@ -71,7 +71,7 @@ object OscN extends UGen3Args {
     krExp( bufNum, freq, phase )
 }
 case class OscN( rate: Rate, bufNum: UGenIn, freq: UGenIn, phase: UGenIn )
-extends SingleOutUGen( bufNum, freq, phase )
+extends SingleOutUGen( bufNum, freq, phase ) // with SideEffectUGen
 
 object VOsc extends UGen3Args {
   def ar( bufPos: GE, freq: GE = 440, phase: GE = 0 ) : GE =
@@ -81,7 +81,7 @@ object VOsc extends UGen3Args {
     krExp( bufPos, freq, phase )
 }
 case class VOsc( rate: Rate, bufPos: UGenIn, freq: UGenIn, phase: UGenIn )
-extends SingleOutUGen( bufPos, freq, phase )
+extends SingleOutUGen( bufPos, freq, phase ) // with SideEffectUGen
 
 object VOsc3 extends UGen4Args {
   def ar( bufPos: GE, freq1: GE = 110, freq2: GE = 220, freq3: GE = 440 ) : GE =
@@ -91,14 +91,14 @@ object VOsc3 extends UGen4Args {
     krExp( bufPos, freq1, freq2, freq3 )
 }
 case class VOsc3( rate: Rate, bufPos: UGenIn, freq1: UGenIn, freq2: UGenIn, freq3: UGenIn )
-extends SingleOutUGen( bufPos, freq1, freq2, freq3 )
+extends SingleOutUGen( bufPos, freq1, freq2, freq3 ) // with SideEffectUGen
 
 object COsc extends UGen3Args {
   def ar( bufNum: GE, freq: GE = 440f, beats: GE = 0.5f ) : GE =
     arExp( bufNum, freq, beats )
 }
 case class COsc( rate: Rate, bufNum: UGenIn, freq: UGenIn, beats: UGenIn )
-extends SingleOutUGen( bufNum, freq, beats )
+extends SingleOutUGen( bufNum, freq, beats ) // with SideEffectUGen
 
 object Formant extends UGen3Args {
   def ar( fundFreq: GE = 440, formFreq: GE = 1760, bw: GE = 880 ) : GE =
@@ -190,28 +190,28 @@ object Index extends UGen2Args {
   def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
 }
 case class Index( rate: Rate, bufNum: UGenIn, in: UGenIn )
-extends SingleOutUGen( bufNum, in )
+extends SingleOutUGen( bufNum, in ) // with SideEffectUGen
 
 object WrapIndex extends UGen2Args {
   def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )
   def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
 }
 case class WrapIndex( rate: Rate, bufNum: UGenIn, in: UGenIn )
-extends SingleOutUGen( bufNum, in )
+extends SingleOutUGen( bufNum, in ) // with SideEffectUGen
 
 object IndexInBetween extends UGen2Args {
   def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )
   def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
 }
 case class IndexInBetween( rate: Rate, bufNum: UGenIn, in: UGenIn )
-extends SingleOutUGen( bufNum, in )
+extends SingleOutUGen( bufNum, in ) // with SideEffectUGen
 
 object DetectIndex extends UGen2Args {
   def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )
   def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
 }
 case class DetectIndex( rate: Rate, bufNum: UGenIn, in: UGenIn )
-extends SingleOutUGen( bufNum, in )
+extends SingleOutUGen( bufNum, in ) // with SideEffectUGen
 
 object Shaper extends UGen2Args {
   def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )

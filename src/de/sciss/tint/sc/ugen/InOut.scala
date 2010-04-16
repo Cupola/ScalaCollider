@@ -33,9 +33,8 @@ import SC._
 import GraphBuilder._
 
 /**
- *	@version	0.11, 03-Jan-10
+ *    @version	0.12, 16-Apr-10
  */
-
 object In {
   def ar( bus: GE, numChannels: Int = 1 ) : GE = make( audio, bus, numChannels )
   def kr( bus: GE, numChannels: Int = 1 ) : GE = make( control, bus, numChannels )
@@ -46,6 +45,7 @@ object In {
 }
 case class In( rate: Rate, bus: UGenIn, numChannels: Int )
 extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ), List( bus ))
+// with SideEffectUGen
 
 object LocalIn {
   def ar( numChannels: Int = 1 ) : GE = this( audio, numChannels )
@@ -53,6 +53,7 @@ object LocalIn {
 }
 case class LocalIn( rate: Rate, numChannels: Int )
 extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ), Nil )
+// with SideEffectUGen // ExclusiveUGen
 
 object LagIn {
   def kr( bus: GE, numChannels: Int = 1, lag: GE = 0.1f ) : GE = {
@@ -62,7 +63,7 @@ object LagIn {
 }
 case class LagIn( bus: UGenIn, numChannels: Int, lag: UGenIn )
 extends MultiOutUGen( List.fill[ Rate ]( numChannels )( audio ), List( bus, lag ))
-with ControlRated
+with ControlRated // with SideEffectUGen
 
 object InFeedback {
   def ar( bus: GE, numChannels: Int = 1 ) : GE = {
@@ -71,7 +72,7 @@ object InFeedback {
 }
 case class InFeedback( bus: UGenIn, numChannels: Int )
 extends MultiOutUGen( List.fill[ Rate ]( numChannels )( audio ), List( bus ))
-with AudioRated
+with AudioRated // with SideEffectUGen
 
 object InTrig {
   def kr( bus: GE, numChannels: Int = 1 ) : GE = {
@@ -80,7 +81,7 @@ object InTrig {
 }
 case class InTrig( bus: UGenIn, numChannels: Int )
 extends MultiOutUGen( List.fill[ Rate ]( numChannels )( audio ), List( bus ))
-with ControlRated
+with ControlRated // with SideEffectUGen
 
 abstract class AbstractOut {
   def ar( bus: GE, multi: GE ) : GE = make( audio, bus, multi )
@@ -89,41 +90,41 @@ abstract class AbstractOut {
   private def make( rate: Rate, bus: GE, multi: GE ) : GE = {
     val args = bus :: replaceZeroesWithSilence( multi ).toUGenIns.toList
     simplify( for( b :: m <- expand( args: _* ))
-      yield this( rate, b, m ))
+      yield this( rate, b, m, SynthDef.individuate ))
   }
 
-  def apply( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ]) : GE
+  def apply( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ], _indiv: Int ) : GE
 }
 
 object Out extends AbstractOut
-case class Out( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ])
+case class Out( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )
 extends ZeroOutUGen( (bus :: multi.toList): _* )
 
 object ReplaceOut extends AbstractOut
-case class ReplaceOut( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ])
+case class ReplaceOut( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )
 extends ZeroOutUGen( (bus :: multi.toList): _* )
 
 object OffsetOut {
-  def ar( bus: GE, multi: GE ) : GE = {
-    val args = bus :: replaceZeroesWithSilence( multi ).toUGenIns.toList
-    simplify( for( b :: m <- expand( args: _* ))
-      yield this( b, m ))
-  }
+   def ar( bus: GE, multi: GE ) : GE = {
+      val args = bus :: replaceZeroesWithSilence( multi ).toUGenIns.toList
+      simplify( for( b :: m <- expand( args: _* ))
+         yield this( b, m, SynthDef.individuate ))
+   }
 }
-case class OffsetOut( bus: UGenIn, multi: Seq[ UGenIn ])
+case class OffsetOut( bus: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )
 extends ZeroOutUGen( (bus :: multi.toList): _* ) with AudioRated
 
 object LocalOut {
-  def ar( multi: GE ) : GE = make( audio, multi )
-  def kr( multi: GE ) : GE = make( control, multi )
+   def ar( multi: GE ) : GE = make( audio, multi )
+   def kr( multi: GE ) : GE = make( control, multi )
 
-  private def make( rate: Rate, multi: GE ) : GE = {
-    val ins = replaceZeroesWithSilence( multi ).toUGenIns
-    this( rate, ins )
-  }
+   private def make( rate: Rate, multi: GE ) : GE = {
+      val ins = replaceZeroesWithSilence( multi ).toUGenIns
+      this( rate, ins )
+   }
 }
 case class LocalOut( rate: Rate, multi: Seq[ UGenIn ])
-extends ZeroOutUGen( multi: _* )
+extends ZeroOutUGen( multi: _* ) // with ExclusiveUGen
 
 object XOut {
   def ar( bus: GE, xfade: GE, multi: GE ) : GE = make( audio, bus, xfade, multi )
@@ -132,8 +133,8 @@ object XOut {
   private def make( rate: Rate, bus: GE, xfade: GE, multi: GE ) : GE = {
     val args = bus :: xfade :: replaceZeroesWithSilence( multi ).toUGenIns.toList
     simplify( for( b :: x :: m <- expand( args: _* ))
-      yield this( rate, b, x, m ))
+      yield this( rate, b, x, m, SynthDef.individuate ))
   }
 }
-case class XOut( rate: Rate, bus: UGenIn, xfade: UGenIn, multi: Seq[ UGenIn ])
+case class XOut( rate: Rate, bus: UGenIn, xfade: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )
 extends ZeroOutUGen( (bus :: xfade :: multi.toList): _* )
