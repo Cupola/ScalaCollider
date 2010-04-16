@@ -36,25 +36,25 @@ import java.io.IOException
  *	@author		Hanns Holger Rutz
  *	@version	0.11, 02-Dec-09
  */
-case class Constant( val value: Float ) extends UGenIn {
-  val rate = scalar
+case class Constant( value: Float ) extends UGenIn {
+   def rate = scalar
   
 //  def toUGenIns = List( this )
 //  val numOutputs = 1
                              
-  def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {
-      val constIndex = synthDef.getConstantIndex( this )
-      if( SynthDef.verbose ) println( "  Constant.writeInputSpec. constIndex = " + constIndex )
-      if( constIndex == -1 ) throw new IOException( "Constant not listed in synth def : " + this )
-      dos.writeShort( -1 )
-      dos.writeShort( constIndex )
-  }
+//  def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {
+//      val constIndex = synthDef.getConstantIndex( this )
+//      if( SynthDef.verbose ) println( "  Constant.writeInputSpec. constIndex = " + constIndex )
+//      if( constIndex == -1 ) throw new IOException( "Constant not listed in synth def : " + this )
+//      dos.writeShort( -1 )
+//      dos.writeShort( constIndex )
+//  }
 
-  override def toString = value.toString
+   override def toString = value.toString
 }
 
-object Constants {
-  val zero		= Constant( 0f )
-  val one		= Constant( 1f )
-  val minusOne	= Constant( -1f )
-}
+//object Constants {
+//   val zero		   = Constant( 0f )
+//   val one		   = Constant( 1f )
+//   val minusOne	= Constant( -1f )
+//}

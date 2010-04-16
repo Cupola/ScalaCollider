@@ -98,8 +98,8 @@ case object squaredShape extends ConstEnvShape {
 case object cubedShape extends ConstEnvShape {
    val id = 7
    def levelAt( pos: Float, y1: Float, y2: Float ) = {
-      val y1Pow3	= Math.pow( y1, 0.3333333 )
-      val y2Pow3	= Math.pow( y2, 0.3333333 )
+      val y1Pow3	= math.pow( y1, 0.3333333 )
+      val y2Pow3	= math.pow( y2, 0.3333333 )
       val yPow3	= pos * (y2Pow3 - y1Pow3) + y1Pow3
       (yPow3 * yPow3 * yPow3).toFloat
    }

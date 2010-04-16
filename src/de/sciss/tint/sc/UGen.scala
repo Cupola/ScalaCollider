@@ -28,33 +28,19 @@
 
 package de.sciss.tint.sc
 
-import _root_.scala.collection.mutable.ListBuffer
-import _root_.scala.math._
+import collection.mutable.ListBuffer
+import math._
 
-import _root_.java.io.{ DataOutputStream, IOException }
+import java.io.{ DataOutputStream, IOException }
 
 import GraphBuilder._
 
 /**
- *	@author		Hanns Holger Rutz
- *	@version	0.13, 31-Dec-09
+ *    @author	Hanns Holger Rutz
+ *    @version 0.14, 14-Apr-10
  */
-/*
-object Rates extends Enumeration {
-  type Rate = Value
-  val scalar, control, audio, demand = Value
-
-  def highest( rates: Seq[ Rate ]) : Rate = {
-    rates.foldLeft( scalar )( (a, b) => if( a > b ) a else b )
-  }
-}
-*/
 
 sealed abstract class Rate( val id: Int )
-
-// extends Ordered[ Rate ] {
-//   def compare( that: Rate ) = this.id compare that.id
-// }
 
 object Rates {
   def highest( rates: Rate* ) = rates.foldLeft[ Rate ]( scalar )( (a, b) => if( a.id > b.id ) a else b )
@@ -84,184 +70,90 @@ case object freeAllInGroup    extends DoneAction( 13 )
 case object freeGroup         extends DoneAction( 14 )
 
 trait RatedGE extends GE {
-  val rate : Rate
+  def rate : Rate
 }
 
-trait ScalarRated  { val rate = scalar }
-trait ControlRated { val rate = control }
-trait AudioRated   { val rate = audio }
+trait ScalarRated  { def rate = scalar }
+trait ControlRated { def rate = control }
+trait AudioRated   { def rate = audio }
 
 trait UGenIn extends RatedGE {
-  final val numOutputs = 1
-  final def toUGenIns = List( this )
-  def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit;
+//   def outputIndex: Int
+
+   final def numOutputs = 1
+   final def toUGenIns = List( this )
+
+//   final def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) { }
+   
+//   def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) {
+//      val ugenIndex = synthDef.getSynthIndex( this )
+////	   val ugenIndex = source.synthIndex
+////      if( SynthDef.verbose ) println( "  writeInputSpec. ugenIndex = " + ugenIndex + "; channel = " + channel )
+//      if( ugenIndex == -1 ) error( "UGen not listed in graph function : " + this )
+//      dos.writeShort( ugenIndex )
+//      dos.writeShort( outputIndex )
+//   }
 }
 
 trait UGenProxy {
-  def source : UGen
+   def source : UGen
+   def outputIndex : Int
 }
 
 abstract class UGen
-extends RatedGE with UGenProxy /* UGenIn */ {
-  def name = { val cn = getClass.getName; cn.substring( cn.lastIndexOf( '.' ) + 1 )}
-  def outputRates: Seq[ Rate ]
-  def inputs: Seq[ UGenIn ]
+extends RatedGE with UGenProxy {
+//   var synthIndex = -1
 
-  var synthIndex = -1
-  val specialIndex = 0
-    
-  def numInputs = inputs.size
-//  val outputs = outputRates.foreach (rate => { })
-//  def toUGenIns = inputs
-//  val numOutputs = outputRates.size
-  def source = this
+//   var antecedents : ListBuffer[ UGen ]	= new ListBuffer[ UGen ]()
+//   var descendants : ListBuffer[ UGen ]	= new ListBuffer[ UGen ]()
 
-    // XXX BEGIN XXX
-//  protected var synthDef : SynthDef = null;
-  var antecedents : ListBuffer[ UGen ]	= new ListBuffer[ UGen ]()
-  var descendants : ListBuffer[ UGen ]	= new ListBuffer[ UGen ]()
+   // ---- constructor ----
+   {
+//      addToSynth
+      SynthDef.builder.foreach( _.addUGen( this ))
+   }
+
+   def name = { val cn = getClass.getName; cn.substring( cn.lastIndexOf( '.' ) + 1 )}
+   def outputRates: Seq[ Rate ]
+   def inputs: Seq[ UGenIn ]
+   def numInputs = inputs.size
+   def source = this
+   def specialIndex = 0
+   def outputIndex = 0
+
+//   protected def addToSynth {
+//   	SynthDef.buildSynthDef.foreach( synthDef => synthDef.addUGen( this ))
+//   }
   
-  addToSynth
-
-  protected def addToSynth {
-   	SynthDef.buildSynthDef.foreach( synthDef => synthDef.addUGen( this ))
-  }
-  
-  def initTopoSort {
-    inputs.foreach (input => {
-      if( input.isInstanceOf[ UGenProxy ]) {
-        var ugen = input.asInstanceOf[ UGenProxy ]
-        antecedents.append( ugen.source )
-        ugen.source.descendants.append( this )
-      }
-    })
-  }
-
-//  def makeAvailable {
-//    if( antecedents.isEmpty ) {
-//      synthDef.available.append( this );
-//    }
-//  }
-  
-//  def schedule( outStack: Buffer[ UGen ]) {
-//    descendants.reverse.foreach (ugen => {
-//      ugen.removeAntecedent( this )
-//    })
-//    outStack.append( this )
-//  }
-
-  def checkInputs : Option[String] = {
-    // checkValidInputs
-    None
-  }
-
-//  protected def checkValidInputs : Option[String] = {
-//    inputs.foreach (input => {
-//      if( input.isValidUGenIn.not ) {
-//        val argName = this.argNameForInputAt(i) ? i
-//        return Some( "arg: '" + argName + "' has bad input: " + input )
+//   def initTopoSort {
+//      inputs.foreach (input => {
+//         if( input.isInstanceOf[ UGenProxy ]) {
+//            var ugen = input.asInstanceOf[ UGenProxy ]
+//            antecedents.append( ugen.source )
+//            ugen.source.descendants.append( this )
+//         }
 //      })
-//    })
-//    None
-//  }
+//   }
 
-  def argNameForInputAt( idx: Int ) : Option[String] = {
-// XXX
-//    var method = this.class.class.findMethod(this.methodSelectorForRate);
-//    if(method.isNil or: {method.argNames.isNil},{ ^nil });
-//    ^method.argNames.at(i + this.argNamesInputsOffset)
-    None
-  }
+   def checkInputs : Option[String] = {
+      // checkValidInputs
+      None
+   }
+   
+//   def optimizeGraph {
+//      // nothing
+//   }
 
-  def dumpArgs {
-    println( " ARGS:" )
-    var count = 0
-    inputs.foreach (input => {
-      println( "   " + (argNameForInputAt( count ).getOrElse( count.toString )) +
-               ": " + input + " " + input.getClass )
-      count += 1
-    })
-  }
-  
-//  def removeAntecedent( ugen: UGen ) {
-//    antecedents -= ugen
-//	  makeAvailable
-//  }
-
-  def optimizeGraph {
-    // nothing
-  }
-  
-//  def collectConstants {
-//    inputs.foreach (input => {
-//      if( input.isInstanceOf[ Constant ]) synthDef.addConstant( input.asInstanceOf[ Constant ])
-//    }) 	
-//  }
-  
-  // XXX END XXX
-
-//  def *( b: GE ) : GE = {
-//    println( "WARNING:\nUGen * mul not yet working" )
-//    this	// XXX
-//  }
-
-  override def toString: String = {
-    name + "." + (rate match {
-    case `scalar` => "ir";
-    case `control` => "kr";
-    case `audio` => "ar";
-    case `demand` => "dr";
-    case _ => "?";
-    }) + inputs.mkString( "(", ", ", ")" )
-  }
+   override def toString: String = {
+      name + "." + (rate match {
+         case `scalar` => "ir";
+         case `control` => "kr";
+         case `audio` => "ar";
+         case `demand` => "dr";
+         case _ => "?";
+      }) + inputs.mkString( "(", ", ", ")" )
+   }
 }
-
-object UGen {
-//  private val rateSymbols = List( 'scalar, 'control, 'audio, 'demand )
-  
-//  def getRateID( rate: Symbol ) : Int = {
-//    rateSymbols.indexOf( rate )
-//  }
-  
-//  def getRateSymbol( rate: Int ) : Symbol = {
-//    rateSymbols( rate )
-//  }
-
-  def multiNew( name: String, rate: Rate, outputRates: Seq[ Rate ], inputs: Seq[ GE ]) : GE = {
-    error( "OBSOLETE ")
-  }
-  
-/*
-  def multiNew( name: String, rate: Rate, outputRates: Seq[ Rate ], inputs: Seq[ GE ]) : GE = {
-    var chanExp = 0;
-    var allOne = true
-    var hasZero = false
-    for( input <- inputs ) {
-      chanExp = max( chanExp, input.numOutputs )
-      allOne  = allOne && (input.numOutputs == 1)
-      hasZero = hasZero || (input.numOutputs == 0)
-    }
-    if( hasZero ) return new GESeq()	// cannot wrap zero size seq
-//  if( allOne )  return new UGen( name, rate, outputRates, inputs map (_.asInstanceOf[ UGenIn ]))
-//  if( allOne )  return new MultiOutUGen( name, rate, outputRates, inputs map (_.asInstanceOf[ UGenIn ]))
-    if( allOne )  return new MultiOutUGen( name, rate, outputRates, inputs.flatMap (_.toUGenIns ))
-
-    val results = new Array[ GE ]( chanExp )
-    val UGenIns = inputs map (_.toUGenIns)
-        
-    for( chan <- (0 until chanExp)) {
-      val newArgs = UGenIns map (multiInput => multiInput( chan % UGenIns.size ))
-//    results.update( chan, new UGen( name, rate, outputRates, newArgs ));
-      results.update( chan, new MultiOutUGen( name, rate, outputRates, newArgs ))
-    }
-    val res2 = results flatMap (_.toUGenIns)
-    GraphBuilder.seq( res2: _* )
-  }
-*/
-             
-//  def outputProxy( rate: Symbol, source: UGen, outputIndex: Int ) : UGen {
-//    new UGen( source.name + "[" + outputIndex + "]", rate, List[ rate ], List[ source ])
-  }
 
 trait UGen1Args {
   def apply( rate: Rate, arg1: UGenIn ) : GE
@@ -272,17 +164,6 @@ trait UGen1Args {
   protected def krExp( arg1: GE ) : GE = make( control, arg1 )
   protected def irExp( arg1: GE ) : GE = make( scalar, arg1 )
 }
-
-//trait UGen1VArgs {
-//  def apply( rate: Rate, arg1: UGenIn, more: Seq[ UGenIn ]) : GE
-//  private def make( rate: Rate, arg1: GE, more: Seq[ GE ]) : GE =
-//    simplify( for( List( a1, m @ _* ) <- expand( (arg1 :: more.toList): _* ))
-//                yield this( rate, a1, m ))
-//
-//  protected def arExp( arg1: GE, more: Seq[ GE ]) : GE = make( audio, arg1, more )
-//  protected def krExp( arg1: GE, more: Seq[ GE ]) : GE = make( control, arg1, more )
-//  protected def irExp( arg1: GE, more: Seq[ GE ]) : GE = make( scalar, arg1, more )
-//}
 
 trait UGen1RArgs { // single rate
   def apply( arg1: UGenIn ) : GE
@@ -422,58 +303,37 @@ abstract class SingleOutUGen( /* override val name: String, */ val inputs: UGenI
 extends UGen with UGenIn {
   def outputRates: Seq[ Rate ] = List( rate )
 
-  def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {
-//      val ugenIndex	= synthDef.getUGenIndex( this )
-      if( SynthDef.verbose ) println( "  SingleOutUGen.writeInputSpec. ugenIndex = " + synthIndex /* ugenIndex */)
-//      if( ugenIndex == -1 ) throw new IOException( "UGen not listed in graph function : " + this )
-//      dos.writeShort( ugenIndex )
-      if( synthIndex == -1 ) throw new IOException( "UGen not listed in graph function : " + this )
-      dos.writeShort( synthIndex )
-      dos.writeShort( 0 )
-  }
+//  def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {
+//      if( SynthDef.verbose ) println( "  SingleOutUGen.writeInputSpec. ugenIndex = " + synthIndex /* ugenIndex */)
+//      if( synthIndex == -1 ) throw new IOException( "UGen not listed in graph function : " + this )
+//      dos.writeShort( synthIndex )
+//      dos.writeShort( 0 )
+//  }
 }
 
 abstract class ZeroOutUGen( val inputs: UGenIn* )
 extends UGen {
-  def outputRates = Nil
-  def toUGenIns: Seq[ UGenIn ] = Nil
-  val numOutputs = 0
+  final def outputRates = Nil
+  final def toUGenIns: Seq[ UGenIn ] = Nil
+  final def numOutputs = 0
 
-  // XXX code shared with SingleOutUGen
-  def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {
-      if( SynthDef.verbose ) println( "  ZeroOutUGen.writeInputSpec. ugenIndex = " + synthIndex /* ugenIndex */)
-      if( synthIndex == -1 ) throw new IOException( "UGen not listed in graph function : " + this )
-      dos.writeShort( synthIndex )
-      dos.writeShort( 0 )
-  }
+//  def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {
+//      if( SynthDef.verbose ) println( "  ZeroOutUGen.writeInputSpec. ugenIndex = " + synthIndex /* ugenIndex */)
+//      if( synthIndex == -1 ) throw new IOException( "UGen not listed in graph function : " + this )
+//      dos.writeShort( synthIndex )
+//      dos.writeShort( 0 )
+//  }
 }
 
-class OutputProxy( val source: UGen, val channel: Int )
-extends UGenIn with UGenProxy
-// extends UGen( source.name + "[" + channel + "]", source.rate, List( rate ), Nil )
-{
-  val rate = source.rate
-//  def toUGenIns = List( this )
-//  val numOutputs = 1
-  
-//  override protected def addToSynth {
-//    synthDef = SynthDef.buildSynthDef
-//  }
- 
-//	init { arg argSource, argIndex;
-//		synthIndex = source.synthIndex;
-// }
-	
-//	dumpName {
-//		^this.source.dumpName ++ "[" ++ outputIndex ++ "]"
-//	}
-  
-  def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {
-//      val ugenIndex	= synthDef.getUGenIndex( source )
-	  val ugenIndex = source.synthIndex
-      if( SynthDef.verbose ) println( "  OutputProxy.writeInputSpec. ugenIndex = " + ugenIndex + "; channel = " + channel )
-      if( ugenIndex == -1 ) throw new IOException( "UGen not listed in graph function : " + source )
-      dos.writeShort( ugenIndex )
-      dos.writeShort( channel )
-  }
+class OutputProxy( final val source: UGen, final val outputIndex: Int )
+extends UGenIn with UGenProxy {
+   final def rate = source.rate
+
+//   def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {
+//	   val ugenIndex = source.synthIndex
+//      if( SynthDef.verbose ) println( "  OutputProxy.writeInputSpec. ugenIndex = " + ugenIndex + "; channel = " + channel )
+//      if( ugenIndex == -1 ) throw new IOException( "UGen not listed in graph function : " + source )
+//      dos.writeShort( ugenIndex )
+//      dos.writeShort( channel )
+//   }
 }

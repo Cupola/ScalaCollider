@@ -49,13 +49,10 @@ object SC {
   implicit def seqOfDouble2GESeq( x: Seq[ Double ]) = new GESeq( (x map (d => Constant( d.toFloat ))): _* )
  
   implicit def string2ControlName( name: String ) = ControlName( name )
-  implicit def string2GE( name: String ) : ControlDesc = {
-    if( SynthDef.buildSynthDef.isDefined ) {
-      SynthDef.buildSynthDef.get.getControlDesc( name )
-    } else {
-      null
-    }
-  }
+
+   // do we really need this?
+//  implicit def string2GE( name: String ) : ControlDesc =
+//    SynthDef.graphBuilder.map( _.getControlDesc( name )) orNull
 
   // mixed number / GE binops
   // these conflict with scala.math, so we commented them out

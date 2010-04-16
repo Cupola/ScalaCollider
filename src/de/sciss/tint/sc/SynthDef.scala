@@ -28,244 +28,180 @@
 
 package de.sciss.tint.sc
 
-import de.sciss.scalaosc.OSCMessage
-import scala.collection.mutable.{ HashMap, HashSet, ListBuffer, Map, Set }
+import collection.mutable.{ HashMap }
 import java.io.{ ByteArrayOutputStream, BufferedOutputStream, DataOutputStream,
                         File, FileOutputStream }
 import java.nio.ByteBuffer
-
+import de.sciss.scalaosc.OSCMessage
 import de.sciss.tint.sc.ugen.{ Control }
 import SC._
-//import _root_.scala.Predef._
-//import Rates._
+import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq, Stack, Vector }
 
 /**
- * 	@author		Hanns Holger Rutz
- *	@version	0.16, 18-Jan-10
+ *    @version 0.17, 14-Apr-10
  */
-class SynthDef( val name: String, rates: Seq[Any] = Nil, prependArgs: Seq[Any] = Nil, var variants: Seq[Any] = Nil )( ugenGraphFunc: () => GE ) {
-//  private def ugenGraphFunc() = func
-//  private var controlIndex								= 0
-	private val controlValues							= new ListBuffer[ Float ]()
-  private val constantSet : Set[ Constant ]				= new HashSet[ Constant ]()
-  private val constants : ListBuffer[ Constant ]		= new ListBuffer[ Constant ]()
-  private val controlDescMap : Map[ String, ControlDesc ] = new HashMap[ String, ControlDesc ]()
-  private val controlDescs : ListBuffer[ ControlDesc ]	= new ListBuffer[ ControlDesc ]()
-  private var ugens	: ListBuffer[ UGen ]				= new ListBuffer[ UGen ]()
-  
-  // XXX BEGIN XXX
-  var available : ListBuffer[ UGen ]					= new ListBuffer[ UGen ]()
-  // XXX END XXX
+class SynthDef private ( val name: String, constants: IIdxSeq[ Float ], controlValues: IIdxSeq[ Float ],
+                         controlDescs: IIdxSeq[ ControlDesc ], ugens: IIdxSeq[ SynthDef.RichUGen ]) {
 
-  import SynthDef._
-
-  build
-  
-/*
-  def this( name: String, ugenGraphFunc: () => Any, rates: Seq[Any], prependArgs: Seq[Any]) {
-    this( name, ugenGraphFunc, rates, prependArgs, Nil )
-  }
-  
-  def this( name: String, ugenGraphFunc: () => Any, rates: Seq[Any]) {
-    this( name, ugenGraphFunc, rates, Nil, Nil )
-  }
-
-  def this( name: String, ugenGraphFunc: () => Any) {
-    this( name, ugenGraphFunc, Nil, Nil, Nil )
-  }
-*/
+   import SynthDef._
 
    def freeMsg: OSCMessage = OSCMessage( "/d_free", name )
 
-  def getControlDesc( name: String ) = controlDescMap( name )
-  def getConstantIndex( c: Constant ) = constants.indexOf( c ) // XXX not efficient, should be a map?
-//  def getUGenIndex( u: UGen ) = ugens.indexOf( u )
+   def send( server: Server ) : SynthDef = {
+      server.sendMsg( recvMsg )
+      this
+   }
   
-//  def allocControl( numCh: Int ) : Int = { val result = controlIndex; controlIndex += numCh; result }
+   def send( server: Server, completionMsg: OSCMessage ) : SynthDef = {
+      server.sendMsg( recvMsg( completionMsg ))
+      this
+   }
+  
+   def recvMsg = OSCMessage( "/d_recv", toBytes )
 
-	def addControl( u: Control ) : Int = {
-		val specialIndex = controlValues.size
-//		u.specialIndex = controlValues.size
-		controlValues ++= u.values
-		specialIndex
-	}
+   def recvMsg( completionMsg: OSCMessage ) =
+	   OSCMessage( "/d_recv", toBytes, completionMsg )
   
-//  def addControl( u: Control ) : Int = {
-//    val result = controlIndex;
-//    controlIndex += numCh; result
-//  }
-  
-  def send( server: Server ) : SynthDef = {
-    server.sendMsg( recvMsg )
-    this
-  }
-  
-  def send( server: Server, completionMsg: OSCMessage ) : SynthDef = {
-    // XXX completionMsg.asRawOSC !!
-    server.sendMsg( recvMsg( completionMsg ))
-    //server.sendMsg("/d_recv", this.asBytes,completionMsg);
-    this
-  }
-  
-  def recvMsg = OSCMessage( "/d_recv", toBytes )
-
-  def recvMsg( completionMsg: OSCMessage ) =
-	  OSCMessage( "/d_recv", toBytes, completionMsg )
-  
-  protected def build {
-    initBuild
-    buildUGenGraph( ugenGraphFunc, rates, prependArgs )
-    finishBuild
-  }
-
   	def toBytes : ByteBuffer = {
     	val baos	= new ByteArrayOutputStream
-    	val dos		= new DataOutputStream( baos )
+    	val dos	= new DataOutputStream( baos )
 
     	dos.writeInt( 0x53436766 )	// magic cookie 'SCgf'
-    	dos.writeInt( 1 )			// version
-    	dos.writeShort( 1 ) 		// number of defs in file.
+    	dos.writeInt( 1 )			   // version
+    	dos.writeShort( 1 ) 		   // number of defs in file.
     	write( dos )
     	dos.flush
     	dos.close
 
     	ByteBuffer.wrap( baos.toByteArray ).asReadOnlyBuffer()
-//    	val arr = baos.toByteArray
-//    	val bb = ByteBuffer.allocate( arr.length )
-//    	bb.put( arr )
-//    	bb.flip
-//    	bb
-    }
+   }
 
-  def load( server: Server ) : SynthDef = {
-    load( server, SynthDef.synthDefDir )
-  }
-  
-  def load( server: Server, completionMsg: OSCMessage ) : SynthDef = {
-    load( server, completionMsg, SynthDef.synthDefDir )
-  }
-  
-  def load( server: Server, completionMsg: OSCMessage, dir: String ) : SynthDef = {
-    writeDefFile( dir )
-    server.sendMsg( loadMsg( completionMsg, dir ))
-    this
-  }
-  
-  def load( server: Server, dir: String ) : SynthDef = {
-    writeDefFile( dir )
-    server.sendMsg( loadMsg( dir ))
-    this
-  }
-  
-  def loadMsg( completionMsg: OSCMessage ) : OSCMessage = {
-    loadMsg( completionMsg, SynthDef.synthDefDir )
-  }
-  
-  def loadMsg( completionMsg: OSCMessage, dir: String ) =
-	  OSCMessage( "/d_load", dir + name + ".scsyndef", completionMsg )
-  
-  def loadMsg : OSCMessage = loadMsg( SynthDef.synthDefDir )
-  
-  def loadMsg( dir: String ) =
-	  OSCMessage( "/d_load", dir + name + ".scsyndef" )
+   private def write( dos: DataOutputStream ) {
+      writePascalString( dos, name )
 
-    def play( target: Node = Server.default, args: Seq[ Tuple2[ String, Float ]] = Nil, addAction: AddAction = addToHead ) : Synth = {
-//		target = target.asTarget
-		val synth	= new Synth( name, target.server )
+      // ---- constants ----
+      dos.writeShort( constants.size )
+      constants.foreach( c => dos.writeFloat( c.value ))
+
+      // ---- controls ----
+      dos.writeShort( controlValues.size )
+      controlValues.foreach( dos.writeFloat( _ ))
+
+      dos.writeShort( controlDescs.size )
+      var count = 0
+      controlDescs.foreach( desc => {
+         desc.name.map( name => {
+            writePascalString( dos, name )
+            dos.writeShort( desc.ugen.specialIndex + desc.ugenOutputIndex )
+         }) getOrElse {
+            println( "Warning: unnamed control " + count + " dropped." )
+         }
+         count += 1
+      })
+
+//      if( verbose ) println( "ugens.size = " + ugens.size )
+
+      dos.writeShort( ugens.size )
+      ugens.foreach( ru => {
+         val ugen = ru.ugen
+         writePascalString( dos, ugen.name )
+
+         dos.writeByte( ugen.rate.id )
+         dos.writeShort( ugen.numInputs )
+         dos.writeShort( ugen.numOutputs )
+         dos.writeShort( ugen.specialIndex )
+
+         ru.inputSpecs.foreach( spec => {
+            dos.writeShort( spec._1 )
+            dos.writeShort( spec._2 )
+         })
+         ugen.outputRates.foreach( rate => dos.writeByte( rate.id ))
+      })
+
+      dos.writeShort( 0 ) // variants not supported
+   }
+
+   def load( server: Server ) : SynthDef = {
+      load( server, SynthDef.synthDefDir )
+   }
+  
+   def load( server: Server, completionMsg: OSCMessage ) : SynthDef = {
+      load( server, completionMsg, SynthDef.synthDefDir )
+   }
+  
+   def load( server: Server, completionMsg: OSCMessage, dir: String ) : SynthDef = {
+      writeDefFile( dir )
+      server.sendMsg( loadMsg( completionMsg, dir ))
+      this
+   }
+  
+   def load( server: Server, dir: String ) : SynthDef = {
+      writeDefFile( dir )
+      server.sendMsg( loadMsg( dir ))
+      this
+   }
+  
+   def loadMsg( completionMsg: OSCMessage ) : OSCMessage = {
+      loadMsg( completionMsg, SynthDef.synthDefDir )
+   }
+  
+   def loadMsg( completionMsg: OSCMessage, dir: String ) =
+	   OSCMessage( "/d_load", dir + name + ".scsyndef", completionMsg )
+  
+   def loadMsg : OSCMessage = loadMsg( SynthDef.synthDefDir )
+  
+   def loadMsg( dir: String ) =
+	   OSCMessage( "/d_load", dir + name + ".scsyndef" )
+
+   def play( target: Node = Server.default, args: Seq[ Tuple2[ String, Float ]] = Nil, addAction: AddAction = addToHead ) : Synth = {
+      val synth	= new Synth( name, target.server )
 		val msg		= synth.newMsg( target, args, addAction )
 		send( target.server, msg )
 		synth
-	}
+   }
     
-  def writeDefFile {
-    writeDefFile( SynthDef.synthDefDir, false )
-  }
+   def writeDefFile {
+      writeDefFile( SynthDef.synthDefDir, false )
+   }
 
-  def writeDefFile( dir: String ) {
-    writeDefFile( dir, false )
-  }
+   def writeDefFile( dir: String ) {
+      writeDefFile( dir, false )
+   }
 
-  def writeDefFile( overwrite: Boolean ) {
-    writeDefFile( SynthDef.synthDefDir, overwrite )
-  }
+   def writeDefFile( overwrite: Boolean ) {
+      writeDefFile( SynthDef.synthDefDir, overwrite )
+   }
 
-  def writeDefFile( dir: String, overwrite: Boolean ) {
-    var file = new File( dir, name + ".scsyndef" )
-    val exists = file.exists
-    if( overwrite ) {
-      if( exists ) file.delete
-      SynthDef.writeDefFile( file.getAbsolutePath, List( this ))
-    } else if( !exists ) {
-      SynthDef.writeDefFile( file.getAbsolutePath, List( this ))
-    }
-  }
-  
-  private def writePascalString( dos: DataOutputStream, str: String ) {
-    dos.writeByte( str.size );
-    dos.write( str.getBytes );
-  }
-
-  private def write( dos: DataOutputStream ) {
-
-    writePascalString( dos, name )	
-    writeConstants( dos )
-
-//    dos.writeShort( controlDescs.size )
-//    controlDescs.foreach (desc => dos.writeFloat( desc.initValues.head )) // XXX .first
-	dos.writeShort( controlValues.size )
-	controlValues.foreach( dos.writeFloat( _ ))
-		
-    dos.writeShort( controlDescs.size )
-    var count = 0
-    controlDescs.foreach (desc => {
-//		println( "||||||| count = " + count + "; name " + desc.name.getOrElse( "<unnamed>" ) + "; specialIndex " + (desc.ugen.specialIndex + desc.ugenOutputIndex))
-      if( desc.name.isDefined ) {
-        writePascalString( dos, desc.name.get )
-//		dos.writeShort( desc.getIndex() )
-//        dos.writeShort( count )
-          dos.writeShort( desc.ugen.specialIndex + desc.ugenOutputIndex )
-      } else {
-        println( "Warning: unnamed control " + count + " dropped." )
+   def writeDefFile( dir: String, overwrite: Boolean ) {
+      var file = new File( dir, name + ".scsyndef" )
+      val exists = file.exists
+      if( overwrite ) {
+         if( exists ) file.delete
+         SynthDef.writeDefFile( file.getAbsolutePath, List( this ))
+      } else if( !exists ) {
+         SynthDef.writeDefFile( file.getAbsolutePath, List( this ))
       }
-      count += 1
-    })
-	
-    if( verbose ) println( "ugens.size = " + ugens.size )
-    
-    dos.writeShort( ugens.size )
-    ugens.foreach (ugen => writeUGenSpec( dos, ugen ))
-		
-    dos.writeShort( variants.size )
-    if( variants.size > 0 ) {
-      throw new IllegalStateException( "Variants : not supported!!" )
-    }
-  }
+   }
+  
+   @inline private def writePascalString( dos: DataOutputStream, str: String ) {
+      dos.writeByte( str.size )
+      dos.write( str.getBytes )
+   }
 
-  private def writeConstants( dos: DataOutputStream ) {
-    dos.writeShort( constants.size );
-    constants.foreach (con => dos.writeFloat( con.value ))
-  }
+//   // test method
+//   def testTopologicalOrder {
+//      var known   = Set[ UGen ]()
+//      val success = ugens.forall( ugen => {
+//         val u    = ugen.inputs.partialMap { case up: UGenProxy => up.source }
+//         val res  = u.forall( known.contains( _ ))
+//         known   += ugen
+//         res
+//      })
+//      if( !success ) error( "Test failed" )
+//      println( "Test passed" )
+//   }
 
-  private def writeUGenSpec( dos: DataOutputStream, ugen: UGen ) {
-    writePascalString( dos, ugen.name )
-
-	if( verbose ) println( "writing ugen spec, name = " + ugen.name + "; index " + ugen.synthIndex + "; numInputs = " + ugen.numInputs + "; numOutputs " + ugen.numOutputs + "; specialIndex " + ugen.specialIndex )
-
-//  dos.writeByte( UGen.getRateID( ugen.rate ))
-    dos.writeByte( ugen.rate.id )
-    dos.writeShort( ugen.numInputs )
-    dos.writeShort( ugen.numOutputs )
-    dos.writeShort( ugen.specialIndex )
-    
-//  ugen.inputs.foreach (input => writeInputSpec( dos, input ))
-    ugen.inputs.foreach (ugen => {
-      if( verbose ) println( "... input:" )
-      ugen.writeInputSpec( dos, this )
-    })
-//    ugen.outputRates.foreach (rate => dos.writeByte( UGen.getRateID( rate )))
-    for( rate <- ugen.outputRates ) dos.writeByte( rate.id )
-  }
-
+   
 /*
   private def writeInputSpec( dos: DataOutputStream, inp: UGenInput ) {
     if( inp.isInstanceOf[ OutputProxy ]) {
@@ -291,152 +227,194 @@ class SynthDef( val name: String, rates: Seq[Any] = Nil, prependArgs: Seq[Any] =
   }
 */
 
-  private def initBuild {
-    SynthDef.buildSynthDef	= Some( this )
-	constants.clear
-    constantSet.clear
-    controlDescs.clear
-//    controlIndex			= 0;
-		controlValues.clear
-  }
-  
-  private def finishBuild {
-    optimizeGraph
-    collectConstants
-    checkInputs		// will die on error
-		
-    // re-sort graph. reindex.
-    topologicalSort
-    indexUGens
-    SynthDef.buildSynthDef = None		
-  }
-  
-  private def optimizeGraph {
-    initTopoSort
-    ugens.clone.foreach (_.optimizeGraph)
-  }
+//   private def checkInputs {
+//      var seenErr = false
+//      ugens.foreach( ugen => {
+//         val err = ugen.checkInputs
+//         if( err.isDefined ) {
+//            seenErr = true
+//            if( verbose ) println( ugen.getClass.toString + " " + err )
+////          ugen.dumpArgs
+//         }
+//      })
+//      if( seenErr ) { throw new Exception( "SynthDef " + name + " build failed" )}
+//   }
+}
 
-  private def collectConstants {
-    ugens.foreach (ugen => {
-      ugen.inputs.foreach (input => {
-        if( input.isInstanceOf[ Constant ]) addConstant( input.asInstanceOf[ Constant ])
-      })
-    })
-  }
+trait SynthDefBuilder {
+   def addUGen( ugen: UGen ) : Unit
+   def addControlDesc( desc: ControlDesc ) : Unit
+   def addControl( u: Control ) : Int
+   def build( name: String ) : SynthDef
+}
 
-  def addConstant( value: Constant ) = {
-    if( !constantSet.contains( value )) {
-      constantSet += value
-      constants	  += value
-    }
-  }
+object SynthDef {
+//	var verbose = false
+//   var buildGraph: Option[ UGenGraph ] = None
+   var synthDefDir         = System.getProperty( "java.io.tmpdir" )
 
-  def addUGen( ugen: UGen ) {
-    if( verbose ) println( "ADD UNIT " + ugen.name + " -> index " + ugens.size );
-    ugen.synthIndex = ugens.size;
-    ugens += ugen
-  }
+   private val sync        = new AnyRef
+   private var builders    = Map.empty[ Thread, SynthDefBuilder ]
+   def builder: Option[ SynthDefBuilder ] = builders.get( Thread.currentThread )
+
+//  def apply( name: String, func: => Any ) = new SynthDef( name, func, Nil, Nil, Nil )
+   def apply( name: String )( thunk: => GE ) : SynthDef = {
+      val b = buildUGenGraph( thunk )
+      b.build( name )
+   }
   
-  def addControlDesc( desc: ControlDesc ) {
-    if( verbose ) println( "ADD CONTROL DESC " + desc.name.getOrElse( "<noname>" ));
-    controlDescs += desc
-	desc.name.foreach( controlDescMap( _ ) = desc )
-  }
+//   def wrap( ugenGraphFunc: () => GE ) : GE = {
+//	   if( buildSynthDef.isEmpty ) {
+//	      throw new Exception( "SynthDef.wrap should be called inside a SynthDef ugenGraphFunc." )
+//	   }
+//      buildSynthDef.get.buildUGenGraph( ugenGraphFunc )
+//   }
 
-  private def indexUGens {
-    var count = 0
-    ugens.foreach( ugen => {
-    	ugen.synthIndex = count
-    	count += 1
-    })
-    if( verbose ) println( "INDEXED " + count )
-  }
-  
-  private def initTopoSort {
-    available.clear
-    if( verbose ) println( "before sort: " + ugens.size )
-    ugens.foreach (ugen => {
-      ugen.antecedents.clear
-      ugen.descendants.clear
-    })
-    ugens.foreach (_.initTopoSort)	// this populates the descendants and antecedents
-    ugens.reverse.foreach (ugen => {
-      val sorted = ugen.descendants.toList.sortWith( (a, b) => a.synthIndex < b.synthIndex )
-      ugen.descendants.clear
-      ugen.descendants.appendAll( sorted )
-//    ugen.makeAvailable; // all ugens with no antecedents are made available
-      if( ugen.antecedents.isEmpty ) {
-        available.append( ugen );
-      }
-
-    })
-    if( verbose ) println( "after sort: " + ugens.size )
-  }
-  
-  private def cleanupTopoSort {
-    ugens.foreach (ugen => {
-      ugen.antecedents.clear
-      ugen.descendants.clear
-    })
-  }
+   def writeDefFile( path: String, defs: Seq[ SynthDef ]) {
+      val os	= new FileOutputStream( path )
+	   val dos	= new DataOutputStream( new BufferedOutputStream( os ))
  
-  private def topologicalSort {
-    val outStack =  new ListBuffer[ UGen ]()
-    initTopoSort
-    while( available.size > 0 ) {
-      val ugen = available.remove( available.size - 1 )
-//    ugen.schedule( outStack )
-      ugen.descendants.reverse.foreach (descUGen => {
-//      descUGen.removeAntecedent( ugen )
-        descUGen.antecedents -= ugen
-//      descUGen.makeAvailable
-        if( descUGen.antecedents.isEmpty ) {
-	      available.append( descUGen );
-        }
-      })
-      outStack.append( ugen )
-    }
-    ugens.clear
-    ugens.appendAll( outStack )
-    cleanupTopoSort
-  }
+//    try {
+      dos.writeInt( 0x53436766 ) 		// magic cookie
+      dos.writeInt( 1 ) 				   // version
+      dos.writeShort( defs.size ) 		// number of defs in file.
+      defs.foreach( _.write( dos ))
+//    }
+//    finally {
+      dos.close
+//    }
+   }
 
-  private def checkInputs {
-    var seenErr = false;
-    ugens.foreach (ugen => {
-      val err = ugen.checkInputs
-      if( err.isDefined ) { 
-        seenErr = true;
-        if( verbose ) println( ugen.getClass.toString + " " + err )
-        ugen.dumpArgs
+   private def buildUGenGraph( thunk: => Any ) : SynthDefBuilder = {
+      val b = new BuilderImpl
+      val t = Thread.currentThread
+      sync.synchronized {
+         builders += t -> b
       }
-    })
-  if( seenErr ) { throw new Exception( "SynthDef " + name + " build failed" )}
-    }
-    
-  protected def buildUGenGraph( func: () => GE, rates: Seq[Any], prependArgs: Seq[Any] ) : GE = {
+      try {
+         thunk
+         b.finish
+         b
+      } finally {
+         sync.synchronized {
+            builders -= t
+         }
+      }
+   }
 
-    // save/restore controls in case of *wrap
-//    var saveControls = controlDescs; // XXX
-		
-    controlDescs.clear
-		
-//  	addControlsFromArgsOfFunc( func, rates, prependArgs.size );
-// XXX    val result = func.valueArray( prependArgs ++ this.buildControls );
-	val result = func.apply() // ( Nothing )
-	buildControls	// ! needs to be _after_ evaluating func
-   
-// XXX    controls = saveControls
-//val result = new GESeq( Nil ) // XXX
-    result
-  }
+   // ---- rich ugen ----
 
-  private def buildControls {
-    if( verbose ) println( "buildControls" )
-    
-//  var nonControlDescs	= controlDescs.filter( _.rate == none )
-    val irControlDescs	= controlDescs.filter( _.rate == scalar )
-    val krControlDescs	= controlDescs.filter( _.rate == control )
+   case class RichUGen( ugen: UGen, inputSpecs: Traversable[ Tuple2[ Int, Int ]])
+
+   // ---- graph builder ----
+
+   private class BuilderImpl extends SynthDefBuilder {
+      // updated during build
+      private var ugens                                  = List.empty[ UGen ]
+      private var controlValues: IIdxSeq[ Float ]        = Vector.empty
+      private var controlDescs: IIdxSeq[ ControlDesc ]   = Vector.empty
+//      private var controlDescMap                         = Set.empty[ String, ControlDesc ]
+
+      // build results
+      private var finished                               = false
+      private var constants : IIdxSeq[ Float ]           = null
+      private var richUGens : IIdxSeq[ RichUGen ]        = null
+
+      def finish {
+         require( !finished )
+         finished = true
+
+         buildControls
+         // check inputs
+         val (igens, c)    = indexUGens
+         val indexedUGens  = sortUGens( igens )
+         richUGens         = indexedUGens.map( iu => RichUGen( iu.ugen, iu.richInputs.map( _.create ))) 
+         constants         = c
+      }
+
+      def build( name: String ) = {
+         new SynthDef( name, constants, controlValues, controlDescs, richUGens )
+      }
+
+      private def indexUGens : Tuple2[ ISeq[ IndexedUGen ], IIdxSeq[ Float ]] = {
+         var constantMap   = Map.empty[ Float, RichConstant ]
+         var constants     = Vector.empty[ Float ]
+         val indexedUGens  = ugens.map( new IndexedUGen( _ ))
+         val ugenMap       = indexedUGens.map( iu => (iu.ugen, iu)).toMap
+         indexedUGens.foreach( iu => {
+            val richIns = iu.ugen.inputs.collect {
+               case Constant( value ) => constantMap.get( value ) getOrElse {
+                  val rc         = new RichConstant( constants.size )
+                  constantMap   += value -> rc
+                  constants    :+= value
+                  rc
+               }
+               case up: UGenProxy => {
+                  val iui         = ugenMap( up.source )
+                  iu.parents     += iui
+                  iui.children   += iu
+                  new RichUGenProxyBuilder( iui, up.outputIndex )
+               }
+            }
+         })
+         (indexedUGens, constants)
+      }
+
+      /*
+       *    Note that in Scala like probably in most other languages,
+       *    the UGens _can only_ be added in right topological order,
+       *    as that is the only way they can refer to their inputs.
+       *    However, the Synth-Definition-File-Format help documents
+       *    states that depth-first order is preferable performance-
+       *    wise. Truth is, performance is probably the same,
+       *    mNumWireBufs might be different, so it's a space not a
+       *    time issue.
+       */
+      private def sortUGens( indexedUGens: ISeq[ IndexedUGen ]) : IIdxSeq[ IndexedUGen ] = {
+         var sorted  = Vector.empty[ IndexedUGen ]
+         val start   = indexedUGens.filter( _.parents.isEmpty )
+         val sorting = (a: IndexedUGen, b: IndexedUGen) => a.numWireBufs > b.numWireBufs
+         var stack   = Stack( start.sortWith( sorting ).iterator )
+         while( stack.nonEmpty ) {
+            var iter = stack.top
+            stack    = stack.pop
+            while( iter.hasNext ) {
+               val iu   = iter.next
+               sorted :+= iu
+               val c    = iu.children
+               c.foreach( _.parents -= iu )
+               val availc = c.filter( _.parents.isEmpty ).toList.sortWith( sorting )
+               if( availc.nonEmpty ) {
+                  stack +:= iter
+                  iter    = availc.iterator
+               }
+            }
+         }
+         sorted
+      }
+
+      def addUGen( ugen: UGen ) {
+//         if( verbose ) println( "ADD UNIT " + ugen.name + " -> index " + ugensUnsorted.size )
+         ugens ::= ugen
+      }
+
+      def addControl( u: Control ) : Int = {
+         val specialIndex = controlValues.size
+         controlValues ++= u.values
+         specialIndex
+      }
+
+      def addControlDesc( desc: ControlDesc ) {
+//         if( verbose ) println( "ADD CONTROL DESC " + desc.name.getOrElse( "<noname>" ))
+         controlDescs :+= desc
+//         desc.name.foreach( controlDescMap += _ -> desc )
+      }
+
+      private def buildControls {
+//         if( verbose ) println( "buildControls" )
+
+          val irControlDescs	= controlDescs.filter( _.rate == scalar )
+          val krControlDescs	= controlDescs.filter( _.rate == control )
 // XXX tr currently broken
 //    val trControlDescs	= controlDescs.filter( _.rate == trigger )
 
@@ -445,77 +423,67 @@ class SynthDef( val name: String, rates: Seq[Any] = Nil, prependArgs: Seq[Any] =
 //                          arguments[cn.argNum] = cn.defaultValue;
 //      };
 //    };
-  
-	if( irControlDescs.size > 0 ) {
-	  if( verbose ) println( "irControlDescs.size = " + irControlDescs.size )
-      val ctrl = Control.ir( irControlDescs.flatMap( _.initValues ))
-      setControlDescSource( irControlDescs, ctrl )
-	}
+
+         if( irControlDescs.size > 0 ) {
+//            if( verbose ) println( "irControlDescs.size = " + irControlDescs.size )
+            val ctrl = Control.ir( irControlDescs.flatMap( _.initValues ))
+            setControlDescSource( irControlDescs, ctrl )
+         }
 // XXX tr currently broken
 //	if( trControlDescs.size > 0 ) {
 //	  if( verbose ) println( "trControlDescs.size = " + trControlDescs.size )
 //      val ctrl = TrigControl.kr( trControlDescs.flatMap( _.initValues ))
 //      setControlDescSource( trControlDescs, ctrl )
 //	}
-    if( krControlDescs.size > 0 ) {
-      val krControlDescsPlain 	= krControlDescs.filter( _.lag.isEmpty )
-      val krControlDescsLagged	= krControlDescs.filter( _.lag.isDefined )
-      
-      if( krControlDescsPlain.size > 0 ) {
-        if( verbose ) println( "krControlDescsPlain.size = " + krControlDescsPlain.size )
-        val ctrl = Control.kr( krControlDescsPlain.flatMap( _.initValues ))
-        setControlDescSource( krControlDescsPlain, ctrl )
-      }
-      if( krControlDescsLagged.size > 0 ) {
-        if( verbose ) println( "XXX krControlDescsLagged NOT YET IMPLEMENTED" )
-      }
-    }
-  }
-  
-  private def setControlDescSource( descs: Seq[ ControlDesc ], source: UGen ) {
-      var off	= 0
-      descs.foreach (desc => {
-        desc.ugen				= source
-        desc.ugenOutputIndex	= off
-        off += desc.numOutputs
-      })
-  }
-}
+         if( krControlDescs.size > 0 ) {
+            val krControlDescsPlain 	= krControlDescs.filter( _.lag.isEmpty )
+            val krControlDescsLagged	= krControlDescs.filter( _.lag.isDefined )
 
-/**
- * 	@author		Hanns Holger Rutz
- *	@version	0.11, 16-Jun-09
- */
-object SynthDef {
-	var verbose = false
-  var buildSynthDef : Option[ SynthDef ] = None
-  var synthDefDir = "/tmp/"	// XXX
-  
-//  def apply( name: String, func: => Any ) = new SynthDef( name, func, Nil, Nil, Nil )
-  def apply( name: String, rates: Seq[Any] = Nil, prependArgs: Seq[Any] = Nil, variants: Seq[Any] = Nil )( thunk: => GE ) : SynthDef = {
-     def func() = thunk
-     new SynthDef( name, rates, prependArgs, variants )( func )
-  }
-  
-  def wrap( ugenGraphFunc: () => GE, rates: Seq[Any], prependArgs: Seq[Any] ) : GE = {
-	if( buildSynthDef.isEmpty ) { 
-	  throw new Exception( "SynthDef.wrap should be called inside a SynthDef ugenGraphFunc." )
-	}
-    buildSynthDef.get.buildUGenGraph( ugenGraphFunc, rates, prependArgs )
-  }
-  
-  def writeDefFile( path: String, defs: Seq[ SynthDef ]) {
-    val os	= new FileOutputStream( path )
-	val dos	= new DataOutputStream( new BufferedOutputStream( os ))
- 
-//  try {
-      dos.writeInt( 0x53436766 );		// magic cookie
-      dos.writeInt( 1 );				// version
-      dos.writeShort( defs.size ); 		// number of defs in file.
-      defs.foreach (_.write( dos ))
-//  }
-//  finally {
-      dos.close
-//  }
-  }
+            if( krControlDescsPlain.size > 0 ) {
+//               if( verbose ) println( "krControlDescsPlain.size = " + krControlDescsPlain.size )
+               val ctrl = Control.kr( krControlDescsPlain.flatMap( _.initValues ))
+               setControlDescSource( krControlDescsPlain, ctrl )
+            }
+            if( krControlDescsLagged.size > 0 ) {
+//               if( verbose ) println( "XXX krControlDescsLagged NOT YET IMPLEMENTED" )
+            }
+         }
+      }
+
+//      def collectConstants {
+//         ugensUnsorted.foreach( iu => {
+//            constantSet ++= iu.ugen.inputs.collect { case c: Constant => c }
+//         })
+//      }
+
+      private def setControlDescSource( descs: Seq[ ControlDesc ], source: UGen ) {
+         var off	= 0
+         descs.foreach( desc => {
+            desc.ugen				= source
+            desc.ugenOutputIndex	= off
+            off += desc.numOutputs
+         })
+      }
+
+      // ---- IndexedUGen ----
+      private class IndexedUGen( val ugen: UGen ) {
+         var parents       = Set.empty[ IndexedUGen ]
+         var children      = Set.empty[ IndexedUGen ]
+         val numWireBufs   = ugen.outputRates.count( _ == audio )
+         var index         = -1
+         var richInputs    = List.empty[ RichUGenInBuilder ]
+      }
+
+      private trait RichUGenInBuilder {
+         def create : Tuple2[ Int, Int ]
+      }
+
+      private class RichConstant( constIdx: Int ) extends RichUGenInBuilder {
+         def create = (-1, constIdx)
+      }
+
+      private class RichUGenProxyBuilder( iu: IndexedUGen, outIdx: Int ) extends RichUGenInBuilder {
+         def create = (iu.index, outIdx)
+      }
+   }
 }

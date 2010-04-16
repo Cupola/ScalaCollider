@@ -12,7 +12,7 @@ extends MultiOutUGen( List.fill( values.size )( rate ), Nil )
 {
 //  override val specialIndex = SynthDef.buildSynthDef.map( _.allocControl( numOutputs )).getOrElse( 0 )
 
-	override val specialIndex = SynthDef.buildSynthDef.map( _.addControl( this )).getOrElse( 0 )
+	override val specialIndex = SynthDef.builder.getOrElse( error( "Executed outside build context" )).addControl( this )
 
 //	*isControlUGen { ^true }
 }

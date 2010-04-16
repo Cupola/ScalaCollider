@@ -496,7 +496,7 @@ abstract class Server extends Model {
       private val emptySet       = Set.empty[ OSCResponderNode ]
       private var mapCmdToNodes  = Map.empty[ String, Set[ OSCResponderNode ]]
       private val	sync				= new AnyRef
-      private var msgQueue: Queue[ ReceivedMessage ] = Queue.Empty
+      private var msgQueue: Queue[ ReceivedMessage ] = Queue.empty
       private var msgInvoked     = false
 
       // ---- constructor ----
@@ -547,7 +547,7 @@ abstract class Server extends Model {
          val toProcess = sync.synchronized {
             msgInvoked = false
             val result = msgQueue
-            msgQueue = Queue.Empty
+            msgQueue = Queue.empty
             result
          }
          toProcess.foreach( rm => dispatchMessage( rm.msg, rm.sender, rm.time ))
