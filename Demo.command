@@ -25,4 +25,4 @@ where=`followlink $0`
 where=`dirname ${where}`
 where=`absdir ${where}`
 cd ${where}
-scala -i DemoScript.txt
+${SCALA_HOME}/bin/scala -i DemoScript.txt

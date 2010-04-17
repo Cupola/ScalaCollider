@@ -2,18 +2,7 @@
 <project version="4">
   <component name="ChangeListManager" verified="true">
     <list default="true" readonly="true" id="01886865-ff38-4eb7-a79d-92e783f03245" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.txt" afterPath="$PROJECT_DIR$/README.txt" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/build.xml" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/SC.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/SC.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/licenses/ScalaCollider-License.txt" afterPath="$PROJECT_DIR$/licenses/ScalaCollider-License.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/SynthDef.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/SynthDef.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TODO.rtf" afterPath="$PROJECT_DIR$/TODO.rtf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/GraphBuilder.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/GraphBuilder.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/tint/sc/ugen/BasicOpsUGen.scala" afterPath="$PROJECT_DIR$/src/de/sciss/tint/sc/ugen/BasicOpsUGen.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ExampleCmd.txt" afterPath="$PROJECT_DIR$/ExampleCmd.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DemoScript.txt" afterPath="$PROJECT_DIR$/DemoScript.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/licenses/ScalaOSC-License.txt" afterPath="$PROJECT_DIR$/licenses/ScalaOSC-License.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Demo.command" afterPath="$PROJECT_DIR$/Demo.command" />
     </list>
     <ignored path=".idea/workspace.xml" />
     <ignored path="ScalaCollider.iws" />

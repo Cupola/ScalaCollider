@@ -13,11 +13,11 @@ Note: to keep the repo small, the following libraries have not been included and
 
     - ScalaOSC (grab it from http://github.com/Sciss/ScalaOSC )
 
-Compile using the included compile_fsc.sh script or the included IntellJ IDEA project.
+Compile using the included compile_fsc.sh script or the included IntelliJ IDEA 9 project.
     
 DEMO SETUP
 
-"Demo.command" should be a double-clickable shell script (on Mac; on Linux you should be able to run it with bash). It will launch scala (assuming that $SCALA_HOME was set and the scala binaries are in $PATH) and run "DemoScript.txt". Edit "DemoScript.txt" to point to the right installation place of SuperCollider.
+"Demo.command" should be a double-clickable shell script (on Mac; on Linux you should be able to run it with bash). It will launch scala (assuming that $SCALA_HOME was set) and run "DemoScript.txt". Edit "DemoScript.txt" to point to the right installation place of SuperCollider.
 
 Try launching scsynth from the Scala interpreter prompt:
 
