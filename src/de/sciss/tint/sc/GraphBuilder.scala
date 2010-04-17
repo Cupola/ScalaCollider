@@ -195,7 +195,7 @@ object GraphBuilder {
     }
 */
   
-    def wrapOut( name: String, func: () => GE, fadeTime: Option[Float] ) : SynthDef = {
+   def wrapOut( name: String, func: () => GE, fadeTime: Option[Float] ) : SynthDef = {
 		def fullFunc() : GE = {
 			var result = func.apply() // .toUGenIns
 			val rate = Rates.highest( result.toUGenIns.map( _.rate ): _* )

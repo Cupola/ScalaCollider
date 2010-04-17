@@ -29,11 +29,10 @@
 package de.sciss.tint.sc
 
 import de.sciss.scalaosc.{ OSCMessage }
-import _root_.scala.math._
+import math._
 
 /**
- *	@author		Hanns Holger Rutz
- * 	@version	0.13, 02-Dec-09
+ * 	@version	0.14, 17-Apr-10
  */
 object SC {
   // GEs
@@ -110,11 +109,11 @@ object SC {
 //   } else ()
 // }
   
-  def play( f: => GE ) : Synth = {
-	def func() = f
-    playFunc( func, new Group( Server.default, 1 ), 0, Some(0.02f), addToHead )
-//	  play( f, target, 0, Some(0.02f), 'addToHead )
-  }
+   def play( thunk: => GE ) : Synth = {
+      val func = () => thunk
+      playFunc( func, Server.default.defaultGroup, 0, Some(0.02f), addToHead )
+//	   play( f, target, 0, Some(0.02f), 'addToHead )
+   }
 
   // XXX should place the thunk always in second argument list
   /*
@@ -133,15 +132,15 @@ object SC {
     playFunc( func, target, outBus, fadeTime, 'addToHead )
   }
   */
-  def play( target: Node = new Group( Server.default, 1 ), outBus: Int,
-           fadeTime: Option[Float] = Some( 0.02f ),
-           addAction: AddAction = addToHead )( f: => GE ) : Synth = {
-	def func() = f
-	playFunc( func, target, outBus, fadeTime, addAction )
-  }
+   def play( target: Node = Server.default.defaultGroup, outBus: Int,
+             fadeTime: Option[Float] = Some( 0.02f ),
+             addAction: AddAction = addToHead )( thunk: => GE ) : Synth = {
+	   val func = () => thunk
+	   playFunc( func, target, outBus, fadeTime, addAction )
+   }
 
    private var uniqueIDCnt = 0
-   private def uniqueID {
+   private def uniqueID = {
       val result = uniqueIDCnt
       uniqueIDCnt += 1
       uniqueIDCnt
@@ -151,17 +150,17 @@ object SC {
     // arg target, outbus = 0, fadeTime=0.02, addAction='addToHead;
 
 //		target = target.asTarget;
-//        val target = new Group( Server.default, 1 ); // XXX
-		val server = target.server;
+//        val target = new Group( Server.default, 1 ) // XXX
+		val server = target.server
 //		if( server.condition != 'running ) { 
 //			throw new IllegalStateException( "server '" + server.name + "' not running." )
 //		}
 //		val defName = "temp__" + abs( func.hashCode )
-		val defName = "temp_" + uniqueID // why risk a hashcode clash?
-		val synthDef = GraphBuilder.wrapOut( defName, func, fadeTime );
-		val synth = new Synth( synthDef.name, server )
-		val bytes = synthDef.toBytes
-		val synthMsg = synth.newMsg( target, List( "i_out" -> outBus.toFloat, "out" -> outBus.toFloat ), addAction )
+		val defName    = "temp_" + uniqueID // why risk a hashcode clash?
+		val synthDef   = GraphBuilder.wrapOut( defName, func, fadeTime )
+		val synth      = new Synth( synthDef.name, server )
+		val bytes      = synthDef.toBytes
+		val synthMsg   = synth.newMsg( target, List( "i_out" -> outBus.toFloat, "out" -> outBus.toFloat ), addAction )
 		if( bytes.remaining > (65535 / 4) ) { // preliminary fix until full size works
 			if( server.isLocal ) {
 				synthDef.load( server, synthMsg )

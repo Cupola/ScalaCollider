@@ -12,4 +12,4 @@ import de.sciss.tint.sc.ugen._
 val s = new swing.AWTServer( "Default" )
 s.options.programPath.value = "/Users/rutz/Documents/devel/fromSVN/SuperCollider3/common/build/scsynth"
 //new swing.NodeTreePanel( s ).makeWindow
-//new swing.ServerStatusPanel( s ).makeWindow
+new swing.ServerStatusPanel( s ).makeWindow

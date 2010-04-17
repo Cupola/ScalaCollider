@@ -18,6 +18,8 @@ val x = play {
     CombN.ar(SinOsc.ar(f)*0.04, 0.2, 0.2, 4) // echoing sine wave
 }
 
+x.free
+
 //////////////////////////////////////////////////////////////////////////
 
 // LFO modulation of Pulse waves and resonant filters
@@ -62,7 +64,7 @@ val x = play {
     for( i <- 0 until p ) {
         z = FSinOsc.ar( f * (i+1) ).madd( // freq of partial
             LFNoise1.kr(
-                List( Rand( 2, 10 ), Rand( 2, 10 ))).madd(  // amplitude rate 
+                List( Rand.ir( 2, 10 ), Rand.ir( 2, 10 ))).madd(  // amplitude rate 
                 0.02,    // amplitude scale
                offset    // amplitude offset
             ).max( 0 ),  // clip negative amplitudes to zero
@@ -89,7 +91,7 @@ val x = play {
                     trig      // trigger rate
                 ) * 0.02,     // trigger amplitude
                 0.005,        // grain attack time
-                Rand(0,0.5)   // grain decay time
+                Rand.ir(0,0.5)   // grain decay time
             ),
             z
         )
@@ -104,13 +106,13 @@ val x = play {
     val p = 15    // number of partials
     val z =       // filter bank specification :
         KlangSpec.fill(p) {
-            (Rand( 80, 10080 ),    // frequencies
-             Rand( -1, 1 ),        // amplitudes
-             Rand( 0.2, 8.2 ))      // ring times
+            (Rand.ir( 80, 10080 ),    // frequencies
+             Rand.ir( -1, 1 ),        // amplitudes
+             Rand.ir( 0.2, 8.2 ))      // ring times
     }
     Pan2.ar(
         Klank.ar(z, Dust.ar(0.7)*0.04),
-        Rand(-1,1)
+        Rand.ir(-1,1)
     )
 }
 
@@ -122,7 +124,7 @@ val x = play {
     val exciter = Decay.ar(Dust.ar(0.6)*0.001, 3.1)*WhiteNoise.ar
     for( i <- (1 to 2) ) yield {
         val spec = KlangSpec.fill(p) {
-            (Rand( 80, 10080 ), 1, Rand( 0.2, 8.2 ))}
+            (Rand.ir( 80, 10080 ), 1, Rand.ir( 0.2, 8.2 ))}
         Klank.ar(spec, exciter)
     }
 }
@@ -142,10 +144,10 @@ val x = play {
         0.2)
     val y = z * 0.6
     z + List(
-          CombL.ar(y, 0.06, LFNoise1.kr(Rand(0, 0.3)).madd(0.025, 0.035), 1) 
-        + CombL.ar(y, 0.06, LFNoise1.kr(Rand(0, 0.3)).madd(0.025, 0.035), 1),
-          CombL.ar(y, 0.06, LFNoise1.kr(Rand(0, 0.3)).madd(0.025, 0.035), 1)
-        + CombL.ar(y, 0.06, LFNoise1.kr(Rand(0, 0.3)).madd(0.025, 0.035), 1)
+          CombL.ar(y, 0.06, LFNoise1.kr(Rand.ir(0, 0.3)).madd(0.025, 0.035), 1) 
+        + CombL.ar(y, 0.06, LFNoise1.kr(Rand.ir(0, 0.3)).madd(0.025, 0.035), 1),
+          CombL.ar(y, 0.06, LFNoise1.kr(Rand.ir(0, 0.3)).madd(0.025, 0.035), 1)
+        + CombL.ar(y, 0.06, LFNoise1.kr(Rand.ir(0, 0.3)).madd(0.025, 0.035), 1)
     )
 }
 
@@ -158,9 +160,9 @@ val x = play {
         Mix.fill(n) {
             Pan2.ar(
                 SinOsc.ar(
-                    SinOsc.kr(Rand(0.02, 0.12), Rand(0, 2*Pi)).madd(IRand(0,599), IRand(700, 1299))
-                ) * LFNoise2.ar(Rand(80, 120)) * 0.1,
-                Rand(-1, 1)
+                    SinOsc.kr(Rand.ir(0.02, 0.12), Rand.ir(0, 2*Pi)).madd(IRand.ir(0,599), IRand.ir(700, 1299))
+                ) * LFNoise2.ar(Rand.ir(80, 120)) * 0.1,
+                Rand.ir(-1, 1)
             )
         }
         + LFNoise2.ar(LFNoise2.kr(List(0.4,0.4)).madd(90, 620)) * LFNoise2.kr(List(0.3,0.3)).madd(0.15, 0.18),
@@ -172,16 +174,16 @@ val x = play {
 // cymbalism
 val x = play {
     val p = 15   // number of partials per channel per 'cymbal'.
-    val f1 = Rand(500, 2500)
-    val f2 = Rand(0, 8000)
+    val f1 = Rand.ir(500, 2500)
+    val f2 = Rand.ir(0, 8000)
     for( i <- (1 to 2) ) yield {
         val z = KlangSpec.fill(p) {
             // sine oscil bank specification :
-            (f1 + Rand(0, f2),  // frequencies
-             1,                 // amplitudes
-             Rand(1, 5))        // ring times
+            (f1 + Rand.ir(0, f2),  // frequencies
+             1,                    // amplitudes
+             Rand.ir(1, 5))        // ring times
         }
-        Klank.ar(z, Decay.ar(Impulse.ar(Rand(0.5, 3.5)), 0.004) * WhiteNoise.ar(0.03))
+        Klank.ar(z, Decay.ar(Impulse.ar(Rand.ir(0.5, 3.5)), 0.004) * WhiteNoise.ar(0.03))
     }
 }
 
@@ -193,8 +195,8 @@ val x = play {
     var n = 6        // number of keys playing
     Mix.fill(n) {    // mix an array of notes
         // calculate delay based on a random note
-        val pitch  = IRand(36, 89)
-        val strike = Impulse.ar(Rand(0.1,0.5), Rand(0,2*Pi)) * 0.1    // random period for each key
+        val pitch  = IRand.ir(36, 89)
+        val strike = Impulse.ar(Rand.ir(0.1,0.5), Rand.ir(0,2*Pi)) * 0.1    // random period for each key
         val hammerEnv = Decay2.ar(strike, 0.008, 0.04)    // excitation envelope
         Pan2.ar(
             // array of 3 strings per note
@@ -223,16 +225,16 @@ val x = play {
     val a = 4    // number of allpass delays
 
     // sine percolation sound :
-    val s = Mix.fill(d) { Resonz.ar(Dust.ar(2.0/d)*50, Rand(200, 3200), 0.003) }
+    val s = Mix.fill(d) { Resonz.ar(Dust.ar(2.0/d)*50, Rand.ir(200, 3200), 0.003) }
 
     // reverb predelay time :
     val z = DelayN.ar(s, 0.048)
 
     // 'c' length modulated comb delays in parallel :
-    var y = Mix(CombL.ar(z, 0.1, LFNoise1.kr(for(i <- 0 until c) yield Rand(0,0.1)).madd(0.04, 0.05), 15))
+    var y = Mix(CombL.ar(z, 0.1, LFNoise1.kr(for(i <- 0 until c) yield Rand.ir(0,0.1)).madd(0.04, 0.05), 15))
 
     // chain of 'a' allpass delays on each of two channels (2 times 'a' total) :
-    for(i <- 0 until a) { y = AllpassN.ar(y, 0.050, List(Rand(0,0.050),Rand(0,0.050)), 1)}
+    for(i <- 0 until a) { y = AllpassN.ar(y, 0.050, List(Rand.ir(0,0.050),Rand.ir(0,0.050)), 1)}
 
     // add original sound to reverb and play it :
     s+(0.2*y)
@@ -249,10 +251,10 @@ val x = play {
     val z = DelayN.ar(s, 0.048, 0.048)
 
     // 6 modulated comb delays in parallel :
-    var y = Mix(CombL.ar(z, 0.1, LFNoise1.kr(for(i <- 0 until 6) yield Rand(0,0.1)).madd(0.04, 0.05), 15))
+    var y = Mix(CombL.ar(z, 0.1, LFNoise1.kr(for(i <- 0 until 6) yield Rand.ir(0,0.1)).madd(0.04, 0.05), 15))
 
     // chain of 4 allpass delays on each of two channels (8 total) :
-    for(i <- 0 until 4) { y = AllpassN.ar(y, 0.050, List(Rand(0,0.050),Rand(0,0.050)), 1)}
+    for(i <- 0 until 4) { y = AllpassN.ar(y, 0.050, List(Rand.ir(0,0.050),Rand.ir(0,0.050)), 1)}
 
     // add original sound to reverb and play it :
     s+y
@@ -315,19 +317,19 @@ val x = play {
                 Array(1, 0.5, 0.25)(   // choose a frequency of pitch change
                     util.Random.nextInt(3))).madd(
                 7,                     // +/- 7 semitones
-                IRand(36, 96)          // random center note
+                IRand.ir(36, 96)       // random center note
             ).round(1),                // round to nearest semitone
             0.2                        // gliss time
         ).midicps                      // convert to hertz
 
         Pan2.ar(    // pan each intrument
             CombL.ar(excitation, 0.02, freq.reciprocal, 3),    // comb delay simulates string
-            Rand(-1,1)    // random pan position
+            Rand.ir(-1,1)    // random pan position
         )
     }
 
     // add some reverb via allpass delays
-    for(i <- 1 to 5) { signal = AllpassN.ar(signal, 0.05, List(Rand(0,0.05),Rand(0,0.05)), 1) }
+    for(i <- 1 to 5) { signal = AllpassN.ar(signal, 0.05, List(Rand.ir(0,0.05),Rand.ir(0,0.05)), 1) }
     LeakDC.ar( signal, 0.995)    // delays build up a lot of DC, so leak it out here.
 }
 

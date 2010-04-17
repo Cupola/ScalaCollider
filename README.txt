@@ -1,10 +1,11 @@
-COPYRIGHT
-
-Please check out the "licenses" folder for license information.
+---- ScalaCollider ----
+A SuperCollider client for the Scala language.
+Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
+Licensed under the GNU General Public License v2 (see "licenses" folder).
 
 PREREQUISITES
 
-Java 1.6 (might work in 1.5) / Scala 2.8 (BETA1) / SuperCollider 3.3.1 / ScalaOSC
+Scala 2.8 (RC1) / Java 1.6 / SuperCollider 3.3.1 / ScalaOSC
 
 INSTALLATION
 
@@ -12,7 +13,7 @@ Note: to keep the repo small, the following libraries have not been included and
 
     - ScalaOSC (grab it from http://github.com/Sciss/ScalaOSC )
 
-Compile using the included compile_fsc.sh script or the included IntellJ IDEA project. Note that the repo also contains the previous NetBeans project. Due to problems with the NetBeans plug-in, the project now uses IDEA, the nb project files are still there for reference.
+Compile using the included compile_fsc.sh script or the included IntellJ IDEA project.
     
 DEMO SETUP
 

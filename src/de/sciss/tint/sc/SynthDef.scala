@@ -38,7 +38,7 @@ import collection.{ breakOut }
 import de.sciss.scalaosc.{ OSCMessage, OSCPacket }
 
 /**
- *    @version 0.17, 14-Apr-10
+ *    @version 0.18, 17-Apr-10
  */
 class SynthDef private ( val name: String, constants: IIdxSeq[ Float ], controlValues: IIdxSeq[ Float ],
                          controlDescs: IIdxSeq[ ControlDesc ], ugens: IIdxSeq[ SynthDef.RichUGen ]) {
@@ -220,45 +220,6 @@ class SynthDef private ( val name: String, constants: IIdxSeq[ Float ], controlV
       })
    }
 
-//   // test method
-//   def testTopologicalOrder {
-//      var known   = Set[ UGen ]()
-//      val success = ugens.forall( ugen => {
-//         val u    = ugen.inputs.partialMap { case up: UGenProxy => up.source }
-//         val res  = u.forall( known.contains( _ ))
-//         known   += ugen
-//         res
-//      })
-//      if( !success ) error( "Test failed" )
-//      println( "Test passed" )
-//   }
-
-   
-/*
-  private def writeInputSpec( dos: DataOutputStream, inp: UGenInput ) {
-    if( inp.isInstanceOf[ OutputProxy ]) {
-      val proxy			= inp.asInstanceOf[ OutputProxy ]
-      val synthIndex	= if( proxy.source.isInstanceOf[ UGen ]) ugens.indexOf( proxy.source ) else
-      if( synthIndex == -1 ) throw new IOException( "UGen not listed in graph function : " + inp )
-      dos.writeShort( synthIndex )
-      dos.writeShort( proxy.channel )
-      
-      println( "wrote proxy, src = " + proxy.source + "; channel " + proxy.channel + "; synthIndex " + synthIndex )
-      
-    } else if( inp.isInstanceOf[ Constant ]) {
-      val constIndex = constants.indexOf( inp );
-      if( constIndex == -1 ) throw new IOException( "Constant not listed in synth def : " + inp )
-      dos.writeShort( -1 )
-      dos.writeShort( constIndex )
-
-      println( "wrote constant, value = " + inp.asInstanceOf[ Constant ].value + "; constIndex " + constIndex )
-
-    } else {
-      assume( false )
-    }
-  }
-*/
-
 //   private def checkInputs {
 //      var seenErr = false
 //      ugens.foreach( ugen => {
@@ -345,7 +306,8 @@ object SynthDef {
 
    private class BuilderImpl extends SynthDefBuilder {
       // updated during build
-      private var ugens                                  = Set.empty[ UGen ]
+      private var ugens : IIdxSeq[ UGen ]                = Vector.empty
+      private var ugenSet                                = Set.empty[ UGen ]
       private var controlValues: IIdxSeq[ Float ]        = Vector.empty
       private var controlDescs: IIdxSeq[ ControlDesc ]   = Vector.empty
 //      private var controlDescMap                         = Set.empty[ String, ControlDesc ]
@@ -378,11 +340,10 @@ object SynthDef {
          res
       }
 
-      private def indexUGens : Tuple2[ IIterable[ IndexedUGen ], IIdxSeq[ Float ]] = {
+      private def indexUGens : Tuple2[ IIdxSeq[ IndexedUGen ], IIdxSeq[ Float ]] = {
          var constantMap   = Map.empty[ Float, RichConstant ]
          var constants     = Vector.empty[ Float ]
-         val indexedUGens  = ugens.map( new IndexedUGen( _ ))
-//         val ugenMap       = indexedUGens.map( iu => (iu.ugen, iu)).toMap
+         val indexedUGens  = ugens.zipWithIndex.map( tup => new IndexedUGen( tup._1, tup._2 ))
          val ugenMap: Map[ UGen, IndexedUGen ] = indexedUGens.map( iu => (iu.ugen, iu))( breakOut )
          indexedUGens.foreach( iu => {
             iu.richInputs = iu.ugen.inputs.collect({
@@ -394,8 +355,8 @@ object SynthDef {
                }
                case up: UGenProxy => {
                   val iui         = ugenMap( up.source )
-                  iu.parents     += iui
-                  iui.children   += iu
+                  iu.parents    :+= iui
+                  iui.children  :+= iu
                   new RichUGenProxyBuilder( iui, up.outputIndex )
                }
             })( breakOut )
@@ -413,26 +374,19 @@ object SynthDef {
        *    mNumWireBufs might be different, so it's a space not a
        *    time issue.
        */
-      private def sortUGens( indexedUGens: IIterable[ IndexedUGen ]) : IIdxSeq[ IndexedUGen ] = {
+      private def sortUGens( indexedUGens: IIdxSeq[ IndexedUGen ]) : IIdxSeq[ IndexedUGen ] = {
+         indexedUGens.foreach( iu => iu.children = iu.children.sortWith( (a, b) => a.index > b.index ))
          var sorted  = Vector.empty[ IndexedUGen ]
-         val start   = indexedUGens.filter( _.parents.isEmpty )
-         val sorting = (a: IndexedUGen, b: IndexedUGen) => a.numWireBufs > b.numWireBufs
-         var stack   = Stack( start.toList.sortWith( sorting ).iterator )
-         while( stack.nonEmpty ) {
-            var iter = stack.top
-            stack    = stack.pop
-            while( iter.hasNext ) {
-               val iu   = iter.next
-               iu.index = sorted.size
-               sorted :+= iu
-               val c    = iu.children
-               c.foreach( _.parents -= iu )
-               val availc  = c.toList.filter( _.parents.isEmpty ).sortWith( sorting )
-               if( availc.nonEmpty ) {
-                  stack +:= iter
-                  iter    = availc.iterator
-               }
-            }
+         var avail   = Stack( indexedUGens.filter( _.parents.isEmpty ) : _* )
+         while( avail.nonEmpty ) {
+            val iu   = avail.top
+            avail    = avail.pop
+            iu.index = sorted.size
+            sorted :+= iu
+            iu.children.foreach( iuc => {
+               iuc.parents = iuc.parents.patch( iuc.parents.indexOf( iu ), Nil, 1 ) // why so difficult to remove?
+               if( iuc.parents.isEmpty ) avail = avail.push( iuc )
+            })
          }
          sorted
       }
@@ -440,7 +394,10 @@ object SynthDef {
       def addUGen( ugen: UGen ) {
 //         if( verbose ) println( "ADD UNIT " + ugen.name + " -> index " + ugensUnsorted.size )
 //         ugens ::= ugen
-         ugens += ugen
+         if( !ugenSet.contains( ugen )) {
+            ugenSet += ugen
+            ugens  :+= ugen
+         }
       }
 
       def addControl( u: Control ) : Int = {
@@ -495,12 +452,6 @@ object SynthDef {
          }
       }
 
-//      def collectConstants {
-//         ugensUnsorted.foreach( iu => {
-//            constantSet ++= iu.ugen.inputs.collect { case c: Constant => c }
-//         })
-//      }
-
       private def setControlDescSource( descs: Seq[ ControlDesc ], source: UGen ) {
          var off	= 0
          descs.foreach( desc => {
@@ -511,11 +462,9 @@ object SynthDef {
       }
 
       // ---- IndexedUGen ----
-      private class IndexedUGen( val ugen: UGen ) {
-         var parents       = Set.empty[ IndexedUGen ]
-         var children      = Set.empty[ IndexedUGen ]
-         val numWireBufs   = ugen.outputRates.count( _ == audio )
-         var index         = -2
+      private class IndexedUGen( val ugen: UGen, var index: Int ) {
+         var parents : IIdxSeq[ IndexedUGen ]   = Vector.empty
+         var children  : IIdxSeq[ IndexedUGen ] = Vector.empty
          var richInputs : List[ RichUGenInBuilder ] = null
       }
 

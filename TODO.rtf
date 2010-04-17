@@ -6,34 +6,8 @@
 
 \f0\fs24 \cf0 - for missing UGens, refer to ugen_list.scd\
 \
-16-Apr-10\
-- misbehaving: "harmonic swimming" (21 wirebufs vs. 3); "harmonic tumbling" (11 vs. 3); "police state" (9 vs. 4); "synthetic piano" (19 vs. 5); "reverberated sine percussion" (6 vs. 4); "reverberated noise bursts" (5 or 6 or 7 (!!) vs. 4); "aleatoric quartet" (7 or 8 (!!) vs. 4\
-// ---> might be related to the implementation of Mix ??\
-// ---> to using Set (so unsorted adding in the first place) ?? --> NOTE: mNumWireBufs _changes_ which suggests that Set might be responsible !!\
-// ---> to case class aliasing ??\
-- not working (compiling): "cymbalism"\
+17-Apr-10\
 \
 - the Buffer delay UGens set a 'done' flag when they are finished playing. // which ones?\
-\pard\pardeftab560\ql\qnatural
-\cf0 \
-\{ \}.play -> strange defname\
-\
-///////////\
-\
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\ql\qnatural\pardirnatural
-\cf0 val d = SynthDef( "perc" ) \{\
-    // pink noise percussion sound :\
-    val s = Decay.ar(Dust.ar(0.6)*0.2, 0.15) * PinkNoise.ar\
-\
-    // reverb predelay time :\
-    val z = DelayN.ar(s, 0.048, 0.048)\
-\
-    // 6 modulated comb delays in parallel :\
-    var y = Mix(CombL.ar(z, 0.1, LFNoise1.kr(for(i <- 0 until 6) yield Rand(0,0.1)).madd(0.04, 0.05), 15))\
-\
-    // chain of 4 allpass delays on each of two channels (8 total) :\
-\
-    // add original sound to reverb and play it :\
-    s+y\
-\}\
+- BinaryOpUGen --> get rid of the Symbol usage\
 }

@@ -226,7 +226,8 @@ object UnaryOpUGen {
             case Abs       => cn( abs( aval ))
             case Ceil      => cn( ceil( aval ))
             case Floor     => cn( floor( aval ))
-            case Frac      => cn( aval % 1.0	)
+//            case Frac      => cn( aval % 1.0	)
+            case Frac      => cn( aval - floor( aval )) // according to jmc
             case Signum    => cn( if( aval == 0 ) 0 else if( aval < 0 ) -1 else 1 )
             case Squared   => cn( aval * aval )
             case Cubed     => cn( aval * aval * aval )
