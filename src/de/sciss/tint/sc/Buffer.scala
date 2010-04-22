@@ -30,7 +30,7 @@ package de.sciss.tint.sc
 import de.sciss.scalaosc.OSCMessage
 
 /**
- * 	@version	0.16, 03-Mar-10
+ * 	@version	0.17, 22-Apr-10
  */
 object Buffer {
    def alloc( server: Server = Server.default, numFrames: Int, numChannels: Int = 1, completionMessage: Option[ OSCMessage ] = None ) : Buffer = {
@@ -102,10 +102,10 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
 
    def queryMsg = OSCMessage( "/b_query", id )
 
-   def free { server.sendMsg( freeMsg )}
+   def free { server ! freeMsg }
 
 	def free( completionMessage: Option[ OSCMessage ]) {
-		server.sendMsg( freeMsg( completionMessage ))
+		server ! freeMsg( completionMessage )
 	}
 
 //	def free( completionMessage: Buffer => OSCMessage ): Unit =
@@ -128,10 +128,10 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
 //	def freeMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
 //       freeMsg( completionMessage.apply( this ))
 
-   def close { server.sendMsg( closeMsg )}
+   def close { server ! closeMsg }
 
    def close( completionMessage: Option[ OSCMessage ]) {
-      server.sendMsg( closeMsg( completionMessage ))
+      server ! closeMsg( completionMessage )
    }
 
 //    def close( completionMessage: Buffer => OSCMessage ): Unit =
@@ -148,10 +148,10 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
 //	def closeMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
 //      closeMsg( completionMessage.apply( this ))
  
-	def alloc { server.sendMsg( allocMsg )}
+	def alloc { server ! allocMsg }
 
 	def alloc( completionMessage: Option[ OSCMessage ]) {
-		server.sendMsg( allocMsg( completionMessage ))
+		server ! allocMsg( completionMessage )
 	}
  
 //	def alloc( completionMessage: Buffer => OSCMessage ): Unit =
@@ -175,7 +175,7 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
    def allocRead( path: String, startFrame: Int = 0, numFrames: Int = -1,
                   completionMessage: Option[ OSCMessage ] = None ) {
 //      path = argpath;
-      server.sendMsg( allocReadMsg( path, startFrame, numFrames, completionMessage ))
+      server ! allocReadMsg( path, startFrame, numFrames, completionMessage )
    }
 
    def allocReadMsg( path: String, startFrame: Int = 0, numFrames: Int = -1,
@@ -195,7 +195,7 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
 
    def read( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
              leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage ] = None ) {
-      server.sendMsg( readMsg( path, fileStartFrame, numFrames, bufStartFrame, leaveOpen, completionMessage ))
+      server ! readMsg( path, fileStartFrame, numFrames, bufStartFrame, leaveOpen, completionMessage )
    }
 
    def readMsg( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
@@ -209,8 +209,8 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
    def readChannel( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
              leaveOpen: Boolean = false, channels: Seq[ Int ],
              completionMessage: Option[ OSCMessage ] = None ) {
-      server.sendMsg( readChannelMsg( path, fileStartFrame, numFrames, bufStartFrame, leaveOpen,
-         channels, completionMessage ))
+      server ! readChannelMsg( path, fileStartFrame, numFrames, bufStartFrame, leaveOpen,
+         channels, completionMessage )
    }
 
    def readChannelMsg( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
@@ -222,10 +222,10 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
       OSCMessage( "/b_readChannel", args: _* )
    }
 
-   def zero { server.sendMsg( zeroMsg )}
+   def zero { server ! zeroMsg }
 
    def zero( completionMessage: Option[ OSCMessage ]) {
-      server.sendMsg( zeroMsg( completionMessage ))
+      server ! zeroMsg( completionMessage )
    }
 
 	def zeroMsg = OSCMessage( "/b_zero", id )

@@ -27,18 +27,10 @@
  */
 package de.sciss.tint.sc
 
-/*
-import _root_.edu.uci.ics.jung.graph.{ DelegateTree, DirectedGraph, DirectedSparseGraph,
-	Graph, ObservableGraph, Tree }
-import _root_.edu.uci.ics.jung.graph.util.Graphs
-*/
-
-import scala.collection.immutable.IntMap
-import scala.collection.mutable.ListBuffer
+import collection.immutable.IntMap
 
 /**
- *	@version    0.11, 03-Mar-10
- *	@author		Hanns Holger Rutz
+ *    @version 0.12, 22-Apr-10
  */
 object NodeManager {
    trait NodeChange { def node: Node; def msg: OSCNodeChange }
@@ -51,55 +43,35 @@ object NodeManager {
 
 class NodeManager( server: Server ) extends Model {
 
-    import NodeManager._
+   import NodeManager._
     
-/*
-	val graph: DirectedGraph[ Node, Long ] = Graphs.synchronizedDirectedGraph( new DirectedSparseGraph() )
-	val ograph = new ObservableGraph( graph )
-    */
-	private var nodes = IntMap.empty[ Node ]
-	
-	private var autoAdd = true
+	private var nodes    = IntMap.empty[ Node ]
+	private var autoAdd  = true
+   private val sync     = new AnyRef
 	
 	// ---- constructor ----
 	{
 		val rootNode = server.rootNode // new Group( server, 0 )
-/*
-		ograph.addVertex( rootNode )
-*/
 		nodes += rootNode.id -> rootNode
       if( server.isRunning ) {
          val defaultGroup = server.defaultGroup
          nodes += defaultGroup.id -> defaultGroup
       }
-      
-//		val baseNode = server.defaultGroup // new Group( server, 1 )
-//		dtree.addChild( (rootNode.id.toLong << 32) | (baseNode.id.toLong & 0xFFFFFFFF), rootNode, baseNode )
-/*
-		ograph.addVertex( baseNode )
-		ograph.addEdge( (rootNode.id.toLong << 32) | (baseNode.id.toLong & 0xFFFFFFFF), rootNode, baseNode )
-*/
-//		nodes += baseNode.id -> baseNode
-		// XXX
-//		dtree.addChild( edgeID, parent, node )
 	}
 
 	def nodeChange( e: OSCNodeChange ) {
-		val nodeO = nodes.get( e.nodeID )
-		val node  = if( nodeO.isDefined ) {
-			nodeO.get
-		} else if( autoAdd && (e.name == "/n_go") && nodes.contains( e.parentID )) {
-			val created = e match {
-				case ee: OSCSynthChange => new Synth( "?", server, e.nodeID ) // que se puede acer...
-				case ee: OSCGroupChange => new Group( server, e.nodeID )
-			}
-			nodes += created.id -> created
-            /*
-			ograph.addVertex( created )
-			ograph.addEdge( (e.parentID.toLong << 32) | (e.nodeID.toLong & 0xFFFFFFFF), nodes( e.parentID ), created )
-            */
-			created
-		} else return
+		val node = nodes.get( e.nodeID ) getOrElse {
+         if( autoAdd && (e.name == "/n_go") && nodes.contains( e.parentID )) {
+            val created = e match {
+               case ee: OSCSynthChange => new Synth( "?", server, e.nodeID ) // que se puede acer...
+               case ee: OSCGroupChange => new Group( server, e.nodeID )
+            }
+            sync.synchronized {
+               nodes += created.id -> created
+            }
+            created
+         } else return
+      }
 		
 		e.name match {
 			case "/n_go"   => nodeGo( node, e )
@@ -109,34 +81,18 @@ class NodeManager( server: Server ) extends Model {
 			case "/n_move" => nodeMove( node, e )
 			case _ =>
 		}
-		
-//		listeners.foreach( _.apply( this, node, e ))
 	}
 
 	private def nodeGo( node: Node, e: OSCNodeChange ) {
-//		val parentO = nodes.get( e.parentID )
-//
-//		parentO.foreach( parent => {
-//			val edgeID = (parent.id.toLong << 32) | (node.id.toLong & 0xFFFFFF)
-///*			if( !ograph.containsVertex( node )) {
-//				ograph.addVertex( node )
-//				ograph.addEdge( edgeID, parent, node )
-//			}
-//*/		})
-
       dispatchBoth( NodeGo( node, e ))
 	}
 	
 	private def nodeEnd( node: Node, e: OSCNodeChange ) {
 		val parentO = nodes.get( e.parentID )
 		
-		nodes -= node.id
-		
-//		parentO.foreach( parent => {
-//			val edgeID = (parent.id.toLong << 32) | (node.id.toLong & 0xFFFFFF)
-//		})
-/*		ograph.removeVertex( node )*/
-
+      sync.synchronized {
+   		nodes -= node.id
+      }
       dispatchBoth( NodeEnd( node, e ))
 	}
 
@@ -160,10 +116,14 @@ class NodeManager( server: Server ) extends Model {
 	// eventually this should be done automatically
 	// by the message dispatch management
 	def register( node: Node ) {
-		nodes += node.id -> node
+      sync.synchronized {
+   		nodes += node.id -> node
+      }
 	}
 	
 	def unregister( node: Node ) {
-		nodes -= node.id
+      sync.synchronized {
+   		nodes -= node.id
+      }
 	}
 }

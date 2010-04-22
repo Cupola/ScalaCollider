@@ -28,12 +28,13 @@
 
 package de.sciss.tint.sc.ugen
 
+import collection.breakOut
 import de.sciss.tint.sc._
 import SC._
 import GraphBuilder._
 
 /**
- *    @version	0.13, 16-Apr-10
+ *    @version	0.13, 22-Apr-10
  */
 object RandSeed extends UGen2Args {
 	def kr( trig: GE, seed: GE = 56789 ) : GE = krExp( trig, seed )
@@ -49,60 +50,60 @@ object RandID extends UGen1Args {
 case class RandID( rate: Rate, id: UGenIn )
 extends SingleOutUGen( id ) // with ExclusiveUGen
 
-object Rand extends UGen2RArgs with UGen2RArgsIndiv {
-	def ir( lo: GE = 0, hi: GE = 1 ) : GE = make( lo, hi )
+object Rand extends UGen2RArgsIndiv {
+	def apply( lo: GE = 0, hi: GE = 1 ) : GE = make( lo, hi )
 }
 case class Rand( lo: UGenIn, hi: UGenIn, _indiv: Int ) extends SingleOutUGen( lo, hi )
 with ScalarRated
 
-object IRand extends UGen2RArgs with UGen2RArgsIndiv {
-	def ir( lo: GE = 0, hi: GE = 127 ) : GE = make( lo, hi )
+object IRand extends UGen2RArgsIndiv {
+	def apply( lo: GE = 0, hi: GE = 127 ) : GE = make( lo, hi )
 }
 case class IRand( lo: UGenIn, hi: UGenIn, _indiv: Int ) extends SingleOutUGen( lo, hi )
 with ScalarRated
 
-object TRand extends UGen3Args with UGen3ArgsIndiv {
+object TRand extends UGen3ArgsIndiv {
 	def ar( lo: GE = 0, hi: GE = 1, trig: GE ) : GE = arExp( lo, hi, trig )
 	def kr( lo: GE = 0, hi: GE = 1, trig: GE ) : GE = krExp( lo, hi, trig )
 }
 case class TRand( rate: Rate, lo: UGenIn, hi: UGenIn, trig: UGenIn, _indiv: Int )
 extends SingleOutUGen( lo, hi, trig )
 
-object TIRand extends UGen3Args with UGen3ArgsIndiv {
+object TIRand extends UGen3ArgsIndiv {
 	def ar( lo: GE = 0, hi: GE = 127, trig: GE ) : GE = arExp( lo, hi, trig )
 	def kr( lo: GE = 0, hi: GE = 127, trig: GE ) : GE = krExp( lo, hi, trig )
 }
 case class TIRand( rate: Rate, lo: UGenIn, hi: UGenIn, trig: UGenIn, _indiv: Int )
 extends SingleOutUGen( lo, hi, trig )
 
-object LinRand extends UGen3RArgs with UGen3RArgsIndiv {
-	def ir( lo: GE = 0, hi: GE = 127, minMax: GE = 0 ) : GE =
+object LinRand extends UGen3RArgsIndiv {
+	def apply( lo: GE = 0, hi: GE = 127, minMax: GE = 0 ) : GE =
       make( lo, hi, minMax )
 }
 case class LinRand( lo: UGenIn, hi: UGenIn, minMax: UGenIn, _indiv: Int )
 extends SingleOutUGen( lo, hi, minMax ) with ScalarRated
 
-object NRand extends UGen3RArgs with UGen3RArgsIndiv {
-	def ir( lo: GE = 0, hi: GE = 127, n: GE = 0 ) : GE =
+object NRand extends UGen3RArgsIndiv {
+	def apply( lo: GE = 0, hi: GE = 127, n: GE = 0 ) : GE =
       make( lo, hi, n )
 }
 case class NRand( lo: UGenIn, hi: UGenIn, n: UGenIn, _indiv: Int )
 extends SingleOutUGen( lo, hi, n ) with ScalarRated
 
-object ExpRand extends UGen2RArgs with UGen2RArgsIndiv {
+object ExpRand extends UGen2RArgsIndiv {
 	def apply( lo: GE = 0.01f, hi: GE = 1 ) : GE = make( lo, hi )
 }
 case class ExpRand( lo: UGenIn, hi: UGenIn, _indiv: Int )
 extends SingleOutUGen( lo, hi ) with ScalarRated
 
-object TExpRand extends UGen3Args with UGen3ArgsIndiv {
+object TExpRand extends UGen3ArgsIndiv {
 	def ar( lo: GE = 0.01f, hi: GE = 1, trig: GE ) : GE = arExp( lo, hi, trig )
 	def kr( lo: GE = 0.01f, hi: GE = 1, trig: GE ) : GE = krExp( lo, hi, trig )
 }
 case class TExpRand( rate: Rate, lo: UGenIn, hi: UGenIn, trig: UGenIn, _indiv: Int )
 extends SingleOutUGen( lo, hi, trig )
 
-object CoinGate extends UGen2Args with UGen2ArgsIndiv {
+object CoinGate extends UGen2ArgsIndiv {
 	def ar( prob: GE = 0.5f, in: GE ) : GE = arExp( prob, in )
 	def kr( prob: GE = 0.5f, in: GE ) : GE = krExp( prob, in )
 }
@@ -118,7 +119,7 @@ object TWindex {
 
    private def make( rate: Rate, trig: GE, list: GE, normalize: GE ) : GE =
       simplify( for( List( t, n, l @ _* ) <-
-                  expand( (trig :: normalize :: list.toUGenIns.toList): _* ))
+                  expand( (trig :: normalize :: list.outputs.toList): _* ))
                      yield this( rate, t, l, n, SynthDef.individuate ))
 
 //   def apply( rate: Rate, trig: UGenIn, list: Seq[ UGenIn ], normalize: UGenIn ) =
@@ -128,19 +129,23 @@ case class TWindex( rate: Rate, trig: UGenIn, list: Seq[ UGenIn ], normalize: UG
 extends SingleOutUGen( (trig :: normalize :: list.toList): _* )
 
 trait NoiseUGen {
-//  type noiseType <: UGen
-  def apply( rate: Rate, _indiv: Int ) : SingleOutUGen
+   def apply( rate: Rate, _indiv: Int ) : SingleOutUGen
 
-  def ar: SingleOutUGen = this( audio,   SynthDef.individuate )
-  def kr: SingleOutUGen = this( control, SynthDef.individuate )
+   def ar: SingleOutUGen = this( audio,   SynthDef.individuate )
+   def kr: SingleOutUGen = this( control, SynthDef.individuate )
 
-  private def make( make1: => SingleOutUGen, mul: GE ) : GE = {
-    val zipped = List.fill[ UGenIn ]( mul.numOutputs )( make1 ).zip( mul.toUGenIns )
-    seq( zipped.flatMap( p => (p._1 * p._2).toUGenIns ): _* )
-  }
+   private def make( make1: => SingleOutUGen, mul: GE ) : GE = {
+//      val numOutputs = mul.numOutputs
+//      val outputs    = mul.outputs
+//      if( numOutputs == 1 ) make1 * outputs.head
+//      else UGenInSeq( outputs.map( m => BinaryOpUGen.make1( BinaryOpUGen.Times, make1, m )))
+//      val zipped = Vector.fill[ UGenIn ]( mul.numOutputs )( make1 ).zip( mul.outputs )
+//      seq( zipped.flatMap( p => (p._1 * p._2).outputs ))
+      seq( mul.outputs.flatMap( m => (make1 * m).outputs )( breakOut ))
+   }
 
-  def ar( mul: GE ): GE = make( ar, mul )
-  def kr( mul: GE ): GE = make( kr, mul )
+   def ar( mul: GE ): GE = make( ar, mul )
+   def kr( mul: GE ): GE = make( kr, mul )
 }
 
 object WhiteNoise extends NoiseUGen // { type noiseType = WhiteNoise }
@@ -179,49 +184,49 @@ object Logistic extends UGen3Args {
 case class Logistic( rate: Rate, chaosParam: UGenIn, freq: UGenIn, init: UGenIn )
 extends SingleOutUGen( chaosParam, freq, init )
 
-object LFNoise0 extends UGen1Args with UGen1ArgsIndiv {
+object LFNoise0 extends UGen1ArgsIndiv {
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFNoise0( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
-object LFNoise1 extends UGen1Args with UGen1ArgsIndiv {
+object LFNoise1 extends UGen1ArgsIndiv {
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFNoise1( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
-object LFNoise2 extends UGen1Args with UGen1ArgsIndiv {
+object LFNoise2 extends UGen1ArgsIndiv {
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFNoise2( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
-object LFClipNoise extends UGen1Args with UGen1ArgsIndiv {
+object LFClipNoise extends UGen1ArgsIndiv {
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFClipNoise( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
-object LFDNoise0 extends UGen1Args with UGen1ArgsIndiv {
+object LFDNoise0 extends UGen1ArgsIndiv {
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFDNoise0( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
-object LFDNoise1 extends UGen1Args with UGen1ArgsIndiv {
+object LFDNoise1 extends UGen1ArgsIndiv {
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFDNoise1( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
-object LFDNoise3 extends UGen1Args with UGen1ArgsIndiv {
+object LFDNoise3 extends UGen1ArgsIndiv {
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFDNoise3( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
-object LFDClipNoise extends UGen1Args with UGen1ArgsIndiv {
+object LFDClipNoise extends UGen1ArgsIndiv {
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
@@ -242,13 +247,13 @@ object MantissaMask extends UGen2Args {
 case class MantissaMask( rate: Rate, in: UGenIn, bits: UGenIn )
 extends SingleOutUGen( in, bits )
 
-object Dust extends UGen1Args with UGen1ArgsIndiv {
+object Dust extends UGen1ArgsIndiv {
 	def ar( density: GE = 1 ) : GE = arExp( density )
 	def kr( density: GE = 1 ) : GE = krExp( density )
 }
 case class Dust( rate: Rate, density: UGenIn, _indiv: Int ) extends SingleOutUGen( density )
 
-object Dust2 extends UGen1Args with UGen1ArgsIndiv {
+object Dust2 extends UGen1ArgsIndiv {
 	def ar( density: GE = 1 ) : GE = arExp( density )
 	def kr( density: GE = 1 ) : GE = krExp( density )
 }

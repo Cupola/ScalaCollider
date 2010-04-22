@@ -38,7 +38,7 @@ import GraphBuilder._
 object DiskOut {
   def ar( bufNum: GE, multi: GE ) : GE =
     simplify( for( List( b, m @ _* ) <-
-                     expand( (bufNum :: multi.toUGenIns.toList): _* ))
+                     expand( (bufNum :: multi.outputs.toList): _* ))
                 yield this( b, m ))
 }
 case class DiskOut( bufNum: UGenIn, multi: Seq[ UGenIn ])
@@ -50,8 +50,7 @@ object DiskIn {
       yield this( numChannels, b, l ))
 }
 case class DiskIn( numChannels: Int, bufNum: UGenIn, loop: UGenIn )
-extends MultiOutUGen( List.fill[ Rate ]( numChannels )( audio ),
-                      List( bufNum, loop )) with AudioRated // with SideEffectUGen // side-effect: advancing sf offset
+extends MultiOutUGen( audio, numChannels, List( bufNum, loop )) with AudioRated // with SideEffectUGen // side-effect: advancing sf offset
 
 object VDiskIn {
   // note: argument 'rate' renamed to 'speed'
@@ -61,6 +60,6 @@ object VDiskIn {
 }
 case class VDiskIn( numChannels: Int, bufNum: UGenIn, speed: UGenIn,
                     loop: UGenIn, sendID: UGenIn )
-extends MultiOutUGen( List.fill[ Rate ]( numChannels )( audio ), List( bufNum, speed, loop, sendID ))
+extends MultiOutUGen( audio, numChannels, List( bufNum, speed, loop, sendID ))
 with AudioRated // with SideEffectUGen
  

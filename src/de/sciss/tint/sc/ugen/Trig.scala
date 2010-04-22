@@ -33,7 +33,7 @@ import SC._
 import GraphBuilder._
 
 /**
- *	@version	0.12, 02-Jan-10
+ *	@version	0.12, 22-Apr-10
  */
 object Trig1 extends UGen2Args {
   def ar( in: GE, dur: GE = 0.1f ) : GE = arExp( in, dur )
@@ -192,7 +192,7 @@ object Pitch {
 case class Pitch( in: UGenIn, initFreq: UGenIn, minFreq: UGenIn, maxFreq: UGenIn,
 			execFreq: UGenIn, binsPerOct: UGenIn, median: UGenIn,
 			ampThresh: UGenIn, peakThresh: UGenIn, downSample: UGenIn )
-extends MultiOutUGen( List( control, control ), List( in, initFreq, minFreq,
+extends MultiOutUGen( control, 2, List( in, initFreq, minFreq,
                       maxFreq, execFreq, binsPerOct, median, ampThresh,
                       peakThresh, downSample ))
 with ControlRated

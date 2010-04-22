@@ -5,7 +5,7 @@ import SC._
 import GraphBuilder._
 
 /**
- *    @version 0.11, 16-Apr-10
+ *    @version 0.11, 22-Apr-10
  */
 object FreeVerb extends UGen4RArgs {
   def ar( in: GE, mix: GE = 0.33f, room: GE = 0.5f, damp: GE = 0.5f ) : GE =
@@ -21,6 +21,6 @@ object FreeVerb2 extends UGen5RArgs {
 }
 // note: deterministic
 case class FreeVerb2( left: UGenIn, right: UGenIn, mix: UGenIn, room: UGenIn, damp: UGenIn )
-extends MultiOutUGen( List( audio, audio ), List( left, right, mix, room, damp ))
+extends MultiOutUGen( audio, 2, List( left, right, mix, room, damp ))
 with AudioRated
 

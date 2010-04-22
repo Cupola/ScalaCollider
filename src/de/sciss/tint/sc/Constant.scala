@@ -28,33 +28,9 @@
 
 package de.sciss.tint.sc
 
-import java.io.DataOutputStream
-import java.io.IOException
-//import Rates._
-
 /**
- *	@author		Hanns Holger Rutz
- *	@version	0.11, 02-Dec-09
+ *	@version	   0.12, 22-Apr-10
  */
-case class Constant( value: Float ) extends UGenIn {
-   def rate = scalar
-  
-//  def toUGenIns = List( this )
-//  val numOutputs = 1
-                             
-//  def writeInputSpec( dos: DataOutputStream, synthDef: SynthDef ) : Unit = {
-//      val constIndex = synthDef.getConstantIndex( this )
-//      if( SynthDef.verbose ) println( "  Constant.writeInputSpec. constIndex = " + constIndex )
-//      if( constIndex == -1 ) throw new IOException( "Constant not listed in synth def : " + this )
-//      dos.writeShort( -1 )
-//      dos.writeShort( constIndex )
-//  }
-
+case class Constant( value: Float ) extends UGenIn with ScalarRated {
    override def toString = value.toString
 }
-
-//object Constants {
-//   val zero		   = Constant( 0f )
-//   val one		   = Constant( 1f )
-//   val minusOne	= Constant( -1f )
-//}

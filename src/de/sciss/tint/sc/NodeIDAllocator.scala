@@ -28,40 +28,31 @@
 
 package de.sciss.tint.sc
 
-import scala.collection.mutable.HashSet
-
 /**
- * 	@author		Hanns Holger Rutz
- *	@version	0.11, 24-Nov-09
+ *    @version	0.12, 22-Apr-10
  */
-class NodeIDAllocator( val user: Int, val initTemp: Int ) {
-//  private var initTemp : Int = options.initialNodeID;
-    private var temp : Int = initTemp;
-	private var mask = user << 26;
-	private var perm = 2;
-    private var permFreed  = HashSet[ Int ]();
+class NodeIDAllocator( user: Int, initTemp: Int ) {
+   private var temp  = initTemp
+   private val mask  = user << 26
+//   private val perm = 2
+//   private var permFreed = HashSet[ Int ]();
+   private val sync = new AnyRef
     
-    // equivalent to Integer:wrap (_WrapInt)
-    private def wrap( x: Int, min: Int, max: Int ) : Int = {
-      val width  = max - min;
-      val widthp = width + 1;
-      val maxp   = max + 1;
-      val off	 = x - min;
-      val add    = (width - off) / widthp * widthp;
-      (off + add) % widthp + min;
-    }
+   // equivalent to Integer:wrap (_WrapInt)
+   private def wrap( x: Int, min: Int, max: Int ) : Int = {
+      val width  = max - min
+      val widthp = width + 1
+      val maxp   = max + 1
+      val off	  = x - min
+      val add    = (width - off) / widthp * widthp
+      (off + add) % widthp + min
+   }
 
-    def alloc : Int = {
-		var x = temp;
-		temp = wrap( x + 1, initTemp, 0x03FFFFFF );
-		x | mask;
-    }
-/*    
-    private def reset {
-		mask = user << 26;
-		temp = initTemp;
-		perm = 2;
-		permFreed.clear;
-    }
-*/
+   def alloc : Int = {
+      sync.synchronized {
+         val x = temp
+         temp = wrap( x + 1, initTemp, 0x03FFFFFF )
+         x | mask
+      }
+   }
 }

@@ -10,21 +10,21 @@ import SC._
 import GraphBuilder._
 
 /**
- *	@version	0.11, 01-Jan-10
+ *	@version	0.11, 22-Apr-10
  */
 object Pan2 extends UGen3Args {
 	def ar( in: GE, pos: GE = 0, level: GE = 1 ) : GE = arExp( in, pos, level )
 	def kr( in: GE, pos: GE = 0, level: GE = 1 ) : GE = krExp( in, pos, level )
 }
 case class Pan2( rate: Rate, in: UGenIn, pos: UGenIn, level: UGenIn )
-extends MultiOutUGen( List( rate, rate ), List( in, pos, level ))
+extends MultiOutUGen( rate, 2, List( in, pos, level ))
 
 object LinPan2 extends UGen3Args {
 	def ar( in: GE, pos: GE = 0, level: GE = 1 ) : GE = arExp( in, pos, level )
 	def kr( in: GE, pos: GE = 0, level: GE = 1 ) : GE = krExp( in, pos, level )
 }
 case class LinPan2( rate: Rate, in: UGenIn, pos: UGenIn, level: UGenIn )
-extends MultiOutUGen( List( rate, rate ), List( in, pos, level ))
+extends MultiOutUGen( rate, 2, List( in, pos, level ))
 
 object Pan4 extends UGen4Args {
 	def ar( in: GE, xpos: GE = 0, ypos: GE = 0, level: GE = 1 ) : GE =
@@ -34,7 +34,7 @@ object Pan4 extends UGen4Args {
       krExp( in, xpos, ypos, level )
 }
 case class Pan4( rate: Rate, in: UGenIn, xpos: UGenIn, ypos: UGenIn, level: UGenIn )
-extends MultiOutUGen( List( rate, rate, rate, rate ), List( in, xpos, ypos, level ))
+extends MultiOutUGen( rate, 4, List( in, xpos, ypos, level ))
 
 object Balance2 extends UGen4Args {
 	def ar( left: GE, right: GE, pos: GE = 0, level: GE = 1 ) : GE =
@@ -44,14 +44,14 @@ object Balance2 extends UGen4Args {
       krExp( left, right, pos, level )
 }
 case class Balance2( rate: Rate, left: UGenIn, right: UGenIn, pos: UGenIn, level: UGenIn )
-extends MultiOutUGen( List( rate, rate ), List( left, right, pos, level ))
+extends MultiOutUGen( rate, 2, List( left, right, pos, level ))
 
 object Rotate2 extends UGen3Args {
 	def ar( x: GE, y: GE, pos: GE = 0 ) : GE = arExp( x, y, pos )
 	def kr( x: GE, y: GE, pos: GE = 0 ) : GE = krExp( x, y, pos )
 }
 case class Rotate2( rate: Rate, x: UGenIn, y: UGenIn, pos: UGenIn )
-extends MultiOutUGen( List( rate, rate ), List( x, y, pos ))
+extends MultiOutUGen( rate, 2, List( x, y, pos ))
 
 // XXX PanB missing
 // XXX PanB2 missing
@@ -75,8 +75,7 @@ object PanAz {
 }
 case class PanAz( rate: Rate, numChannels: Int, in: UGenIn, pos: UGenIn,
                   level: UGenIn, width: UGenIn, orient: UGenIn )
-extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ),
-                      List( in, pos, level, width, orient ))
+extends MultiOutUGen( rate, numChannels, List( in, pos, level, width, orient ))
 
 object XFade2 extends UGen4Args {
 	def ar( inA: GE, inB: GE = 0, pan: GE = 0, level: GE = 1 ) : GE =

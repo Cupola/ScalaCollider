@@ -64,7 +64,7 @@ val x = play {
     for( i <- 0 until p ) {
         z = FSinOsc.ar( f * (i+1) ).madd( // freq of partial
             LFNoise1.kr(
-                List( Rand.ir( 2, 10 ), Rand.ir( 2, 10 ))).madd(  // amplitude rate 
+                List( Rand( 2, 10 ), Rand( 2, 10 ))).madd(  // amplitude rate 
                 0.02,    // amplitude scale
                offset    // amplitude offset
             ).max( 0 ),  // clip negative amplitudes to zero
@@ -91,7 +91,7 @@ val x = play {
                     trig      // trigger rate
                 ) * 0.02,     // trigger amplitude
                 0.005,        // grain attack time
-                Rand.ir(0,0.5)   // grain decay time
+                Rand(0,0.5)   // grain decay time
             ),
             z
         )
@@ -106,13 +106,13 @@ val x = play {
     val p = 15    // number of partials
     val z =       // filter bank specification :
         KlangSpec.fill(p) {
-            (Rand.ir( 80, 10080 ),    // frequencies
-             Rand.ir( -1, 1 ),        // amplitudes
-             Rand.ir( 0.2, 8.2 ))      // ring times
+            (Rand( 80, 10080 ),    // frequencies
+             Rand( -1, 1 ),        // amplitudes
+             Rand( 0.2, 8.2 ))      // ring times
     }
     Pan2.ar(
         Klank.ar(z, Dust.ar(0.7)*0.04),
-        Rand.ir(-1,1)
+        Rand(-1,1)
     )
 }
 

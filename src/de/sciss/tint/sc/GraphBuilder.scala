@@ -30,52 +30,24 @@ package de.sciss.tint.sc
 
 import SC._
 //import ugen.{ BinaryOpUGen => BinOp, EnvGen, MulAdd, Silent, Out, UnaryOpUGen => UnOp }
-import ugen.{ BinaryOpUGen => BinOp, EnvGen, MulAdd, Silent, Out, UnaryOpUGen }
+import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
+import ugen.{ BinaryOpUGen, EnvGen, MulAdd, Silent, Out, UnaryOpUGen }
 //import Rates._
 
 /**
- * 	@version	0.14, 14-Apr-10
+ * 	@version	0.14, 22-Apr-10
  */
 trait GE {
-   def numOutputs : Int
-   def toUGenIns : Seq[ UGenIn ]
-
-// this is awfully dangerous, because
-// with the implicit conversions in action
-// a line like
-//      "amp".kr( 1 )
-// will be seen by the compiler as
-// ControlName( "amp" ).kr.apply( 1 )
-// !!
-//  def apply( idx: Int ) : UGenIn = toUGenIns( idx )
-   def `\\`( idx: Int ) : UGenIn = toUGenIns( idx )
-
-//   import BinaryOpUGen._
-
-   // binary ops
-   def +( b: GE ) : GE        = BinOp.make( Symbol( "+" ), this, b )
-   def -( b: GE ) : GE        = BinOp.make( Symbol( "-" ), this, b )
-   def *( b: GE ) : GE        = BinOp.make( Symbol( "*" ), this, b )
-// def div( b: GE ) : GE      = BinOp.make( Symbol( 'div, this, b )
-   def /( b: GE ) : GE        = BinOp.make( Symbol( "/" ), this, b )
-   def mod( b: GE ) : GE      = BinOp.make( 'mod, this, b )
-   def <( b: GE ) : GE	      = BinOp.make( Symbol( "<" ), this, b )
-   def >( b: GE ) : GE	      = BinOp.make( Symbol( ">" ), this, b )
-   def <=( b: GE ) : GE	      = BinOp.make( Symbol( "<=" ), this, b )
-   def >=( b: GE ) : GE	      = BinOp.make( Symbol( ">=" ), this, b )
-   def min( b: GE ) : GE      = BinOp.make( 'min, this, b )
-   def max( b: GE ) : GE      = BinOp.make( 'max, this, b )
-// def &( b: GE ) : GE	      = BinOp.make( Symbol( "&" ), this, b )
-// def |( b: GE ) : GE	      = BinOp.make( Symbol( "|" ), this, b )
-   def round( b: GE ) : GE    = BinOp.make( 'round, this, b )
-   def clip2( b: GE ) : GE    = BinOp.make( 'clip2, this, b )
+   def outputs : IIdxSeq[ UGenIn ]
+   def numOutputs : Int = outputs.size
+   def `\\`( idx: Int ) : UGenIn = outputs( idx )
 
    import UnaryOpUGen._
    
    // unary ops
    def neg : GE               = Neg.make( this )
    def reciprocal : GE        = Reciprocal.make( this )
-//   def bitNot : GE	         = UnOp.make( 'bitNot, this )
+// def bitNot : GE	         = UnOp.make( 'bitNot, this )
    def abs : GE	            = Abs.make( this )
 // def asFloat : GE	         = UnOp.make( 'asFloat, this )
 // def asInteger : GE	      = UnOp.make( 'asInteger, this )
@@ -107,134 +79,124 @@ trait GE {
    def sinh : GE              = Sinh.make( this )
    def cosh : GE              = Cosh.make( this )
    def tanh : GE              = Tanh.make( this )
-//   def rand : GE              = UnOp.make( 'rand, this )
-//   def rand2 : GE             = UnOp.make( 'rand2, this )
-//   def linrand : GE           = UnOp.make( 'linrand, this )
-//   def bilinrand : GE         = UnOp.make( 'bilinrand, this )
-//   def sum3rand : GE          = UnOp.make( 'sum3rand, this )
+// def rand : GE              = UnOp.make( 'rand, this )
+// def rand2 : GE             = UnOp.make( 'rand2, this )
+// def linrand : GE           = UnOp.make( 'linrand, this )
+// def bilinrand : GE         = UnOp.make( 'bilinrand, this )
+// def sum3rand : GE          = UnOp.make( 'sum3rand, this )
    def distort : GE           = Distort.make( this )
    def softclip : GE          = Softclip.make( this )
-//   def coin : GE              = UnOp.make( 'coin, this )
-//   def even : GE              = UnOp.make( 'even, this )
-//   def odd : GE               = UnOp.make( 'odd, this )
-//   def rectWindow : GE        = UnOp.make( 'rectWindow, this )
-//   def hanWindow : GE         = UnOp.make( 'hanWindow, this )
-//   def welWindow : GE         = UnOp.make( 'sum3rand, this )
-//   def triWindow : GE         = UnOp.make( 'triWindow, this )
+// def coin : GE              = UnOp.make( 'coin, this )
+// def even : GE              = UnOp.make( 'even, this )
+// def odd : GE               = UnOp.make( 'odd, this )
+// def rectWindow : GE        = UnOp.make( 'rectWindow, this )
+// def hanWindow : GE         = UnOp.make( 'hanWindow, this )
+// def welWindow : GE         = UnOp.make( 'sum3rand, this )
+// def triWindow : GE         = UnOp.make( 'triWindow, this )
    def ramp : GE              = Ramp.make( this )
    def scurve : GE            = Scurve.make( this )
-//   def isPositive : GE        = UnOp.make( 'isPositive, this )
-//   def isNegative : GE        = UnOp.make( 'isNegative, this )
-//   def isStrictlyPositive : GE= UnOp.make( 'isStrictlyPositive, this )
-//   def rho : GE               = UnOp.make( 'rho, this )
-//   def theta : GE             = UnOp.make( 'theta, this )
+// def isPositive : GE        = UnOp.make( 'isPositive, this )
+// def isNegative : GE        = UnOp.make( 'isNegative, this )
+// def isStrictlyPositive : GE= UnOp.make( 'isStrictlyPositive, this )
+// def rho : GE               = UnOp.make( 'rho, this )
+// def theta : GE             = UnOp.make( 'theta, this )
 
-//  def madd( mul: GE, add: GE ) : GE
+   import BinaryOpUGen._
+
+   // binary ops
+   def +( b: GE ) : GE        = Plus.make( this, b )
+   def -( b: GE ) : GE        = Minus.make( this, b )
+   def *( b: GE ) : GE        = Times.make( this, b )
+// def div( b: GE ) : GE      = IDiv.make( this, b )
+   def /( b: GE ) : GE        = Div.make( this, b )
+   def %( b: GE ) : GE        = Mod.make( this, b )
+   def ===( b: GE ) : GE      = Eq.make( this, b )
+   def !==( b: GE ) : GE      = Neq.make( this, b )
+   def <( b: GE ) : GE	      = Lt.make( this, b )
+   def >( b: GE ) : GE	      = Gt.make( this, b )
+   def <=( b: GE ) : GE	      = Leq.make( this, b )
+   def >=( b: GE ) : GE	      = Geq.make( this, b )
+   def min( b: GE ) : GE      = Min.make( this, b )
+   def max( b: GE ) : GE      = Max.make( this, b )
+   def &( b: GE ) : GE	      = BitAnd.make( this, b )
+   def |( b: GE ) : GE	      = BitOr.make( this, b )
+   def ^( b: GE ) : GE	      = BitXor.make( this, b )
+// def Lcm( b: GE ) : GE      = Lcm.make( this, b )
+// def Gcd( b: GE ) : GE      = Gcd.make( this, b )
+   def round( b: GE ) : GE    = Round.make( this, b )
+   def roundup( b: GE ) : GE  = Roundup.make( this, b ) // sclang uses camel case instead
+   def trunc( b: GE ) : GE    = Trunc.make( this, b )
+   def atan2( b: GE ) : GE    = Atan2.make( this, b )
+   def hypot( b: GE ) : GE    = Hypot.make( this, b )
+   def hypotx( b: GE ) : GE   = Hypotx.make( this, b )
+   def pow( b: GE ) : GE      = Pow.make( this, b )
+// def <<( b: GE ) : GE       = <<.make( this, b )
+// def >>( b: GE ) : GE       = >>.make( this, b )
+// def unsgnRghtShift( b: GE ) : GE = UnsgnRghtShift.make( this, b )
+// def fill( b: GE ) : GE     = Fill.make( this, b )
+   def ring1( b: GE ) : GE    = Ring1.make( this, b )
+   def ring2( b: GE ) : GE    = Ring2.make( this, b )
+   def ring3( b: GE ) : GE    = Ring3.make( this, b )
+   def ring4( b: GE ) : GE    = Ring4.make( this, b )
+   def difsqr( b: GE ) : GE   = Difsqr.make( this, b )
+   def sumsqr( b: GE ) : GE   = Sumsqr.make( this, b )
+   def sqrsum( b: GE ) : GE   = Sqrsum.make( this, b )
+   def sqrdif( b: GE ) : GE   = Sqrdif.make( this, b )
+   def absdif( b: GE ) : GE   = Absdif.make( this, b )
+   def thresh( b: GE ) : GE   = Thresh.make( this, b )
+   def amclip( b: GE ) : GE   = Amclip.make( this, b )
+   def scaleneg( b: GE ) : GE = Scaleneg.make( this, b )
+   def clip2( b: GE ) : GE    = Clip2.make( this, b )
+   def excess( b: GE ) : GE   = Excess.make( this, b )
+   def fold2( b: GE ) : GE    = Fold2.make( this, b )
+   def wrap2( b: GE ) : GE    = Wrap2.make( this, b )
+   def firstarg( b: GE ) : GE = Firstarg.make( this, b ) // sclang uses camel case instead
+// def rrand( b: GE ) : GE    = Rrand.make( this, b )
+// def exprrand( b: GE ) : GE = Exprrand.make( this, b )
 
    def madd( mul: GE, add: GE ) : GE = {
-      Rates.highest( toUGenIns.map( _.rate ): _* ) match {
+      Rates.highest( outputs.map( _.rate ): _* ) match {
          case `audio`   => MulAdd.ar( this, mul, add )
          case `control` => MulAdd.kr( this, mul, add )
-         case r => error( "Illegal rate " + r )
+         case r         => error( "Illegal rate " + r )
       }
    }
 }
 
-case class GESeq( elements: UGenIn* ) extends GE {
-   def numOutputs = elements.size
+case class UGenInSeq( outputs: IIdxSeq[ UGenIn ]) extends GE {
+// def numOutputs = outputs.size
 // def getOutputAt( idx: Int ) = elements( idx )
-   def toUGenIns : Seq[ UGenIn ] = elements
+// def outputs: Seq[ UGenIn ] = elements
 
-   override def toString = elements.mkString( "[ ", ", ", " ]" )
+   override def toString = outputs.mkString( "[ ", ", ", " ]" )
 }
 
 object GraphBuilder {
 	//used to create an out ugen automatically and a fade envelope
 
-    def seq( elements: UGenIn* ) : GE = {
-      if( elements.size == 1 ) elements.head else new GESeq( elements: _* )
-    }
-/*
- 	def replaceZeroesWithSilence( input: GE ) : GE = {
-		input match {
-//			case x: OutputProxy => input
-			case Constants.zero => Silent.ar( 1 )
-//			case x: Constant => input
-			case x: GESeq => {
-				// this replaces zeroes with audio rate silence.
-				// sub collections are deep replaced
-
-				val UGenIns = input.toUGenIns
-				val numZeroes = UGenIns.filter( _ == Constants.zero ).size
-				if( numZeroes == 0 ) {
-					input
-				} else {
-					val silent = Silent.ar( numZeroes ).toUGenIns
-//		    val iter = UGenIns.elements.counted
-					var pos = 0
-					// XXX recursion missing
-					val result = UGenIns map (UGenIn => {
-						if( input == Constants.zero ) {
-							pos = pos + 1
-							silent( pos - 1 )
-						} else UGenIn
-					})
-					new GESeq( result: _* )
-				}
-			}
-			case _ => input
-		}
- 	}
-*/
-/*
-    def rateForElem( elem: GE ) : Symbol = {
-      if( elem.isInstanceOf[ UGenIn ])
-        elem.asInstanceOf[ UGenIn ].rate
-      else
-        rateForElem( elem.getOutputAt( 0 ))
-    }
-*/
-  
+   def seq( elements: IIdxSeq[ UGenIn ]) : GE = {
+      if( elements.size == 1 ) elements.head else new UGenInSeq( elements )
+   }
+     
    def wrapOut( name: String, func: () => GE, fadeTime: Option[Float] ) : SynthDef = {
-		def fullFunc() : GE = {
-			var result = func.apply() // .toUGenIns
-			val rate = Rates.highest( result.toUGenIns.map( _.rate ): _* )
-//			( new Ordering[ Symbol ] {
-//				def compare( x: Symbol, y: Symbol ) : Int = {
-//					x.name.compare( y.name )
-//				}
-//			})
+		def fullFunc : GE = {
+			var result = func.apply()
+			val rate = Rates.highest( result.outputs.map( _.rate ): _* )
 			if( (rate == audio) || (rate == control) ) {
 				fadeTime.foreach( fdt => {
 					result = makeFadeEnv( fdt ) * result
 				})
-//				val i_out : UGenIn = Constant( 0 )
 				val i_out = "i_out".ir
-//				result = replaceZeroesWithSilence( result )
-
-//                UGen.multiNew( outClass, rate, Nil /* (1 to result.size) map (x => rate) */,
-//							   List( i_out ) ++ result.toUGenIns )
-
-                if( rate == audio ) {
-                  Out.ar( i_out, result )
-                } else {
-                  Out.kr( i_out, result )
-                }
-        
-			} else {
-            	result
+            if( rate == audio ) {
+               Out.ar( i_out, result )
+            } else {
+               Out.kr( i_out, result )
             }
-//			val rate='scalar // XXX
-//			val rate = result.first.rate
-//			val resultSeq: GESeq = result match {
-//				case seq: GESeq => seq
-//				case ugen: GE => GESeq( ugen )
-//			}
+			} else {
+            result
+         }
 		}
-//		val res =
-			SynthDef( name )( fullFunc )
-//		res.writeDefFile
-//		res
+      SynthDef( name )( fullFunc )
 	}
 
 	def makeFadeEnv( fadeTime: Float ) : GE = {
@@ -255,11 +217,11 @@ object GraphBuilder {
       }
 //    println( "chanExp " + chanExp + "; allOne " + allOne + "; hasZero " + hasZero )
       if( allOne ) {
-         List( args.toList.flatMap( _.toUGenIns.toList ))
+         List( args.toList.flatMap( _.outputs.toList ))
       } else if( hasZero ) {
          Nil	// cannot wrap zero size seq
       } else {
-         val exp = args.toList.map( _.toUGenIns.toArray )
+         val exp = args.toList.map( _.outputs.toArray )
          val test1 = exp.toList
 //         val res = for( ch <- 0 until chanExp ) yield exp.map( (arr) => arr.apply( ch % arr.size ))
          val res = for( ch <- 0 until chanExp ) yield {
@@ -279,12 +241,12 @@ object GraphBuilder {
       if( res.size == 1 ) {
          res.head
       } else {
-         seqOfGE2GESeq( res )
+         seqOfGEToGE( res )
       }
    }
 
    def replaceZeroesWithSilence( ge: GE ) : GE = {
-      val ins = ge.toUGenIns
+      val ins = ge.outputs
       val numZeroes = ins.foldLeft( 0 )( (sum, in) => in match {
          case Constant( 0 ) => sum + 1
          case _ => sum
@@ -292,7 +254,7 @@ object GraphBuilder {
       if( numZeroes == 0 ) {
          ge
       } else {
-         val silent = Silent.ar( numZeroes ).toUGenIns.iterator
+         val silent = Silent.ar( numZeroes ).outputs.iterator
          val res = ins map (in => in match {
             case Constant( 0 ) => silent.next
             case _ => in

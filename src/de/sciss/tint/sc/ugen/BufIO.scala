@@ -51,7 +51,7 @@ object PlayBuf {
 }
 case class PlayBuf( rate: Rate, numChannels: Int, bufNum: UGenIn, speed: UGenIn, trig: UGenIn, startPos: UGenIn,
                     loop: UGenIn, doneAction: UGenIn )
-extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ), List( bufNum, speed, trig, startPos, loop, doneAction ))
+extends MultiOutUGen( rate, numChannels, List( bufNum, speed, trig, startPos, loop, doneAction ))
 // with SideEffectUGen // side-effect: done flag
 
 object TGrains {
@@ -63,7 +63,7 @@ object TGrains {
 }
 case class TGrains( rate: Rate, numChannels: Int, bufNum: UGenIn, speed: UGenIn, centerPos: UGenIn, dur: UGenIn,
                     pan: UGenIn, amp: UGenIn, interp: UGenIn )
-extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ), List( bufNum, speed, centerPos, dur, pan, amp, interp ))
+extends MultiOutUGen( rate, numChannels, List( bufNum, speed, centerPos, dur, pan, amp, interp ))
 
 object BufRd {
    def ar( numChannels: Int, bufNum: GE, phase: GE = 0, loop: GE = 1, interp: GE = 2 ) : GE =
@@ -79,7 +79,7 @@ object BufRd {
 case class BufRd( rate: Rate, numChannels: Int, bufNum: UGenIn, phase: UGenIn, loop: UGenIn, interp: UGenIn )
 //class BufRd( val rate: Rate, val numChannels: Int, val bufNum: UGenIn, val phase: UGenIn, val loop: UGenIn,
 //             val interp: UGenIn )
-extends MultiOutUGen( List.fill[ Rate ]( numChannels )( rate ), List( bufNum, phase, loop, interp ))
+extends MultiOutUGen( rate, numChannels, List( bufNum, phase, loop, interp ))
 // with SideEffectUGen // side-effect: done-flag
 
 object BufWr {
@@ -90,7 +90,7 @@ object BufWr {
       make( control, multi, bufNum, phase, loop )
 
    private def make( rate: Rate, multi: GE, bufNum: GE, phase: GE, loop: GE ) =
-      simplify( for( List( b, p, l, m @ _* ) <- expand( (bufNum :: phase :: loop :: multi.toUGenIns.toList) :_* ))
+      simplify( for( List( b, p, l, m @ _* ) <- expand( (bufNum :: phase :: loop :: multi.outputs.toList) :_* ))
          yield this( rate, b, p, l, m ))
 
 //	checkInputs {
@@ -115,7 +115,7 @@ object RecordBuf {
    private def make( rate: Rate, multi: GE, bufNum: GE, offset: GE, recLevel: GE, preLevel: GE, run: GE,
                        loop: GE, trig: GE, doneAction: GE ) =
       simplify( for( List( b, o, r, p, n, l, t, d, m @ _* ) <- expand( (bufNum :: offset :: recLevel :: preLevel ::
-                     run :: loop :: trig :: doneAction :: multi.toUGenIns.toList) :_* ))
+                     run :: loop :: trig :: doneAction :: multi.outputs.toList) :_* ))
          yield this( rate, b, o, r, p, n, l, t, d, m, SynthDef.individuate ))
 }
 case class RecordBuf( rate: Rate, bufNum: UGenIn, offset: UGenIn, recLevel: UGenIn, preLevel: UGenIn,

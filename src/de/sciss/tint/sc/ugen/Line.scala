@@ -27,12 +27,13 @@
  */
 package de.sciss.tint.sc.ugen
 
+import collection.immutable.{ IndexedSeq => IIdxSeq }
 import de.sciss.tint.sc._
 import SC._
 //import Rates._
 
 /**
- * 	@version	0.13, 16-Apr-10
+ * 	@version	0.13, 22-Apr-10
  */
 object Line extends UGen4Args {
 	def ar( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = doNothing ) : GE =
@@ -124,14 +125,14 @@ object T2A extends UGen1Args {
 case class T2A( rate: Rate, in: UGenIn ) extends SingleOutUGen( in )
 
 object DC {
-	def ar( in: GE ) : GE = this( audio, in.toUGenIns: _* )
-	def kr( in: GE ) : GE = this( control, in.toUGenIns: _* )
+	def ar( in: GE ) : GE = this( audio, in.outputs )
+	def kr( in: GE ) : GE = this( control, in.outputs )
 }
-case class DC( rate: Rate, in: UGenIn* )
-extends MultiOutUGen( in.map( _ => audio ), in )
+case class DC( rate: Rate, multi: IIdxSeq[ UGenIn ])
+extends MultiOutUGen( audio, multi.size, multi )
 
 object Silent {
 	def ar( numChannels: Int ) : GE = this( numChannels )
 }
 case class Silent( numChannels: Int )
-extends MultiOutUGen( List.fill( numChannels )( audio ), Nil ) { val rate = audio }
+extends MultiOutUGen( audio, numChannels, Nil ) with AudioRated

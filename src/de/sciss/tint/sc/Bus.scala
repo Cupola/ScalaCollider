@@ -59,16 +59,16 @@ case class Bus( rate: Rate, index: Int, numChannels: Int, server: Server ) {
 	private var freed = false
 
 	def free {
-	  if( freed ) {
-	     println( "WARNING: Bus.free : has already been freed" )
-	     return
-	  }
+	   if( freed ) {
+	      error( this.toString + " : has already been freed" )
+//	      return
+	   }
 
-	  if( rate == audio ) {
-		  server.busses.freeAudio( index )
-	  } else {
-		  server.busses.freeControl( index )
-	  }
-	  freed = true
+	   if( rate == audio ) {
+		   server.busses.freeAudio( index )
+	   } else {
+		   server.busses.freeControl( index )
+	   }
+	   freed = true
 	}
 }

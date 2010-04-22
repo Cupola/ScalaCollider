@@ -93,7 +93,7 @@ extends Model
 	def free : Node = free( true )
 
 	def free( sendFlag: Boolean ) : Node = {
-  		if( sendFlag ) server.sendMsg( freeMsg )
+  		if( sendFlag ) server ! freeMsg
   		group = null
   		isPlaying = false
   		isRunning = false
@@ -108,7 +108,7 @@ extends Model
   	def run : Node = run( true )
   
   	def run( flag: Boolean ) : Node = {
-  		server.sendMsg( runMsg( flag ))
+  		server ! runMsg( flag )
   		this
   	}
 	
@@ -118,7 +118,7 @@ extends Model
   	def runMsg( flag: Boolean ) = OSCMessage( "/n_run", id, if( flag ) 1 else 0 )
   
   	def set( pairs: Tuple2[ Any, Float ]*) : Node = {
-  		server.sendMsg( setMsg( pairs: _* ))
+  		server ! setMsg( pairs: _* )
   		this
   	}
 	
@@ -136,7 +136,7 @@ extends Model
   	}
 
   	def setn( pairs: Tuple2[ Any, Seq[ Float ]]*) : Node = {
-  		server.sendMsg( setnMsg( pairs: _* ))
+  		server ! setnMsg( pairs: _* )
   		this
   	}
 	
@@ -152,14 +152,14 @@ extends Model
   	}
 
   	def trace : Node = {
-  		server.sendMsg( "/n_trace", id )
+  		server ! OSCMessage( "/n_trace", id )
   		this
   	}
 
   	def release : Node = release( None )
   
   	def release( releaseTime: Option[ Float ]) : Node = {
-  		server.sendMsg( releaseMsg( releaseTime ))
+  		server ! releaseMsg( releaseTime )
   		this
   	}
 
@@ -172,60 +172,60 @@ extends Model
 	}
 
   	def map( pairs: Tuple2[ Any, Int ]*) : Node = {
-  		server.sendMsg( mapMsg( pairs: _* ))
+  		server ! mapMsg( pairs: _* )
   		this
   	}
   
   	def mapMsg( pairs: Tuple2[ Any, Int ]*) : OSCMessage = {
   		val args = new Array[ Any ]( (pairs.size << 1) + 1 )
   		args( 0 ) = id
-	    var i = 1
-	    pairs.foreach { tuple => {
+	   var i = 1
+	   pairs.foreach { tuple => {
 	    	args( i ) = tuple._1
 	    	i = i + 1
 	    	args( i ) = tuple._2
 	    	i = i + 1
-	    }}
+	   }}
   		OSCMessage( "/n_map", args:_* )
   	}
 
   	def mapn( triplets: Tuple3[ Any, Int, Int ]*) : Unit = {
-  		server.sendMsg( mapnMsg( triplets: _* ))
+  		server ! mapnMsg( triplets: _* )
   		this
   	}
   	
   	def mapnMsg( triplets: Tuple3[ Any, Int, Int ]*) : OSCMessage = {
   		val args = new Array[ Any ]( triplets.size * 3 + 1 )
   		args( 0 ) = id
-        var i = 1
-        triplets.foreach { trip => {
-        	args( i )     = trip._1
-            args( i + 1 ) = trip._2
-            args( i + 2 ) = trip._3
-            i = i + 3
-        }}
+      var i = 1
+      triplets.foreach { trip => {
+         args( i )     = trip._1
+         args( i + 1 ) = trip._2
+         args( i + 2 ) = trip._3
+         i = i + 3
+      }}
   		OSCMessage( "/n_mapn", args:_* )
   	}
 
   	def fill( triplets: Tuple3[ Any, Int, Float ]*) : Node = {
-  		server.sendMsg( fillMsg( triplets: _* ))
+  		server ! fillMsg( triplets: _* )
   		this
   	}
 	
   	def fillMsg( triplets: Tuple3[ Any, Int, Float ]*) : OSCMessage = {
   		val args = new Array[ Any ]( triplets.size * 3 + 1 )
   		args( 0 ) = id
-        var i = 1
-        triplets.foreach { trip => {
-        	args( i )     = trip._1
-	        args( i + 1 ) = trip._2
-	        args( i + 2 ) = trip._3
-	        i = i + 3
-        }}
+      var i = 1
+      triplets.foreach { trip => {
+         args( i )     = trip._1
+	      args( i + 1 ) = trip._2
+	      args( i + 2 ) = trip._3
+	      i = i + 3
+      }}
     	OSCMessage( "/n_fill", args:_* )
   	}
 
-    def moveAfterMsg( node: Node ) : OSCMessage = {
+   def moveAfterMsg( node: Node ) : OSCMessage = {
 		group = node.group
 		OSCMessage( "/n_after", id, node.id )
 	}

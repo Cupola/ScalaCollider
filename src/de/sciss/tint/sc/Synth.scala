@@ -61,37 +61,37 @@ extends Node( server, id )
 
 // factory
 object Synth {
-    def spawn( defName: String, args: Seq[Tuple2[String,Float]] = Nil ): Synth = {
+   def play( defName: String, args: Seq[ Tuple2[ String, Float ]] = Nil ): Synth = {
       head( Server.default.defaultGroup, defName, args )
 	}
 
-    def after( target: Node, defName: String, args: Seq[Tuple2[String,Float]] = Nil ): Synth = {
-	  val synth = new Synth( defName, target.server );
-      synth.server.sendMsg( synth.newMsg( target, args, addAfter ))
+   def after( target: Node, defName: String, args: Seq[ Tuple2[ String, Float ]] = Nil ): Synth = {
+	   val synth = new Synth( defName, target.server );
+      synth.server ! synth.newMsg( target, args, addAfter )
       synth
 	}
  
-    def before( target: Node, defName: String, args: Seq[Tuple2[String,Float]] = Nil ): Synth = {
-	  val synth = new Synth( defName, target.server )
-      synth.server.sendMsg( synth.newMsg( target, args, addBefore ))
+   def before( target: Node, defName: String, args: Seq[ Tuple2[ String, Float ]] = Nil ): Synth = {
+	   val synth = new Synth( defName, target.server )
+      synth.server ! synth.newMsg( target, args, addBefore )
       synth
 	}
  
 	def head( target: Group, defName: String, args: Seq[Tuple2[String,Float]] = Nil ): Synth = {
-	  val synth = new Synth( defName, target.server )
-      synth.server.sendMsg( synth.newMsg( target, args, addToHead ))
+	   val synth = new Synth( defName, target.server )
+      synth.server ! synth.newMsg( target, args, addToHead )
       synth
 	}
 
 	def tail( target: Group, defName: String, args: Seq[Tuple2[String,Float]] = Nil ): Synth = {
-	  val synth = new Synth( defName, target.server )
-      synth.server.sendMsg( synth.newMsg( target, args, addToTail ))
+	   val synth = new Synth( defName, target.server )
+      synth.server ! synth.newMsg( target, args, addToTail )
       synth
 	}
  
 	def replace( target: Node, defName: String, args: Seq[Tuple2[String,Float]] = Nil ): Synth = {
-	  val synth = new Synth( defName, target.server )
-      synth.server.sendMsg( synth.newMsg( target, args, addReplace ))
+	   val synth = new Synth( defName, target.server )
+      synth.server ! synth.newMsg( target, args, addReplace )
       synth
 	}
   

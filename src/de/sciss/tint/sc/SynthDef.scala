@@ -48,12 +48,12 @@ class SynthDef private ( val name: String, constants: IIdxSeq[ Float ], controlV
    def freeMsg: OSCMessage = OSCMessage( "/d_free", name )
 
    def send( server: Server ) : SynthDef = {
-      server.sendMsg( recvMsg )
+      server ! recvMsg
       this
    }
   
    def send( server: Server, completionMsg: OSCMessage ) : SynthDef = {
-      server.sendMsg( recvMsg( completionMsg ))
+      server ! recvMsg( completionMsg )
       this
    }
   
@@ -115,7 +115,7 @@ class SynthDef private ( val name: String, constants: IIdxSeq[ Float ], controlV
             dos.writeShort( spec._1 )
             dos.writeShort( spec._2 )
          })
-         ugen.outputRates.foreach( rate => dos.writeByte( rate.id ))
+         ugen.outputs.foreach( in => dos.writeByte( in.rate.id ))
       })
 
       dos.writeShort( 0 ) // variants not supported
@@ -131,13 +131,13 @@ class SynthDef private ( val name: String, constants: IIdxSeq[ Float ], controlV
   
    def load( server: Server, completionMsg: OSCMessage, dir: String ) : SynthDef = {
       writeDefFile( dir )
-      server.sendMsg( loadMsg( completionMsg, dir ))
+      server ! loadMsg( completionMsg, dir )
       this
    }
   
    def load( server: Server, dir: String ) : SynthDef = {
       writeDefFile( dir )
-      server.sendMsg( loadMsg( dir ))
+      server ! loadMsg( dir )
       this
    }
   
@@ -239,7 +239,13 @@ trait SynthDefBuilder {
    def addControlDesc( desc: ControlDesc ) : Unit
    def addControl( u: Control ) : Int
    def build( name: String ) : SynthDef
-   def individuate : Int
+
+   private var indivCnt = 0
+   def individuate : Int = {
+      val res = indivCnt
+      indivCnt += 1
+      res
+   }
 }
 
 object SynthDef {
@@ -248,16 +254,32 @@ object SynthDef {
    var synthDefDir         = System.getProperty( "java.io.tmpdir" )
 
    private val sync        = new AnyRef
-   private var builders    = Map.empty[ Thread, SynthDefBuilder ]
-   def builder: Option[ SynthDefBuilder ] = builders.get( Thread.currentThread )
+//   private var builders    = Map.empty[ Thread, SynthDefBuilder ]
+
+   // java.lang.ThreadLocal is around 30% faster than
+   // using a synchronized map, plus we don't need
+   // to look after its cleaning
+   private val builders    = new ThreadLocal[ SynthDefBuilder ] {
+      override protected def initialValue = new BuilderImpl
+   }
+//   def builder: Option[ SynthDefBuilder ] = builders.get( Thread.currentThread )
+   def builder: SynthDefBuilder = builders.get
 
 //  def apply( name: String, func: => Any ) = new SynthDef( name, func, Nil, Nil, Nil )
    def apply( name: String )( thunk: => GE ) : SynthDef = {
-      val b = buildUGenGraph( thunk )
-      b.build( name )
+      val b = new BuilderImpl
+      builders.set( b )
+      try {
+         thunk
+         b.finish
+         b.build( name )
+      } finally {
+         builders.set( BuilderDummy )
+      }
    }
 
-   def individuate: Int = builder.map( _.individuate ) getOrElse 0
+//   def individuate: Int = builder.map( _.individuate ) getOrElse 0
+   def individuate: Int = builder.individuate
 
 //   def wrap( ugenGraphFunc: () => GE ) : GE = {
 //	   if( buildSynthDef.isEmpty ) {
@@ -281,28 +303,18 @@ object SynthDef {
 //    }
    }
 
-   private def buildUGenGraph( thunk: => Any ) : SynthDefBuilder = {
-      val b = new BuilderImpl
-      val t = Thread.currentThread
-      sync.synchronized {
-         builders += t -> b
-      }
-      try {
-         thunk
-         b.finish
-         b
-      } finally {
-         sync.synchronized {
-            builders -= t
-         }
-      }
-   }
-
-   // ---- rich ugen ----
+  // ---- rich ugen ----
 
    case class RichUGen( ugen: UGen, inputSpecs: Traversable[ Tuple2[ Int, Int ]])
 
    // ---- graph builder ----
+
+   private object BuilderDummy extends SynthDefBuilder {
+      def build( name: String ) : SynthDef = error( "Out of context" )
+      def addControl( u: Control ) : Int = 0
+      def addControlDesc( desc: ControlDesc ) {}
+      def addUGen( ugen: UGen ) {}
+   }
 
    private class BuilderImpl extends SynthDefBuilder {
       // updated during build
@@ -331,13 +343,6 @@ object SynthDef {
 
       def build( name: String ) = {
          new SynthDef( name, constants, controlValues, controlDescs, richUGens )
-      }
-
-      private var indivCnt = 0
-      def individuate = {
-         val res = indivCnt
-         indivCnt += 1
-         res
       }
 
       private def indexUGens : Tuple2[ IIdxSeq[ IndexedUGen ], IIdxSeq[ Float ]] = {
@@ -428,7 +433,8 @@ object SynthDef {
 
          if( irControlDescs.size > 0 ) {
 //            if( verbose ) println( "irControlDescs.size = " + irControlDescs.size )
-            val ctrl = Control.ir( irControlDescs.flatMap( _.initValues ))
+//            val ctrl = Control.ir( irControlDescs.flatMap( _.initValues ))
+            val ctrl = new Control( scalar, irControlDescs.flatMap( _.initValues ))
             setControlDescSource( irControlDescs, ctrl )
          }
 // XXX tr currently broken
@@ -443,11 +449,12 @@ object SynthDef {
 
             if( krControlDescsPlain.size > 0 ) {
 //               if( verbose ) println( "krControlDescsPlain.size = " + krControlDescsPlain.size )
-               val ctrl = Control.kr( krControlDescsPlain.flatMap( _.initValues ))
+//               val ctrl = Control.kr( krControlDescsPlain.flatMap( _.initValues ))
+               val ctrl = new Control( control, krControlDescsPlain.flatMap( _.initValues ))
                setControlDescSource( krControlDescsPlain, ctrl )
             }
             if( krControlDescsLagged.size > 0 ) {
-//               if( verbose ) println( "XXX krControlDescsLagged NOT YET IMPLEMENTED" )
+               error( "krControlDescsLagged NOT YET IMPLEMENTED" )
             }
          }
       }

@@ -35,22 +35,7 @@ import SC._
  *	@version	0.10, 09-Dec-09
  */
 object Mix {
-	def apply( array: GE ) : GE = {
-		val inputs = array.toUGenIns
-		if( inputs.size == 0 ) {
-			GESeq()
-		} else if( inputs.size == 1 ) {
-			array
-		} else {
-			var i = 0
-			var sum: GE = 0
-			inputs.foreach( inp => {
-				if( i == 0 ) sum = inp else sum += inp
-				i = i + 1
-			})
-			sum
-		}
-	}
+	def apply( elements: GE ) : GE = elements.outputs.foldLeft[ GE ]( 0 )( (a, b) => a + b )
 
 	// support this common idiom
     // (corresponds to fill in sclang)
@@ -58,8 +43,8 @@ object Mix {
       (0 until n).foldLeft[ GE ]( 0 )( (sum, i) => sum + func( i ))
 	}
 
-    def fill( n: Int )( thunk: => GE ) : GE = {
+   def fill( n: Int )( thunk: => GE ) : GE = {
       def func() = thunk
       (0 until n).foldLeft[ GE ]( 0 )( (sum, i) => sum + func() )
-    }
+   }
 }

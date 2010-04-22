@@ -35,14 +35,9 @@ import GraphBuilder._
 import math._
 
 /**
- *    @version 0.11, 16-Apr-10
+ *    @version 0.11, 22-Apr-10
  */
 object MulAdd {
-//  private def multiNew( name: String, rate: Rate, outputRates: Seq[ Symbol ], inputs: Seq[ GE ]) : GE = {... }
-//  private def findHighestRate( inputs: Seq[ UGenIn ]) : Rate = {
-//    inputs.map(_.rate).max
-//  }
-
   def ar( in: GE, mul: GE, add: GE ) : GE = {
     simplify( for( List( i, m, a ) <- expand( in, mul, add )) yield this( audio, i, m, a ))
   }
@@ -67,80 +62,13 @@ object MulAdd {
       case (c(-1), _)    => add - in
       case (c(1), _)     => in + add
       case _             => this( rate, in, mul, add )
-  }
-
-/*
-  def apply( in: GE, mul: GE, add: GE ) : GE = {
-    var chanExp = 0;
-    var allOne = true
-    var hasZero = false
-    val inputs = List( in, mul, add )
-    
-    for( input <- inputs ) {
-      chanExp = max( chanExp, input.numOutputs )
-      allOne  = allOne && (input.numOutputs == 1)
-      hasZero = hasZero || (input.numOutputs == 0)
-    }
-    if( hasZero ) return new GESeq()	// cannot wrap zero size seq
-    if( allOne ) {
- //	  val UGenIns = inputs.flatMap (_.toUGenIns )
-      val ini  = in.toUGenIns.head
-      val muli = mul.toUGenIns.head
-      val addi = add.toUGenIns.head
-      return optimizedNew( ini, muli, addi )
-     }
-
-    val results = new Array[ GE ]( chanExp )
-//  val UGenIns = inputs map (_.toUGenIns)
-    val inis  = in.toUGenIns
-    val mulis = mul.toUGenIns
-    val addis = add.toUGenIns
-        
-    for( chan <- (0 until chanExp)) {
-//    val newArgs = UGenIns map (multiInput => multiInput( chan % UGenIns.size ))
-//    results.update( chan, new UGen( name, rate, outputRates, newArgs ));
-//	  results.update( chan, optimizedNew( newArgs ))
-      val ini  = inis( chan % inis.size )
-      val muli = mulis( chan % mulis.size )
-      val addi = addis( chan % addis.size )
-      results.update( chan, optimizedNew( ini, muli, addi ))
-    }
-    val res2 = results flatMap (_.toUGenIns)
-    GraphBuilder.seq( res2: _* )
-  }
-  
-  private def optimizedNew( in: UGenIn, mul: UGenIn, add: UGenIn ) : GE = {
-	// eliminate degenerate cases
-    if( mul == Constants.zero ) return add
-    val minus = mul == Constants.minusOne
-    val nomul = mul == Constants.one
-    val noadd = add == Constants.zero
-
-    if( nomul && noadd ) return in
-    if( minus && noadd ) return in.neg
-    if( noadd ) return in * mul
-    if( minus ) return add - in
-    if( nomul ) return in + add
-    
-    // do the full ugen
-    val inputs = List( in, mul, add )
-//    val rate = findHighestRate( inputs )
-    val rate = Rates.highest( inputs.map( _.rate ): _* )
-    return new SingleOutUGen( "MulAdd", rate, rate, inputs )
-  }
-
-  def canBeMulAdd( in: RatedGE, mul: RatedGE, add: RatedGE ) : Boolean = {
-    // see if these inputs satisfy the constraints of a MulAdd ugen.
-    if( in.rate == 'audio ) return true
-    if( (in.rate == 'control) && ((mul.rate == 'control) || (mul.rate == 'scalar)) && 
-          ((add.rate == 'control) || (add.rate == 'scalar)) ) return true 
-    false
-  }
-*/
+   }
 }
 
 case class MulAdd( rate: Rate, in: UGenIn, mul: UGenIn, add: UGenIn )
-extends SingleOutUGen( in, mul, add )
+extends SingleOutUGen( in, mul, add ) {
+   override def toString = in.toString + ".madd(" + mul + ", " + add + ")"
+}
 
 abstract class BasicOpUGen( override val specialIndex: Int, inputs: UGenIn* )
 extends SingleOutUGen( inputs: _* )
@@ -151,7 +79,7 @@ object UnaryOpUGen {
 
       def name = { val cn = getClass.getName
          val sz   = cn.length
-         val i    = cn.lastIndexOf( '.' ) + 1
+         val i    = cn.indexOf( '$' ) + 1
          cn.charAt( i ).toLower + cn.substring( i + 1, if( cn.charAt( sz - 1 ) == '$' ) sz - 1 else sz )
       }
    }
@@ -214,8 +142,8 @@ object UnaryOpUGen {
       simplify( for( List( ai ) <- expand( a )) yield make1( selector, ai ))
    }
 
-   private def cn( f: Float )  = c( f )
-   private def cn( d: Double ) = c( d.toFloat )
+   @inline private def cn( f: Float )  = c( f )
+   @inline private def cn( d: Double ) = c( d.toFloat )
 
    private def make1( selector: Op, a: UGenIn ) : GE = {
       // replace constants immediately
@@ -226,7 +154,7 @@ object UnaryOpUGen {
             case Abs       => cn( abs( aval ))
             case Ceil      => cn( ceil( aval ))
             case Floor     => cn( floor( aval ))
-//            case Frac      => cn( aval % 1.0	)
+//          case Frac      => cn( aval % 1.0	)
             case Frac      => cn( aval - floor( aval )) // according to jmc
             case Signum    => cn( if( aval == 0 ) 0 else if( aval < 0 ) -1 else 1 )
             case Squared   => cn( aval * aval )
@@ -263,63 +191,103 @@ object UnaryOpUGen {
          case _            => this( a.rate, selector, a )
       }
    }
-
-/*
-  def determineRate( a: UGenIn, b: UGenIn ) : Rate = {
-    if( a.rate > b.rate ) a.rate else b.rate
-//    max( a.rate, b.rate )
-//    if( a.rate == 'demand ) return 'demand
-//    if( b.rate == 'demand ) return 'demand
-//    if( a.rate == 'audio ) return 'audio
-//    if( b.rate == 'audio ) return 'audio
-//    if( a.rate == 'control ) return 'control
-//    if( b.rate == 'control ) return 'control
-//    'scalar
-  }
-  */
 }
 
 // Note: only deterministic selectors are implemented!!
 case class UnaryOpUGen( rate: Rate, selector: UnaryOpUGen.Op, a: UGenIn )
-extends BasicOpUGen( selector.id, a )
+extends BasicOpUGen( selector.id, a ) {
+   override def toString = a.toString + "." + selector.name
+}
 
 object BinaryOpUGen {
-  private val selectors = Map( List(
-	Symbol( "+" ), Symbol( "-" ), Symbol( "*" ), 'div, Symbol( "/" ),
-	'mod, '== , Symbol( "!=" ), Symbol( "<" ) , Symbol( ">" ),
-    Symbol( "<=" ), Symbol( ">=" ), 'min, 'max, Symbol( "&" ), Symbol( "|" ), Symbol( "^" ),
-    'lcm, 'gcd, 'round, 'roundUp, 'trunc, 'atan2, 'hypot, 'hypotApx, 'pow, 'leftShift, 'rightShift, 
-    'unsignedRightShift, 'fill, 'ring1, 'ring2, 'ring3, 'ring4, 'difsqr, 'sumsqr, 'sqrsum, 'sqrdif,
-    'absdif, 'thresh, 'amclip, 'scaleneg, 'clip2, 'excess, 'fold2, 'wrap2, 'firstArg, 'rrand, 'exprand
-  ).zipWithIndex: _* )
+   sealed abstract class Op( val id: Int ) {
+      def make( a: GE, b: GE ) : GE = BinaryOpUGen.make( this, a, b )
 
-  protected[sc] def make( selector: Symbol, a: GE, b: GE ) : GE = {
-     val made = for( List( ai, bi ) <- expand( a, b )) yield make1( selector, ai, bi )
-     simplify( made )
-  }
+      def name = { val cn = getClass.getName
+         val sz   = cn.length
+         val i    = cn.indexOf( '$' ) + 1
+         cn.charAt( i ).toLower + cn.substring( i + 1, if( cn.charAt( sz - 1 ) == '$' ) sz - 1 else sz )
+      }
+   }
+   case object Plus           extends Op(  0 ) { override val name = "+" }
+   case object Minus          extends Op(  1 ) { override val name = "-" }
+   case object Times          extends Op(  2 ) { override val name = "*" }
+// case object IDiv           extends Op(  3 )
+   case object Div            extends Op(  4 ) { override val name = "/" }
+   case object Mod            extends Op(  5 ) { override val name = "%" }
+   case object Eq             extends Op(  6 ) { override val name = "===" }
+   case object Neq            extends Op(  7 ) { override val name = "!==" }
+   case object Lt             extends Op(  8 ) { override val name = "<" }
+   case object Gt             extends Op(  9 ) { override val name = ">" }
+   case object Leq            extends Op( 10 ) { override val name = "<=" }
+   case object Geq            extends Op( 11 ) { override val name = ">=" }
+   case object Min            extends Op( 12 )
+   case object Max            extends Op( 13 )
+   case object BitAnd         extends Op( 14 ) { override val name = "&" }
+   case object BitOr          extends Op( 15 ) { override val name = "|" }
+   case object BitXor         extends Op( 16 ) { override val name = "^" }
+// case object Lcm            extends Op( 17 )
+// case object Gcd            extends Op( 18 )
+   case object Round          extends Op( 19 )
+   case object Roundup        extends Op( 20 )
+   case object Trunc          extends Op( 21 )
+   case object Atan2          extends Op( 22 )
+   case object Hypot          extends Op( 23 )
+   case object Hypotx         extends Op( 24 )
+   case object Pow            extends Op( 25 )
+// case object <<             extends Op( 26 )
+// case object >>             extends Op( 27 )
+// case object UnsgnRghtShft  extends Op( 28 )
+// case object Fill           extends Op( 29 )
+   case object Ring1          extends Op( 30 )
+   case object Ring2          extends Op( 31 )
+   case object Ring3          extends Op( 32 )
+   case object Ring4          extends Op( 33 )
+   case object Difsqr         extends Op( 34 )
+   case object Sumsqr         extends Op( 35 )
+   case object Sqrsum         extends Op( 36 )
+   case object Sqrdif         extends Op( 37 )
+   case object Absdif         extends Op( 38 )
+   case object Thresh         extends Op( 39 )
+   case object Amclip         extends Op( 40 )
+   case object Scaleneg       extends Op( 41 )
+   case object Clip2          extends Op( 42 )
+   case object Excess         extends Op( 43 )
+   case object Fold2          extends Op( 44 )
+   case object Wrap2          extends Op( 45 )
+   case object Firstarg       extends Op( 46 )
+// case object Rrand          extends Op( 47 )
+// case object ExpRRand       extends Op( 48 )
 
-  private def make1( selector: Symbol, a: UGenIn, b: UGenIn ) : GE = {
-    val rate = Rates.highest( a.rate, b.rate )
-    (selector, a, b) match {
-      case (Symbol( "*" ), c(0), _)  => a
-      case (Symbol( "*" ), _, c(0))  => b
-      case (Symbol( "*" ), c(1), _)  => b
-      case (Symbol( "*" ), _, c(1))  => a
-      case (Symbol( "*" ), c(-1), _) => b.neg
-      case (Symbol( "*" ), _, c(-1)) => a.neg
+   protected[sc] def make( selector: Op, a: GE, b: GE ) : GE = {
+      simplify( for( List( ai, bi ) <- expand( a, b )) yield make1( selector, ai, bi ))
+   }
 
-      case (Symbol( "+" ), c(0), _)  => b
-      case (Symbol( "+" ), _, c(0))  => a
+   @inline private def cn( f: Float )  = c( f )
+   @inline private def cn( d: Double ) = c( d.toFloat )
 
-      case (Symbol( "-" ), c(0), _)  => b.neg
-      case (Symbol( "-" ), _, c(0))  => a
+   protected[ sc ] def make1( selector: Op, a: UGenIn, b: UGenIn ) : GE = {
+      // XXX TODO: case (_, c(ac), c(bc)) ! 
+      (selector, a, b) match {
+         case (Times, c(0), _)   => a
+         case (Times, _, c(0))   => b
+         case (Times, c(1), _)   => b
+         case (Times, _, c(1))   => a
+         case (Times, c(-1), _)  => b.neg
+         case (Times, _, c(-1))  => a.neg
 
-      case (Symbol( "/" ), _, c(1))  => a
-      case (Symbol( "/" ), _, c(-1)) => a.neg
-      case (Symbol( "/" ), _, _) if b.rate == scalar => a * b.reciprocal
+         case (Plus, c(0), _)    => b
+         case (Plus, _, c(0))    => a
 
-      case _ => this( rate, selector, a, b )
-    }
+         case (Minus, c(0), _)   => b.neg
+         case (Minus, _, c(0))   => a
+
+         case (Div, _, c(1))     => a
+         case (Div, _, c(-1))    => a.neg
+         case (Div, _, _) if b.rate == scalar => a * b.reciprocal
+
+         case _ => this( Rates.highest( a.rate, b.rate ), selector, a, b )
+      }
   }
 
 /*
@@ -337,5 +305,11 @@ object BinaryOpUGen {
 }
 
 // Note: only deterministic selectors are implemented!!
-case class BinaryOpUGen( rate: Rate, selector: Symbol, a: UGenIn, b: UGenIn )
-extends BasicOpUGen( BinaryOpUGen.selectors( selector ), a, b )
+case class BinaryOpUGen( rate: Rate, selector: BinaryOpUGen.Op, a: UGenIn, b: UGenIn )
+extends BasicOpUGen( selector.id, a, b ) {
+   override def toString = if( (selector.id <= 11) || ((selector.id >=14) && (selector.id <= 16)) ) {
+      "(" + a + " " + selector.name + " " + b + ")"
+   } else {
+      a.toString + "." + selector.name + "(" + b + ")"
+   }
+}

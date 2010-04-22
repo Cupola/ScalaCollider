@@ -31,8 +31,7 @@ package de.sciss.tint.sc
 import de.sciss.scalaosc.OSCMessage
 
 /**
- *	@author		Hanns Holger Rutz
- *	@version	0.12, 13-Jan-10
+ *    @version	0.12, 22-Apr-10
  */
 object Group {
     def spawn: Group = {
@@ -41,55 +40,52 @@ object Group {
 
 	def after( target: Node ): Group = {
 	  	val group = new Group( target.server )
-	  	group.server.sendMsg( group.newMsg( target, addAfter ))
+	  	group.server ! group.newMsg( target, addAfter )
 	  	group
 	}
  
 	def before( target: Node ): Group = {
 	  	val group = new Group( target.server )
-	  	group.server.sendMsg( group.newMsg( target, addBefore ))
-        group
+	  	group.server ! group.newMsg( target, addBefore )
+      group
 	}
  
 	def head( target: Group ): Group = {
 		val group = new Group( target.server )
-		group.server.sendMsg( group.newMsg( target, addToHead ))
-        group
+		group.server ! group.newMsg( target, addToHead )
+      group
 	}
 
 	def tail( target: Group ): Group = {
 	  	val group = new Group( target.server )
-	  	group.server.sendMsg( group.newMsg( target, addToTail ))
-        group
+	  	group.server ! group.newMsg( target, addToTail )
+      group
 	}
  
 	def replace( target: Node ): Group = {
 	  	val group = new Group( target.server )
-	  	group.server.sendMsg( group.newMsg( target, addReplace ))
-        group
+	  	group.server ! group.newMsg( target, addReplace )
+      group
 	}
 }
 
 class Group( server: Server, id: Int )
 extends Node( server, id ) {
-	def this( server: Server ) = {
-		this( server, server.nodes.nextID )
-	}
-  
-	def this() = {
-		this( Server.default )
-	}
+	def this( server: Server ) = this( server, server.nodes.nextID )
+	def this() = this( Server.default )
 
-	def newMsg( target: Node, addAction: AddAction ) : OSCMessage = {
+	def newMsg( target: Node, addAction: AddAction ) =
 		OSCMessage( "/g_new", id, addAction.id, target.id )
-	}
 
-    def dumpTree: Unit = dumpTree( false )
+   def dumpTree: Unit = dumpTree( false )
 	def dumpTree( postControls: Boolean ) {
-		server.sendMsg( "/g_dumpTree", id, if( postControls ) 1 else 0 )
+		server ! dumpTreeMsg( postControls )
 	}
 
-    def freeAll: Unit = server.sendMsg( freeAllMsg )
+   def dumpTreeMsg : OSCMessage = dumpTreeMsg( false )
+   def dumpTreeMsg( postControls: Boolean ) = OSCMessage( "/g_dumpTree", id, if( postControls ) 1 else 0 )
+
+   def freeAll { server ! freeAllMsg }
 	def freeAllMsg = OSCMessage( "/g_freeAll", id )
   
 	def moveNodeToHeadMsg( node: Node ) : OSCMessage = {

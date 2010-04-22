@@ -32,13 +32,13 @@ import SC._
 import GraphBuilder._
 
 /**
- *	@version	0.10, 02-Jan-10
+ *	@version	0.10, 22-Apr-10
  */
 object Hilbert extends UGen1Args { // do not use UGen1RArgs as there might be a kr version in the future
   def ar( in: GE ) : GE = arExp( in )
 }
 case class Hilbert( rate: Rate, in: UGenIn )
-extends MultiOutUGen( List( audio, audio ), List( in ))
+extends MultiOutUGen( audio, 2, List( in ))
 
 object FreqShift extends UGen3Args {
   def ar( in: GE, freq: GE = 0, phase: GE = 0 ) : GE = arExp( in, freq, phase )

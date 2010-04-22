@@ -29,25 +29,26 @@
 package de.sciss.tint.sc
 
 import de.sciss.scalaosc.{ OSCMessage }
+import collection.breakOut
 import math._
 
 /**
- * 	@version	0.14, 17-Apr-10
+ * 	@version	0.14, 22-Apr-10
  */
 object SC {
   // GEs
-  implicit def float2GE( x: Float ) = Constant( x )
-  implicit def int2GE( x: Int ) = Constant( x.toFloat )
-  implicit def double2GE( x: Double ) = Constant( x.toFloat )
-  implicit def seqOfGE2GESeq( x: Seq[ GE ]) = new GESeq( (x flatMap (_.toUGenIns)): _* )
-  implicit def doneAction2GE( x: DoneAction ) = Constant( x.id )
+  implicit def floatToGE( x: Float ) = Constant( x )
+  implicit def intToGE( x: Int ) = Constant( x.toFloat )
+  implicit def doubleToGE( x: Double ) = Constant( x.toFloat )
+  implicit def seqOfGEToGE( x: Seq[ GE ]) = new UGenInSeq( x.flatMap( _.outputs )( breakOut ))
+  implicit def doneActionToGE( x: DoneAction ) = Constant( x.id )
 
   // why these are necessary now??
-  implicit def seqOfFloat2GESeq( x: Seq[ Float ]) = new GESeq( (x map (Constant( _ ))): _* )
-  implicit def seqOfInt2GESeq( x: Seq[ Int ]) = new GESeq( (x map (i => Constant( i.toFloat ))): _* )
-  implicit def seqOfDouble2GESeq( x: Seq[ Double ]) = new GESeq( (x map (d => Constant( d.toFloat ))): _* )
+  implicit def seqOfFloatToGE( x: Seq[ Float ]) = new UGenInSeq( x.map( Constant( _ ))( breakOut ))
+  implicit def seqOfIntToGE( x: Seq[ Int ]) = new UGenInSeq( x.map( i => Constant( i.toFloat ))( breakOut ))
+  implicit def seqOfDoubleToGE( x: Seq[ Double ]) = new UGenInSeq( x.map( d => Constant( d.toFloat ))( breakOut ))
  
-  implicit def string2ControlName( name: String ) = ControlName( name )
+  implicit def stringToControlName( name: String ) = ControlName( name )
 
    // do we really need this?
 //  implicit def string2GE( name: String ) : ControlDesc =
@@ -59,20 +60,17 @@ object SC {
 //  def min( a: GE, b: GE ) = a.min( b )
 
   // Misc
-  implicit def string2Option( x: String ) = Some( x )
-  def dup[T]( x: T, num: Int ) : Seq[T] = {
-//  var res = new Array[T]( num );
-    (1 to num) map (y => x)
-  }
+  implicit def stringToOption( x: String ) = Some( x )
+//  def dup[T]( x: T, num: Int ) : Seq[T] = (1 to num) map (y => x)
 
    // Buffer convenience
-   implicit def message2Option( msg: OSCMessage ) = Some( msg )
+   implicit def messageToOption( msg: OSCMessage ) = Some( msg )
 
    // Nodes
-   implicit def int2Node( id: Int ) : Node = new Group( Server.default, id )
-   implicit def server2Group( s: Server ) : Group = s.defaultGroup
+   implicit def intToNode( id: Int ) : Node = new Group( Server.default, id )
+   implicit def serverToGroup( s: Server ) : Group = s.defaultGroup
 
-   // Maths conversions
+   // Maths conversions XXX TODO : add more of the unary and binary ops
    def ampdb( amp: Float ) = (log10( amp ) * 20).toFloat
    def dbamp( db: Float ) = (exp( db / 20 * log( 10 ))).toFloat
    def midicps( midi: Float ) = (440 * pow( 2, (midi - 69) * 0.083333333333 )).toFloat
@@ -86,29 +84,7 @@ object SC {
       println( "WARNING:\n" + s )
       s
    }
-  
-  // Function
-  // XXX
-//  def fork( f: () => Any ) : Thread = { val t = new Thread( new Runnable() { def run() { f }}); t.start; t }
-//  def fork( f: => Unit ) : Routine = { Routine.run( f )}
-  
-//	asSynthDef { arg rates, prependArgs, outClass='Out, fadeTime, name;}
-//  def toSynthDef( f: () => Any, rates: Seq[Any], prependArgs: Seq[Any], outClass: Symbol, fadeTime: AnyVal, name: String ) : SynthDef = {
-//   		^GraphBuilder.wrapOut(name ?? { this.identityHash.abs.asString },
-//			this, rates, prependArgs, outClass, fadeTime
-//		);	
-//  }
 
-// CCC
-//  def fork[A,C]( ctx: =>(A @cps[A,C]) ) = { val r = new Routine( Clock.default, ctx ); r.start; r }
-//  def sleep( delta: Long ): Unit @suspendable = self.asInstanceOf[Routine[_,_]].sleep( delta )
-//
-// def loopWhile(cond: =>Boolean)(body: =>(Any @suspendable)): Unit @suspendable = {
-//   if (cond) {
-//     body; loopWhile(cond)(body)
-//   } else ()
-// }
-  
    def play( thunk: => GE ) : Synth = {
       val func = () => thunk
       playFunc( func, Server.default.defaultGroup, 0, Some(0.02f), addToHead )
@@ -140,10 +116,13 @@ object SC {
    }
 
    private var uniqueIDCnt = 0
+   private val uniqueSync = new AnyRef
    private def uniqueID = {
-      val result = uniqueIDCnt
-      uniqueIDCnt += 1
-      uniqueIDCnt
+      uniqueSync.synchronized {
+         uniqueIDCnt += 1
+         val result = uniqueIDCnt
+         result
+      }
    }
 
    private def playFunc( func: () => GE, target: Node, outBus: Int, fadeTime: Option[Float], addAction: AddAction ) : Synth = {
@@ -166,10 +145,10 @@ object SC {
 				synthDef.load( server, synthMsg )
 			} else {
 				warn( "synthdef may have been too large to send to remote server" )
-				server.sendMsg( "/d_recv", bytes, synthMsg )
+				server ! OSCMessage( "/d_recv", bytes, synthMsg )
 			}
 		} else {
-			server.sendMsg( "/d_recv", bytes, synthMsg )
+			server ! OSCMessage( "/d_recv", bytes, synthMsg )
 		}
 		synth
 	}

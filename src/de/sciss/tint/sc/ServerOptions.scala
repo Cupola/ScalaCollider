@@ -34,7 +34,7 @@ import _root_.scala.collection.mutable.ListBuffer
  *    @author		Hanns Holger Rutz
  * 	@version    0.13, 22-Feb-10
  */
-abstract class ServerOption[T]( val switch: String, val default: T ) {
+class ServerOption[T]( val switch: String, val default: T ) {
    protected var valu = default
    def value : T = valu
    def value_=( newValue: T ) : ServerOption[T] = {
@@ -57,8 +57,8 @@ extends ServerOption[Boolean]( sw, defau ) {
 class ServerStringOption( sw: String, defau: String )
 extends ServerOption[String]( sw, defau )
 
-class ServerSymbolOption( sw: String, defau: Symbol )
-extends ServerOption[Symbol]( sw, defau )
+//class ServerSymbolOption( sw: String, defau: Symbol )
+//extends ServerOption[Symbol]( sw, defau )
 
 class ServerOptions {
    var initialNodeID = 1000
@@ -83,7 +83,8 @@ class ServerOptions {
    // realtime only
    val host					      = new ServerStringOption( "", "127.0.0.1" )
    val port					      = new ServerIntOption( "", 57100 )
-   val protocol				   = new ServerSymbolOption( "", 'udp )
+//   val protocol				   = new ServerSymbolOption( "", 'udp )
+   val protocol				   = new ServerStringOption( "", "udp" )
    val inputStreamsEnabled	   = new ServerStringOption( "I", "" )
    val outputStreamsEnabled	= new ServerStringOption( "O", "" )
    val inDeviceName		   	= new ServerStringOption( "", "" )
@@ -118,9 +119,9 @@ class ServerOptions {
     
       result += programPath.stringValue
       protocol.value match {
-         case 'tcp => result += "-t"
-         case 'udp => result += "-u"
-         case _ => throw new IllegalArgumentException( protocol.stringValue )
+         case "tcp" => result += "-t"
+         case "udp" => result += "-u"
+         case _ => error( protocol.stringValue )
       }
       result += port.stringValue
       if( inDeviceName.value == outDeviceName.value ) {

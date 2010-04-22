@@ -47,7 +47,7 @@ import de.sciss.scalaosc.OSCMessage
 class OSCResponderNode( server: Server, val name: String, action: (OSCMessage, SocketAddress, Long) => Unit ) {
   
 // private val		multi			= server.getMultiResponder
-// private val		sync			= multi.getSync
+   private val		sync			= server.responderSync
 
 	private var		removeWhenDoneVal	= false
 	private var		listening			= false		
@@ -75,14 +75,14 @@ class OSCResponderNode( server: Server, val name: String, action: (OSCMessage, S
 	 *
 	 *	@throws		IllegalStateException	if the node has already been added
 	 */
-	def add : OSCResponderNode = {
-//	  synchronized( sync ) {
-	    if( !listening ) {
-           server.addResponderNode( this )
-           listening = true
-       }
-       this
-//	  }
+   def add : OSCResponderNode = {
+	   sync.synchronized {
+	      if( !listening ) {
+            server.addResponderNode( this )
+            listening = true
+         }
+         this
+	   }
 	}
 	
 	/**
@@ -141,10 +141,10 @@ class OSCResponderNode( server: Server, val name: String, action: (OSCMessage, S
 	 *	@see		#add()
 	 */
 	def remove : OSCResponderNode = {
-//	  synchronized( sync ) {
-        listening = false
-        server.removeResponderNode( this )
-        this
-//    }
+      sync.synchronized {
+         listening = false
+         server.removeResponderNode( this )
+         this
+      }
 	}
 }

@@ -28,40 +28,44 @@
 
 package de.sciss.tint.sc
 
-import java.io.{ DataOutputStream, IOException }
+import collection.immutable.{ IndexedSeq => IIdxSeq }
 import math._
 
 /**
  *    @version	0.12, 14-Apr-10
  */
 case class ControlName( name: String ) {
-   def ir : ControlDesc = ir( List( 0f ))
-   def ir( value: Float ) : ControlDesc = ir( List( value ))
-   def kr : ControlDesc = kr( List( 0f ))
-   def kr( value: Float ) : ControlDesc = kr( List( value ))
+   def ir : ControlDesc = ir( Vector( 0f ))
+   def ir( value: Float ) : ControlDesc = ir( Vector( value ))
+   def kr : ControlDesc = kr( Vector( 0f ))
+   def kr( value: Float ) : ControlDesc = kr( Vector( value ))
 
-   def ir( values: Seq[ Float ]) = new ControlDesc( Some( name ), scalar, values, None )
-   def kr( values: Seq[ Float ]) = new ControlDesc( Some( name ), control, values, None )
+   def ir( values: IIdxSeq[ Float ]) = new ControlDesc( Some( name ), scalar, values, None )
+   def kr( values: IIdxSeq[ Float ]) = new ControlDesc( Some( name ), control, values, None )
 
-   def kr( values: Tuple2[ GE, Seq[ Float ]]) : ControlDesc = {
-      val lags = values._1.toUGenIns
+   def kr( values: Tuple2[ GE, IIdxSeq[ Float ]]) : ControlDesc = {
+      val lags = values._1.outputs
       val inits = values._2
       val numCh = max( lags.size, inits.size )
       new ControlDesc( Some( name ), control, wrapExtend( values._2, numCh ), Some( wrapExtend( lags, numCh )))
    }
   
-   private def wrapExtend[T]( coll: Seq[T], size: Int ) : Seq[T] = {
+   private def wrapExtend[T]( coll: IIdxSeq[T], size: Int ) : IIdxSeq[T] = {
       if( coll.size == size ) coll
       else if( coll.size > size ) coll.take( size )
       else {
-         val result = new scala.collection.mutable.ListBuffer[T]() // ( size )
-         (0 until size).foreach (i => result.update( i, coll( i )))
+         var result = coll
+         while( result.size < size ) {
+            val diff = size - result.size
+            result ++= (if( diff >= coll.size ) coll else coll.take( diff ))
+         }
          result
       }
    }
 }
 
-class ControlDesc( val name: Option[ String ], val rate: Rate, val initValues: Seq[ Float ], val lag : Option[ Seq[ UGenIn ]])
+class ControlDesc( val name: Option[ String ], val rate: Rate, val initValues: IIdxSeq[ Float ],
+                   val lag : Option[ IIdxSeq[ UGenIn ]])
 extends RatedGE
 {
    var ugen: UGen = null            // XXX mutable
@@ -72,15 +76,12 @@ extends RatedGE
       addToSynth
    }
 
-   def outputs : Seq[ ControlProxy ] = (0 until initValues.size) map (i => {
-      new ControlProxy( this, i )
-   })
-
-   def numOutputs	= initValues.size
-   def toUGenIns	= outputs
+   def outputs /*: Seq[ ControlProxy ]*/ = (0 until initValues.size).map( new ControlProxy( this, _ ))
+   override def numOutputs	= initValues.size
+//   def toUGenIns	= outputs
 
    private def addToSynth {
-      SynthDef.builder.foreach (_.addControlDesc( this ))
+      SynthDef.builder.addControlDesc( this )
    }
 }
 

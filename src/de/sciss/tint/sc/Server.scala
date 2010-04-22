@@ -28,47 +28,62 @@
 
 package de.sciss.tint.sc
 
-import de.sciss.scalaosc.{ OSCBundle, OSCChannel, OSCClient, OSCMessage }
+import de.sciss.scalaosc.{ OSCChannel, OSCClient, OSCMessage, OSCPacket }
 import java.net.{ ConnectException, InetAddress, InetSocketAddress, SocketAddress }
-import java.io.{ BufferedInputStream, File, InputStream, IOException }
+import java.io.{ BufferedReader, File, InputStream, InputStreamReader, IOException }
 import java.util.{ Timer, TimerTask }
-import scala.collection.immutable.{ Queue }
-import scala.collection.mutable.{ ListBuffer }
+import scala.collection.immutable.Queue
 import scala.math._
 
 /**
- *    @author		Hanns Holger Rutz
- * 	@version    0.13, 08-Mar-10
+ * 	@version    0.14, 22-Apr-10
  */
 object Server {
-   private var allVar = Set.empty[ Server ]
+   private val allSync  = new AnyRef
+   private var allVar   = Set.empty[ Server ]
+   var default: Server  = null
 
-   var default: Server = null
-   def all = allVar
-   
+   def all     = allVar
+
+   private def add( s: Server ) {
+      allSync.synchronized {
+         allVar += s
+         if( default == null ) default = s
+      }
+   }
+
+   private def remove( s: Server ) {
+      allSync.synchronized {
+         allVar -= s
+         if( default == s ) default = null
+      }
+   }
+
    def printError( name: String, t: Throwable ) {
       println( name + " : " )
       t.printStackTrace
    }
 
-   case object Running
-   case object Booting
-   case object Offline
+   abstract sealed class Condition
+   case object Running extends Condition
+   case object Booting extends Condition
+   case object Offline extends Condition
+   private case object Terminating extends Condition
+   private case object NoPending extends Condition
+
    case class Counts( c: OSCStatusReplyMessage )
-   private case object Terminating
-   private case object NoPending
 }
 
 abstract class Server extends Model {
    import Server._
 
-   private val syncBootThread						      = new AnyRef
    private var aliveThread: Option[StatusWatcher]	= None
    private var bootThread: Option[BootThread]		= None
    private var countsVar							      = new OSCStatusReplyMessage( 0, 0, 0, 0, 0f, 0f, 0.0, 0.0 )
-   private val collBootCompletion					   = new ListBuffer[ (Server) => Unit ]()
-   private var conditionVar: AnyRef 				   = Offline
-   private var pendingCondition: AnyRef	      	= NoPending
+   private var collBootCompletion					   = Queue.empty[ (Server) => Unit ]
+   private val condSync                            = new AnyRef
+   private var conditionVar: Condition 			   = Offline
+   private var pendingCondition: Condition      	= NoPending
    private var bufferAllocatorVar: ContiguousBlockAllocator = null
    private val host                                = InetAddress.getByName( options.host.value )
 
@@ -81,21 +96,18 @@ abstract class Server extends Model {
    var latency                                     = 0.2f
 
    private val c                                   = {
-      val client        = OSCClient( options.protocol.value, 0, host.isLoopbackAddress, ServerCodec )
+      val client        = OSCClient( Symbol( options.protocol.value ), 0, host.isLoopbackAddress, ServerCodec )
       client.bufferSize = 0x10000
       client.target     = addr
+      client.action     = multiResponder.messageReceived
       client
    }
 
-   private val multi                               = new OSCMultiResponder  // must be after 'c'
-   
    // ---- constructor ----
    {
-      allVar += this
-      if( default == null ) default = this
+      add( this )
       createNewAllocators
 //    resetBufferAutoInfo
-//    try { c.connect }
    }
 
    // ---- abstract methods ----
@@ -106,10 +118,9 @@ abstract class Server extends Model {
    
 
    def isConnected = c.isConnected
-   def isRunning = conditionVar == Running
-   def isBooting = conditionVar == Booting
-   def isOffline = conditionVar == Offline
-//  def getBufferAllocator = bufferAllocator
+   def isRunning = condSync.synchronized { conditionVar == Running }
+   def isBooting = condSync.synchronized { conditionVar == Booting }
+   def isOffline = condSync.synchronized { conditionVar == Offline }
    def bufferAllocator = bufferAllocatorVar
 
    object nodes {
@@ -137,33 +148,8 @@ abstract class Server extends Model {
       def freeControl( index: Int ) = controlAllocator.free( index )
       def freeAudio( index: Int ) = audioAllocator.free( index )
    }
-  
-   def sendMsg( cmd: String, p: Any* ) {
-      c.send( OSCMessage( cmd, p: _* ))
-   }
-  
-   def sendMsg( msg: OSCMessage ) {
-      c.send( msg )
-   }
 
-	def sendBundle( delta: Double, msgs: OSCMessage* ) {
-      // XXX eventually use logical clock
-	   c.send(
-	      if( delta >= 0 ) {
-	    	   val absSecs			= System.currentTimeMillis * 0.001 + delta
-	    	   val secsSince1900	= absSecs.toLong + 2208988800L;
-	    	   val secsFractional= ((absSecs % 1.0) * 0x100000000L).toLong
-	    	   val raw				= (secsSince1900 << 32) | secsFractional;
-	    	   OSCBundle( raw, msgs: _* )
-	      } else {
-	     	   OSCBundle( msgs: _* )
-	      }
-	   )
-	}
-
-   def sendBundle( bndl: OSCBundle ) {
-      c.send( bndl )
-   }
+   def !( p: OSCPacket ) { c.send( p )}
 
    def counts = countsVar
    protected[sc] def counts_=( newCounts: OSCStatusReplyMessage ) {
@@ -179,52 +165,55 @@ abstract class Server extends Model {
       rootNode.dumpTree( controls )
    }
   
-   def condition = conditionVar
-   protected[sc] def condition_=( newCondition: AnyRef ) {
-      if( newCondition != conditionVar ) {
-         conditionVar = newCondition
-         if( newCondition == Offline ) {
-//          if( pendingCondition == Terminating ) {
+   def condition = condSync.synchronized { conditionVar }
+   protected[sc] def condition_=( newCondition: Condition ) {
+      condSync.synchronized {
+         if( newCondition != conditionVar ) {
+            conditionVar = newCondition
+            if( newCondition == Offline ) {
                pendingCondition = NoPending
-//          }
-         } else if( newCondition == Running ) {
-            if( pendingCondition == Booting ) {
-               pendingCondition = NoPending
-               collBootCompletion.foreach( _.apply( this ))
-               collBootCompletion.clear
+            } else if( newCondition == Running ) {
+               if( pendingCondition == Booting ) {
+                  pendingCondition = NoPending
+                  collBootCompletion.foreach( action => try {
+                        action.apply( this )
+                     }
+                     catch { case e => e.printStackTrace() }
+                  )
+                  collBootCompletion = Queue.empty
+               }
             }
+            dispatch( newCondition )
          }
-         dispatch( newCondition )
       }
    }
 
-//  protected[sc] def getMultiResponder = multi
-
    def startAliveThread( delay: Float = 0.25f, period: Float = 0.25f, deathBounces: Int = 25 ) {
-//    synchronized( syncBootThread ) {
-      if( aliveThread.isEmpty ) {
-         val statusWatcher = new StatusWatcher( delay, period, deathBounces )
-         aliveThread = Some( statusWatcher )
-         statusWatcher.start
+      condSync.synchronized {
+         if( aliveThread.isEmpty ) {
+            val statusWatcher = new StatusWatcher( delay, period, deathBounces )
+            aliveThread = Some( statusWatcher )
+            statusWatcher.start
+         }
       }
-//    }
    }
 
    def stopAliveThread {
-//  synchronized( syncBootThread ) {
-      aliveThread.foreach( _.stop )
-      aliveThread = None
-//  }
+      condSync.synchronized {
+         aliveThread.foreach( _.stop )
+         aliveThread = None
+      }
   }
 
    def queryCounts {
-      sendMsg( OSCStatusMessage )
+      this ! OSCStatusMessage
    }
 
    // note: this is called register instead of
    // notify to avoid conflict with notify in java.lang.Object
-   def register( onOff: Boolean = true ) {
-      sendMsg( notifyMsg( onOff ))
+   def register : Unit = register( true )
+   def register( onOff: Boolean ) {
+      this ! notifyMsg( onOff )
    }
 
    def notifyMsg( onOff: Boolean = true ) : OSCMessage =
@@ -245,67 +234,83 @@ abstract class Server extends Model {
 
    def boot: Unit = boot( true )
    def boot( createAliveThread: Boolean ) {
-      if( pendingCondition != NoPending ) {
-         println( "Server:boot - ongoing operations" )
-         return
-      }
-      if( conditionVar == Running ) {
-         println( "Server:boot - already running" )
-         return
-      }
-    
-      if( !isLocal ) throw new IllegalStateException( "Server.boot : only allowed for local servers!" )
-      
+      if( !isLocal ) error( "Server.boot : only allowed for local servers!" )
+
       val whenBooted = (s: Server) => {
          try {
-            println( "notification is on" )
-            s.register()
-            s.initTree	// XXX inefficient since it re-created the node allocator
+//            println( "notification is on" )
+            s.register
+            s.initTree
          }
          catch { case e: IOException => printError( "Server.boot", e )}
       }
 
-      pendingCondition = Booting
-      condition = Booting
-
-      try {
-         createNewAllocators
-// XXX resetBufferAutoInfo
-			
-         addDoWhenBooted( whenBooted )
-         bootServerApp( createAliveThread )
-      }
-      catch { case e /*: IOException*/ => {
-         removeDoWhenBooted( whenBooted )
-         try {
-            stopAliveThread
+      condSync.synchronized {
+         if( pendingCondition != NoPending ) {
+            println( "Server:boot - ongoing operations" )
+            return
          }
-         catch { case e /*: IOException*/ => printError( "Server.boot", e )}
-//      setBooting( false )
-         condition = Offline // pendingCondition = NoPending
-         throw e
-      }}
+         if( conditionVar == Running ) {
+            println( "Server:boot - already running" )
+            return
+         }
+
+         pendingCondition  = Booting
+         condition         = Booting
+
+         try {
+            createNewAllocators
+// XXX resetBufferAutoInfo
+
+            addDoWhenBooted( whenBooted )
+            if( bootThread.isEmpty ) {
+               val thread	= new BootThread( createAliveThread )
+               bootThread	= Some( thread )
+               thread.start
+            } else error( "Illegal state : boot thread still set" )
+         }
+         catch { case e => {
+            removeDoWhenBooted( whenBooted )
+            try {
+               stopAliveThread
+            }
+            catch { case e => printError( "Server.boot", e )}
+            condition = Offline // pendingCondition = NoPending
+            throw e
+         }}
+      }
    }
   
    private def bootThreadTerminated {
-      bootThread = None
-      stopAliveThread
-      condition = Offline
+      condSync.synchronized {
+         bootThread = None
+         stopAliveThread
+         condition = Offline
+      }
    }
   
    // note: we do _not_ reset the nodeIDallocator here
    def initTree {
-//    println( "initTree" )
-      sendMsg( defaultGroup.newMsg( rootNode, addToHead ))
-//    sendMsg( OSCMessage( "/g_new", 1, 0, 0 ))
+      this ! defaultGroup.newMsg( rootNode, addToHead )
    }
   
    def addDoWhenBooted( action: (Server) => Unit ) {
-      collBootCompletion += action
+      condSync.synchronized {
+         if( condition == Running ) {
+            try {
+               action.apply( this )
+            }
+            catch { case e => e.printStackTrace() }
+         } else {
+            collBootCompletion = collBootCompletion.enqueue( action )
+         }
+      }
    }
   
    def removeDoWhenBooted( action: (Server) => Unit ) {
-      collBootCompletion -= action
+      condSync.synchronized {
+         collBootCompletion = collBootCompletion.filterNot( _ == action )
+      }
    }
  
    private def createNewAllocators {
@@ -314,19 +319,9 @@ abstract class Server extends Model {
       bufferAllocatorVar = new ContiguousBlockAllocator( options.audioBuffers.value )
    }
 
-   private def bootServerApp( createAliveThread: Boolean ) {
-      if( bootThread.isEmpty ) {
-//    println( "about to boot " + this.name + "; '" + this.options.program.value + "'" )
-         var thread	= new BootThread( createAliveThread )
-         bootThread	= Some( thread )
-//       condition	= 'booting
-         thread.start
-      }
-   }
-  
    def quit {
-      sendMsg( quitMsg )
-      println( "/quit sent" )
+      this ! quitMsg
+//      println( "/quit sent" )
       cleanUpAfterQuit
    }
 
@@ -334,8 +329,10 @@ abstract class Server extends Model {
 
    private def cleanUpAfterQuit {
       try {
-         stopAliveThread
-         pendingCondition = Terminating
+         condSync.synchronized {
+            stopAliveThread
+            pendingCondition = Terminating
+         }
       }
       catch { case e: IOException => printError( "Server.cleanUpAfterQuit", e )}
    }
@@ -345,16 +342,22 @@ abstract class Server extends Model {
    }
 
    protected[sc] def addResponderNode( resp: OSCResponderNode ) {
-      multi.addNode( resp )
+      multiResponder.addNode( resp )
    }
 
    protected[sc] def removeResponderNode( resp: OSCResponderNode ) {
-      multi.removeNode( resp )
+      multiResponder.removeNode( resp )
    }
 
+   protected[sc] def responderSync : AnyRef = multiResponder.nodeSync
+
    def dispose {
-      multi.dispose
-      c.dispose
+      condSync.synchronized {
+         remove( this )
+         c.action = (msg: OSCMessage, sender: SocketAddress, time: Long) => ()
+         multiResponder.dispose
+         c.dispose
+      }
    }
 
    override def toString = "Server( " + name + " )"
@@ -365,68 +368,60 @@ abstract class Server extends Model {
    extends Thread {
       var keepRunning = true
 
-//  private val folder = new File( "/Users/rutz/Documents/devel/fromSVN/SuperCollider3/build" )
-      private val program = options.programPath.value
-      println( "Booting '" + program + "'" )
-      private val file = new File( program )
+      private val program     = options.programPath.value
+//      println( "Booting '" + program + "'" )
+      private val file        = new File( program )
       private val processArgs = options.toRealtimeArgs.toArray
-      private val pb = new ProcessBuilder( processArgs: _* )
+      private val pb          = new ProcessBuilder( processArgs: _* )
          .directory( file.getParentFile )
          .redirectErrorStream( true )
 
       override def run {
-         var cStarted = false
-         var pRunning = true
-         val inBuf	= new Array[Byte](128)
          try {
-            val p			= pb.start
-            val inStream	= new BufferedInputStream( p.getInputStream )
-            while( keepRunning && pRunning ) {
-               if( !cStarted ) {
-                  try {
-                     startClient
-                     cStarted = true
-                     // note that we optimistically assume that if we boot the server, it
-                     // will not die (exhausting deathBounces). if it crashes, the boot
-                     // thread's process will know anyway. this way we avoid stupid
-                     // server offline notifications when using slow asynchronous commands
-                     if( createAliveThread ) startAliveThread( 1.0f, 0.25f, Int.MaxValue )
+            val p          = pb.start
+            val inReader   = new BufferedReader( new InputStreamReader( p.getInputStream ))
+            new Thread( new Runnable {
+               def run {
+                  while( true ) {
+                     val line = inReader.readLine
+                     if( line != null ) println( line ) else return
                   }
-                  catch { case e: ConnectException => } // thrown when in TCP mode and socket not yet available
                }
+            }).start
+            var cStarted   = false
+            var pRunning   = true
+            while( keepRunning && pRunning && !cStarted ) {
                try {
-                  Thread.sleep( 500 )   // a kind of cheesy way to wait for the program to end
+                  startClient
+                  cStarted = true
+                  // note that we optimistically assume that if we boot the server, it
+                  // will not die (exhausting deathBounces). if it crashes, the boot
+                  // thread's process will know anyway. this way we avoid stupid
+                  // server offline notifications when using slow asynchronous commands
+                  if( createAliveThread ) startAliveThread( 1.0f, 0.25f, Int.MaxValue )
                }
-               catch { case e: InterruptedException => }
-
-               handleConsole( inStream, inBuf )
-//             handleConsole( errStream, errBuf )
+               catch { case e: ConnectException => } // thrown when in TCP mode and socket not yet available
+               Thread.sleep( 500 )
                try {
-                  val resultCode	= p.exitValue
-                  pRunning			= false
-//                p					= null
-                  println( "scsynth terminated (" + resultCode +")" )
+                  p.exitValue // throws an exception if process still running
+                  pRunning	= false
                }
                catch { case e: IllegalThreadStateException => } // gets thrown if we call exitValue() while sc still running
             } // while( keepScRunning && pRunning )
+
+            if( keepRunning && pRunning ) {
+               p.waitFor()
+            } else {
+               p.destroy()
+            }
+
+            val resultCode	= p.exitValue
+            println( "scsynth terminated (" + resultCode +")" )
          }
          catch { case e: IOException => printError( "BootThread.run", e )}
          finally {
             bootThreadTerminated  // ! must be before setRunning !
          }
-      }
-
-      // redirect console
-      private def handleConsole( stream: InputStream, buf: Array[Byte] ) : Unit = {
-         try {
-            while( stream.available > 0 ) {
-               val i = min( buf.length, stream.available )
-               stream.read( buf, 0, i )
-//             printStream.write( buf, 0, i )
-               print( new String( buf, 0, i ))
-            }
-         }
-         catch { case e: IOException => } // ignored XXX
       }
    }
 
@@ -492,62 +487,54 @@ abstract class Server extends Model {
       }
    }
 
-   private class OSCMultiResponder extends Runnable {
+   object multiResponder extends Runnable {
       private val emptySet       = Set.empty[ OSCResponderNode ]
       private var mapCmdToNodes  = Map.empty[ String, Set[ OSCResponderNode ]]
-      private val	sync				= new AnyRef
+      val nodeSync   		      = new AnyRef
+      val msgSync		            = new AnyRef
       private var msgQueue: Queue[ ReceivedMessage ] = Queue.empty
       private var msgInvoked     = false
 
-      // ---- constructor ----
-      {
-         c.action = messageReceived
-      }
-
       def addNode( node: OSCResponderNode ) {
-   //  synchronized( sync ) {
-         mapCmdToNodes += node.name -> (mapCmdToNodes.getOrElse( node.name, emptySet ) + node)
-   //	}
+         nodeSync.synchronized {
+            mapCmdToNodes += node.name -> (mapCmdToNodes.getOrElse( node.name, emptySet ) + node)
+         }
       }
 
       def removeNode( node: OSCResponderNode ) {
-   //  synchronized( sync ) {
-         mapCmdToNodes.get( node.name ).foreach( set => {
-            val setNew = set - node
-            if( setNew.isEmpty ) {
-               mapCmdToNodes -= node.name
-            } else {
-               mapCmdToNodes += node.name -> setNew
-            }
-         })
-   //	}
+         nodeSync.synchronized {
+            mapCmdToNodes.get( node.name ).foreach( set => {
+               val setNew = set - node
+               if( setNew.isEmpty ) {
+                  mapCmdToNodes -= node.name
+               } else {
+                  mapCmdToNodes += node.name -> setNew
+               }
+            })
+         }
       }
 
       def dispose {
-   //  synchronized( sync ) {
-         c.action = (msg: OSCMessage, sender: SocketAddress, time: Long) => ()
-         mapCmdToNodes = Map.empty
-   //  }
+         nodeSync.synchronized { mapCmdToNodes = Map.empty }
       }
 
       // ------------ OSCListener interface ------------
 
-      private def messageReceived( msg: OSCMessage, sender: SocketAddress, time: Long ) {
-         sync.synchronized {
+      def messageReceived( msg: OSCMessage, sender: SocketAddress, time: Long ) {
+         msgSync.synchronized {
             msgQueue = msgQueue.enqueue( ReceivedMessage( msg, sender, time ))
             if( !msgInvoked ) {
                msgInvoked = true
                invokeOnMainThread( this )
-//               EventQueue.invokeLater( this )
             }
          }
       }
 
       def run {
-         val toProcess = sync.synchronized {
-            msgInvoked = false
-            val result = msgQueue
-            msgQueue = Queue.empty
+         val toProcess = msgSync.synchronized {
+            msgInvoked  = false
+            val result  = msgQueue
+            msgQueue    = Queue.empty
             result
          }
          toProcess.foreach( rm => dispatchMessage( rm.msg, rm.sender, rm.time ))
@@ -563,7 +550,8 @@ abstract class Server extends Model {
 
          // old stylee
          val cmdName = if( msg.name.charAt( 0 ) == 47 ) msg.name else "/" + msg.name
-         mapCmdToNodes.get( cmdName ).foreach( _.foreach( resp => {
+         val nodes = nodeSync.synchronized { mapCmdToNodes.get( cmdName )}
+         nodes.foreach( _.foreach( resp => {
             try {
                resp.messageReceived( msg, sender, time )
             } catch { case e: Exception => printError( "messageReceived", e )}

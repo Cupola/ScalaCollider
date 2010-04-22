@@ -5,28 +5,34 @@
 
 package de.sciss.tint.sc.ugen
 
+import collection.immutable.{ IndexedSeq => IIdxSeq }
 import de.sciss.tint.sc._
 
 // YYY could be a case class if specialIndex
 // was passed as a parameter
-class Control( val rate: Rate, val values: Seq[ Float ])
-extends MultiOutUGen( List.fill( values.size )( rate ), Nil )
+
+/**
+ *    @version 0.11, 22-Apr-10
+ */
+class Control( val rate: Rate, val values: IIdxSeq[ Float ])
+extends MultiOutUGen( rate, values.size, Nil )
 {
 //  override val specialIndex = SynthDef.buildSynthDef.map( _.allocControl( numOutputs )).getOrElse( 0 )
 
-	override val specialIndex = SynthDef.builder.getOrElse( error( "Executed outside build context" )).addControl( this )
+	override val specialIndex = SynthDef.builder.addControl( this )
 
 //	*isControlUGen { ^true }
 }
 
-class TrigControl( r: Rate, v: Seq[ Float ]) extends Control( r, v )
+class TrigControl( r: Rate, values: IIdxSeq[ Float ])
+extends Control( r, values )
 
 object Control {
-	def kr( values: Seq[ Float ]) : Control = new Control( control, values )
-	def ir( values: Seq[ Float ]) : Control = new Control( scalar, values )
+	def kr( values: Float* ) : Control = new Control( control, Vector( values: _* ))
+	def ir( values: Float* ) : Control = new Control( scalar, Vector( values: _* ))
 }
 
 object TrigControl {
-	def kr( values: Seq[ Float ]) : Control = new TrigControl( control, values )
-	def ir( values: Seq[ Float ]) : Control = new TrigControl( scalar, values )
+	def kr( values: Float* ) : Control = new TrigControl( control, Vector( values: _* ))
+	def ir( values: Float* ) : Control = new TrigControl( scalar, Vector( values: _* ))
 }

@@ -41,8 +41,8 @@ trait EnvShape {
 trait ConstEnvShape extends EnvShape {
    val id: Int
    val curvature: Float = 0f
-   def idGE: GE = int2GE( id )
-   val curvatureGE: GE = float2GE( curvature )
+   def idGE: GE = intToGE( id )
+   val curvatureGE: GE = floatToGE( curvature )
 
    def levelAt( pos: Float, y1: Float, y2: Float ) : Float
 }
@@ -104,7 +104,7 @@ case object cubedShape extends ConstEnvShape {
       (yPow3 * yPow3 * yPow3).toFloat
    }
 }
-case class varShape( override idGE: GE, override curvatureGE: GE = int2GE( 0 )) extends EnvShape
+case class varShape( override idGE: GE, override curvatureGE: GE = intToGE( 0 )) extends EnvShape
 
 case class EnvSeg( dur: GE, targetLevel: GE, shape: EnvShape = linearShape )
 

@@ -235,7 +235,7 @@ object Select {
 
   private def make( rate: Rate, index: GE, multi: GE ) : GE =
     simplify( for( List( i, m @ _* ) <-
-                     expand( (index :: multi.toUGenIns.toList): _* ))
+                     expand( (index :: multi.outputs.toList): _* ))
                 yield this( rate, i, m ))
 }
 case class Select( rate: Rate, index: UGenIn, multi: Seq[ UGenIn ])
