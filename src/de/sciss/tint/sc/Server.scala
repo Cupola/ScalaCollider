@@ -30,7 +30,7 @@ package de.sciss.tint.sc
 
 import de.sciss.scalaosc.{ OSCChannel, OSCClient, OSCMessage, OSCPacket }
 import java.net.{ ConnectException, InetAddress, InetSocketAddress, SocketAddress }
-import java.io.{ BufferedReader, File, InputStream, InputStreamReader, IOException }
+import java.io.{ BufferedReader, File, InputStreamReader, IOException }
 import java.util.{ Timer, TimerTask }
 import scala.collection.immutable.Queue
 import scala.math._
@@ -61,7 +61,7 @@ object Server {
 
    def printError( name: String, t: Throwable ) {
       println( name + " : " )
-      t.printStackTrace
+      t.printStackTrace()
    }
 
    abstract sealed class Condition
@@ -84,7 +84,7 @@ abstract class Server extends Model {
    private val condSync                            = new AnyRef
    private var conditionVar: Condition 			   = Offline
    private var pendingCondition: Condition      	= NoPending
-   private var bufferAllocatorVar: ContiguousBlockAllocator = null
+//   private var bufferAllocatorVar: ContiguousBlockAllocator = null
    private val host                                = InetAddress.getByName( options.host.value )
 
    val addr                                        = new InetSocketAddress( host, options.port.value )
@@ -116,12 +116,11 @@ abstract class Server extends Model {
    val options: ServerOptions
    val clientID: Int
    
-
    def isConnected = c.isConnected
    def isRunning = condSync.synchronized { conditionVar == Running }
    def isBooting = condSync.synchronized { conditionVar == Booting }
    def isOffline = condSync.synchronized { conditionVar == Offline }
-   def bufferAllocator = bufferAllocatorVar
+//   def bufferAllocator = bufferAllocatorVar
 
    object nodes {
       private var allocator : NodeIDAllocator = _
@@ -133,8 +132,8 @@ abstract class Server extends Model {
    }
   
    object busses {
-      protected var controlAllocator : ContiguousBlockAllocator = _
-      protected var audioAllocator : ContiguousBlockAllocator = _
+      private var controlAllocator : ContiguousBlockAllocator = _
+      private var audioAllocator : ContiguousBlockAllocator = _
     
       reset
     
@@ -147,6 +146,19 @@ abstract class Server extends Model {
       def allocAudio( numChannels: Int ) = audioAllocator.alloc( numChannels )
       def freeControl( index: Int ) = controlAllocator.free( index )
       def freeAudio( index: Int ) = audioAllocator.free( index )
+   }
+
+   object buffers {
+      private var allocator: ContiguousBlockAllocator = _
+
+      reset
+
+      def reset = {
+         allocator = new ContiguousBlockAllocator( options.audioBuffers.value )
+      }
+
+      def alloc( numChannels: Int ) = allocator.alloc( numChannels )
+      def free( index: Int ) = allocator.free( index )
    }
 
    def !( p: OSCPacket ) { c.send( p )}
@@ -216,18 +228,15 @@ abstract class Server extends Model {
       this ! notifyMsg( onOff )
    }
 
-   def notifyMsg( onOff: Boolean = true ) : OSCMessage =
-      OSCMessage( "/notify", if( onOff ) 1 else 0 )
+   def notifyMsg( onOff: Boolean = true ) = OSCServerNotifyMessage( onOff )
 
    def dumpOSC( mode: Int = OSCChannel.DUMP_TEXT ) {
-      c.dumpIncomingOSC( mode, filter = _ match {
+      c.dumpIncomingOSC( mode, filter = {
          case m: OSCStatusReplyMessage => false
          case _ => true
       })
-      c.dumpOutgoingOSC( mode, filter = _ match {
-// fucking match doesn not work, need case object here eventually!
-//        case m: OSCStatusMessage.type => false
-         case OSCMessage( "/status" ) => false
+      c.dumpOutgoingOSC( mode, filter = {
+         case OSCStatusMessage => false
          case _ => true
       })
    }
@@ -294,6 +303,11 @@ abstract class Server extends Model {
       this ! defaultGroup.newMsg( rootNode, addToHead )
    }
   
+   def addDoWhenBooted( action: => Unit ) {
+      val actionFunc = (s: Server) => action
+      addDoWhenBooted( actionFunc )
+   }
+
    def addDoWhenBooted( action: (Server) => Unit ) {
       condSync.synchronized {
          if( condition == Running ) {
@@ -316,7 +330,7 @@ abstract class Server extends Model {
    private def createNewAllocators {
       nodes.reset
       busses.reset
-      bufferAllocatorVar = new ContiguousBlockAllocator( options.audioBuffers.value )
+      buffers.reset
    }
 
    def quit {
@@ -325,7 +339,7 @@ abstract class Server extends Model {
       cleanUpAfterQuit
    }
 
-   def quitMsg = OSCMessage( "/quit" )
+   def quitMsg = OSCServerQuitMessage
 
    private def cleanUpAfterQuit {
       try {
@@ -360,7 +374,7 @@ abstract class Server extends Model {
       }
    }
 
-   override def toString = "Server( " + name + " )"
+   override def toString = "Server(" + name + ")"
 
    // -------- internal class BootThread -------- 
 
@@ -388,6 +402,8 @@ abstract class Server extends Model {
                   }
                }
             }).start
+
+            // connect phase
             var cStarted   = false
             var pRunning   = true
             while( keepRunning && pRunning && !cStarted ) {
@@ -400,14 +416,13 @@ abstract class Server extends Model {
                   // server offline notifications when using slow asynchronous commands
                   if( createAliveThread ) startAliveThread( 1.0f, 0.25f, Int.MaxValue )
                }
-               catch { case e: ConnectException => } // thrown when in TCP mode and socket not yet available
-               Thread.sleep( 500 )
+               catch { case e: ConnectException => Thread.sleep( 500 )} // thrown when in TCP mode and socket not yet available
                try {
                   p.exitValue // throws an exception if process still running
                   pRunning	= false
                }
                catch { case e: IllegalThreadStateException => } // gets thrown if we call exitValue() while sc still running
-            } // while( keepScRunning && pRunning )
+            }
 
             if( keepRunning && pRunning ) {
                p.waitFor()
@@ -415,12 +430,11 @@ abstract class Server extends Model {
                p.destroy()
             }
 
-            val resultCode	= p.exitValue
-            println( "scsynth terminated (" + resultCode +")" )
+            println( "scsynth terminated (" + p.exitValue +")" )
          }
-         catch { case e: IOException => printError( "BootThread.run", e )}
+         catch { case e: IOException => printError( "BootThread.run", e )} // thrown if process was not built
          finally {
-            bootThreadTerminated  // ! must be before setRunning !
+            bootThreadTerminated
          }
       }
    }

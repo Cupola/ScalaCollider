@@ -33,7 +33,7 @@ import collection.immutable.IntMap
  *    @version 0.12, 22-Apr-10
  */
 object NodeManager {
-   trait NodeChange { def node: Node; def msg: OSCNodeChange }
+   abstract sealed class NodeChange { def node: Node; def msg: OSCNodeChange }
    case class NodeGo(   node: Node, msg: OSCNodeChange ) extends NodeChange
    case class NodeEnd(  node: Node, msg: OSCNodeChange ) extends NodeChange
    case class NodeOn(   node: Node, msg: OSCNodeChange ) extends NodeChange
@@ -59,53 +59,46 @@ class NodeManager( server: Server ) extends Model {
       }
 	}
 
-	def nodeChange( e: OSCNodeChange ) {
-		val node = nodes.get( e.nodeID ) getOrElse {
-         if( autoAdd && (e.name == "/n_go") && nodes.contains( e.parentID )) {
-            val created = e match {
-               case ee: OSCSynthChange => new Synth( "?", server, e.nodeID ) // que se puede acer...
-               case ee: OSCGroupChange => new Group( server, e.nodeID )
-            }
+	def nodeChange( e: OSCNodeChange ) : Unit = e match {
+      case OSCNodeGoMessage( nodeID, _ ) => {
+         val node = nodes.get( nodeID ) getOrElse {
+            if( autoAdd && nodes.contains( e.info.parentID )) {
+               val created = e.info match {
+                  case ee: OSCSynthInfo => new Synth( "?", server, nodeID ) // que se puede acer...
+                  case ee: OSCGroupInfo => new Group( server, nodeID )
+               }
+               sync.synchronized {
+                  nodes += nodeID -> created
+               }
+               created
+            } else return
+         }
+         dispatchBoth( NodeGo( node, e ))
+      }
+      case OSCNodeEndMessage( nodeID, _ ) => {
+         nodes.get( nodeID ).foreach( node => {
             sync.synchronized {
-               nodes += created.id -> created
+               nodes -= node.id
             }
-            created
-         } else return
+            dispatchBoth( NodeEnd( node, e ))
+         })
       }
-		
-		e.name match {
-			case "/n_go"   => nodeGo( node, e )
-			case "/n_end"  => nodeEnd( node, e )
-			case "/n_off"  => nodeOff( node, e )
-			case "/n_on"   => nodeOn( node, e )
-			case "/n_move" => nodeMove( node, e )
-			case _ =>
-		}
-	}
-
-	private def nodeGo( node: Node, e: OSCNodeChange ) {
-      dispatchBoth( NodeGo( node, e ))
-	}
-	
-	private def nodeEnd( node: Node, e: OSCNodeChange ) {
-		val parentO = nodes.get( e.parentID )
-		
-      sync.synchronized {
-   		nodes -= node.id
+      case OSCNodeOffMessage( nodeID, _ ) => {
+         nodes.get( nodeID ).foreach( node => {
+            dispatchBoth( NodeOff( node, e ))
+         })
       }
-      dispatchBoth( NodeEnd( node, e ))
-	}
-
-	private def nodeOff( node: Node, e: OSCNodeChange ) {
-      dispatchBoth( NodeOff( node, e ))
-	}
-
-	private def nodeOn( node: Node, e: OSCNodeChange ) {
-      dispatchBoth( NodeOn( node, e ))
-	}
-
-	private def nodeMove( node: Node, e: OSCNodeChange ) {
-      dispatchBoth( NodeMove( node, e ))
+      case OSCNodeOnMessage( nodeID, _ ) => {
+         nodes.get( nodeID ).foreach( node => {
+            dispatchBoth( NodeOn( node, e ))
+         })
+      }
+      case OSCNodeMoveMessage( nodeID, _ ) => {
+         nodes.get( nodeID ).foreach( node => {
+            dispatchBoth( NodeMove( node, e ))
+         })
+      }
+      case _ =>
 	}
 
    private def dispatchBoth( change: NodeChange ) {

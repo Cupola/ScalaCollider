@@ -1,8 +1,8 @@
 /*
  *  Node.scala
- *  Tintantmare
+ *  ScalaCollider
  *
- *  Copyright (c) 2008-2009 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -28,14 +28,10 @@
 
 package de.sciss.tint.sc
 
-import scala.collection.immutable.HashMap
-import collection.mutable.ListBuffer
-
-import de.sciss.scalaosc.OSCMessage
+import collection.immutable.{ IndexedSeq => IIdxSeq }
 
 /**
- * 	@author		Hanns Holger Rutz
- *	@version	0.13, 13-Jan-10
+ *    @version	0.14, 22-Apr-10
  */
 
 sealed abstract class AddAction( val id: Int )
@@ -47,18 +43,20 @@ case object addAfter    extends AddAction( 3 )
 case object addReplace  extends AddAction( 4 )
 
 /**
- * 	@author		Hanns Holger Rutz
- *    @version    0.13, 03-Mar-10
+ *    @version    0.14, 22-Apr-10
  */
-class Node( val server: Server, val id: Int )
-extends Model
-{
-	var group : Group = null
-	var isPlaying	= false
-	var isRunning = false
+abstract class Node extends Model {
 
-	def register: Unit = register( false )
-	def register( assumePlaying: Boolean ) {
+   // ---- abstract ----
+   val server: Server
+   val id: Int
+
+//	var group : Group = null
+//	var isPlaying	= false
+//	var isRunning  = false
+
+//	def register: Unit = register( false )
+	def register {
 //  	NodeWatcher.register( this, assumePlaying )
        server.nodeMgr.register( this )
   	}
@@ -90,146 +88,118 @@ extends Model
       dispatch( change )
    }
 
-	def free : Node = free( true )
+//	def free : Node = free( true )
 
-	def free( sendFlag: Boolean ) : Node = {
-  		if( sendFlag ) server ! freeMsg
-  		group = null
-  		isPlaying = false
-  		isRunning = false
-  		this
+	def free {
+  		server ! freeMsg
+//  		group = null
+//  		isPlaying = false
+//  		isRunning = false
+//  		this
   	}
   
 //  private def asArray( o: Object ) : Array[Object] = Seq( o ).toArray
 //  private def asArray( o: Int ) : Array[Object] = Seq( o.asInstanceOf[AnyRef] ).toArray
   
-  	def freeMsg = OSCMessage( "/n_free", id )
+  	def freeMsg = OSCNodeFreeMessage( id )
 
-  	def run : Node = run( true )
+  	def run : Unit = run( true )
   
-  	def run( flag: Boolean ) : Node = {
+  	def run( flag: Boolean ) {
   		server ! runMsg( flag )
   		this
   	}
 	
-  	def runMsg : OSCMessage = runMsg( true )
-
-	// XXX should add automatic boolean conversion
-  	def runMsg( flag: Boolean ) = OSCMessage( "/n_run", id, if( flag ) 1 else 0 )
+  	def runMsg : OSCNodeRunMessage = runMsg( true )
+  	def runMsg( flag: Boolean ) = OSCNodeRunMessage( id -> flag )
   
-  	def set( pairs: Tuple2[ Any, Float ]*) : Node = {
+  	def set( pairs: Tuple2[ Any, Float ]*) {
   		server ! setMsg( pairs: _* )
-  		this
   	}
 	
-  	def setMsg( pairs: Tuple2[ Any, Float ]*) : OSCMessage = {
-  		val args = new Array[ Any ]( (pairs.size << 1) + 1 )
-  		args( 0 ) = id
-  		var i = 1
-  		pairs.foreach { tuple => {
-  			args( i ) = tuple._1
-  		    i = i + 1
-  			args( i ) = tuple._2
-  		    i = i + 1
-  		}}
-  		OSCMessage( "/n_set", args:_* )
-  	}
+  	def setMsg( pairs: Tuple2[ Any, Float ]* ) =
+  		OSCNodeSetMessage( id, pairs: _* )
 
-  	def setn( pairs: Tuple2[ Any, Seq[ Float ]]*) : Node = {
+  	def setn( pairs: Tuple2[ Any, IIdxSeq[ Float ]]*) {
   		server ! setnMsg( pairs: _* )
-  		this
   	}
 	
-  	def setnMsg( pairs: Tuple2[ Any, Seq[ Float ]]*) : OSCMessage = {
-  		val args = new ListBuffer[ Any ]()
-  		args += id
-  		pairs.foreach (pair => {
-  			args += pair._1
-            args += pair._2.size
-            pair._2.foreach { value => args += value }
-  		})
-  		OSCMessage( "/n_setn", args: _* )
+  	def setnMsg( pairs: Tuple2[ Any, IIdxSeq[ Float ]]*) =
+  		OSCNodeSetnMessage( id, pairs: _* )
+
+  	def trace {
+  		server ! traceMsg
   	}
 
-  	def trace : Node = {
-  		server ! OSCMessage( "/n_trace", id )
-  		this
-  	}
+   def traceMsg = OSCNodeTraceMessage( id )
 
-  	def release : Node = release( None )
+  	def release : Unit = release( None )
   
-  	def release( releaseTime: Option[ Float ]) : Node = {
+  	def release( releaseTime: Option[ Float ]) {
   		server ! releaseMsg( releaseTime )
-  		this
   	}
 
-  	def releaseMsg : OSCMessage = releaseMsg( None )
+  	def releaseMsg : OSCNodeSetMessage = releaseMsg( None )
   
   	// assumes a control called 'gate' in the synth
-  	def releaseMsg( releaseTime: Option[ Float ]) : OSCMessage = {
+  	def releaseMsg( releaseTime: Option[ Float ]) = {
   		val value = releaseTime.map( -1.0f - _ ).getOrElse( 0.0f )
   		setMsg( "gate" -> value )
 	}
 
-  	def map( pairs: Tuple2[ Any, Int ]*) : Node = {
-  		server ! mapMsg( pairs: _* )
-  		this
-  	}
-  
-  	def mapMsg( pairs: Tuple2[ Any, Int ]*) : OSCMessage = {
-  		val args = new Array[ Any ]( (pairs.size << 1) + 1 )
-  		args( 0 ) = id
-	   var i = 1
-	   pairs.foreach { tuple => {
-	    	args( i ) = tuple._1
-	    	i = i + 1
-	    	args( i ) = tuple._2
-	    	i = i + 1
-	   }}
-  		OSCMessage( "/n_map", args:_* )
-  	}
+   def map( pairs: Tuple2[ Any, ControlBus ]* ) {
+      server ! mapMsg( pairs: _* )
+   }
 
-  	def mapn( triplets: Tuple3[ Any, Int, Int ]*) : Unit = {
-  		server ! mapnMsg( triplets: _* )
-  		this
+//  	def map( pairs: Tuple2[ Any, Int ]* ) {
+//  		server ! mapMsg( pairs: _* )
+//  	}
+  
+//  	def mapMsg( pairs: Tuple2[ Any, Int ]* ) =
+//  		OSCNodeMapMessage( id, pairs: _* )
+
+   def mapMsg( pairs: Tuple2[ Any, ControlBus ]* ) =
+      OSCNodeMapMessage( id, pairs.map( p => p._1 -> p._2.index ): _* )
+   
+   def mapn( control: Any, index: Int, numControls: Int ) {
+      server ! mapnMsg( OSCNodeMapInfo( control, index, numControls ))
+   }
+
+   def mapn( control: Any, bus: ControlBus ) {
+      server ! mapnMsg( OSCNodeMapInfo( control, bus.index, bus.numChannels ))
+   }
+
+  	def mapn( mappings: OSCNodeMapInfo* ) {
+  		server ! mapnMsg( mappings: _* )
   	}
   	
-  	def mapnMsg( triplets: Tuple3[ Any, Int, Int ]*) : OSCMessage = {
-  		val args = new Array[ Any ]( triplets.size * 3 + 1 )
-  		args( 0 ) = id
-      var i = 1
-      triplets.foreach { trip => {
-         args( i )     = trip._1
-         args( i + 1 ) = trip._2
-         args( i + 2 ) = trip._3
-         i = i + 3
-      }}
-  		OSCMessage( "/n_mapn", args:_* )
-  	}
+   def mapnMsg( control: Any, index: Int, numControls: Int ) =
+      OSCNodeMapnMessage( id, OSCNodeMapInfo( control, index, numControls ))
 
-  	def fill( triplets: Tuple3[ Any, Int, Float ]*) : Node = {
-  		server ! fillMsg( triplets: _* )
-  		this
+   def mapnMsg( control: Any, bus: ControlBus ) =
+      OSCNodeMapnMessage( id, OSCNodeMapInfo( control, bus.index, bus.numChannels ))
+
+  	def mapnMsg( mappings: OSCNodeMapInfo* ) =
+  		OSCNodeMapnMessage( id, mappings: _* )
+
+   def fill( control: AnyRef, numChannels: Int, value: Float ) {
+      server ! fillMsg( control, numChannels, value )
+   }
+
+  	def fill( fillings: OSCNodeFillInfo* ) {
+  		server ! fillMsg( fillings: _* )
   	}
 	
-  	def fillMsg( triplets: Tuple3[ Any, Int, Float ]*) : OSCMessage = {
-  		val args = new Array[ Any ]( triplets.size * 3 + 1 )
-  		args( 0 ) = id
-      var i = 1
-      triplets.foreach { trip => {
-         args( i )     = trip._1
-	      args( i + 1 ) = trip._2
-	      args( i + 2 ) = trip._3
-	      i = i + 3
-      }}
-    	OSCMessage( "/n_fill", args:_* )
-  	}
+   def fillMsg( control: AnyRef, numChannels: Int, value: Float ) =
+      OSCNodeFillMessage( id, OSCNodeFillInfo( control, numChannels, value ))
+   
+  	def fillMsg( fillings: OSCNodeFillInfo* ) = OSCNodeFillMessage( id, fillings: _* )
 
-   def moveAfterMsg( node: Node ) : OSCMessage = {
-		group = node.group
-		OSCMessage( "/n_after", id, node.id )
-	}
- 
-  	def moveToHeadMsg( group: Group ) : OSCMessage = group.moveNodeToHeadMsg( this )	
-  	def moveToTailMsg( group: Group ) : OSCMessage = group.moveNodeToTailMsg( this )
+   def moveBeforeMsg( node: Node )  = OSCNodeBeforeMessage( id -> node.id )
+   def moveAfterMsg( node: Node )   = OSCNodeAfterMessage( id -> node.id )
+
+  	def moveToHeadMsg( group: Group ) : OSCGroupHeadMessage = group.moveNodeToHeadMsg( this )
+  	def moveToTailMsg( group: Group ) : OSCGroupTailMessage = group.moveNodeToTailMsg( this )
 }
+
+class NodeRef( val server: Server, val id: Int ) extends Node

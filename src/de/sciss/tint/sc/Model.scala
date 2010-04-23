@@ -30,9 +30,6 @@ trait Model {
       var filtered: Queue[ AnyRef => Unit ] = Queue.empty
       sync.synchronized {
          listeners = listeners.filterNot( _ == l )
-//         listeners.foreach( x => if( x != l )
-//         filtered = filtered.enqueue( x )) // ugly; no easier way??
-//         listeners = filtered
       }
    }
 }

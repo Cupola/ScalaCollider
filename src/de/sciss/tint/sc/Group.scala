@@ -28,13 +28,11 @@
 
 package de.sciss.tint.sc
 
-import de.sciss.scalaosc.OSCMessage
-
 /**
  *    @version	0.12, 22-Apr-10
  */
 object Group {
-    def spawn: Group = {
+    def play: Group = {
 		head( Server.default.defaultGroup )
 	}
 
@@ -69,34 +67,30 @@ object Group {
 	}
 }
 
-class Group( server: Server, id: Int )
-extends Node( server, id ) {
+case class Group( server: Server, id: Int )
+extends Node {
 	def this( server: Server ) = this( server, server.nodes.nextID )
 	def this() = this( Server.default )
 
 	def newMsg( target: Node, addAction: AddAction ) =
-		OSCMessage( "/g_new", id, addAction.id, target.id )
+		OSCGroupNewMessage( OSCGroupNewInfo( id, addAction.id, target.id ))
 
    def dumpTree: Unit = dumpTree( false )
 	def dumpTree( postControls: Boolean ) {
 		server ! dumpTreeMsg( postControls )
 	}
 
-   def dumpTreeMsg : OSCMessage = dumpTreeMsg( false )
-   def dumpTreeMsg( postControls: Boolean ) = OSCMessage( "/g_dumpTree", id, if( postControls ) 1 else 0 )
+   def dumpTreeMsg : OSCGroupDumpTreeMessage = dumpTreeMsg( false )
+   def dumpTreeMsg( postControls: Boolean ) = OSCGroupDumpTreeMessage( id -> postControls )
+
+   def queryTreeMsg( postControls: Boolean ) = OSCGroupQueryTreeMessage( id -> postControls )
 
    def freeAll { server ! freeAllMsg }
-	def freeAllMsg = OSCMessage( "/g_freeAll", id )
+	def freeAllMsg = OSCGroupFreeAllMessage( id )
   
-	def moveNodeToHeadMsg( node: Node ) : OSCMessage = {
-		node.group = this
-		OSCMessage( "/g_head", id, node.id )
-	}
-  
-  	def moveNodeToTailMsg( node: Node ) : OSCMessage = {
-		node.group = this
-		OSCMessage( "/g_tail", id, node.id )
-  	}
+   def deepFree { server ! deepFreeMsg }
+	def deepFreeMsg = OSCGroupDeepFreeMessage( id )
 
-	override def toString = "Group( " + id + " )"
+	def moveNodeToHeadMsg( node: Node ) = OSCGroupHeadMessage( id -> node.id )
+  	def moveNodeToTailMsg( node: Node ) = OSCGroupTailMessage( id -> node.id )
 }

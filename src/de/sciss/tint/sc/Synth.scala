@@ -28,68 +28,48 @@
 
 package de.sciss.tint.sc
 
-import de.sciss.scalaosc.OSCMessage
-
 /**
- * 	@author		Hanns Holger Rutz
- *	@version	0.13, 13-Jan-10
+ *    @version	0.14, 22-Apr-10
  */
-// case class Synth( defName: String, override val server: Server, override val id: Int )
-class Synth( val defName: String, override val server: Server, override val id: Int )
-extends Node( server, id )
-{
+case class Synth( defName: String, server: Server, id: Int )
+extends Node {
+   
 	def this( defName: String, server: Server = Server.default ) = this( defName, server, server.nodes.nextID )
 
-	def newMsg( target: Node, args: Seq[Tuple2[String,Float]] = Nil, addAction: AddAction = addToHead ) : OSCMessage = {
-		val argsA = new Array[ Any ]( (args.size << 1) + 4 )
-		argsA( 0 ) = defName
-		argsA( 1 ) = id
-		argsA( 2 ) = addAction.id
-		argsA( 3 ) = target.id
-		var i = 4
-		args.foreach { pair => {
-			argsA( i ) = pair._1
-			i += 1
-			argsA( i ) = pair._2
-			i += 1
-		}}
-		OSCMessage( "/s_new", argsA:_* )
-	}
-
-	override def toString = "Synth( \"" + defName + "\" : " + id + " )"
+	def newMsg( target: Node, args: Seq[ Tuple2[ Any, Float ]] = Nil, addAction: AddAction = addToHead ) =
+      OSCSynthNewMessage( defName, id, addAction.id, target.id, args: _* )
 }
 
 // factory
 object Synth {
-   def play( defName: String, args: Seq[ Tuple2[ String, Float ]] = Nil ): Synth = {
+   def play( defName: String, args: Seq[ Tuple2[ Any, Float ]] = Nil ) : Synth =
       head( Server.default.defaultGroup, defName, args )
-	}
 
-   def after( target: Node, defName: String, args: Seq[ Tuple2[ String, Float ]] = Nil ): Synth = {
+   def after( target: Node, defName: String, args: Seq[ Tuple2[ Any, Float ]] = Nil ) = {
 	   val synth = new Synth( defName, target.server );
       synth.server ! synth.newMsg( target, args, addAfter )
       synth
 	}
  
-   def before( target: Node, defName: String, args: Seq[ Tuple2[ String, Float ]] = Nil ): Synth = {
+   def before( target: Node, defName: String, args: Seq[ Tuple2[ Any, Float ]] = Nil ) = {
 	   val synth = new Synth( defName, target.server )
       synth.server ! synth.newMsg( target, args, addBefore )
       synth
 	}
  
-	def head( target: Group, defName: String, args: Seq[Tuple2[String,Float]] = Nil ): Synth = {
+	def head( target: Group, defName: String, args: Seq[ Tuple2[ Any, Float ]] = Nil ) = {
 	   val synth = new Synth( defName, target.server )
       synth.server ! synth.newMsg( target, args, addToHead )
       synth
 	}
 
-	def tail( target: Group, defName: String, args: Seq[Tuple2[String,Float]] = Nil ): Synth = {
+	def tail( target: Group, defName: String, args: Seq[ Tuple2[ Any, Float ]] = Nil ) = {
 	   val synth = new Synth( defName, target.server )
       synth.server ! synth.newMsg( target, args, addToTail )
       synth
 	}
  
-	def replace( target: Node, defName: String, args: Seq[Tuple2[String,Float]] = Nil ): Synth = {
+	def replace( target: Node, defName: String, args: Seq[ Tuple2[ Any, Float ]] = Nil ) = {
 	   val synth = new Synth( defName, target.server )
       synth.server ! synth.newMsg( target, args, addReplace )
       synth

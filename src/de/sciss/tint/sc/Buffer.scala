@@ -71,13 +71,13 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
    }
 
    def this( server: Server ) =
-      this( server.bufferAllocator.alloc( 1 ), server )
+      this( server.buffers.alloc( 1 ), server )
 
    def this( server: Server, numFrames: Int ) =
-      this( server, numFrames, 1, server.bufferAllocator.alloc( 1 ))
+      this( server, numFrames, 1, server.buffers.alloc( 1 ))
 
    def this( server: Server, numFrames: Int, numChannels: Int ) =
-      this( server, numFrames, numChannels, server.bufferAllocator.alloc( 1 ))
+      this( server, numFrames, numChannels, server.buffers.alloc( 1 ))
 
    def numFrames   = numFramesVar
    def numChannels = numChannelsVar
@@ -86,7 +86,7 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
    def register {
 //  	NodeWatcher.register( this, assumePlaying )
        server.bufMgr.register( this )
-     }
+   }
 
    protected[sc] def updated( change: BufferManager.BufferInfo ) {
       val info       = change.info
@@ -100,7 +100,7 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
 //	def this( server: Server = Server.default, numFrames: Int, numChannels: Int = 1 ) = this( server, numFrames, numChannels, server.getBufferAllocator.alloc( 1 ))
 //	val id = if( bufNumPreliminary >= 0 ) bufNumPreliminary else server.getBufferAllocator.alloc( 1 )
 
-   def queryMsg = OSCMessage( "/b_query", id )
+   def queryMsg = OSCBufferQueryMessage( id )
 
    def free { server ! freeMsg }
 
@@ -111,18 +111,11 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
 //	def free( completionMessage: Buffer => OSCMessage ): Unit =
 //       free( completionMessage.apply( this ))
 
-   def freeMsg: OSCMessage = {
-//      uncache
-      server.bufferAllocator.free( id )  // XXX
-      OSCMessage( "/b_free", id )
-   }
+   def freeMsg: OSCBufferFreeMessage = freeMsg( None )
 
-	def freeMsg( completionMessage: Option[ OSCMessage ]) : OSCMessage = {
-      completionMessage.map( msg => {
-//         uncache
-         server.bufferAllocator.free( id )  // XXX
-         OSCMessage( "/b_free", id, msg )
-      }) getOrElse freeMsg
+	def freeMsg( completionMessage: Option[ OSCMessage ]) = {
+      server.buffers.free( id )  // XXX
+      OSCBufferFreeMessage( id, completionMessage )
 	}
 
 //	def freeMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
@@ -137,40 +130,21 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
 //    def close( completionMessage: Buffer => OSCMessage ): Unit =
 //       close( completionMessage.apply( this ))
  
-	def closeMsg = OSCMessage( "/b_close", id )
+	def closeMsg: OSCBufferCloseMessage = closeMsg( None )
 
-	def closeMsg( completionMessage: Option[ OSCMessage ]) : OSCMessage = {
-      completionMessage.map( msg => {
-         OSCMessage( "/b_close", id, msg )
-      }) getOrElse closeMsg
-   }
+	def closeMsg( completionMessage: Option[ OSCMessage ]) =
+      OSCBufferCloseMessage( id, completionMessage )
 
-//	def closeMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
-//      closeMsg( completionMessage.apply( this ))
- 
 	def alloc { server ! allocMsg }
 
 	def alloc( completionMessage: Option[ OSCMessage ]) {
 		server ! allocMsg( completionMessage )
 	}
  
-//	def alloc( completionMessage: Buffer => OSCMessage ): Unit =
-//      alloc( completionMessage.apply( this ))
+	def allocMsg: OSCBufferAllocMessage = allocMsg( None )
 
-	def allocMsg: OSCMessage = {
-//		cache
-		OSCMessage( "/b_alloc", id, numFrames, numChannels )
-	}
-
-	def allocMsg( completionMessage: Option[ OSCMessage ]) : OSCMessage = {
-      completionMessage.map( msg => {
-//         cache
-         OSCMessage( "/b_alloc", id, numFrames, numChannels, msg )
-      }) getOrElse allocMsg
-	}
-
-//	def allocMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
-//      allocMsg( completionMessage.apply( this ))
+	def allocMsg( completionMessage: Option[ OSCMessage ]) =
+      OSCBufferAllocMessage( id, numFrames, numChannels, completionMessage )
 
    def allocRead( path: String, startFrame: Int = 0, numFrames: Int = -1,
                   completionMessage: Option[ OSCMessage ] = None ) {
@@ -179,19 +153,14 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
    }
 
    def allocReadMsg( path: String, startFrame: Int = 0, numFrames: Int = -1,
-                     completionMessage: Option[ OSCMessage ] = None ) : OSCMessage = {
+                     completionMessage: Option[ OSCMessage ] = None ) = {
 //      this.cache;
 //      path = argpath;
-      completionMessage.map( msg => {
-                   OSCMessage( "/b_allocRead", id, path, startFrame, numFrames, msg )
-      }) getOrElse OSCMessage( "/b_allocRead", id, path, startFrame, numFrames )
+      OSCBufferAllocReadMessage( id, path, startFrame, numFrames, completionMessage )
    }
 
-   def cueSoundFileMsg( path: String, startFrame: Int = 0, completionMessage: Option[ OSCMessage ] = None ) = {
-      completionMessage.map( msg => {
-                   OSCMessage( "/b_read", id, path, startFrame, numFrames, 0, 1, msg )
-      }) getOrElse OSCMessage( "/b_read", id, path, startFrame, numFrames, 0, 1 )
-	}
+   def cueSoundFileMsg( path: String, startFrame: Int = 0, completionMessage: Option[ OSCMessage ] = None ) =
+      OSCBufferReadMessage( id, path, startFrame, numFrames, 0, true, completionMessage )
 
    def read( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
              leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage ] = None ) {
@@ -199,12 +168,8 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
    }
 
    def readMsg( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
-                leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage ] = None ) = {
-      val loi = if( leaveOpen ) 1 else 0
-      completionMessage.map( msg => {
-                   OSCMessage( "/b_read", id, path, fileStartFrame, numFrames, bufStartFrame, loi, msg )
-      }) getOrElse OSCMessage( "/b_read", id, path, fileStartFrame, numFrames, bufStartFrame, loi )
-   }
+                leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage ] = None ) =
+      OSCBufferReadMessage( id, path, fileStartFrame, numFrames, bufStartFrame, leaveOpen, completionMessage )
 
    def readChannel( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
              leaveOpen: Boolean = false, channels: Seq[ Int ],
@@ -215,12 +180,9 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
 
    def readChannelMsg( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
                 leaveOpen: Boolean = false, channels: Seq[ Int ],
-                completionMessage: Option[ OSCMessage ] = None ) = {
-      val loi = if( leaveOpen ) 1 else 0
-      val args = List( id, path, fileStartFrame, numFrames, bufStartFrame, loi ) ::: channels.toList :::
-         completionMessage.map( msg => List( msg )).getOrElse( Nil )
-      OSCMessage( "/b_readChannel", args: _* )
-   }
+                completionMessage: Option[ OSCMessage ] = None ) =
+      OSCBufferReadChannelMessage( id, path, fileStartFrame, numFrames, bufStartFrame, leaveOpen, channels.toList,
+         completionMessage )
 
    def zero { server ! zeroMsg }
 
@@ -228,13 +190,10 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
       server ! zeroMsg( completionMessage )
    }
 
-	def zeroMsg = OSCMessage( "/b_zero", id )
+	def zeroMsg: OSCBufferZeroMessage = zeroMsg( None )
 
-	def zeroMsg( completionMessage: Option[ OSCMessage ]) : OSCMessage = {
-      completionMessage.map( msg => {
-         OSCMessage( "/b_zero", id, msg )
-      }) getOrElse zeroMsg
-   }
+	def zeroMsg( completionMessage: Option[ OSCMessage ]) =
+      OSCBufferZeroMessage( id, completionMessage )
 
 //	// cache Buffers for easy info updating
 //	private def cache {
