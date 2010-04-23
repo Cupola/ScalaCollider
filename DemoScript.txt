@@ -1,15 +1,10 @@
-//:cp libraries/collections-generic-4.01.jar
-//:cp libraries/jung-algorithms-2.0.jar
-//:cp libraries/jung-api-2.0.jar
-//:cp libraries/jung-graph-impl-2.0.jar
-//:cp libraries/jung-visualization-2.0.jar
 :cp libraries/ScalaOSC.jar
 :cp dist/ScalaCollider.jar
-import scala.math._
-import de.sciss.tint.sc._
+import math._
+import de.sciss.synth._
 import SC._
-import de.sciss.tint.sc.ugen._
-val s = new swing.AWTServer( "Default" )
+import de.sciss.synth.ugen._
+val s = new PlainServer( "Default" )
 s.options.programPath.value = "/Users/rutz/Documents/devel/fromSVN/SuperCollider3/common/build/scsynth"
 //new swing.NodeTreePanel( s ).makeWindow
-new swing.ServerStatusPanel( s ).makeWindow
+//new swing.ServerStatusPanel( s ).makeWindow

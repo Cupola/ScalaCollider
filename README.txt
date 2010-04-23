@@ -5,15 +5,15 @@ Licensed under the GNU General Public License v2 (see "licenses" folder).
 
 PREREQUISITES
 
-Scala 2.8 (RC1) / Java 1.6 / SuperCollider 3.3.1 / ScalaOSC
+Scala 2.8 (RC1) / Java 1.6 / SuperCollider 3.3.1+ / ScalaOSC
 
 INSTALLATION
 
-Note: to keep the repo small, the following libraries have not been included and need to be installed manually into the "libraries" folder:
+The following libraries have to be downloaded and installed into the "libraries" folder:
 
     - ScalaOSC (grab it from http://github.com/Sciss/ScalaOSC )
 
-Compile using the included compile_fsc.sh script or the included IntelliJ IDEA 9 project.
+Compile using the included compile_fsc.sh script or the included IntelliJ IDEA 9 CE project.
     
 DEMO SETUP
 
@@ -23,4 +23,4 @@ Try launching scsynth from the Scala interpreter prompt:
 
 scala> s.boot
 
-And when booted, create some example synths using stuff in "ExampleCmd.txt" as a template.
+And when booted, create some example synths using "ExampleCmd.txt" as a template.
