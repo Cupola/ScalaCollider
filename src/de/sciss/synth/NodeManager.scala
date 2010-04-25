@@ -31,72 +31,68 @@ package de.sciss.synth
 import collection.immutable.IntMap
 
 /**
- *    @version 0.12, 22-Apr-10
+ *    @version 0.12, 24-Apr-10
  */
 object NodeManager {
-   abstract sealed class NodeChange { def node: Node; def msg: OSCNodeChange }
-   case class NodeGo(   node: Node, msg: OSCNodeChange ) extends NodeChange
-   case class NodeEnd(  node: Node, msg: OSCNodeChange ) extends NodeChange
-   case class NodeOn(   node: Node, msg: OSCNodeChange ) extends NodeChange
-   case class NodeOff(  node: Node, msg: OSCNodeChange ) extends NodeChange
-   case class NodeMove( node: Node, msg: OSCNodeChange ) extends NodeChange
+   abstract sealed class NodeChange { def node: Node; def info: OSCNodeInfo }
+   case class NodeGo(   node: Node, info: OSCNodeInfo ) extends NodeChange
+   case class NodeEnd(  node: Node, info: OSCNodeInfo ) extends NodeChange
+   case class NodeOn(   node: Node, info: OSCNodeInfo ) extends NodeChange
+   case class NodeOff(  node: Node, info: OSCNodeInfo ) extends NodeChange
+   case class NodeMove( node: Node, info: OSCNodeInfo ) extends NodeChange
+   case object Cleared
 }
 
 class NodeManager( server: Server ) extends Model {
 
    import NodeManager._
     
-	private var nodes    = IntMap.empty[ Node ]
+	private var nodes: IntMap[ Node ] = _
 	private var autoAdd  = true
    private val sync     = new AnyRef
 	
 	// ---- constructor ----
 	{
-		val rootNode = server.rootNode // new Group( server, 0 )
-		nodes += rootNode.id -> rootNode
-      if( server.isRunning ) {
-         val defaultGroup = server.defaultGroup
-         nodes += defaultGroup.id -> defaultGroup
-      }
+      clear
+//      if( server.isRunning ) {
+//         val defaultGroup = server.defaultGroup
+//         nodes += defaultGroup.id -> defaultGroup
+//      }
 	}
 
 	def nodeChange( e: OSCNodeChange ) : Unit = e match {
-      case OSCNodeGoMessage( nodeID, _ ) => {
+      case OSCNodeGoMessage( nodeID, info ) => {
          val node = nodes.get( nodeID ) getOrElse {
-            if( autoAdd && nodes.contains( e.info.parentID )) {
-               val created = e.info match {
-                  case ee: OSCSynthInfo => new Synth( "?", server, nodeID ) // que se puede acer...
+            if( autoAdd && nodes.contains( info.parentID )) {
+               val created = info match {
+                  case ee: OSCSynthInfo => new Synth( null, server, nodeID ) // que se puede acer...
                   case ee: OSCGroupInfo => new Group( server, nodeID )
                }
-               sync.synchronized {
-                  nodes += nodeID -> created
-               }
+               register( created )
                created
             } else return
          }
-         dispatchBoth( NodeGo( node, e ))
+         dispatchBoth( NodeGo( node, info ))
       }
-      case OSCNodeEndMessage( nodeID, _ ) => {
+      case OSCNodeEndMessage( nodeID, info ) => {
          nodes.get( nodeID ).foreach( node => {
-            sync.synchronized {
-               nodes -= node.id
-            }
-            dispatchBoth( NodeEnd( node, e ))
+            unregister( node )
+            dispatchBoth( NodeEnd( node, info ))
          })
       }
-      case OSCNodeOffMessage( nodeID, _ ) => {
-         nodes.get( nodeID ).foreach( node => {
-            dispatchBoth( NodeOff( node, e ))
+      case OSCNodeOffMessage( nodeID, info ) => {
+         nodes.get( e.nodeID ).foreach( node => {
+            dispatchBoth( NodeOff( node, info ))
          })
       }
-      case OSCNodeOnMessage( nodeID, _ ) => {
-         nodes.get( nodeID ).foreach( node => {
-            dispatchBoth( NodeOn( node, e ))
+      case OSCNodeOnMessage( nodeID, info ) => {
+         nodes.get( e.nodeID ).foreach( node => {
+            dispatchBoth( NodeOn( node, info ))
          })
       }
-      case OSCNodeMoveMessage( nodeID, _ ) => {
-         nodes.get( nodeID ).foreach( node => {
-            dispatchBoth( NodeMove( node, e ))
+      case OSCNodeMoveMessage( nodeID, info ) => {
+         nodes.get( e.nodeID ).foreach( node => {
+            dispatchBoth( NodeMove( node, info ))
          })
       }
       case _ =>
@@ -120,4 +116,14 @@ class NodeManager( server: Server ) extends Model {
    		nodes -= node.id
       }
 	}
+
+   def getNode( id: Int ) : Option[ Node ] = sync.synchronized { nodes.get( id )}
+
+   def clear {
+      val rootNode = server.rootNode // new Group( server, 0 )
+      sync.synchronized {
+         nodes = IntMap( rootNode.id -> rootNode )
+      }
+      dispatch( Cleared )
+   }
 }

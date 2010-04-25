@@ -163,6 +163,49 @@ abstract class Server extends Model {
 
    def !( p: OSCPacket ) { c.send( p )}
 
+   // XXX should use actor syntax instead, returning an Option[ OSCMessage ] to the current actor
+   private def sendAsyncPacket( ap: AsyncOSCPacket, timeOut: Long = 5000 )( success: => Unit )( failure: => Unit ) {
+      val sync = new AnyRef
+      var handled = false
+      val timer = new Timer( "TimeOut", true )
+      lazy val funSucc: (SocketAddress, Long) => Unit = (addr, when) => {
+//println( "---4" )
+         timer.cancel
+         sync.synchronized {
+            multiResponder.removeListener( ap.replyMessage, funSucc )
+            if( !handled ) {
+//println( "---5" )
+               handled = true
+               invokeOnMainThread( new Runnable {
+                  def run = {
+//println( "---6" )
+                     success
+                  }
+               })
+            }
+         }
+      }
+      timer.schedule( new TimerTask {
+         def run = {
+//println( "---1" )
+            invokeOnMainThread( new Runnable {
+               def run = sync.synchronized {
+//println( "---2" )
+                  if( !handled ) {
+//println( "---3" )
+                     multiResponder.removeListener( ap.replyMessage, funSucc )
+                     handled = true
+                     failure
+                  }
+               }
+            })
+         }
+      }, timeOut )
+//println( "---0" )
+      multiResponder.addListener( ap.replyMessage, funSucc )
+      this ! ap.packet
+   }
+
    def counts = countsVar
    protected[synth] def counts_=( newCounts: OSCStatusReplyMessage ) {
       countsVar = newCounts
@@ -184,6 +227,7 @@ abstract class Server extends Model {
             conditionVar = newCondition
             if( newCondition == Offline ) {
                pendingCondition = NoPending
+               serverLost
             } else if( newCondition == Running ) {
                if( pendingCondition == Booting ) {
                   pendingCondition = NoPending
@@ -245,15 +289,15 @@ abstract class Server extends Model {
    def boot( createAliveThread: Boolean ) {
       if( !isLocal ) error( "Server.boot : only allowed for local servers!" )
 
-      val whenBooted = (s: Server) => {
-         try {
-//            println( "notification is on" )
-            s.register
-            s.initTree
-         }
-         catch { case e: IOException => printError( "Server.boot", e )}
-      }
-
+//      val whenBooted = (s: Server) => {
+//         try {
+////            println( "notification is on" )
+//            s.register
+//            s.initTree
+//         }
+//         catch { case e: IOException => printError( "Server.boot", e )}
+//      }
+//
       condSync.synchronized {
          if( pendingCondition != NoPending ) {
             println( "Server:boot - ongoing operations" )
@@ -268,10 +312,10 @@ abstract class Server extends Model {
          condition         = Booting
 
          try {
-            createNewAllocators
+//            createNewAllocators
 // XXX resetBufferAutoInfo
 
-            addDoWhenBooted( whenBooted )
+//            addDoWhenBooted( whenBooted )
             if( bootThread.isEmpty ) {
                val thread	= new BootThread( createAliveThread )
                bootThread	= Some( thread )
@@ -279,7 +323,7 @@ abstract class Server extends Model {
             } else error( "Illegal state : boot thread still set" )
          }
          catch { case e => {
-            removeDoWhenBooted( whenBooted )
+//            removeDoWhenBooted( whenBooted )
             try {
                stopAliveThread
             }
@@ -289,7 +333,20 @@ abstract class Server extends Model {
          }}
       }
    }
-  
+
+   private def serverContacted {
+      createNewAllocators
+      sendAsyncPacket( notifyMsg( true )) {
+         initTree
+         condition = Running
+      } {}
+   }
+
+   private def serverLost {
+      nodeMgr.clear
+      multiResponder.clear
+   }
+
    private def bootThreadTerminated {
       condSync.synchronized {
          bootThread = None
@@ -300,6 +357,7 @@ abstract class Server extends Model {
   
    // note: we do _not_ reset the nodeIDallocator here
    def initTree {
+      nodeMgr.register( defaultGroup )
       this ! defaultGroup.newMsg( rootNode, addToHead )
    }
   
@@ -450,6 +508,7 @@ abstract class Server extends Model {
       private val	periodMillis	= (period * 1000).toInt
 //      private val	timer			   = new SwingTimer( periodMillis, this )
       private var timer: Option[ Timer ] = None
+      private var callServerContacted  = true
 
 //      // ---- constructor ----
 //      timer.setInitialDelay( delayMillis )
@@ -474,21 +533,22 @@ abstract class Server extends Model {
       }
 
       def run {
-         if( (pendingCondition == Booting) && (options.protocol.value == 'tcp) && !isConnected ) {
-            try {
-               startClient
-            }
-            catch { case e: IOException => printError( "Server.status", e )}
-         } else {
+//         if( (pendingCondition == Booting) && (options.protocol.value == 'tcp) && !isConnected ) {
+//            try {
+//               startClient
+//            }
+//            catch { case e: IOException => printError( "Server.status", e )}
+//         } else {
             alive -= 1
             if( alive < 0 ) {
+               callServerContacted = true
                condition = Offline
             }
             try {
                queryCounts
             }
             catch { case e: IOException => printError( "Server.status", e )}
-         }
+//         }
       }
 
       def statusReply( msg: OSCStatusReplyMessage ) {
@@ -496,18 +556,22 @@ abstract class Server extends Model {
          // note: put the counts before running
          // because that way e.g. the sampleRate
          // is instantly available
-         counts     = msg
-         condition  = Running
+         counts = msg
+         if( !isRunning && callServerContacted ) {
+            callServerContacted = false
+            serverContacted
+         }
       }
    }
 
    object multiResponder extends Runnable {
-      private val emptySet       = Set.empty[ OSCResponderNode ]
-      private var mapCmdToNodes  = Map.empty[ String, Set[ OSCResponderNode ]]
-      val nodeSync   		      = new AnyRef
-      val msgSync		            = new AnyRef
+      private val emptySet          = Set.empty[ OSCResponderNode ]
+      private var mapCmdToNodes     = Map.empty[ String, Set[ OSCResponderNode ]]
+      private var mapMsgListeners   = Map.empty[ OSCMessage, Set[ Function2[ SocketAddress, Long, Unit ]]]
+      val nodeSync   		         = new AnyRef
+      val msgSync		               = new AnyRef
       private var msgQueue: Queue[ ReceivedMessage ] = Queue.empty
-      private var msgInvoked     = false
+      private var msgInvoked        = false
 
       def addNode( node: OSCResponderNode ) {
          nodeSync.synchronized {
@@ -525,6 +589,33 @@ abstract class Server extends Model {
                   mapCmdToNodes += node.name -> setNew
                }
             })
+         }
+      }
+
+      def clear {
+         nodeSync.synchronized {
+            mapMsgListeners = Map.empty
+         }
+      }
+
+      def addListener( msg: OSCMessage, fun: (SocketAddress, Long) => Unit ) {
+         nodeSync.synchronized {
+            mapMsgListeners += msg -> (mapMsgListeners.get( msg ).map( _ + fun ) getOrElse Set( fun ))
+//println( "after add : " + mapMsgListeners )
+         }
+      }
+
+      def removeListener( msg: OSCMessage, fun: (SocketAddress, Long) => Unit ) {
+         nodeSync.synchronized {
+            mapMsgListeners.get( msg ).foreach( set => {
+               val setNew = set - fun
+               if( setNew.isEmpty ) {
+                  mapMsgListeners -= msg
+               } else {
+                  mapMsgListeners += msg -> setNew
+               }
+            })
+//println( "after remove: " + mapMsgListeners )
          }
       }
 
@@ -562,7 +653,14 @@ abstract class Server extends Model {
             case _ =>
          }
 
-         // old stylee
+         // new stylee
+         val listeners = nodeSync.synchronized { mapMsgListeners.get( msg )}
+//println( "listeners for " + msg + " : " + listeners )
+         listeners.foreach( _.foreach( f => try {
+            f.apply( sender, time )
+         } catch  { case e => printError( "messageReceived", e )}))
+
+         // old stylee -> XXX to be removed           
          val cmdName = if( msg.name.charAt( 0 ) == 47 ) msg.name else "/" + msg.name
          val nodes = nodeSync.synchronized { mapCmdToNodes.get( cmdName )}
          nodes.foreach( _.foreach( resp => {

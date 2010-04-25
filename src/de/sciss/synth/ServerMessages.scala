@@ -220,7 +220,11 @@ extends OSCMessage( "/b_info", infos.flatMap( info =>
    List( info.bufID, info.numFrames, info.numChannels, info.sampleRate )): _* )
 
 // ---- messages to the server ----
-case class OSCServerNotifyMessage( onOff: Boolean ) extends OSCMessage( "/notify", if( onOff ) 1 else 0 )
+case class OSCServerNotifyMessage( onOff: Boolean )
+extends OSCMessage( "/notify", if( onOff ) 1 else 0 ) with AsyncOSCPacket {
+   def replyMessage = OSCMessage( "/done", "/notify" )
+}
+
 case object OSCServerQuitMessage extends OSCMessage( "/quit" )
 
 case class OSCBufferQueryMessage( ids: Int* ) extends OSCMessage( "/b_query", ids: _* )
