@@ -75,7 +75,7 @@ val x = play {
     val f = 50       // fundamental frequency
     val p = 20       // number of partials per channel
     var z: GE = 0.0  // start of oscil daisy chain
-    val offset = Line.kr(0, -0.02, 60)    // causes sound to separate and fade
+    val offset = Line.kr(0, -0.02, 60, doneAction=freeSelf) // causes sound to separate and fade
     for( i <- 0 until p ) {
         z = FSinOsc.ar( f * (i+1) ).madd( // freq of partial
             LFNoise1.kr(
@@ -96,7 +96,7 @@ val x = play {
     val f = 80       // fundamental frequency
     val p = 10       // number of partials per channel
     var z: GE = 0.0  // start of oscil daisy chain
-    val trig = XLine.kr(List(10,10), 0.1, 60)  // trigger probability decreases over time
+    val trig = XLine.kr(List(10,10), 0.1, 60, doneAction=freeSelf) // trigger probability decreases over time
     for( i <- 0 until p ) {
         z = FSinOsc.ar(
                 f * (i+1)     // freq of partial

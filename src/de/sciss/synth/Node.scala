@@ -31,7 +31,7 @@ package de.sciss.synth
 import collection.immutable.{ IndexedSeq => IIdxSeq }
 
 /**
- *    @version	0.14, 24-Apr-10
+ *    @version	0.14, 27-Apr-10
  */
 
 sealed abstract class AddAction( val id: Int )
@@ -195,10 +195,16 @@ abstract class Node extends Model {
    
   	def fillMsg( fillings: OSCNodeFillInfo* ) = OSCNodeFillMessage( id, fillings: _* )
 
+   def moveBefore( node: Node ) { server ! moveBeforeMsg( node )}
    def moveBeforeMsg( node: Node )  = OSCNodeBeforeMessage( id -> node.id )
+
+   def moveAfter( node: Node ) { server ! moveAfterMsg( node )}
    def moveAfterMsg( node: Node )   = OSCNodeAfterMessage( id -> node.id )
 
+   def moveToHead( group: Group ) { server ! moveToHeadMsg( group )}
   	def moveToHeadMsg( group: Group ) : OSCGroupHeadMessage = group.moveNodeToHeadMsg( this )
+
+   def moveToTail( group: Group ) { server ! moveToTailMsg( group )}
   	def moveToTailMsg( group: Group ) : OSCGroupTailMessage = group.moveNodeToTailMsg( this )
 }
 
