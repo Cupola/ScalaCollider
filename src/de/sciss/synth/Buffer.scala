@@ -30,7 +30,6 @@ package de.sciss.synth
 
 import de.sciss.scalaosc.OSCMessage
 import ugen.{ BufRateScale, FreeSelfWhenDone, PlayBuf }
-import SC._
 
 /**
  * 	@version	0.17, 22-Apr-10
@@ -200,10 +199,13 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
 
    // ---- utility methods ----
    def play( loop: Boolean = false, amp: Float = 1f, out: Int = 0 ) : Synth = {
-      val player = PlayBuf.ar( numChannels, id, BufRateScale.kr( id ), loop = if( loop ) 1 else 0 )
-      if( !loop ) FreeSelfWhenDone.kr( player )
-      player * amp
-   }.play( server, out )
+      import SC._
+      SC.play( server, out ) { // working around nasty compiler bug
+         val ply = PlayBuf.ar( numChannels, id, BufRateScale.kr( id ), loop = if( loop ) 1 else 0 )
+         if( !loop ) FreeSelfWhenDone.kr( ply )
+         ply * amp
+      }
+   }
    
 //	// cache Buffers for easy info updating
 //	private def cache {

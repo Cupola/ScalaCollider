@@ -75,7 +75,7 @@
       <file leaf-file-name="SC.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/de/sciss/synth/SC.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="92" column="68" selection-start="4604" selection-end="4604" vertical-scroll-proportion="0.0">
+            <state line="73" column="26" selection-start="3749" selection-end="3841" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -84,7 +84,7 @@
       <file leaf-file-name="Buffer.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/de/sciss/synth/Buffer.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="205" column="24" selection-start="7563" selection-end="7563" vertical-scroll-proportion="0.33333334">
+            <state line="208" column="0" selection-start="7280" selection-end="7626" vertical-scroll-proportion="0.43593314">
               <folding />
             </state>
           </provider>
@@ -421,7 +421,7 @@
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="MemberChooser.sorted" value="false" />
     <property name="recentsLimit" value="5" />
-    <property name="options.lastSelected" value="project.scopes" />
+    <property name="options.lastSelected" value="preferences.pluginManager" />
     <property name="project.structure.side.proportion" value="0.0" />
     <property name="MemberChooser.copyJavadoc" value="false" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
@@ -648,7 +648,7 @@
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39922482" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32992327" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32992327" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32945737" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.23071104" sideWeight="0.25968993" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -778,14 +778,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/de/sciss/synth/SC.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="92" column="68" selection-start="4604" selection-end="4604" vertical-scroll-proportion="0.0">
+        <state line="73" column="26" selection-start="3749" selection-end="3841" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/de/sciss/synth/Buffer.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="205" column="24" selection-start="7563" selection-end="7563" vertical-scroll-proportion="0.33333334">
+        <state line="208" column="0" selection-start="7280" selection-end="7626" vertical-scroll-proportion="0.43593314">
           <folding />
         </state>
       </provider>
