@@ -3,18 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" readonly="true" id="01886865-ff38-4eb7-a79d-92e783f03245" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/synth/SC.scala" afterPath="$PROJECT_DIR$/src/de/sciss/synth/SC.scala" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/de/sciss/synth/GraphFunction.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/synth/Synth.scala" afterPath="$PROJECT_DIR$/src/de/sciss/synth/Synth.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/synth/ServerMessages.scala" afterPath="$PROJECT_DIR$/src/de/sciss/synth/ServerMessages.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/synth/SynthDef.scala" afterPath="$PROJECT_DIR$/src/de/sciss/synth/SynthDef.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/synth/ugen/Line.scala" afterPath="$PROJECT_DIR$/src/de/sciss/synth/ugen/Line.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/synth/Constant.scala" afterPath="$PROJECT_DIR$/src/de/sciss/synth/Constant.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/synth/ugen/BasicOpUGen.scala" afterPath="$PROJECT_DIR$/src/de/sciss/synth/ugen/BasicOpUGen.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/synth/ControlDesc.scala" afterPath="$PROJECT_DIR$/src/de/sciss/synth/ControlDesc.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/synth/Node.scala" afterPath="$PROJECT_DIR$/src/de/sciss/synth/Node.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ExampleCmd.txt" afterPath="$PROJECT_DIR$/ExampleCmd.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/de/sciss/synth/GraphBuilder.scala" afterPath="$PROJECT_DIR$/src/de/sciss/synth/GraphBuilder.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="ScalaCollider.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -83,19 +73,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ServerMessages.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="ServerMessages.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/de/sciss/synth/ServerMessages.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="299" column="59" selection-start="12749" selection-end="12749" vertical-scroll-proportion="0.19377652">
+            <state line="291" column="55" selection-start="12293" selection-end="12293" vertical-scroll-proportion="-0.65384614">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SC.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="SC.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/de/sciss/synth/SC.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="60" column="71" selection-start="2669" selection-end="2669" vertical-scroll-proportion="0.0">
+            <state line="92" column="68" selection-start="4604" selection-end="4604" vertical-scroll-proportion="0.7075209">
               <folding />
             </state>
           </provider>
@@ -122,7 +112,7 @@
       <file leaf-file-name="GraphFunction.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/de/sciss/synth/GraphFunction.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="33" column="85" selection-start="1020" selection-end="1020" vertical-scroll-proportion="-16.23077">
+            <state line="27" column="3" selection-start="498" selection-end="683" vertical-scroll-proportion="-12.769231">
               <folding />
             </state>
           </provider>
@@ -187,9 +177,9 @@
         <option value="$PROJECT_DIR$/src/de/sciss/synth/Synth.scala" />
         <option value="$PROJECT_DIR$/src/de/sciss/synth/Node.scala" />
         <option value="$PROJECT_DIR$/src/de/sciss/synth/SynthDef.scala" />
-        <option value="$PROJECT_DIR$/src/de/sciss/synth/SC.scala" />
         <option value="$PROJECT_DIR$/src/de/sciss/synth/GraphFunction.scala" />
         <option value="$PROJECT_DIR$/src/de/sciss/synth/ServerMessages.scala" />
+        <option value="$PROJECT_DIR$/src/de/sciss/synth/SC.scala" />
       </list>
     </option>
   </component>
@@ -763,16 +753,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/synth/SC.scala">
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/synth/ServerMessages.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="60" column="71" selection-start="2669" selection-end="2669" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/synth/GraphFunction.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="33" column="85" selection-start="1020" selection-end="1020" vertical-scroll-proportion="-16.23077">
+        <state line="291" column="55" selection-start="12293" selection-end="12293" vertical-scroll-proportion="-0.65384614">
           <folding />
         </state>
       </provider>
@@ -784,9 +767,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/de/sciss/synth/ServerMessages.scala">
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/synth/GraphFunction.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="299" column="59" selection-start="12749" selection-end="12749" vertical-scroll-proportion="0.19377652">
+        <state line="27" column="3" selection-start="498" selection-end="683" vertical-scroll-proportion="-12.769231">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/de/sciss/synth/SC.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="92" column="68" selection-start="4604" selection-end="4604" vertical-scroll-proportion="0.7075209">
           <folding />
         </state>
       </provider>
