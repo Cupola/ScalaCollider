@@ -29,7 +29,7 @@
 package de.sciss.synth
 
 /**
- *    @version	0.14, 22-Apr-10
+ *    @version	0.14, 28-Apr-10
  */
 case class Synth( defName: String, server: Server, id: Int )
 extends Node {
@@ -42,38 +42,27 @@ extends Node {
 
 // factory
 object Synth {
-   def play( defName: String, args: Seq[ ControlSetMap ] = Nil ) : Synth =
-      head( Server.default.defaultGroup, defName, args )
+   def play( defName: String, args: Seq[ ControlSetMap ] = Nil, target: Node = Server.default.defaultGroup,
+             addAction: AddAction = addToHead ) = {
+      val synth = new Synth( defName, target.server )
+      synth.server ! synth.newMsg( target, args, addAction )
+      synth
+   }
 
-   def after( target: Node, defName: String, args: Seq[ ControlSetMap ] = Nil ) = {
-	   val synth = new Synth( defName, target.server );
-      synth.server ! synth.newMsg( target, args, addAfter )
-      synth
-	}
+   def after( target: Node, defName: String, args: Seq[ ControlSetMap ] = Nil ) : Synth =
+      play( defName, args, target, addAfter )
  
-   def before( target: Node, defName: String, args: Seq[ ControlSetMap ] = Nil ) = {
-	   val synth = new Synth( defName, target.server )
-      synth.server ! synth.newMsg( target, args, addBefore )
-      synth
-	}
- 
-	def head( target: Group, defName: String, args: Seq[ ControlSetMap ] = Nil ) = {
-	   val synth = new Synth( defName, target.server )
-      synth.server ! synth.newMsg( target, args, addToHead )
-      synth
-	}
+   def before( target: Node, defName: String, args: Seq[ ControlSetMap ] = Nil ) : Synth =
+      play( defName, args, target, addBefore )
 
-	def tail( target: Group, defName: String, args: Seq[ ControlSetMap ] = Nil ) = {
-	   val synth = new Synth( defName, target.server )
-      synth.server ! synth.newMsg( target, args, addToTail )
-      synth
-	}
- 
-	def replace( target: Node, defName: String, args: Seq[ ControlSetMap ] = Nil ) = {
-	   val synth = new Synth( defName, target.server )
-      synth.server ! synth.newMsg( target, args, addReplace )
-      synth
-	}
+	def head( target: Group, defName: String, args: Seq[ ControlSetMap ] = Nil ) : Synth =
+      play( defName, args, target, addToHead )
+
+	def tail( target: Group, defName: String, args: Seq[ ControlSetMap ] = Nil ) : Synth =
+      play( defName, args, target, addToTail )
+
+	def replace( target: Node, defName: String, args: Seq[ ControlSetMap ] = Nil ) : Synth =
+      play( defName, args, target, addReplace )
   
 //  def newPaused = {
 //    new Synth( "schoko", new Server( "lala", new NetAddr, new ServerOptions, 0 ), 0 );

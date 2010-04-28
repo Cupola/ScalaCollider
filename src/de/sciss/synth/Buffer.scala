@@ -32,7 +32,7 @@ import de.sciss.scalaosc.OSCMessage
 import ugen.{ BufRateScale, FreeSelfWhenDone, PlayBuf }
 
 /**
- * 	@version	0.17, 22-Apr-10
+ * 	@version	0.17, 28-Apr-10
  */
 object Buffer {
    def alloc( server: Server = Server.default, numFrames: Int, numChannels: Int = 1, completionMessage: Option[ OSCMessage ] = None ) : Buffer = {
@@ -55,6 +55,23 @@ object Buffer {
 //      b.doOnInfo = action
 //      b.cache
       b.allocRead( path, startFrame, numFrames, Some( b.queryMsg ))
+      b
+   }
+
+   def readChannel( server: Server = Server.default, path: String, startFrame: Int = 0, numFrames: Int = -1,
+                    channels: Seq[ Int ], action: Buffer => Unit = _ => () ) : Buffer = {
+      val b = new Buffer( server )
+      b.register
+      lazy val l: (AnyRef) => Unit = _ match {
+         case BufferManager.BufferInfo( _, _ ) => {
+            b.removeListener( l )
+            action( b )
+         }
+      }
+      b.addListener( l )
+//      b.doOnInfo = action
+//      b.cache
+      b.allocReadChannel( path, startFrame, numFrames, channels, Some( b.queryMsg ))
       b
    }
 }
@@ -161,6 +178,19 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
       OSCBufferAllocReadMessage( id, path, startFrame, numFrames, completionMessage )
    }
 
+   def allocReadChannel( path: String, startFrame: Int = 0, numFrames: Int = -1, channels: Seq[ Int ],
+                         completionMessage: Option[ OSCMessage ] = None ) {
+//      path = argpath;
+      server ! allocReadChannelMsg( path, startFrame, numFrames, channels, completionMessage )
+   }
+
+   def allocReadChannelMsg( path: String, startFrame: Int = 0, numFrames: Int = -1, channels: Seq[ Int ],
+                            completionMessage: Option[ OSCMessage ] = None ) = {
+//      this.cache;
+//      path = argpath;
+      OSCBufferAllocReadChannelMessage( id, path, startFrame, numFrames, channels.toList, completionMessage )
+   }
+
    def cueSoundFileMsg( path: String, startFrame: Int = 0, completionMessage: Option[ OSCMessage ] = None ) =
       OSCBufferReadMessage( id, path, startFrame, numFrames, 0, true, completionMessage )
 
@@ -203,7 +233,7 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
       SC.play( server, out ) { // working around nasty compiler bug
          val ply = PlayBuf.ar( numChannels, id, BufRateScale.kr( id ), loop = if( loop ) 1 else 0 )
          if( !loop ) FreeSelfWhenDone.kr( ply )
-         ply * amp
+         ply * "amp".kr( amp )
       }
    }
    

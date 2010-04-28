@@ -36,7 +36,7 @@ import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
 import collection.mutable.{ ListBuffer }
 
 /**
- *    @version	0.11, 22-Apr-10
+ *    @version	0.11, 28-Apr-10
  */
 trait OSCMessageCodec {
 	def decodeMessage( name: String, b: ByteBuffer ) : OSCMessage
@@ -242,6 +242,11 @@ case class OSCBufferAllocReadMessage( id: Int, path: String, startFrame: Int, nu
                                       completionMessage: Option[ OSCMessage ])
 extends OSCMessage( "/b_allocRead", (completionMessage.map( m => List( id, path, startFrame, numFrames, m ))
                                                        getOrElse List( id, path, startFrame, numFrames )): _* )
+
+case class OSCBufferAllocReadChannelMessage( id: Int, path: String, startFrame: Int, numFrames: Int,
+                                             channels: List[ Int ], completionMessage: Option[ OSCMessage ])
+extends OSCMessage( "/b_allocReadChannel", (List( id, path, startFrame, numFrames ) ::: channels
+   ::: completionMessage.map( msg => List( msg )).getOrElse( Nil )): _* )
 
 case class OSCBufferReadMessage( id: Int, path: String, fileStartFrame: Int, numFrames: Int, bufStartFrame: Int,
                                  leaveOpen: Boolean, completionMessage: Option[ OSCMessage ])
