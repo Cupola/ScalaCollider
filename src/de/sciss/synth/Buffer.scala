@@ -74,9 +74,13 @@ object Buffer {
       b.allocReadChannel( path, startFrame, numFrames, channels, Some( b.queryMsg ))
       b
    }
+
+   private def isPowerOfTwo( i: Int ) = (i & (i-1)) == 0
 }
 
 class Buffer private( val id: Int, val server: Server ) extends Model {
+   import Buffer._
+   
    private var numFramesVar   = -1
    private var numChannelsVar = -1
    private var sampleRateVar  = 0f
@@ -226,6 +230,20 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
 
 	def zeroMsg( completionMessage: Option[ OSCMessage ]) =
       OSCBufferZeroMessage( id, completionMessage )
+
+   def write( path: String, fileType: AudioFile.Type = AudioFile.AIFF,
+              sampleFormat: AudioFile.SampleFormat = AudioFile.Float, numFrames: Int = -1, startFrame: Int = 0,
+              leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage] = None ) {
+//         path = path ?? { thisProcess.platform.recordingsDir +/+ "SC_" ++ Date.localtime.stamp ++ "." ++ headerFormat };
+         server ! writeMsg( path, fileType, sampleFormat, numFrames, startFrame, leaveOpen, completionMessage )
+      }
+
+   def writeMsg( path: String, fileType: AudioFile.Type = AudioFile.AIFF,
+                 sampleFormat: AudioFile.SampleFormat = AudioFile.Float, numFrames: Int = -1, startFrame: Int = 0,
+                 leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage] = None ) = {
+//      require( isPowerOfTwo( this.numFrames ))
+      OSCBufferWriteMessage( id, path, fileType, sampleFormat, numFrames, startFrame, leaveOpen, completionMessage )
+   }
 
    // ---- utility methods ----
    def play( loop: Boolean = false, amp: Float = 1f, out: Int = 0 ) : Synth = {

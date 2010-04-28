@@ -36,7 +36,7 @@ extends RuntimeException( reason )
 //import de.sciss.tint.sc.{ control => kr, audio => ar } // name conflict
 
 /**
- *    @version	0.12, 18-Jan-10
+ *    @version	0.12, 28-Apr-10
  */
 object Bus {
 	def control( server: Server = Server.default, numChannels: Int = 1 ) = {
@@ -110,7 +110,7 @@ extends Bus with ControlRated {
    }
 
    def setnMsg( pairs: Tuple2[ Int, IndexedSeq[ Float ]]* ) = {
-      require( pairs.forall( tup => (tup._1 >= 0 && (tup._1 + tup._2.size) < numChannels) ))
+      require( pairs.forall( tup => (tup._1 >= 0 && (tup._1 + tup._2.size) <= numChannels) ))
       // XXX replace by toIndexedSeq once it has been fixed to be immutable
       val ipairs = pairs.map( tup => (tup._1 + index, Vector( tup._2: _* )))
       OSCControlBusSetnMessage( ipairs: _* )

@@ -263,6 +263,12 @@ extends OSCMessage( "/b_readChannel", (List( id, path, fileStartFrame, numFrames
 case class OSCBufferZeroMessage( id: Int, completionMessage: Option[ OSCMessage ])
 extends OSCMessage( "/b_zero", (completionMessage.map( m => List( id, m )) getOrElse List( id )): _* )
 
+case class OSCBufferWriteMessage( id: Int, path: String, fileType: AudioFile.Type, sampleFormat: AudioFile.SampleFormat,
+                                  numFrames: Int, startFrame: Int, leaveOpen: Boolean,
+                                  completionMessage: Option[ OSCMessage])
+extends OSCMessage( "/b_write", (List( id, path, fileType.id, sampleFormat.id, numFrames, startFrame,
+   if( leaveOpen ) 1 else 0 ) ::: completionMessage.map( msg => List( msg )).getOrElse( Nil )): _* )
+
 //case class OSCBusValuePair( index: Int, value: Float )
 case class OSCControlBusSetMessage( indicesAndValues: Tuple2[ Int, Float ]* )
 extends OSCMessage( "/c_set", indicesAndValues.flatMap( iv => List( iv._1, iv._2 )): _* )

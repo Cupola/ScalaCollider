@@ -29,13 +29,12 @@
 package de.sciss.synth
 
 import SC._
-//import ugen.{ BinaryOpUGen => BinOp, EnvGen, MulAdd, Silent, Out, UnaryOpUGen => UnOp }
+import collection.breakOut
 import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
-import ugen.{ BinaryOpUGen, EnvGen, MulAdd, Silent, Out, UnaryOpUGen }
-//import Rates._
+import ugen.{ BinaryOpUGen, EnvGen, MulAdd, Silent, Out, Poll, UnaryOpUGen }
 
 /**
- * 	@version	0.14, 22-Apr-10
+ * 	@version	0.14, 28-Apr-10
  */
 trait GE {
    def outputs : IIdxSeq[ UGenIn ]
@@ -160,6 +159,32 @@ trait GE {
          case `control` => MulAdd.kr( this, mul, add )
          case r         => error( "Illegal rate " + r )
       }
+   }
+
+   def poll( trig: GE, label: String, trigID: GE = -1 ) : GE = {
+      import GraphBuilder._
+
+      val inputs  = this.outputs
+      val numIns  = inputs.size
+      val trigs   = trig.outputs
+      val ids     = trigID.outputs
+      val labels  = if( label != null ) {
+         Vector.fill( numIns )( label )
+      } else {
+         val multi = numIns > 1
+         inputs.zipWithIndex.map( tup => {
+            val (in, ch) = tup
+            (if( multi ) ch.toString + " -> " else "") + (in match {
+               case p: UGenProxy => if( p.source.numOutputs > 1 ) "(" + p.outputIndex + ")" else ""
+               case x            => x.toString
+            })
+         })
+      }
+      val numExp = math.max( numIns, math.max( trigs.size, math.max( labels.size, ids.size )))
+      seq( (0 until numExp).flatMap[ UGenIn, IIdxSeq[ UGenIn ]]( ch => (inputs( ch ).rate match {
+         case `audio` => Poll.ar( trigs( ch ), inputs( ch ), labels( ch ), ids( ch ))
+         case _ =>       Poll.kr( trigs( ch ), inputs( ch ), labels( ch ), ids( ch ))
+      }).outputs )( breakOut ))
    }
 }
 
