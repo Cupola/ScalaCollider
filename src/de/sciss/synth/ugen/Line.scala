@@ -79,13 +79,13 @@ case class LinLin( rate: Rate, in: UGenIn, srcLo: UGenIn, srcHi: UGenIn, dstLo: 
 extends SingleOutUGen( in, srcLo, srcHi, dstLo, dstHi )
 
 object AmpComp extends UGen3Args {
-	def ar( freq: GE = midicps( 60 ), root: GE = midicps( 60 ), expon: GE = 0.3333 ) : GE =
+	def ar( freq: GE = 60.midicps, root: GE = 60.midicps, expon: GE = 0.3333 ) : GE =
       arExp( freq, root, expon )
 
-	def kr( freq: GE = midicps( 60 ), root: GE = midicps( 60 ), expon: GE = 0.3333 ) : GE =
+	def kr( freq: GE = 60.midicps, root: GE = 60.midicps, expon: GE = 0.3333 ) : GE =
       krExp( freq, root, expon )
 
-	def ir( freq: GE = midicps( 60 ), root: GE = midicps( 60 ), expon: GE = 0.3333 ) : GE =
+	def ir( freq: GE = 60.midicps, root: GE = 60.midicps, expon: GE = 0.3333 ) : GE =
       irExp( freq, root, expon )
 // XXX checkInputs
 }

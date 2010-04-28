@@ -36,40 +36,40 @@ extends Node {
    
 	def this( defName: String, server: Server = Server.default ) = this( defName, server, server.nodes.nextID )
 
-	def newMsg( target: Node, args: Seq[ Tuple2[ Any, Float ]] = Nil, addAction: AddAction = addToHead ) =
+	def newMsg( target: Node, args: Seq[ ControlSetMap ] = Nil, addAction: AddAction = addToHead ) =
       OSCSynthNewMessage( defName, id, addAction.id, target.id, args: _* )
 }
 
 // factory
 object Synth {
-   def play( defName: String, args: Seq[ Tuple2[ Any, Float ]] = Nil ) : Synth =
+   def play( defName: String, args: Seq[ ControlSetMap ] = Nil ) : Synth =
       head( Server.default.defaultGroup, defName, args )
 
-   def after( target: Node, defName: String, args: Seq[ Tuple2[ Any, Float ]] = Nil ) = {
+   def after( target: Node, defName: String, args: Seq[ ControlSetMap ] = Nil ) = {
 	   val synth = new Synth( defName, target.server );
       synth.server ! synth.newMsg( target, args, addAfter )
       synth
 	}
  
-   def before( target: Node, defName: String, args: Seq[ Tuple2[ Any, Float ]] = Nil ) = {
+   def before( target: Node, defName: String, args: Seq[ ControlSetMap ] = Nil ) = {
 	   val synth = new Synth( defName, target.server )
       synth.server ! synth.newMsg( target, args, addBefore )
       synth
 	}
  
-	def head( target: Group, defName: String, args: Seq[ Tuple2[ Any, Float ]] = Nil ) = {
+	def head( target: Group, defName: String, args: Seq[ ControlSetMap ] = Nil ) = {
 	   val synth = new Synth( defName, target.server )
       synth.server ! synth.newMsg( target, args, addToHead )
       synth
 	}
 
-	def tail( target: Group, defName: String, args: Seq[ Tuple2[ Any, Float ]] = Nil ) = {
+	def tail( target: Group, defName: String, args: Seq[ ControlSetMap ] = Nil ) = {
 	   val synth = new Synth( defName, target.server )
       synth.server ! synth.newMsg( target, args, addToTail )
       synth
 	}
  
-	def replace( target: Node, defName: String, args: Seq[ Tuple2[ Any, Float ]] = Nil ) = {
+	def replace( target: Node, defName: String, args: Seq[ ControlSetMap ] = Nil ) = {
 	   val synth = new Synth( defName, target.server )
       synth.server ! synth.newMsg( target, args, addReplace )
       synth

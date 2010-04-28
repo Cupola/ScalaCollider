@@ -29,6 +29,7 @@
 package de.sciss.synth
 
 import collection.immutable.{ IndexedSeq => IIdxSeq }
+import SC._
 
 /**
  *    @version	0.14, 27-Apr-10
@@ -113,18 +114,18 @@ abstract class Node extends Model {
   	def runMsg : OSCNodeRunMessage = runMsg( true )
   	def runMsg( flag: Boolean ) = OSCNodeRunMessage( id -> flag )
   
-  	def set( pairs: Tuple2[ Any, Float ]*) {
+  	def set( pairs: ControlSetMap* ) {
   		server ! setMsg( pairs: _* )
   	}
 	
-  	def setMsg( pairs: Tuple2[ Any, Float ]* ) =
+  	def setMsg( pairs: ControlSetMap* ) =
   		OSCNodeSetMessage( id, pairs: _* )
 
-  	def setn( pairs: Tuple2[ Any, IIdxSeq[ Float ]]*) {
+  	def setn( pairs: ControlSetMap* ) {
   		server ! setnMsg( pairs: _* )
   	}
 	
-  	def setnMsg( pairs: Tuple2[ Any, IIdxSeq[ Float ]]*) =
+  	def setnMsg( pairs: ControlSetMap* ) =
   		OSCNodeSetnMessage( id, pairs: _* )
 
   	def trace {
@@ -134,20 +135,22 @@ abstract class Node extends Model {
    def traceMsg = OSCNodeTraceMessage( id )
 
   	def release : Unit = release( None )
-  
+   def release( releaseTime: Float ) { release( Some( releaseTime ))}
+
   	def release( releaseTime: Option[ Float ]) {
   		server ! releaseMsg( releaseTime )
   	}
 
   	def releaseMsg : OSCNodeSetMessage = releaseMsg( None )
-  
+   def releaseMsg( releaseTime: Float ) : OSCNodeSetMessage = releaseMsg( Some( releaseTime ))
+
   	// assumes a control called 'gate' in the synth
   	def releaseMsg( releaseTime: Option[ Float ]) = {
   		val value = releaseTime.map( -1.0f - _ ).getOrElse( 0.0f )
   		setMsg( "gate" -> value )
 	}
 
-   def map( pairs: Tuple2[ Any, ControlBus ]* ) {
+   def map( pairs: SingleControlBusMap* ) {
       server ! mapMsg( pairs: _* )
    }
 
@@ -158,31 +161,31 @@ abstract class Node extends Model {
 //  	def mapMsg( pairs: Tuple2[ Any, Int ]* ) =
 //  		OSCNodeMapMessage( id, pairs: _* )
 
-   def mapMsg( pairs: Tuple2[ Any, ControlBus ]* ) =
-      OSCNodeMapMessage( id, pairs.map( p => p._1 -> p._2.index ): _* )
+   def mapMsg( pairs: SingleControlBusMap* ) =
+      OSCNodeMapMessage( id, pairs: _* )
    
-   def mapn( control: Any, index: Int, numControls: Int ) {
-      server ! mapnMsg( OSCNodeMapInfo( control, index, numControls ))
-   }
+//   def mapn( control: ControlID, index: Int, numControls: Int ) {
+//      server ! mapnMsg( OSCNodeMapInfo( control, index, numControls ))
+//   }
 
-   def mapn( control: Any, bus: ControlBus ) {
-      server ! mapnMsg( OSCNodeMapInfo( control, bus.index, bus.numChannels ))
-   }
+//   def mapn( control: ControlID, bus: ControlBus ) {
+//      server ! mapnMsg( OSCNodeMapInfo( control, bus.index, bus.numChannels ))
+//   }
 
-  	def mapn( mappings: OSCNodeMapInfo* ) {
+  	def mapn( mappings: ControlBusMap* ) {
   		server ! mapnMsg( mappings: _* )
   	}
   	
-   def mapnMsg( control: Any, index: Int, numControls: Int ) =
-      OSCNodeMapnMessage( id, OSCNodeMapInfo( control, index, numControls ))
+//   def mapnMsg( control: ControlID, index: Int, numControls: Int ) =
+//      OSCNodeMapnMessage( id, OSCNodeMapInfo( control, index, numControls ))
 
-   def mapnMsg( control: Any, bus: ControlBus ) =
-      OSCNodeMapnMessage( id, OSCNodeMapInfo( control, bus.index, bus.numChannels ))
+//   def mapnMsg( control: ControlID, bus: ControlBus ) =
+//      OSCNodeMapnMessage( id, OSCNodeMapInfo( control, bus.index, bus.numChannels ))
 
-  	def mapnMsg( mappings: OSCNodeMapInfo* ) =
+  	def mapnMsg( mappings: ControlBusMap* ) =
   		OSCNodeMapnMessage( id, mappings: _* )
 
-   def fill( control: AnyRef, numChannels: Int, value: Float ) {
+   def fill( control: Any, numChannels: Int, value: Float ) {
       server ! fillMsg( control, numChannels, value )
    }
 
@@ -190,7 +193,7 @@ abstract class Node extends Model {
   		server ! fillMsg( fillings: _* )
   	}
 	
-   def fillMsg( control: AnyRef, numChannels: Int, value: Float ) =
+   def fillMsg( control: Any, numChannels: Int, value: Float ) =
       OSCNodeFillMessage( id, OSCNodeFillInfo( control, numChannels, value ))
    
   	def fillMsg( fillings: OSCNodeFillInfo* ) = OSCNodeFillMessage( id, fillings: _* )

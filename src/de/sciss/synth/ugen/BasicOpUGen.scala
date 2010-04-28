@@ -35,7 +35,7 @@ import GraphBuilder._
 import math._
 
 /**
- *    @version 0.11, 22-Apr-10
+ *    @version 0.11, 27-Apr-10
  */
 object MulAdd {
   def ar( in: GE, mul: GE, add: GE ) : GE = {
@@ -142,54 +142,54 @@ object UnaryOpUGen {
       simplify( for( List( ai ) <- expand( a )) yield make1( selector, ai ))
    }
 
-   @inline private def cn( f: Float )  = c( f )
-   @inline private def cn( d: Double ) = c( d.toFloat )
+//   @inline private def cn( f: Float )  = c( f )
+//   @inline private def cn( d: Double ) = c( d.toFloat )
 
    private def make1( selector: Op, a: UGenIn ) : GE = {
-      // replace constants immediately
-      a match {
-         case c( aval ) => selector match {
-            case Neg       => cn( -aval )
-         // case Not       =>
-            case Abs       => cn( abs( aval ))
-            case Ceil      => cn( ceil( aval ))
-            case Floor     => cn( floor( aval ))
-//          case Frac      => cn( aval % 1.0	)
-            case Frac      => cn( aval - floor( aval )) // according to jmc
-            case Signum    => cn( if( aval == 0 ) 0 else if( aval < 0 ) -1 else 1 )
-            case Squared   => cn( aval * aval )
-            case Cubed     => cn( aval * aval * aval )
-            case Sqrt      => cn( sqrt( aval ))
-            case Exp       => cn( exp( aval ))
-            case Reciprocal=> cn( 1.0f / aval )
-            case Midicps   => cn( midicps( aval ))
-            case Cpsmidi   => cn( cpsmidi( aval ))
-            case Midiratio => cn( pow( 2, aval * 0.083333333333 ))
-            case Ratiomidi => cn( 12 * log( aval ) / log( 2 ))
-            case Dbamp     => cn( pow( 10, aval * 0.05 ))
-            case Ampdb     => cn( log10( aval )* 20 )
-            case Octcps    => cn( 440 * pow( 2, aval - 4.75 ))
-            case Cpsoct    => cn( log( aval * 0.0022727272727 ) / log( 2 ) + 4.75 )
-            case Log       => cn( log( aval ))
-            case Log2      => cn( log( aval ) / log( 2 ))
-            case Log10     => cn( log10( aval ))
-            case Sin       => cn( sin( aval ))
-            case Cos       => cn( cos( aval ))
-            case Tan       => cn( tan( aval ))
-            case Asin      => cn( asin( aval ))
-            case Acos      => cn( acos( aval ))
-            case Atan      => cn( atan( aval ))
-            case Sinh      => cn( sinh( aval ))
-            case Cosh      => cn( cosh( aval ))
-            case Tanh      => cn( tanh( aval ))
-            case Distort   => cn( aval / (1 + abs( aval )))
-            case Softclip  =>	{ val absx = abs( aval ); cn( if( absx <= 0.5f ) aval else (absx - 0.25f) / aval )}
-            case Ramp      => cn( if( aval <= 0 ) 0 else if( aval >= 1 ) 1 else aval )
-            case Scurve    => cn( if( aval <= 0 ) 0 else if( aval > 1 ) 1 else aval * aval * (3 - 2 * aval))
-            case _         => this( a.rate, selector, a )
-         }
-         case _            => this( a.rate, selector, a )
-      }
+      this( a.rate, selector, a )
+//      // replace constants immediately
+//      a match {
+//         case c( aval ) => selector match {
+//            case Neg       => cn( -aval )
+//         // case Not       =>
+//            case Abs       => cn( abs( aval ))
+//            case Ceil      => cn( ceil( aval ))
+//            case Floor     => cn( floor( aval ))
+//            case Frac      => cn( aval - floor( aval )) // according to jmc
+//            case Signum    => cn( signum( aval ))
+//            case Squared   => cn( aval * aval )
+//            case Cubed     => cn( aval * aval * aval )
+//            case Sqrt      => cn( sqrt( aval ))
+//            case Exp       => cn( exp( aval ))
+//            case Reciprocal=> cn( 1.0f / aval )
+//            case Midicps   => cn( 440 * pow( 2, (aval - 69) * 0.083333333333 ))
+//            case Cpsmidi   => cn( log( aval * 0.0022727272727 ) / log( 2 ) * 12 + 69 )
+//            case Midiratio => cn( pow( 2, aval * 0.083333333333 ))
+//            case Ratiomidi => cn( 12 * log( aval ) / log( 2 ))
+//            case Dbamp     => cn( pow( 10, aval * 0.05 ))
+//            case Ampdb     => cn( log10( aval )* 20 )
+//            case Octcps    => cn( 440 * pow( 2, aval - 4.75 ))
+//            case Cpsoct    => cn( log( aval * 0.0022727272727 ) / log( 2 ) + 4.75 )
+//            case Log       => cn( log( aval ))
+//            case Log2      => cn( log( aval ) / log( 2 ))
+//            case Log10     => cn( log10( aval ))
+//            case Sin       => cn( sin( aval ))
+//            case Cos       => cn( cos( aval ))
+//            case Tan       => cn( tan( aval ))
+//            case Asin      => cn( asin( aval ))
+//            case Acos      => cn( acos( aval ))
+//            case Atan      => cn( atan( aval ))
+//            case Sinh      => cn( sinh( aval ))
+//            case Cosh      => cn( cosh( aval ))
+//            case Tanh      => cn( tanh( aval ))
+//            case Distort   => cn( aval / (1 + abs( aval )))
+//            case Softclip  =>	{ val absx = abs( aval ); cn( if( absx <= 0.5f ) aval else (absx - 0.25f) / aval )}
+//            case Ramp      => cn( if( aval <= 0 ) 0 else if( aval >= 1 ) 1 else aval )
+//            case Scurve    => cn( if( aval <= 0 ) 0 else if( aval > 1 ) 1 else aval * aval * (3 - 2 * aval))
+//            case _         => this( a.rate, selector, a )
+//         }
+//         case _            => this( a.rate, selector, a )
+//      }
    }
 }
 

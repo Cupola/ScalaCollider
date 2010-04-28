@@ -28,13 +28,13 @@
 
 package de.sciss.synth
 
-import collection.immutable.{ IndexedSeq => IIdxSeq }
+import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
 import math._
 
 /**
  *    @version	0.12, 23-Apr-10
  */
-case class ControlName( name: String ) {
+class ControlFactory( name: String ) {
    def ir : ControlDesc = ir( Vector( 0f ))
    def ir( value: Double ) : ControlDesc = ir( Vector( value.toFloat ))
    def ir( value: Float ) : ControlDesc = ir( Vector( value ))
@@ -64,6 +64,40 @@ case class ControlName( name: String ) {
          result
       }
    }
+}
+
+//case class ControlID protected[synth]( id: Any )
+trait ControlSetMap {
+   def toSetSeq: IIdxSeq[ Any ]
+   def toSetnSeq: IIdxSeq[ Any ]
+}
+
+case class SingleControlSetMap protected[synth]( key: Any, value: Float )
+extends ControlSetMap {
+   def toSetSeq: IIdxSeq[ Any ]  = Vector( key, value )
+   def toSetnSeq: IIdxSeq[ Any ] = Vector( key, 1, value )
+}
+
+case class MultiControlSetMap protected[synth]( key: Any, values: IIdxSeq[ Float ])
+extends ControlSetMap {
+   def toSetSeq: IIdxSeq[ Any ]  = error( "Not yet supported" )
+   def toSetnSeq: IIdxSeq[ Any ] = key +: values.size +: values
+}
+
+trait ControlBusMap {
+//   def toMapSeq: IIdxSeq[ Any ]
+   def toMapnSeq: IIdxSeq[ Any ]
+}
+
+case class SingleControlBusMap protected[synth]( key: Any, index: Int )
+extends ControlBusMap {
+   def toMapSeq: IIdxSeq[ Any ]  = Vector( key, index )
+   def toMapnSeq: IIdxSeq[ Any ] = Vector( key, index, 1 )
+}
+
+case class MultiControlBusMap protected[synth]( key: Any, index: Int, numChannels: Int )
+extends ControlBusMap {
+   def toMapnSeq: IIdxSeq[ Any ] = Vector( key, index, numChannels )
 }
 
 class ControlDesc( val name: Option[ String ], val rate: Rate, val initValues: IIdxSeq[ Float ],

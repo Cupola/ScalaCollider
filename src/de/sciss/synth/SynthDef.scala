@@ -155,7 +155,7 @@ class SynthDef private ( val name: String, constants: IIdxSeq[ Float ], controlV
    def loadMsg( dir: String ) =
 	   OSCMessage( "/d_load", dir + name + ".scsyndef" )
 
-   def play( target: Node = Server.default, args: Seq[ Tuple2[ String, Float ]] = Nil, addAction: AddAction = addToHead ) : Synth = {
+   def play( target: Node = Server.default, args: Seq[ ControlSetMap ] = Nil, addAction: AddAction = addToHead ) : Synth = {
       val synth	= new Synth( name, target.server )
 		val msg		= synth.newMsg( target, args, addAction )
 		send( target.server, msg )

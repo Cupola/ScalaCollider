@@ -289,18 +289,18 @@ extends OSCMessage( "/g_freeAll", ids: _* )
 case class OSCGroupDeepFreeMessage( ids: Int* )
 extends OSCMessage( "/g_deepFree", ids: _* )
 
-case class OSCSynthNewMessage( defName: String, id: Int, addAction: Int, targetID: Int, controls: Tuple2[ Any, Float ]* )
+case class OSCSynthNewMessage( defName: String, id: Int, addAction: Int, targetID: Int, controls: ControlSetMap* )
 extends OSCMessage( "/s_new",
-   (Vector( defName, id, addAction, targetID ) ++ controls.flatMap( p => Vector( p._1, p._2 ))( breakOut )): _* )
+   (Vector( defName, id, addAction, targetID ) ++ controls.flatMap( _.toSetSeq )): _* )
 
 case class OSCNodeRunMessage( nodes: Tuple2[ Int, Boolean ]* )
 extends OSCMessage( "/n_run", nodes.flatMap( n => List( n._1, if( n._2 ) 1 else 0 )): _* )
 
-case class OSCNodeSetMessage( id: Int, pairs: Tuple2[ Any, Float ]* )
-extends OSCMessage( "/n_set", (id +: pairs.flatMap( p => Vector( p._1, p._2 ))): _* )
+case class OSCNodeSetMessage( id: Int, pairs: ControlSetMap* )
+extends OSCMessage( "/n_set", (id +: pairs.flatMap( _.toSetSeq )): _* )
 
-case class OSCNodeSetnMessage( id: Int, pairs: Tuple2[ Any, IIdxSeq[ Float ]]* )
-extends OSCMessage( "/n_setn", (id +: pairs.flatMap( p => Vector( p._1, p._2.size ) ++ p._2 )): _* )
+case class OSCNodeSetnMessage( id: Int, pairs: ControlSetMap* )
+extends OSCMessage( "/n_setn", (id +: pairs.flatMap( _.toSetnSeq )): _* )
 
 case class OSCNodeTraceMessage( ids: Int* )
 extends OSCMessage( "/n_trace", ids: _* )
@@ -311,13 +311,13 @@ extends OSCMessage( "/n_noid", ids: _* )
 case class OSCNodeFreeMessage( ids: Int* )
 extends OSCMessage( "/n_free", ids: _* )
 
-case class OSCNodeMapMessage( id: Int, mappings: Tuple2[ Any, Int ]* )
-extends OSCMessage( "/n_map", (id +: mappings.flatMap( m => Vector( m._1, m._2 ))): _* )
+case class OSCNodeMapMessage( id: Int, mappings: SingleControlBusMap* )
+extends OSCMessage( "/n_map", (id +: mappings.flatMap( _.toMapSeq )): _* )
 
-case class OSCNodeMapInfo( control: Any, index: Int, numChannels: Int )
+//case class OSCNodeMapInfo( control: Any, index: Int, numChannels: Int )
 
-case class OSCNodeMapnMessage( id: Int, mappings: OSCNodeMapInfo* )
-extends OSCMessage( "/n_mapn", (id +: mappings.flatMap( m => Vector( m.control, m.index, m.numChannels ))): _* )
+case class OSCNodeMapnMessage( id: Int, mappings: ControlBusMap* )
+extends OSCMessage( "/n_mapn", (id +: mappings.flatMap( _.toMapnSeq )): _* )
 
 case class OSCNodeFillInfo( control: Any, numChannels: Int, value: Float )
 

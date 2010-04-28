@@ -30,52 +30,59 @@ package de.sciss.synth
 
 import de.sciss.scalaosc.{ OSCMessage }
 import collection.breakOut
+import collection.immutable.{ IndexedSeq => IIdxSeq }
 import math._
 
 /**
- * 	@version	0.14, 22-Apr-10
+ * 	@version	0.14, 27-Apr-10
  */
 object SC {
-  // GEs
-  implicit def floatToGE( x: Float ) = Constant( x )
-  implicit def intToGE( x: Int ) = Constant( x.toFloat )
-  implicit def doubleToGE( x: Double ) = Constant( x.toFloat )
-  implicit def seqOfGEToGE( x: Seq[ GE ]) = new UGenInSeq( x.flatMap( _.outputs )( breakOut ))
-  implicit def doneActionToGE( x: DoneAction ) = Constant( x.id )
+   // GEs
+   implicit def floatToGE( x: Float ) = Constant( x )
+   implicit def intToGE( x: Int ) = Constant( x.toFloat )
+   implicit def doubleToGE( x: Double ) = Constant( x.toFloat )
+   implicit def seqOfGEToGE( x: Seq[ GE ]) = new UGenInSeq( x.flatMap( _.outputs )( breakOut ))
+   implicit def doneActionToGE( x: DoneAction ) = Constant( x.id )
 
-  // why these are necessary now??
-  implicit def seqOfFloatToGE( x: Seq[ Float ]) = new UGenInSeq( x.map( Constant( _ ))( breakOut ))
-  implicit def seqOfIntToGE( x: Seq[ Int ]) = new UGenInSeq( x.map( i => Constant( i.toFloat ))( breakOut ))
-  implicit def seqOfDoubleToGE( x: Seq[ Double ]) = new UGenInSeq( x.map( d => Constant( d.toFloat ))( breakOut ))
- 
-  implicit def stringToControlName( name: String ) = ControlName( name )
+   // ...und zurueck
+   implicit def constantToFloat( c: Constant ) = c.value
 
-   // do we really need this?
-//  implicit def string2GE( name: String ) : ControlDesc =
-//    SynthDef.graphBuilder.map( _.getControlDesc( name )) orNull
+   // why these are necessary now??
+   implicit def seqOfFloatToGE( x: Seq[ Float ]) = new UGenInSeq( x.map( Constant( _ ))( breakOut ))
+   implicit def seqOfIntToGE( x: Seq[ Int ]) = new UGenInSeq( x.map( i => Constant( i.toFloat ))( breakOut ))
+   implicit def seqOfDoubleToGE( x: Seq[ Double ]) = new UGenInSeq( x.map( d => Constant( d.toFloat ))( breakOut ))
 
-  // mixed number / GE binops
-  // these conflict with scala.math, so we commented them out
-//  def max( a: GE, b: GE ) = a.max( b )
-//  def min( a: GE, b: GE ) = a.min( b )
+   // control mapping
+   implicit def intFloatControlSet( tup: (Int, Float) )                    = SingleControlSetMap( tup._1, tup._2 )
+   implicit def intIntControlSet( tup: (Int, Int) )                        = SingleControlSetMap( tup._1, tup._2.toFloat )
+   implicit def intDoubleControlSet( tup: (Int, Double) )                  = SingleControlSetMap( tup._1, tup._2.toFloat )
+   implicit def stringFloatControlSet( tup: (String, Float) )              = SingleControlSetMap( tup._1, tup._2 )
+   implicit def stringIntControlSet( tup: (String, Int) )                  = SingleControlSetMap( tup._1, tup._2.toFloat )
+   implicit def stringDoubleControlSet( tup: (String, Double) )            = SingleControlSetMap( tup._1, tup._2.toFloat )
+   implicit def intFloatsControlSet( tup: (Int, IIdxSeq[ Float ]))         = MultiControlSetMap( tup._1, tup._2 )
+   implicit def stringFloatsControlSet( tup: (String, IIdxSeq[ Float ]))   = MultiControlSetMap( tup._1, tup._2 )
 
-  // Misc
-  implicit def stringToOption( x: String ) = Some( x )
-//  def dup[T]( x: T, num: Int ) : Seq[T] = (1 to num) map (y => x)
+   implicit def intIntControlBus( tup: (Int, Int) )               = SingleControlBusMap( tup._1, tup._2 )
+   implicit def stringIntControlBus( tup: (String, Int) )         = SingleControlBusMap( tup._1, tup._2 )
+   implicit def intIntIntControlBus( tup: (Int, Int, Int) )       = MultiControlBusMap( tup._1, tup._2, tup._3 )
+   implicit def stringIntIntControlBus( tup: (String, Int, Int) ) = MultiControlBusMap( tup._1, tup._2, tup._3 )
+   implicit def intBusControlBus( tup: (Int, ControlBus) )        = MultiControlBusMap( tup._1, tup._2.index, tup._2.numChannels )
+   implicit def stringBusControlBus( tup: (String, ControlBus) )  = MultiControlBusMap( tup._1, tup._2.index, tup._2.numChannels )
+
+   // pimping
+   implicit def stringToControlFactory( name: String ) = new ControlFactory( name )
+   implicit def thunkToGraphFunction[ T <% GE ]( thunk: => T ) = new GraphFunction( thunk )
+
+//   // Misc
+//   implicit def stringToOption( x: String ) = Some( x )
 
    // Buffer convenience
-   implicit def messageToOption( msg: OSCMessage ) = Some( msg )
+   implicit def messageToOption( msg: OSCMessage ) : Option[ OSCMessage ] = Some( msg )
 
    // Nodes
-   implicit def intToNode( id: Int ) : Node = new Group( Server.default, id )
+//   implicit def intToNode( id: Int ) : Node = new Group( Server.default, id )
    implicit def serverToGroup( s: Server ) : Group = s.defaultGroup
 
-   // Maths conversions XXX TODO : add more of the unary and binary ops
-   def ampdb( amp: Float ) = (log10( amp ) * 20).toFloat
-   def dbamp( db: Float ) = (exp( db / 20 * log( 10 ))).toFloat
-   def midicps( midi: Float ) = (440 * pow( 2, (midi - 69) * 0.083333333333 )).toFloat
-   def cpsmidi( freq: Float ) = (log( freq * 0.0022727272727 ) / log( 2 ) * 12 + 69).toFloat
-  
 //  implicit def stringToStringOrInt( x: String ) = new StringOrInt( x )
 //  implicit def intToStringOrInt( x: Int ) = new StringOrInt( x )
   
@@ -84,72 +91,4 @@ object SC {
       println( "WARNING:\n" + s )
       s
    }
-
-   def play( thunk: => GE ) : Synth = {
-      val func = () => thunk
-      playFunc( func, Server.default.defaultGroup, 0, Some(0.02f), addToHead )
-//	   play( f, target, 0, Some(0.02f), 'addToHead )
-   }
-
-  // XXX should place the thunk always in second argument list
-  /*
-  def play( f: => GE, target: => Node ) : Synth = {
-	def func() = f
-    playFunc( func, target, 0, Some(0.02f), 'addToHead )
-  }
-
-  def play( f: => GE, target: => Node, outBus: Int ) : Synth = {
-	def func() = f
-    playFunc( func, target, outBus, Some(0.02f), 'addToHead )
-  }
-
-  def play( f: => GE, target: => Node, outBus: Int, fadeTime: Option[Float]) : Synth = {
-	def func() = f
-    playFunc( func, target, outBus, fadeTime, 'addToHead )
-  }
-  */
-   def play( target: Node = Server.default.defaultGroup, outBus: Int,
-             fadeTime: Option[Float] = Some( 0.02f ),
-             addAction: AddAction = addToHead )( thunk: => GE ) : Synth = {
-	   val func = () => thunk
-	   playFunc( func, target, outBus, fadeTime, addAction )
-   }
-
-   private var uniqueIDCnt = 0
-   private val uniqueSync = new AnyRef
-   private def uniqueID = {
-      uniqueSync.synchronized {
-         uniqueIDCnt += 1
-         val result = uniqueIDCnt
-         result
-      }
-   }
-
-   private def playFunc( func: () => GE, target: Node, outBus: Int, fadeTime: Option[Float], addAction: AddAction ) : Synth = {
-    // arg target, outbus = 0, fadeTime=0.02, addAction='addToHead;
-
-//		target = target.asTarget;
-//        val target = new Group( Server.default, 1 ) // XXX
-		val server = target.server
-//		if( server.condition != 'running ) { 
-//			throw new IllegalStateException( "server '" + server.name + "' not running." )
-//		}
-//		val defName = "temp__" + abs( func.hashCode )
-		val defName    = "temp_" + uniqueID // why risk a hashcode clash?
-		val synthDef   = GraphBuilder.wrapOut( defName, func, fadeTime )
-		val synth      = new Synth( synthDef.name, server )
-		val bytes      = synthDef.toBytes
-		val synthMsg   = synth.newMsg( target, List( "i_out" -> outBus.toFloat, "out" -> outBus.toFloat ), addAction )
-		if( bytes.remaining > (65535 / 4) ) { // preliminary fix until full size works
-			if( server.isLocal ) {
-				synthDef.load( server, synthMsg )
-			} else {
-				warn( "synthdef may have been too large to send to remote server" )
-				server ! OSCMessage( "/d_recv", bytes, synthMsg )
-			}
-		} else {
-			server ! OSCMessage( "/d_recv", bytes, synthMsg )
-		}
-		synth
-	}
 }

@@ -46,11 +46,10 @@ trait GE {
    
    // unary ops
    def neg : GE               = Neg.make( this )
-   def reciprocal : GE        = Reciprocal.make( this )
-// def bitNot : GE	         = UnOp.make( 'bitNot, this )
+// def bitNot : GE	         = BitNot.make( this )
    def abs : GE	            = Abs.make( this )
-// def asFloat : GE	         = UnOp.make( 'asFloat, this )
-// def asInteger : GE	      = UnOp.make( 'asInteger, this )
+// def toFloat : GE	         = UnOp.make( 'asFloat, this )
+// def toInteger : GE	      = UnOp.make( 'asInteger, this )
    def ceil : GE	            = Ceil.make( this )
    def floor : GE	            = Floor.make( this )
    def frac : GE	            = Frac.make( this )
@@ -59,12 +58,13 @@ trait GE {
    def cubed : GE             = Cubed.make( this )
    def sqrt : GE              = Sqrt.make( this )
    def exp : GE               = Exp.make( this )
+   def reciprocal : GE        = Reciprocal.make( this )
    def midicps : GE           = Midicps.make( this )
    def cpsmidi : GE           = Cpsmidi.make( this )
    def midiratio : GE         = Midiratio.make( this )
    def ratiomidi : GE         = Ratiomidi.make( this )
-   def ampdb : GE             = Ampdb.make( this )
    def dbamp : GE             = Dbamp.make( this )
+   def ampdb : GE             = Ampdb.make( this )
    def octcps : GE            = Octcps.make( this )
    def cpsoct : GE            = Cpsoct.make( this )
    def log : GE               = Log.make( this )
@@ -178,25 +178,20 @@ object GraphBuilder {
       if( elements.size == 1 ) elements.head else new UGenInSeq( elements )
    }
      
-   def wrapOut( name: String, func: () => GE, fadeTime: Option[Float] ) : SynthDef = {
-		def fullFunc : GE = {
-			var result = func.apply()
-			val rate = Rates.highest( result.outputs.map( _.rate ): _* )
-			if( (rate == audio) || (rate == control) ) {
-				fadeTime.foreach( fdt => {
-					result = makeFadeEnv( fdt ) * result
-				})
-				val i_out = "i_out".ir
+   def wrapOut( name: String, thunk: => GE, fadeTime: Option[Float] ) : SynthDef = {
+      SynthDef( name ) {
+         val res1 = thunk
+         val rate = Rates.highest( res1.outputs.map( _.rate ): _* )
+         if( (rate == audio) || (rate == control) ) {
+            val res2 = fadeTime.map( fdt => makeFadeEnv( fdt ) * res1 ) getOrElse res1
+            val i_out = "i_out".ir
             if( rate == audio ) {
-               Out.ar( i_out, result )
+               Out.ar( i_out, res2 )
             } else {
-               Out.kr( i_out, result )
+               Out.kr( i_out, res2 )
             }
-			} else {
-            result
-         }
-		}
-      SynthDef( name )( fullFunc )
+         } else res1
+      }
 	}
 
 	def makeFadeEnv( fadeTime: Float ) : GE = {
