@@ -36,7 +36,7 @@ import collection.immutable.Queue
 import math._
 
 /**
- * 	@version    0.14, 22-Apr-10
+ * 	@version    0.14, 28-Apr-10
  */
 object Server {
    private val allSync  = new AnyRef
@@ -492,7 +492,7 @@ abstract class Server extends Model {
          }
          catch { case e: IOException => printError( "BootThread.run", e )} // thrown if process was not built
          finally {
-            bootThreadTerminated
+            invokeOnMainThread( new Runnable { def run = bootThreadTerminated })
          }
       }
    }
