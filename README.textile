@@ -34,7 +34,7 @@ The demo target starts a REPL and executes the file @console-startup.txt@ which 
 
 @scala> s.boot@
 
-Please refer to @ExampleCmd.txt@ for some example code. There is also an introductory video for the "Swing frontend":http://github.com/Sciss/ScalaColliderSwing at "www.screencast.com/t/MjU1NGIxZTg":http://www.screencast.com/t/MjU1NGIxZTg
+Please refer to @ExampleCmd.txt@ for some example code. There is also an introductory video for the "Swing frontend":http://github.com/Sciss/ScalaColliderSwing at "www.screencast.com/t/YjUwNDZjMT":http://www.screencast.com/t/YjUwNDZjMT
 
 h3. download
 
