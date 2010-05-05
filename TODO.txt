@@ -1,0 +1,11 @@
+- for missing UGens, refer to ugen_list.scd
+
+22-Apr-10
+
+- the Buffer delay UGens set a 'done' flag when they are finished playing. // which ones?
+
+- mutable state
+	Buffer
+	ControlDesc
+[OK]	Node
+	Server

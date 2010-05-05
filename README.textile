@@ -1,0 +1,41 @@
+h2. ScalaCollider ==<small>-- version 0.12 (built 04-may-10) --</small>==
+
+h3. statement
+
+ScalaCollider is a SuperCollider client for the Scala language. It is (C)opyright 2008-2010 by Hanns Holger Rutz. All rights reserved. ScalaCollider is released under the "GNU General Public License":http://www.sciss.de/scalaCollider/licenses/ScalaCollider-License.txt and comes with absolutely no warranties. To contact the author, send an email to @contact at sciss.de@
+
+For project status, visit "www.sciss.de/scalaCollider":http://www.sciss.de/scalaCollider/ .
+
+h3. requirements / installation
+
+ScalaOSC currently compiles against Scala 2.8.0.RC1. It requires Java 1.6 and SuperCollider 3.3.1+. It depends on ScalaOSC ( "github.com/Sciss/ScalaOSC":http://github.com/Sciss/ScalaOSC ).
+
+The repository contains a project file for Intellij IDEA 9 CE, and project files for sbt. Targets for sbt:
+
+* @clean@
+* @compile@
+* @doc@
+* @package@
+* @demo@
+
+The easiest way to install ScalaOSC is to go into your clone of the ScalaOSC git repository, and then execute
+
+@$ sbt publish-local@
+
+After wards, go back into the clone of the ScalaCollider git repository, and simply run
+
+@$ sbt update@
+
+which should find ScalaOSC in your local Ivy repository.
+
+h3. running the demo
+
+The demo target starts a REPL and executes the file @console-startup.txt@ which by default imports the necessary packages and creates a default server. make sure that @s.options.programPath.value@ is set correctly. then boot the server:
+
+@scala> s.boot@
+
+Please refer to @ExampleCmd.txt@ for some example code. There is also an introductory video for the "Swing frontend":http://github.com/Sciss/ScalaColliderSwing at "www.screencast.com/t/MjU1NGIxZTg":http://www.screencast.com/t/MjU1NGIxZTg
+
+h3. download
+
+The current version can be downloaded from "github.com/Sciss/ScalaCollider":http://github.com/Sciss/ScalaCollider

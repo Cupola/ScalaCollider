@@ -1,10 +1,6 @@
-:cp libraries/ScalaOSC.jar
-:cp dist/ScalaCollider.jar
 import math._
 import de.sciss.synth._
-import SC._
+import de.sciss.synth.SC._
 import de.sciss.synth.ugen._
 val s = new PlainServer( "Default" )
 s.options.programPath.value = "/Users/rutz/Documents/devel/fromSVN/SuperCollider3/common/build/scsynth"
-//new swing.NodeTreePanel( s ).makeWindow
-//new swing.ServerStatusPanel( s ).makeWindow
