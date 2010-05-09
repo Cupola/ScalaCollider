@@ -34,7 +34,7 @@ import collection.immutable.{ IndexedSeq => IIdxSeq }
 import math._
 
 /**
- * 	@version	0.14, 27-Apr-10
+ * 	@version	0.14, 09-May-10
  */
 object SC {
    // GEs
@@ -77,8 +77,17 @@ object SC {
 //   implicit def stringToOption( x: String ) = Some( x )
 
    // Buffer convenience
-   implicit def messageToCompletion( msg: OSCMessage ) : Buffer.Completion = Buffer.message( msg )
-   implicit def actionToCompletion( fun: Buffer => Unit ) : Buffer.Completion = Buffer.action( fun )
+//   implicit def actionToCompletion( fun: Buffer => Unit ) : Buffer.Completion = Buffer.action( fun )
+   import Buffer.{ Completion => Comp, SomeCompletion => SomeComp }
+   def message( msg: => OSCMessage ) : Comp                          = SomeComp( Some( _ => msg ), None )
+   def message( msg: Buffer => OSCMessage ) : Comp                   = SomeComp( Some( msg ), None )
+   def action( action: => Unit ) : Comp                              = SomeComp( None, Some( _ => action ))
+   def action( action: Buffer => Unit ) : Comp                       = SomeComp( None, Some( action ))
+   def complete( msg: => OSCMessage, action: => Unit ) : Comp        = SomeComp( Some( _ => msg ), Some( _ => action ))
+   def complete( msg: Buffer => OSCMessage, action: => Unit ) : Comp = SomeComp( Some( msg ), Some( _ => action ))
+   def complete( msg: => OSCMessage, action: Buffer => Unit ) : Comp = SomeComp( Some( _ => msg ), Some( action ))
+   def complete( msg: Buffer => OSCMessage, action: Buffer => Unit ) : Comp = SomeComp( Some( msg ), Some( action ))
+   implicit def messageToCompletion( msg: OSCMessage ) : Comp        = message( msg )
 
    // Nodes
 //   implicit def intToNode( id: Int ) : Node = new Group( Server.default, id )

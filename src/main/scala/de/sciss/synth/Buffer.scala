@@ -30,24 +30,22 @@ package de.sciss.synth
 
 import de.sciss.scalaosc.{ OSCBundle, OSCMessage, OSCPacket }
 import ugen.{ BufRateScale, FreeSelfWhenDone, PlayBuf }
+import SC._
 
 /**
  * 	@version	0.18, 09-May-10
  */
 object Buffer {
-   final class Completion private[Buffer](
-      private[Buffer] val message: Option[ Buffer => OSCMessage ],
-      private[Buffer] val action:  Option[ Buffer => Unit ])
-   val NoCompletion = new Completion( None, None )
-
-   def message( msg: => OSCMessage )                           = new Completion( Some( _ => msg ), None )
-   def message( msg: Buffer => OSCMessage )                    = new Completion( Some( msg ), None )
-   def action( action: => Unit )                               = new Completion( None, Some( _ => action ))
-   def action( action: Buffer => Unit )                        = new Completion( None, Some( action ))
-   def complete( msg: => OSCMessage, action: => Unit )         = new Completion( Some( _ => msg ), Some( _ => action ))
-   def complete( msg: Buffer => OSCMessage, action: => Unit )  = new Completion( Some( msg ), Some( _ => action ))
-   def complete( msg: => OSCMessage, action: Buffer => Unit )  = new Completion( Some( _ => msg ), Some( action ))
-   def complete( msg: Buffer => OSCMessage, action: Buffer => Unit ) = new Completion( Some( msg ), Some( action ))
+   sealed abstract class Completion {
+      private[Buffer] val message: Option[ Buffer => OSCMessage ]
+      private[Buffer] val action:  Option[ Buffer => Unit ]
+   }
+   case class SomeCompletion( private[Buffer] val message: Option[ Buffer => OSCMessage ],
+                              private[Buffer] val action:  Option[ Buffer => Unit ]) extends Completion
+   case object NoCompletion extends Completion {
+      private[Buffer] val message = None
+      private[Buffer] val action  = None
+   }
 
    def alloc( server: Server = Server.default, numFrames: Int, numChannels: Int = 1,
               completion: Completion = NoCompletion ) : Buffer = {
@@ -80,6 +78,8 @@ object Buffer {
    private def isPowerOfTwo( i: Int ) = (i & (i-1)) == 0
 }
 
+// note: unfortunately we need to reverse the arguments here
+// to allow the public constructor (server, numFrames) ...
 class Buffer private( val id: Int, val server: Server ) extends Model {
    b =>
 
@@ -106,6 +106,8 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
    def this( server: Server, numFrames: Int, numChannels: Int ) =
       this( server, numFrames, numChannels, server.buffers.alloc( 1 ))
 
+   override def toString = "Buffer(" + server + ", " + numFrames + ", " + numChannels + ", " + id + ")"
+
    def numFrames   = numFramesVar
    def numChannels = numChannelsVar
    def sampleRate  = sampleRateVar
@@ -121,10 +123,6 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
       sampleRateVar  = info.sampleRate
       dispatch( change )
    }
-
-
-//	def this( server: Server = Server.default, numFrames: Int, numChannels: Int = 1 ) = this( server, numFrames, numChannels, server.getBufferAllocator.alloc( 1 ))
-//	val id = if( bufNumPreliminary >= 0 ) bufNumPreliminary else server.getBufferAllocator.alloc( 1 )
 
    def queryMsg = OSCBufferQueryMessage( id )
 
