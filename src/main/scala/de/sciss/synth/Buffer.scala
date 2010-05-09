@@ -28,50 +28,52 @@
 
 package de.sciss.synth
 
-import de.sciss.scalaosc.OSCMessage
+import de.sciss.scalaosc.{ OSCBundle, OSCMessage, OSCPacket }
 import ugen.{ BufRateScale, FreeSelfWhenDone, PlayBuf }
 
 /**
- * 	@version	0.17, 28-Apr-10
+ * 	@version	0.18, 09-May-10
  */
 object Buffer {
-   def alloc( server: Server = Server.default, numFrames: Int, numChannels: Int = 1, completionMessage: Option[ OSCMessage ] = None ) : Buffer = {
+   final class Completion private[Buffer](
+      private[Buffer] val message: Option[ Buffer => OSCMessage ],
+      private[Buffer] val action:  Option[ Buffer => Unit ])
+   val NoCompletion = new Completion( None, None )
+
+   def message( msg: => OSCMessage )                           = new Completion( Some( _ => msg ), None )
+   def message( msg: Buffer => OSCMessage )                    = new Completion( Some( msg ), None )
+   def action( action: => Unit )                               = new Completion( None, Some( _ => action ))
+   def action( action: Buffer => Unit )                        = new Completion( None, Some( action ))
+   def complete( msg: => OSCMessage, action: => Unit )         = new Completion( Some( _ => msg ), Some( _ => action ))
+   def complete( msg: Buffer => OSCMessage, action: => Unit )  = new Completion( Some( msg ), Some( _ => action ))
+   def complete( msg: => OSCMessage, action: Buffer => Unit )  = new Completion( Some( _ => msg ), Some( action ))
+   def complete( msg: Buffer => OSCMessage, action: Buffer => Unit ) = new Completion( Some( msg ), Some( action ))
+
+   def alloc( server: Server = Server.default, numFrames: Int, numChannels: Int = 1,
+              completion: Completion = NoCompletion ) : Buffer = {
       val b = new Buffer( server, numFrames, numChannels )
-      b.alloc( completionMessage )
+      b.alloc( completion )
       b
    }
 
    def read( server: Server = Server.default, path: String, startFrame: Int = 0, numFrames: Int = -1,
-             action: Buffer => Unit = _ => () ) : Buffer = {
+             completion: Completion = NoCompletion ) : Buffer = {
       val b = new Buffer( server )
-      b.register
-      lazy val l: (AnyRef) => Unit = _ match {
-         case BufferManager.BufferInfo( _, _ ) => {
-            b.removeListener( l )
-            action( b )
-         }
-      }
-      b.addListener( l )
-//      b.doOnInfo = action
-//      b.cache
-      b.allocRead( path, startFrame, numFrames, Some( b.queryMsg ))
+      b.allocRead( path, startFrame, numFrames, completion )
+      b
+   }
+
+   def cue( server: Server = Server.default, path: String, startFrame: Int = 0, numChannels: Int = 1,
+            numBufFrames: Int = 32768, completion: Completion = NoCompletion ) : Buffer = {
+      val b = new Buffer( server, numBufFrames, numChannels )
+      b.alloc( message( b.cueMsg( path, startFrame, completion )))
       b
    }
 
    def readChannel( server: Server = Server.default, path: String, startFrame: Int = 0, numFrames: Int = -1,
-                    channels: Seq[ Int ], action: Buffer => Unit = _ => () ) : Buffer = {
+                    channels: Seq[ Int ], completion: Completion = NoCompletion ) : Buffer = {
       val b = new Buffer( server )
-      b.register
-      lazy val l: (AnyRef) => Unit = _ match {
-         case BufferManager.BufferInfo( _, _ ) => {
-            b.removeListener( l )
-            action( b )
-         }
-      }
-      b.addListener( l )
-//      b.doOnInfo = action
-//      b.cache
-      b.allocReadChannel( path, startFrame, numFrames, channels, Some( b.queryMsg ))
+      b.allocReadChannel( path, startFrame, numFrames, channels, completion )
       b
    }
 
@@ -79,18 +81,20 @@ object Buffer {
 }
 
 class Buffer private( val id: Int, val server: Server ) extends Model {
+   b =>
+
    import Buffer._
-   
+
+   private var released       = false
    private var numFramesVar   = -1
    private var numChannelsVar = -1
    private var sampleRateVar  = 0f
-//   var doOnInfo = (buf: Buffer) => ()
 
    def this( server: Server, numFrames: Int, numChannels: Int, id: Int ) = {
       this( id, server )
       numFramesVar   = numFrames
       numChannelsVar = numChannels
-      sampleRateVar  = server.counts.sampleRate.toFloat
+      sampleRateVar  = server.sampleRate.toFloat
    }
 
    def this( server: Server ) =
@@ -107,7 +111,6 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
    def sampleRate  = sampleRateVar
 
    def register {
-//  	NodeWatcher.register( this, assumePlaying )
        server.bufMgr.register( this )
    }
 
@@ -127,122 +130,144 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
 
    def free { server ! freeMsg }
 
-	def free( completionMessage: Option[ OSCMessage ]) {
-		server ! freeMsg( completionMessage )
+	def free( completion: Option[ OSCMessage ]) {
+		server ! freeMsg( completion, true )
 	}
 
-//	def free( completionMessage: Buffer => OSCMessage ): Unit =
-//       free( completionMessage.apply( this ))
+   def freeMsg: OSCBufferFreeMessage = freeMsg( None, true )
 
-   def freeMsg: OSCBufferFreeMessage = freeMsg( None )
-
-	def freeMsg( completionMessage: Option[ OSCMessage ]) = {
-      server.buffers.free( id )  // XXX
-      OSCBufferFreeMessage( id, completionMessage )
+   /**
+    *    @param   release  whether the buffer id should be immediately returned to the id-allocator or not.
+    *                      if you build a system that monitors when bundles are really sent to the server,
+    *                      and you need to deal with transaction abortion, you might want to pass in
+    *                      <code>false</code> here, and manually release the id, using the <code>release</code>
+    *                      method
+    */
+	def freeMsg( completion: Option[ OSCMessage ], release: Boolean = true ) = {
+      if( release ) this.release
+      OSCBufferFreeMessage( id, completion )
 	}
 
-//	def freeMsg( completionMessage: Buffer => OSCMessage ) : OSCMessage =
-//       freeMsg( completionMessage.apply( this ))
+   /**
+    *    Releases the buffer id to the id-allocator pool, without sending any
+    *    OSCMessage. Use with great care.
+    */
+   def release {
+      if( released ) error( this.toString + " : has already been freed" )
+      server.buffers.free( id )
+      released = true
+   }
 
    def close { server ! closeMsg }
 
-   def close( completionMessage: Option[ OSCMessage ]) {
-      server ! closeMsg( completionMessage )
+   def close( completion: Option[ OSCMessage ]) {
+      server ! closeMsg( completion )
    }
 
-//    def close( completionMessage: Buffer => OSCMessage ): Unit =
-//       close( completionMessage.apply( this ))
- 
 	def closeMsg: OSCBufferCloseMessage = closeMsg( None )
 
-	def closeMsg( completionMessage: Option[ OSCMessage ]) =
-      OSCBufferCloseMessage( id, completionMessage )
+	def closeMsg( completion: Option[ OSCMessage ]) =
+      OSCBufferCloseMessage( id, completion )
 
 	def alloc { server ! allocMsg }
 
-	def alloc( completionMessage: Option[ OSCMessage ]) {
-		server ! allocMsg( completionMessage )
+	def alloc( completion: Completion ) {
+		server ! allocMsg( makePacket( completion ))
 	}
+
+   private def makePacket( completion: Completion ) : Option[ OSCPacket ] =
+      completion.action.map( action => {
+         register
+         lazy val l: AnyRef => Unit = {
+            case BufferManager.BufferInfo( _, _ ) => {
+               removeListener( l )
+               action( b )
+            }
+         }
+         addListener( l )
+         val op: OSCPacket = completion.message.map[ OSCPacket ]( m => OSCBundle( m.apply( b ), queryMsg )).getOrElse( queryMsg )
+         op
+      }).orElse( completion.message.map( _.apply( b )))
  
 	def allocMsg: OSCBufferAllocMessage = allocMsg( None )
 
-	def allocMsg( completionMessage: Option[ OSCMessage ]) =
-      OSCBufferAllocMessage( id, numFrames, numChannels, completionMessage )
+	def allocMsg( completion: Option[ OSCPacket ]) =
+      OSCBufferAllocMessage( id, numFrames, numChannels, completion )
 
    def allocRead( path: String, startFrame: Int = 0, numFrames: Int = -1,
-                  completionMessage: Option[ OSCMessage ] = None ) {
+                  completion: Completion = NoCompletion ) {
 //      path = argpath;
-      server ! allocReadMsg( path, startFrame, numFrames, completionMessage )
+      server ! allocReadMsg( path, startFrame, numFrames, makePacket( completion ))
    }
 
    def allocReadMsg( path: String, startFrame: Int = 0, numFrames: Int = -1,
-                     completionMessage: Option[ OSCMessage ] = None ) = {
+                     completion: Option[ OSCPacket ] = None ) = {
 //      this.cache;
 //      path = argpath;
-      OSCBufferAllocReadMessage( id, path, startFrame, numFrames, completionMessage )
+      OSCBufferAllocReadMessage( id, path, startFrame, numFrames, completion )
    }
 
    def allocReadChannel( path: String, startFrame: Int = 0, numFrames: Int = -1, channels: Seq[ Int ],
-                         completionMessage: Option[ OSCMessage ] = None ) {
+                         completion: Completion = NoCompletion ) {
 //      path = argpath;
-      server ! allocReadChannelMsg( path, startFrame, numFrames, channels, completionMessage )
+      server ! allocReadChannelMsg( path, startFrame, numFrames, channels, makePacket( completion ))
    }
 
    def allocReadChannelMsg( path: String, startFrame: Int = 0, numFrames: Int = -1, channels: Seq[ Int ],
-                            completionMessage: Option[ OSCMessage ] = None ) = {
+                            completion: Option[ OSCPacket ] = None ) = {
 //      this.cache;
 //      path = argpath;
-      OSCBufferAllocReadChannelMessage( id, path, startFrame, numFrames, channels.toList, completionMessage )
+      OSCBufferAllocReadChannelMessage( id, path, startFrame, numFrames, channels.toList, completion )
    }
 
-   def cueSoundFileMsg( path: String, startFrame: Int = 0, completionMessage: Option[ OSCMessage ] = None ) =
-      OSCBufferReadMessage( id, path, startFrame, numFrames, 0, true, completionMessage )
+   def cueMsg( path: String, startFrame: Int = 0, completion: Completion = NoCompletion ) =
+      OSCBufferReadMessage( id, path, startFrame, numFrames, 0, true, makePacket( completion ))
 
    def read( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
-             leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage ] = None ) {
-      server ! readMsg( path, fileStartFrame, numFrames, bufStartFrame, leaveOpen, completionMessage )
+             leaveOpen: Boolean = false, completion: Completion = NoCompletion ) {
+      server ! readMsg( path, fileStartFrame, numFrames, bufStartFrame, leaveOpen, makePacket( completion ))
    }
 
    def readMsg( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
-                leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage ] = None ) =
-      OSCBufferReadMessage( id, path, fileStartFrame, numFrames, bufStartFrame, leaveOpen, completionMessage )
+                leaveOpen: Boolean = false, completion: Option[ OSCPacket ] = None ) =
+      OSCBufferReadMessage( id, path, fileStartFrame, numFrames, bufStartFrame, leaveOpen, completion )
 
    def readChannel( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
              leaveOpen: Boolean = false, channels: Seq[ Int ],
-             completionMessage: Option[ OSCMessage ] = None ) {
+             completion: Completion = NoCompletion ) {
       server ! readChannelMsg( path, fileStartFrame, numFrames, bufStartFrame, leaveOpen,
-         channels, completionMessage )
+         channels, makePacket( completion ))
    }
 
    def readChannelMsg( path: String, fileStartFrame: Int = 0, numFrames: Int = -1, bufStartFrame: Int = 0,
                 leaveOpen: Boolean = false, channels: Seq[ Int ],
-                completionMessage: Option[ OSCMessage ] = None ) =
+                completion: Option[ OSCPacket ] = None ) =
       OSCBufferReadChannelMessage( id, path, fileStartFrame, numFrames, bufStartFrame, leaveOpen, channels.toList,
-         completionMessage )
+         completion )
 
    def zero { server ! zeroMsg }
 
-   def zero( completionMessage: Option[ OSCMessage ]) {
-      server ! zeroMsg( completionMessage )
+   def zero( completion: Option[ OSCPacket ]) {
+      server ! zeroMsg( completion )
    }
 
 	def zeroMsg: OSCBufferZeroMessage = zeroMsg( None )
 
-	def zeroMsg( completionMessage: Option[ OSCMessage ]) =
-      OSCBufferZeroMessage( id, completionMessage )
+	def zeroMsg( completion: Option[ OSCPacket ]) =
+      OSCBufferZeroMessage( id, completion )
 
    def write( path: String, fileType: AudioFile.Type = AudioFile.AIFF,
               sampleFormat: AudioFile.SampleFormat = AudioFile.Float, numFrames: Int = -1, startFrame: Int = 0,
-              leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage] = None ) {
+              leaveOpen: Boolean = false, completion: Completion = NoCompletion) {
 //         path = path ?? { thisProcess.platform.recordingsDir +/+ "SC_" ++ Date.localtime.stamp ++ "." ++ headerFormat };
-         server ! writeMsg( path, fileType, sampleFormat, numFrames, startFrame, leaveOpen, completionMessage )
+         server ! writeMsg( path, fileType, sampleFormat, numFrames, startFrame, leaveOpen, makePacket( completion ))
       }
 
    def writeMsg( path: String, fileType: AudioFile.Type = AudioFile.AIFF,
                  sampleFormat: AudioFile.SampleFormat = AudioFile.Float, numFrames: Int = -1, startFrame: Int = 0,
-                 leaveOpen: Boolean = false, completionMessage: Option[ OSCMessage] = None ) = {
+                 leaveOpen: Boolean = false, completion: Option[ OSCPacket] = None ) = {
 //      require( isPowerOfTwo( this.numFrames ))
-      OSCBufferWriteMessage( id, path, fileType, sampleFormat, numFrames, startFrame, leaveOpen, completionMessage )
+      OSCBufferWriteMessage( id, path, fileType, sampleFormat, numFrames, startFrame, leaveOpen, completion )
    }
 
    // ---- utility methods ----

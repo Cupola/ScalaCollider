@@ -28,7 +28,7 @@
 
 package de.sciss.synth
 
-import de.sciss.scalaosc.{ OSCException, OSCMessage, OSCPacketCodec }
+import de.sciss.scalaosc.{ OSCException, OSCMessage, OSCPacket, OSCPacketCodec }
 import de.sciss.scalaosc.OSCPacket._
 import java.nio.ByteBuffer
 import collection.breakOut
@@ -36,7 +36,7 @@ import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
 import collection.mutable.{ ListBuffer }
 
 /**
- *    @version	0.11, 28-Apr-10
+ *    @version	0.12, 09-May-10
  */
 trait OSCMessageCodec {
 	def decodeMessage( name: String, b: ByteBuffer ) : OSCMessage
@@ -229,45 +229,45 @@ case object OSCServerQuitMessage extends OSCMessage( "/quit" )
 
 case class OSCBufferQueryMessage( ids: Int* ) extends OSCMessage( "/b_query", ids: _* )
 
-case class OSCBufferFreeMessage( id: Int, completionMessage: Option[ OSCMessage ])
-extends OSCMessage( "/b_free", (completionMessage.map( m => List( id, m )) getOrElse List( id )): _* )
+case class OSCBufferFreeMessage( id: Int, completion: Option[ OSCPacket ])
+extends OSCMessage( "/b_free", (completion.map( m => List( id, m )) getOrElse List( id )): _* )
 
-case class OSCBufferCloseMessage( id: Int, completionMessage: Option[ OSCMessage ])
-extends OSCMessage( "/b_close", (completionMessage.map( m => List( id, m )) getOrElse List( id )): _* )
+case class OSCBufferCloseMessage( id: Int, completion: Option[ OSCPacket ])
+extends OSCMessage( "/b_close", (completion.map( m => List( id, m )) getOrElse List( id )): _* )
 
-case class OSCBufferAllocMessage( id: Int, numFrames: Int, numChannels: Int, completionMessage: Option[ OSCMessage ])
-extends OSCMessage( "/b_alloc", (completionMessage.map( m => List( id, numFrames, numChannels, m ))
+case class OSCBufferAllocMessage( id: Int, numFrames: Int, numChannels: Int, completion: Option[ OSCPacket ])
+extends OSCMessage( "/b_alloc", (completion.map( m => List( id, numFrames, numChannels, m ))
                                                    getOrElse List( id, numFrames, numChannels )): _* )
 case class OSCBufferAllocReadMessage( id: Int, path: String, startFrame: Int, numFrames: Int,
-                                      completionMessage: Option[ OSCMessage ])
-extends OSCMessage( "/b_allocRead", (completionMessage.map( m => List( id, path, startFrame, numFrames, m ))
+                                      completion: Option[ OSCPacket ])
+extends OSCMessage( "/b_allocRead", (completion.map( m => List( id, path, startFrame, numFrames, m ))
                                                        getOrElse List( id, path, startFrame, numFrames )): _* )
 
 case class OSCBufferAllocReadChannelMessage( id: Int, path: String, startFrame: Int, numFrames: Int,
-                                             channels: List[ Int ], completionMessage: Option[ OSCMessage ])
+                                             channels: List[ Int ], completion: Option[ OSCPacket ])
 extends OSCMessage( "/b_allocReadChannel", (List( id, path, startFrame, numFrames ) ::: channels
-   ::: completionMessage.map( msg => List( msg )).getOrElse( Nil )): _* )
+   ::: completion.map( msg => List( msg )).getOrElse( Nil )): _* )
 
 case class OSCBufferReadMessage( id: Int, path: String, fileStartFrame: Int, numFrames: Int, bufStartFrame: Int,
-                                 leaveOpen: Boolean, completionMessage: Option[ OSCMessage ])
-extends OSCMessage( "/b_read", (completionMessage.map(
+                                 leaveOpen: Boolean, completion: Option[ OSCPacket ])
+extends OSCMessage( "/b_read", (completion.map(
    m =>      List( id, path, fileStartFrame, numFrames, bufStartFrame, if( leaveOpen ) 1 else 0, m ))
    getOrElse List( id, path, fileStartFrame, numFrames, bufStartFrame, if( leaveOpen ) 1 else 0 )): _* )
 
 case class OSCBufferReadChannelMessage( id: Int, path: String, fileStartFrame: Int, numFrames: Int,
                                         bufStartFrame: Int, leaveOpen: Boolean, channels: List[ Int ],
-                                        completionMessage: Option[ OSCMessage ])
+                                        completion: Option[ OSCPacket ])
 extends OSCMessage( "/b_readChannel", (List( id, path, fileStartFrame, numFrames, bufStartFrame,
-   if( leaveOpen ) 1 else 0 ) ::: channels ::: completionMessage.map( msg => List( msg )).getOrElse( Nil )): _* )
+   if( leaveOpen ) 1 else 0 ) ::: channels ::: completion.map( msg => List( msg )).getOrElse( Nil )): _* )
 
-case class OSCBufferZeroMessage( id: Int, completionMessage: Option[ OSCMessage ])
-extends OSCMessage( "/b_zero", (completionMessage.map( m => List( id, m )) getOrElse List( id )): _* )
+case class OSCBufferZeroMessage( id: Int, completion: Option[ OSCPacket ])
+extends OSCMessage( "/b_zero", (completion.map( m => List( id, m )) getOrElse List( id )): _* )
 
 case class OSCBufferWriteMessage( id: Int, path: String, fileType: AudioFile.Type, sampleFormat: AudioFile.SampleFormat,
                                   numFrames: Int, startFrame: Int, leaveOpen: Boolean,
-                                  completionMessage: Option[ OSCMessage])
+                                  completion: Option[ OSCPacket])
 extends OSCMessage( "/b_write", (List( id, path, fileType.id, sampleFormat.id, numFrames, startFrame,
-   if( leaveOpen ) 1 else 0 ) ::: completionMessage.map( msg => List( msg )).getOrElse( Nil )): _* )
+   if( leaveOpen ) 1 else 0 ) ::: completion.map( msg => List( msg )).getOrElse( Nil )): _* )
 
 //case class OSCBusValuePair( index: Int, value: Float )
 case class OSCControlBusSetMessage( indicesAndValues: Tuple2[ Int, Float ]* )

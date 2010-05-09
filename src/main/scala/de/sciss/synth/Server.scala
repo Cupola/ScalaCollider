@@ -36,25 +36,25 @@ import collection.immutable.Queue
 import math._
 
 /**
- * 	@version    0.14, 28-Apr-10
+ * 	@version    0.15, 09-May-10
  */
 object Server {
    private val allSync  = new AnyRef
-   private var allVar   = Set.empty[ Server ]
+//   private var allVar   = Set.empty[ Server ]
    var default: Server  = null
 
-   def all     = allVar
+//   def all     = allVar
 
    private def add( s: Server ) {
       allSync.synchronized {
-         allVar += s
+//         allVar += s
          if( default == null ) default = s
       }
    }
 
    private def remove( s: Server ) {
       allSync.synchronized {
-         allVar -= s
+//         allVar -= s
          if( default == s ) default = null
       }
    }
@@ -88,7 +88,7 @@ abstract class Server extends Model {
    private val host                                = InetAddress.getByName( options.host.value )
 
    val addr                                        = new InetSocketAddress( host, options.port.value )
-   val isLocal                                     = host.isLoopbackAddress || host.isSiteLocalAddress
+   def isLocal                                     = host.isLoopbackAddress || host.isSiteLocalAddress
    val rootNode                                    = new Group( this, 0 )
    val defaultGroup                                = new Group( this, 1 )
    val nodeMgr                                     = new NodeManager( this )
@@ -344,6 +344,7 @@ abstract class Server extends Model {
 
    private def serverLost {
       nodeMgr.clear
+      bufMgr.clear
       multiResponder.clear
    }
 

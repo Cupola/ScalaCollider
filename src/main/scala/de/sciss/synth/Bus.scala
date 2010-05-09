@@ -68,12 +68,12 @@ trait Bus {
 
 case class ControlBus( server: Server, index: Int, numChannels: Int )
 extends Bus with ControlRated {
-	private var freed = false
+	private var released = false
 
 	def free {
-	   if( freed ) error( this.toString + " : has already been freed" )
+	   if( released ) error( this.toString + " : has already been freed" )
 		server.busses.freeControl( index )
-	   freed = true
+	   released = true
 	}
 
    def set( v: Float ) {
@@ -119,11 +119,11 @@ extends Bus with ControlRated {
 
 case class AudioBus( server: Server, index: Int, numChannels: Int )
 extends Bus with AudioRated {
-   private var freed = false
+   private var released = false
 
    def free {
-      if( freed ) error( this.toString + " : has already been freed" )
+      if( released ) error( this.toString + " : has already been freed" )
       server.busses.freeAudio( index )
-      freed = true
+      released = true
    }
 }

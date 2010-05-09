@@ -352,7 +352,7 @@ val x = {
 // based on record scratcher by Josh Parmenter (2007)
 
 // path to a mono soundfile here
-val buf = Buffer.read(s, "sounds/a11wlk01.wav");
+val buf = Buffer.read(s, "sounds/a11wlk01.wav")
 val x = {
     var speed = MouseX.kr(-10, 10)
     speed = speed - DelayN.kr(speed, 0.1, 0.1)

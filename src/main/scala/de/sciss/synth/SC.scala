@@ -77,7 +77,8 @@ object SC {
 //   implicit def stringToOption( x: String ) = Some( x )
 
    // Buffer convenience
-   implicit def messageToOption( msg: OSCMessage ) : Option[ OSCMessage ] = Some( msg )
+   implicit def messageToCompletion( msg: OSCMessage ) : Buffer.Completion = Buffer.message( msg )
+   implicit def actionToCompletion( fun: Buffer => Unit ) : Buffer.Completion = Buffer.action( fun )
 
    // Nodes
 //   implicit def intToNode( id: Int ) : Node = new Group( Server.default, id )

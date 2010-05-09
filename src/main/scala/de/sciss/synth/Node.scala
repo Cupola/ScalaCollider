@@ -32,7 +32,7 @@ import collection.immutable.{ IndexedSeq => IIdxSeq }
 import SC._
 
 /**
- *    @version	0.14, 27-Apr-10
+ *    @version	0.15, 09-May-10
  */
 
 sealed abstract class AddAction( val id: Int )
@@ -135,7 +135,8 @@ abstract class Node extends Model {
    def traceMsg = OSCNodeTraceMessage( id )
 
   	def release : Unit = release( None )
-   def release( releaseTime: Float ) { release( Some( releaseTime ))}
+   def release( releaseTime: Float ) {  release( Some( releaseTime ))}
+   def release( releaseTime: Double ) { release( Some( releaseTime.toFloat ))}
 
   	def release( releaseTime: Option[ Float ]) {
   		server ! releaseMsg( releaseTime )

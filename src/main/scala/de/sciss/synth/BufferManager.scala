@@ -34,28 +34,54 @@ object BufferManager {
    case class BufferInfo( buffer: Buffer, info: OSCBufferInfo )
 }
 
+/**
+ *    @version 0.11, 09-May-10
+ */
 class BufferManager( server: Server ) extends Model {
    import BufferManager._
 
-   private var buffers = IntMap.empty[ Buffer ]
+   private var buffers: IntMap[ Buffer ] = _
+   private val sync = new AnyRef
+
+   // ---- constructor ----
+   {
+      clear
+   }
 
    def bufferInfo( msg: OSCBufferInfoMessage ) {
-      msg.infos.foreach( info => {
-         buffers.get( info.bufID ).foreach( buf => {
-            val change = BufferInfo( buf, info )
-            dispatch( change )
-            buf.updated( change )
+      sync.synchronized {
+         msg.infos.foreach( info => {
+            buffers.get( info.bufID ).foreach( buf => {
+               // this is the only safe way: automatically unregister,
+               // since unlike nodes whose id is steadily increasing
+               // and which fire identifiable n_end messages, we
+               // would run into trouble. putting unregister in
+               // freeMsg like sclang does is not very elegant, as
+               // that message might not be sent immediately or not
+               // at all.
+               buffers -= buf.id
+               val change = BufferInfo( buf, info )
+               dispatch( change )
+               buf.updated( change )
+            })
          })
-      })
+      }
    }
 
    // eventually this should be done automatically
    // by the message dispatch management
    def register( buf: Buffer ) {
-      buffers += buf.id -> buf
+      sync.synchronized { buffers += buf.id -> buf }
    }
 
    def unregister( buf: Buffer ) {
-      buffers -= buf.id
+      sync.synchronized { buffers -= buf.id }
+   }
+
+   def clear {
+      sync.synchronized {
+         buffers = IntMap.empty
+      }
+//    dispatch( Cleared )
    }
 }
