@@ -2,5 +2,4 @@ import math._
 import de.sciss.synth._
 import de.sciss.synth.SC._
 import de.sciss.synth.ugen._
-val s = new PlainServer( "Default" )
-s.options.programPath.value = "/Users/rutz/Documents/devel/fromSVN/SuperCollider3/common/build/scsynth"
+val s = new PlainServer()

@@ -433,7 +433,7 @@ abstract class Server extends Model {
       }
    }
 
-   override def toString = "Server(" + name + ")"
+   override def toString = "<" + name + ">"
 
    // -------- internal class BootThread -------- 
 

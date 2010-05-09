@@ -65,7 +65,7 @@ class NodeManager( server: Server ) extends Model {
          val node = nodes.get( nodeID ) getOrElse {
             if( autoAdd && nodes.contains( info.parentID )) {
                val created = info match {
-                  case ee: OSCSynthInfo => new Synth( null, server, nodeID ) // que se puede acer...
+                  case ee: OSCSynthInfo => new Synth( server, nodeID )
                   case ee: OSCGroupInfo => new Group( server, nodeID )
                }
                register( created )

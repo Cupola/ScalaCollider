@@ -49,39 +49,41 @@ object Buffer {
 
    def alloc( server: Server = Server.default, numFrames: Int, numChannels: Int = 1,
               completion: Completion = NoCompletion ) : Buffer = {
-      val b = new Buffer( server, numFrames, numChannels )
-      b.alloc( completion )
+      val b = apply( server )
+      b.alloc( numFrames, numChannels, completion )
       b
    }
 
    def read( server: Server = Server.default, path: String, startFrame: Int = 0, numFrames: Int = -1,
              completion: Completion = NoCompletion ) : Buffer = {
-      val b = new Buffer( server )
+      val b = apply( server )
       b.allocRead( path, startFrame, numFrames, completion )
       b
    }
 
    def cue( server: Server = Server.default, path: String, startFrame: Int = 0, numChannels: Int = 1,
             numBufFrames: Int = 32768, completion: Completion = NoCompletion ) : Buffer = {
-      val b = new Buffer( server, numBufFrames, numChannels )
-      b.alloc( message( b.cueMsg( path, startFrame, completion )))
+      val b = apply( server )
+      b.alloc( numBufFrames, numChannels, message( b.cueMsg( path, startFrame, completion )))
       b
    }
 
    def readChannel( server: Server = Server.default, path: String, startFrame: Int = 0, numFrames: Int = -1,
                     channels: Seq[ Int ], completion: Completion = NoCompletion ) : Buffer = {
-      val b = new Buffer( server )
+      val b = apply( server )
       b.allocReadChannel( path, startFrame, numFrames, channels, completion )
       b
    }
 
+   def apply( server: Server = Server.default ) : Buffer = apply( server, server.buffers.alloc( 1 ))
+
    private def isPowerOfTwo( i: Int ) = (i & (i-1)) == 0
 }
 
-// note: unfortunately we need to reverse the arguments here
-// to allow the public constructor (server, numFrames) ...
-class Buffer private( val id: Int, val server: Server ) extends Model {
+case class Buffer( server: Server, id: Int ) extends Model {
    b =>
+
+   def this( server: Server = Server.default ) = this( server, server.buffers.alloc( 1 ))
 
    import Buffer._
 
@@ -90,23 +92,8 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
    private var numChannelsVar = -1
    private var sampleRateVar  = 0f
 
-   def this( server: Server, numFrames: Int, numChannels: Int, id: Int ) = {
-      this( id, server )
-      numFramesVar   = numFrames
-      numChannelsVar = numChannels
-      sampleRateVar  = server.sampleRate.toFloat
-   }
-
-   def this( server: Server ) =
-      this( server.buffers.alloc( 1 ), server )
-
-   def this( server: Server, numFrames: Int ) =
-      this( server, numFrames, 1, server.buffers.alloc( 1 ))
-
-   def this( server: Server, numFrames: Int, numChannels: Int ) =
-      this( server, numFrames, numChannels, server.buffers.alloc( 1 ))
-
-   override def toString = "Buffer(" + server + ", " + numFrames + ", " + numChannels + ", " + id + ")"
+   override def toString = "Buffer(" + server + ", " + id +
+      (if( numFramesVar >= 0 ) ")<" + numFramesVar + ", " + numChannelsVar + ", " + sampleRateVar + ">" else ")")
 
    def numFrames   = numFramesVar
    def numChannels = numChannelsVar
@@ -167,10 +154,10 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
 	def closeMsg( completion: Option[ OSCMessage ]) =
       OSCBufferCloseMessage( id, completion )
 
-	def alloc { server ! allocMsg }
+//	def alloc { server ! allocMsg }
 
-	def alloc( completion: Completion ) {
-		server ! allocMsg( makePacket( completion ))
+	def alloc( numFrames: Int, numChannels: Int = 1, completion: Completion = NoCompletion ) {
+		server ! allocMsg( numFrames, numChannels, makePacket( completion ))
 	}
 
    private def makePacket( completion: Completion ) : Option[ OSCPacket ] =
@@ -187,10 +174,14 @@ class Buffer private( val id: Int, val server: Server ) extends Model {
          op
       }).orElse( completion.message.map( _.apply( b )))
  
-	def allocMsg: OSCBufferAllocMessage = allocMsg( None )
+//	def allocMsg: OSCBufferAllocMessage = allocMsg( None )
 
-	def allocMsg( completion: Option[ OSCPacket ]) =
+	def allocMsg( numFrames: Int, numChannels: Int = 1, completion: Option[ OSCPacket ] = None ) = {
+      numFramesVar   = numFrames
+      numChannelsVar = numChannels
+      sampleRateVar  = server.sampleRate.toFloat
       OSCBufferAllocMessage( id, numFrames, numChannels, completion )
+   }
 
    def allocRead( path: String, startFrame: Int = 0, numFrames: Int = -1,
                   completion: Completion = NoCompletion ) {

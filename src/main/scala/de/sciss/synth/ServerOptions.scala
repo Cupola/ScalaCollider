@@ -29,10 +29,11 @@
 package de.sciss.synth
 
 import collection.mutable.ListBuffer
+import java.io.File
 
 /**
  *    @author		Hanns Holger Rutz
- * 	@version    0.13, 22-Feb-10
+ * 	@version    0.13, 09-May-10
  */
 class ServerOption[T]( val switch: String, val default: T ) {
    protected var valu = default
@@ -63,7 +64,8 @@ extends ServerOption[String]( sw, defau )
 class ServerOptions {
    var initialNodeID = 1000
   
-   val programPath		      = new ServerStringOption( "", "scsynth" )
+   val programPath		      = new ServerStringOption( "",
+      new File( System.getenv( "SC_HOME" ), "scsynth" ).getAbsolutePath ) // sorry dan...
    val controlBusChannels	   = new ServerIntOption( "c", 4096 )
    val audioBusChannels		   = new ServerIntOption( "a",  128 )
    val outputBusChannels		= new ServerIntOption( "o",    8 )
@@ -82,7 +84,7 @@ class ServerOptions {
 
    // realtime only
    val host					      = new ServerStringOption( "", "127.0.0.1" )
-   val port					      = new ServerIntOption( "", 57100 )
+   val port					      = new ServerIntOption( "", 57100 ) // distinguish from sclang so we happily coexist
 //   val protocol				   = new ServerSymbolOption( "", 'udp )
    val protocol				   = new ServerStringOption( "", "udp" )
    val inputStreamsEnabled	   = new ServerStringOption( "I", "" )

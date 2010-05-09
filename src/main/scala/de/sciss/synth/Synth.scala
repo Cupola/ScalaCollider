@@ -29,23 +29,31 @@
 package de.sciss.synth
 
 /**
- *    @version	0.14, 28-Apr-10
+ *    @version	0.15, 09-May-10
  */
-case class Synth( defName: String, server: Server, id: Int )
+case class Synth( server: Server, id: Int )
 extends Node {
-   
-	def this( defName: String, server: Server = Server.default ) = this( defName, server, server.nodes.nextID )
+   private var defNameVar = ""
 
-	def newMsg( target: Node, args: Seq[ ControlSetMap ] = Nil, addAction: AddAction = addToHead ) =
+	def this( server: Server = Server.default ) = this( server, server.nodes.nextID )
+
+	def newMsg( defName: String, target: Node, args: Seq[ ControlSetMap ] = Nil, addAction: AddAction = addToHead ) = {
+      defNameVar = defName
       OSCSynthNewMessage( defName, id, addAction.id, target.id, args: _* )
+   }
+
+   def defName = defNameVar
+
+   override def toString = "Synth(" + server + ", " + id +
+      (if( defNameVar != "" ) ")<" + defNameVar + ">" else ")")
 }
 
 // factory
 object Synth {
    def play( defName: String, args: Seq[ ControlSetMap ] = Nil, target: Node = Server.default.defaultGroup,
              addAction: AddAction = addToHead ) = {
-      val synth = new Synth( defName, target.server )
-      synth.server ! synth.newMsg( target, args, addAction )
+      val synth = new Synth( target.server )
+      synth.server ! synth.newMsg( defName, target, args, addAction )
       synth
    }
 

@@ -29,9 +29,9 @@ class GraphFunction[ T <% GE ]( thunk: => T ) {
 		val server = target.server
 		val defName    = "temp_" + uniqueID // why risk a hashcode clash?
 		val synthDef   = GraphBuilder.wrapOut( defName, thunk, fadeTime )
-		val synth      = new Synth( synthDef.name, server )
+		val synth      = new Synth( server )
 		val bytes      = synthDef.toBytes
-		val synthMsg   = synth.newMsg( target, List( "i_out" -> outBus, "out" -> outBus ), addAction )
+		val synthMsg   = synth.newMsg( synthDef.name, target, List( "i_out" -> outBus, "out" -> outBus ), addAction )
 		if( bytes.remaining > (65535 / 4) ) { // preliminary fix until full size works
 			if( server.isLocal ) {
 				synthDef.load( server, synthMsg )
