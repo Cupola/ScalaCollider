@@ -44,8 +44,8 @@ extends Node {
 
    def defName = defNameVar
 
-   override def toString = "Synth(" + server + ", " + id +
-      (if( defNameVar != "" ) ")<" + defNameVar + ">" else ")")
+   override def toString = "Synth(" + server + "," + id +
+      (if( defNameVar != "" ) ") : <" + defNameVar + ">" else ")")
 }
 
 // factory

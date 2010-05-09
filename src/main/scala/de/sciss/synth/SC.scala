@@ -78,16 +78,16 @@ object SC {
 
    // Buffer convenience
 //   implicit def actionToCompletion( fun: Buffer => Unit ) : Buffer.Completion = Buffer.action( fun )
-   import Buffer.{ Completion => Comp, SomeCompletion => SomeComp }
-   def message( msg: => OSCMessage ) : Comp                          = SomeComp( Some( _ => msg ), None )
-   def message( msg: Buffer => OSCMessage ) : Comp                   = SomeComp( Some( msg ), None )
-   def action( action: => Unit ) : Comp                              = SomeComp( None, Some( _ => action ))
-   def action( action: Buffer => Unit ) : Comp                       = SomeComp( None, Some( action ))
-   def complete( msg: => OSCMessage, action: => Unit ) : Comp        = SomeComp( Some( _ => msg ), Some( _ => action ))
-   def complete( msg: Buffer => OSCMessage, action: => Unit ) : Comp = SomeComp( Some( msg ), Some( _ => action ))
-   def complete( msg: => OSCMessage, action: Buffer => Unit ) : Comp = SomeComp( Some( _ => msg ), Some( action ))
-   def complete( msg: Buffer => OSCMessage, action: Buffer => Unit ) : Comp = SomeComp( Some( msg ), Some( action ))
-   implicit def messageToCompletion( msg: OSCMessage ) : Comp        = message( msg )
+   import Buffer.{ Completion => Comp }
+   def message( msg: => OSCMessage )                           = Comp( Some( _ => msg ), None )
+   def message( msg: Buffer => OSCMessage )                    = Comp( Some( msg ), None )
+   def action( action: => Unit )                               = Comp( None, Some( _ => action ))
+   def action( action: Buffer => Unit )                        = Comp( None, Some( action ))
+   def complete( msg: => OSCMessage, action: => Unit )         = Comp( Some( _ => msg ), Some( _ => action ))
+   def complete( msg: Buffer => OSCMessage, action: => Unit )  = Comp( Some( msg ), Some( _ => action ))
+   def complete( msg: => OSCMessage, action: Buffer => Unit )  = Comp( Some( _ => msg ), Some( action ))
+   def complete( msg: Buffer => OSCMessage, action: Buffer => Unit ) = Comp( Some( msg ), Some( action ))
+   implicit def messageToCompletion( msg: OSCMessage )         = message( msg )
 
    // Nodes
 //   implicit def intToNode( id: Int ) : Node = new Group( Server.default, id )

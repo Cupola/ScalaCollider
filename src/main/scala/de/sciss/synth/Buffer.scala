@@ -36,16 +36,13 @@ import SC._
  * 	@version	0.18, 09-May-10
  */
 object Buffer {
-   sealed abstract class Completion {
-      private[Buffer] val message: Option[ Buffer => OSCMessage ]
-      private[Buffer] val action:  Option[ Buffer => Unit ]
-   }
-   case class SomeCompletion( private[Buffer] val message: Option[ Buffer => OSCMessage ],
-                              private[Buffer] val action:  Option[ Buffer => Unit ]) extends Completion
-   case object NoCompletion extends Completion {
-      private[Buffer] val message = None
-      private[Buffer] val action  = None
-   }
+//   sealed abstract class Completion {
+//      private[Buffer] val message: Option[ Buffer => OSCMessage ]
+//      private[Buffer] val action:  Option[ Buffer => Unit ]
+//   }
+   case class Completion( private[Buffer] val message: Option[ Buffer => OSCMessage ],
+                          private[Buffer] val action:  Option[ Buffer => Unit ])
+   val NoCompletion = Completion( None, None )
 
    def alloc( server: Server = Server.default, numFrames: Int, numChannels: Int = 1,
               completion: Completion = NoCompletion ) : Buffer = {
@@ -92,8 +89,8 @@ case class Buffer( server: Server, id: Int ) extends Model {
    private var numChannelsVar = -1
    private var sampleRateVar  = 0f
 
-   override def toString = "Buffer(" + server + ", " + id +
-      (if( numFramesVar >= 0 ) ")<" + numFramesVar + ", " + numChannelsVar + ", " + sampleRateVar + ">" else ")")
+   override def toString = "Buffer(" + server + "," + id +
+      (if( numFramesVar >= 0 ) ") : <" + numFramesVar + "," + numChannelsVar + "," + sampleRateVar + ">" else ")")
 
    def numFrames   = numFramesVar
    def numChannels = numChannelsVar
@@ -160,20 +157,6 @@ case class Buffer( server: Server, id: Int ) extends Model {
 		server ! allocMsg( numFrames, numChannels, makePacket( completion ))
 	}
 
-   private def makePacket( completion: Completion ) : Option[ OSCPacket ] =
-      completion.action.map( action => {
-         register
-         lazy val l: AnyRef => Unit = {
-            case BufferManager.BufferInfo( _, _ ) => {
-               removeListener( l )
-               action( b )
-            }
-         }
-         addListener( l )
-         val op: OSCPacket = completion.message.map[ OSCPacket ]( m => OSCBundle( m.apply( b ), queryMsg )).getOrElse( queryMsg )
-         op
-      }).orElse( completion.message.map( _.apply( b )))
- 
 //	def allocMsg: OSCBufferAllocMessage = allocMsg( None )
 
 	def allocMsg( numFrames: Int, numChannels: Int = 1, completion: Option[ OSCPacket ] = None ) = {
@@ -186,7 +169,7 @@ case class Buffer( server: Server, id: Int ) extends Model {
    def allocRead( path: String, startFrame: Int = 0, numFrames: Int = -1,
                   completion: Completion = NoCompletion ) {
 //      path = argpath;
-      server ! allocReadMsg( path, startFrame, numFrames, makePacket( completion ))
+      server ! allocReadMsg( path, startFrame, numFrames, makePacket( completion, true ))
    }
 
    def allocReadMsg( path: String, startFrame: Int = 0, numFrames: Int = -1,
@@ -199,7 +182,7 @@ case class Buffer( server: Server, id: Int ) extends Model {
    def allocReadChannel( path: String, startFrame: Int = 0, numFrames: Int = -1, channels: Seq[ Int ],
                          completion: Completion = NoCompletion ) {
 //      path = argpath;
-      server ! allocReadChannelMsg( path, startFrame, numFrames, channels, makePacket( completion ))
+      server ! allocReadChannelMsg( path, startFrame, numFrames, channels, makePacket( completion, true ))
    }
 
    def allocReadChannelMsg( path: String, startFrame: Int = 0, numFrames: Int = -1, channels: Seq[ Int ],
@@ -268,25 +251,26 @@ case class Buffer( server: Server, id: Int ) extends Model {
          ply * "amp".kr( amp )
       }
    }
-   
-//	// cache Buffers for easy info updating
-//	private def cache {
-////		Buffer.initServerCache(server);
-////		serverCaches[server][id] = this;
-//	}
-//
-//	private def uncache {
-////		if(serverCaches[server].notNil,{
-////			serverCaches[server].removeAt(id);
-////		});
-////		if(serverCaches[server].size == 1) {
-////			// the 1 item would be the responder
-////			// if there is more than 1 item then the rest are cached buffers
-////			// else we can remove.
-////			// cx: tho i don't see why its important. it will just have to be added
-////			// back when the next buffer is added and the responder is removed when
-////			// the server reboots
-////			Buffer.clearServerCaches(server);
-////		}
-//	}
+
+   private def makePacket( completion: Completion, forceQuery: Boolean = false ) : Option[ OSCPacket ] = {
+      val a = completion.action
+      if( forceQuery || a.isDefined ) {
+         register
+         a.foreach( action => {
+            lazy val l: AnyRef => Unit = {
+               case BufferManager.BufferInfo( _, _ ) => {
+                  removeListener( l )
+                  action( b )
+               }
+            }
+            addListener( l )
+         })
+      }
+      (completion.message, a) match {
+         case (None, None)                => if( forceQuery ) Some( queryMsg ) else None
+         case (Some( msg ), None)         => Some( if( forceQuery ) OSCBundle( msg.apply( b ), queryMsg ) else msg.apply( b ))
+         case (None, Some( act ))         => Some( queryMsg )
+         case (Some( msg ), Some( act ))  => Some( OSCBundle( msg.apply( b ), queryMsg ))
+      }
+   }
 }

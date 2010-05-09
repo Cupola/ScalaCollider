@@ -34,7 +34,7 @@ import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
 import ugen.{ BinaryOpUGen, EnvGen, MulAdd, Silent, Out, Poll, UnaryOpUGen }
 
 /**
- * 	@version	0.14, 28-Apr-10
+ * 	@version	0.14, 09-May-10
  */
 trait GE {
    def outputs : IIdxSeq[ UGenIn ]
@@ -223,7 +223,10 @@ object GraphBuilder {
 		val dt			= "fadeTime".kr( fadeTime )
 		val gate       = "gate".kr( 1 )
 		val startVal	= (dt <= 0)
-		EnvGen.kr( Env( startVal, List( EnvSeg( 1, 1 ), EnvSeg( 1, 0 )), 1 ), gate, 1, 0, dt, 2 )
+      // curveShape( -6 ) is perceptually close to exponential decay,
+      // but really ends at zero
+		EnvGen.kr( Env( startVal, List( EnvSeg( 1, 1 ), EnvSeg( 1, 0, curveShape( -6f ))), 1 ), gate,
+         timeScale = dt, doneAction = freeSelf )
 	}
 
    def expand( args: GE* ): Seq[ List[ UGenIn ]] = {
