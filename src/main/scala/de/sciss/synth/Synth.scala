@@ -71,8 +71,6 @@ object Synth {
 
 	def replace( target: Node, defName: String, args: Seq[ ControlSetMap ] = Nil ) : Synth =
       play( defName, args, target, addReplace )
-  
-//  def newPaused = {
-//    new Synth( "schoko", new Server( "lala", new NetAddr, new ServerOptions, 0 ), 0 );
-// }
+
+   def apply( server: Server = Server.default ) : Synth = apply( server, server.nodes.nextID )
 }
