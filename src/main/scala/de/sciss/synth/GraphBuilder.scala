@@ -223,10 +223,11 @@ object GraphBuilder {
 		val dt			= "fadeTime".kr( fadeTime )
 		val gate       = "gate".kr( 1 )
 		val startVal	= (dt <= 0)
-      // curveShape( -6 ) is perceptually close to exponential decay,
-      // but really ends at zero
-		EnvGen.kr( Env( startVal, List( EnvSeg( 1, 1 ), EnvSeg( 1, 0, curveShape( -6f ))), 1 ), gate,
-         timeScale = dt, doneAction = freeSelf )
+      // this is slightly more costly than what sclang does
+      // (using non-linear shape plus an extra unary op),
+      // but it fadeout is much smoother this way...
+		EnvGen.kr( Env( startVal, List( EnvSeg( 1, 1, curveShape( -4 )), EnvSeg( 1, 0, sineShape )), 1 ),
+         gate, timeScale = dt, doneAction = freeSelf ).squared
 	}
 
    def expand( args: GE* ): Seq[ List[ UGenIn ]] = {

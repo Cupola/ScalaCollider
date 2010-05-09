@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" readonly="true" id="01886865-ff38-4eb7-a79d-92e783f03245" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Buffer.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Buffer.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphBuilder.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphBuilder.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SC.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SC.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Synth.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Synth.scala" />
     </list>
     <ignored path=".idea/workspace.xml" />
     <ignored path="ScalaCollider.iws" />
@@ -78,7 +75,7 @@
       <file leaf-file-name="GraphBuilder.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphBuilder.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="228" column="0" selection-start="9883" selection-end="9883" vertical-scroll-proportion="0.8490566">
+            <state line="228" column="97" selection-start="9948" selection-end="9948" vertical-scroll-proportion="0.8490566">
               <folding />
             </state>
           </provider>
@@ -855,7 +852,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphBuilder.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="228" column="0" selection-start="9883" selection-end="9883" vertical-scroll-proportion="0.8490566">
+        <state line="228" column="97" selection-start="9948" selection-end="9948" vertical-scroll-proportion="0.8490566">
           <folding />
         </state>
       </provider>
