@@ -78,16 +78,17 @@ object SC {
 
    // Buffer convenience
 //   implicit def actionToCompletion( fun: Buffer => Unit ) : Buffer.Completion = Buffer.action( fun )
-   import Buffer.{ Completion => Comp }
-   def message( msg: => OSCMessage )                           = Comp( Some( _ => msg ), None )
-   def message( msg: Buffer => OSCMessage )                    = Comp( Some( msg ), None )
-   def action( action: => Unit )                               = Comp( None, Some( _ => action ))
-   def action( action: Buffer => Unit )                        = Comp( None, Some( action ))
-   def complete( msg: => OSCMessage, action: => Unit )         = Comp( Some( _ => msg ), Some( _ => action ))
-   def complete( msg: Buffer => OSCMessage, action: => Unit )  = Comp( Some( msg ), Some( _ => action ))
-   def complete( msg: => OSCMessage, action: Buffer => Unit )  = Comp( Some( _ => msg ), Some( action ))
-   def complete( msg: Buffer => OSCMessage, action: Buffer => Unit ) = Comp( Some( msg ), Some( action ))
-   implicit def messageToCompletion( msg: OSCMessage )         = message( msg )
+//   import Buffer.{ Completion => Comp }
+   def message[T]( msg: => OSCMessage ) = Completion[T]( Some( _ => msg ), None )
+   def message[T]( msg: T => OSCMessage ) = Completion[T]( Some( msg ), None )
+   def action[T]( action: => Unit ) = Completion[T]( None, Some( _ => action ))
+   def action[T]( action: T => Unit ) = Completion[T]( None, Some( action ))
+   def complete[T]( msg: => OSCMessage, action: => Unit ) = Completion[T]( Some( _ => msg ), Some( _ => action ))
+   def complete[T]( msg: T => OSCMessage, action: => Unit ) = Completion[T]( Some( msg ), Some( _ => action ))
+   def complete[T]( msg: => OSCMessage, action: T => Unit ) = Completion[T]( Some( _ => msg ), Some( action ))
+   def complete[T]( msg: T => OSCMessage, action: T => Unit ) = Completion[T]( Some( msg ), Some( action ))
+   implicit def messageToCompletion[T]( msg: OSCMessage ) = message[T]( msg )
+   implicit def messageToOption( msg: OSCMessage ) = Some( msg )
 
    // Nodes
 //   implicit def intToNode( id: Int ) : Node = new Group( Server.default, id )

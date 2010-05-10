@@ -26,10 +26,11 @@
  *  Changelog:
  */
 
-package de.sciss.synth
+package de.sciss.synth.osc
 
 import de.sciss.scalaosc.{ OSCException, OSCMessage, OSCPacket, OSCPacketCodec }
 import de.sciss.scalaosc.OSCPacket._
+import de.sciss.synth.{ AudioFile, ControlBusMap, ControlSetMap, SingleControlBusMap }
 import java.nio.ByteBuffer
 import collection.breakOut
 import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
@@ -340,3 +341,12 @@ extends OSCMessage( "/n_before", groups.flatMap( g => List( g._1, g._2 )): _* )
 
 case class OSCNodeAfterMessage( groups: Tuple2[ Int, Int ]* )
 extends OSCMessage( "/n_after", groups.flatMap( g => List( g._1, g._2 )): _* )
+
+case class OSCSynthDefRecvMessage( bytes: ByteBuffer, completion: Option[ OSCPacket ])
+extends OSCMessage( "/d_recv", (bytes :: (completion.map( List( _ )) getOrElse Nil)): _* )
+
+case class OSCSynthDefFreeMessage( names: String* )
+extends OSCMessage( "/d_free", names: _* )
+
+case class OSCSynthDefLoadMessage( path: String, completion: Option[ OSCPacket ])
+extends OSCMessage( "/d_load", (path :: (completion.map( List( _ )) getOrElse Nil)): _* )

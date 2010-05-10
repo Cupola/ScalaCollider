@@ -29,10 +29,11 @@
 package de.sciss.synth
 
 import collection.immutable.{ IndexedSeq => IIdxSeq }
+import osc._
 import SC._
 
 /**
- *    @version	0.15, 09-May-10
+ *    @version	0.15, 10-May-10
  */
 
 sealed abstract class AddAction( val id: Int )

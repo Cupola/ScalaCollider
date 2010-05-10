@@ -1,4 +1,4 @@
-package de.sciss.synth
+package de.sciss.synth.osc
 
 import de.sciss.scalaosc.{ OSCMessage, OSCPacket }
 

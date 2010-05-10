@@ -36,17 +36,17 @@ import GraphBuilder._
  *  @version  0.11, 01-Jan-10
  */
 object Osc extends UGen3Args {
-  def ar( bufNum: GE, freq: GE = 440, phase: GE = 0 ) : GE =
-    arExp( bufNum, freq, phase )
+  def ar( bufID: GE, freq: GE = 440, phase: GE = 0 ) : GE =
+    arExp( bufID, freq, phase )
 
-  def kr( bufNum: GE, freq: GE = 440, phase: GE = 0 ) : GE =
-    krExp( bufNum, freq, phase )
+  def kr( bufID: GE, freq: GE = 440, phase: GE = 0 ) : GE =
+    krExp( bufID, freq, phase )
 }
-case class Osc( rate: Rate, bufNum: UGenIn, freq: UGenIn, phase: UGenIn )
-extends SingleOutUGen( bufNum, freq, phase )
+case class Osc( rate: Rate, bufID: UGenIn, freq: UGenIn, phase: UGenIn )
+extends SingleOutUGen( bufID, freq, phase )
 
-// class Osc private ( r: Rate, val bufNum: UGenIn, val freq: UGenIn, val phase: UGenIn )
-// extends UGen( "Osc", r, List( r ), List( bufNum, freq, phase )) {
+// class Osc private ( r: Rate, val bufID: UGenIn, val freq: UGenIn, val phase: UGenIn )
+// extends UGen( "Osc", r, List( r ), List( bufID, freq, phase )) {
 // }
 
 object SinOsc extends UGen2Args {
@@ -64,14 +64,14 @@ case class SinOscFB( rate: Rate, freq: UGenIn, feedback: UGenIn )
 extends SingleOutUGen( freq, feedback )
 
 object OscN extends UGen3Args {
-  def ar( bufNum: GE, freq: GE = 440, phase: GE = 0 ) : GE =
-    arExp( bufNum, freq, phase )
+  def ar( bufID: GE, freq: GE = 440, phase: GE = 0 ) : GE =
+    arExp( bufID, freq, phase )
 
-  def kr( bufNum: GE, freq: GE = 440, phase: GE = 0 ) : GE =
-    krExp( bufNum, freq, phase )
+  def kr( bufID: GE, freq: GE = 440, phase: GE = 0 ) : GE =
+    krExp( bufID, freq, phase )
 }
-case class OscN( rate: Rate, bufNum: UGenIn, freq: UGenIn, phase: UGenIn )
-extends SingleOutUGen( bufNum, freq, phase ) // with SideEffectUGen
+case class OscN( rate: Rate, bufID: UGenIn, freq: UGenIn, phase: UGenIn )
+extends SingleOutUGen( bufID, freq, phase ) // with SideEffectUGen
 
 object VOsc extends UGen3Args {
   def ar( bufPos: GE, freq: GE = 440, phase: GE = 0 ) : GE =
@@ -94,11 +94,11 @@ case class VOsc3( rate: Rate, bufPos: UGenIn, freq1: UGenIn, freq2: UGenIn, freq
 extends SingleOutUGen( bufPos, freq1, freq2, freq3 ) // with SideEffectUGen
 
 object COsc extends UGen3Args {
-  def ar( bufNum: GE, freq: GE = 440f, beats: GE = 0.5f ) : GE =
-    arExp( bufNum, freq, beats )
+  def ar( bufID: GE, freq: GE = 440f, beats: GE = 0.5f ) : GE =
+    arExp( bufID, freq, beats )
 }
-case class COsc( rate: Rate, bufNum: UGenIn, freq: UGenIn, beats: UGenIn )
-extends SingleOutUGen( bufNum, freq, beats ) // with SideEffectUGen
+case class COsc( rate: Rate, bufID: UGenIn, freq: UGenIn, beats: UGenIn )
+extends SingleOutUGen( bufID, freq, beats ) // with SideEffectUGen
 
 object Formant extends UGen3Args {
   def ar( fundFreq: GE = 440, formFreq: GE = 1760, bw: GE = 880 ) : GE =
@@ -186,48 +186,48 @@ case class SyncSaw( rate: Rate, syncFreq: UGenIn, sawFreq: UGenIn )
 extends SingleOutUGen( syncFreq, sawFreq )
 
 object Index extends UGen2Args {
-  def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )
-  def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
+  def ar( bufID: GE, in: GE = 0 ) : GE = arExp( bufID, in )
+  def kr( bufID: GE, in: GE = 0 ) : GE = krExp( bufID, in )
 }
-case class Index( rate: Rate, bufNum: UGenIn, in: UGenIn )
-extends SingleOutUGen( bufNum, in ) // with SideEffectUGen
+case class Index( rate: Rate, bufID: UGenIn, in: UGenIn )
+extends SingleOutUGen( bufID, in ) // with SideEffectUGen
 
 object WrapIndex extends UGen2Args {
-  def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )
-  def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
+  def ar( bufID: GE, in: GE = 0 ) : GE = arExp( bufID, in )
+  def kr( bufID: GE, in: GE = 0 ) : GE = krExp( bufID, in )
 }
-case class WrapIndex( rate: Rate, bufNum: UGenIn, in: UGenIn )
-extends SingleOutUGen( bufNum, in ) // with SideEffectUGen
+case class WrapIndex( rate: Rate, bufID: UGenIn, in: UGenIn )
+extends SingleOutUGen( bufID, in ) // with SideEffectUGen
 
 object IndexInBetween extends UGen2Args {
-  def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )
-  def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
+  def ar( bufID: GE, in: GE = 0 ) : GE = arExp( bufID, in )
+  def kr( bufID: GE, in: GE = 0 ) : GE = krExp( bufID, in )
 }
-case class IndexInBetween( rate: Rate, bufNum: UGenIn, in: UGenIn )
-extends SingleOutUGen( bufNum, in ) // with SideEffectUGen
+case class IndexInBetween( rate: Rate, bufID: UGenIn, in: UGenIn )
+extends SingleOutUGen( bufID, in ) // with SideEffectUGen
 
 object DetectIndex extends UGen2Args {
-  def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )
-  def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
+  def ar( bufID: GE, in: GE = 0 ) : GE = arExp( bufID, in )
+  def kr( bufID: GE, in: GE = 0 ) : GE = krExp( bufID, in )
 }
-case class DetectIndex( rate: Rate, bufNum: UGenIn, in: UGenIn )
-extends SingleOutUGen( bufNum, in ) // with SideEffectUGen
+case class DetectIndex( rate: Rate, bufID: UGenIn, in: UGenIn )
+extends SingleOutUGen( bufID, in ) // with SideEffectUGen
 
 object Shaper extends UGen2Args {
-  def ar( bufNum: GE, in: GE = 0 ) : GE = arExp( bufNum, in )
-  def kr( bufNum: GE, in: GE = 0 ) : GE = krExp( bufNum, in )
+  def ar( bufID: GE, in: GE = 0 ) : GE = arExp( bufID, in )
+  def kr( bufID: GE, in: GE = 0 ) : GE = krExp( bufID, in )
 }
-case class Shaper( rate: Rate, bufNum: UGenIn, in: UGenIn )
-extends SingleOutUGen( bufNum, in )
+case class Shaper( rate: Rate, bufID: UGenIn, in: UGenIn )
+extends SingleOutUGen( bufID, in )
 
 // IndexL XXX
 
 object DegreeToKey extends UGen3Args {
-  def ar( bufNum: GE, in: GE, octave: GE = 12 ) : GE = arExp( bufNum, in, octave )
-  def kr( bufNum: GE, in: GE, octave: GE = 12 ) : GE = krExp( bufNum, in, octave )
+  def ar( bufID: GE, in: GE, octave: GE = 12 ) : GE = arExp( bufID, in, octave )
+  def kr( bufID: GE, in: GE, octave: GE = 12 ) : GE = krExp( bufID, in, octave )
 }
-case class DegreeToKey( rate: Rate, bufNum: UGenIn, in: UGenIn, octave: UGenIn )
-extends SingleOutUGen( bufNum, in, octave )
+case class DegreeToKey( rate: Rate, bufID: UGenIn, in: UGenIn, octave: UGenIn )
+extends SingleOutUGen( bufID, in, octave )
 
 object Select {
   def ar( index: GE, multi: GE ) : GE = make( audio, index, multi )

@@ -28,17 +28,20 @@
 
 package de.sciss.synth
 
-import java.io.{ ByteArrayOutputStream, BufferedOutputStream, DataOutputStream,
-                        File, FileOutputStream }
+import java.io.{ ByteArrayOutputStream, BufferedOutputStream, DataOutputStream, File, FileOutputStream }
 import java.nio.ByteBuffer
+import de.sciss.synth.{ Completion => Comp }
 import ugen.Control
+import osc._
 import SC._
 import collection.immutable.{ IndexedSeq => IIdxSeq, Iterable => IIterable, Seq => ISeq, Stack, Vector }
 import collection.{ breakOut }
 import de.sciss.scalaosc.{ OSCMessage, OSCPacket }
+import File.{ separator => sep }
 
 /**
- *    @version 0.18, 23-Apr-10
+ *    @version 0.18, 10-May-10
+ *    @todo    should add load and loadDir to companion object
  */
 class SynthDef private ( val name: String, constants: IIdxSeq[ Float ], controlValues: IIdxSeq[ Float ],
                          controlDescs: IIdxSeq[ ControlDesc ], ugens: IIdxSeq[ SynthDef.RichUGen ]) {
@@ -47,22 +50,16 @@ class SynthDef private ( val name: String, constants: IIdxSeq[ Float ], controlV
 
    override def toString = "SynthDef(" + name + ")"
 
-   def freeMsg: OSCMessage = OSCMessage( "/d_free", name )
+   def freeMsg = OSCSynthDefFreeMessage( name )
 
-   def send( server: Server ) : SynthDef = {
-      server ! recvMsg
+   def recv( server: Server, completion: Completion = NoCompletion ) : SynthDef = {
+      if( completion.action.isDefined ) error( "Completion action not yet supported" )
+      server ! recvMsg( completion.message.map( _.apply( this )))
       this
    }
   
-   def send( server: Server, completionMsg: OSCMessage ) : SynthDef = {
-      server ! recvMsg( completionMsg )
-      this
-   }
-  
-   def recvMsg = OSCMessage( "/d_recv", toBytes )
-
-   def recvMsg( completionMsg: OSCMessage ) =
-	   OSCMessage( "/d_recv", toBytes, completionMsg )
+   def recvMsg: OSCSynthDefRecvMessage = recvMsg( None )
+   def recvMsg( completion: Option[ OSCMessage ]) = OSCSynthDefRecvMessage( toBytes, completion )
   
   	def toBytes : ByteBuffer = {
     	val baos	= new ByteArrayOutputStream
@@ -123,58 +120,29 @@ class SynthDef private ( val name: String, constants: IIdxSeq[ Float ], controlV
       dos.writeShort( 0 ) // variants not supported
    }
 
-   def load( server: Server ) : SynthDef = {
-      load( server, SynthDef.synthDefDir )
-   }
-  
-   def load( server: Server, completionMsg: OSCMessage ) : SynthDef = {
-      load( server, completionMsg, SynthDef.synthDefDir )
-   }
-  
-   def load( server: Server, completionMsg: OSCMessage, dir: String ) : SynthDef = {
+   def load( server: Server = Server.default, dir: String = defaultDir,
+             completion: Completion = NoCompletion ) : SynthDef = {
+      if( completion.action.isDefined ) error( "Completion action not yet supported" )
       writeDefFile( dir )
-      server ! loadMsg( completionMsg, dir )
+      server ! loadMsg( dir, completion.message.map( _.apply( this )))
       this
    }
   
-   def load( server: Server, dir: String ) : SynthDef = {
-      writeDefFile( dir )
-      server ! loadMsg( dir )
-      this
-   }
+   def loadMsg : OSCSynthDefLoadMessage = loadMsg()
   
-   def loadMsg( completionMsg: OSCMessage ) : OSCMessage = {
-      loadMsg( completionMsg, SynthDef.synthDefDir )
-   }
-  
-   def loadMsg( completionMsg: OSCMessage, dir: String ) =
-	   OSCMessage( "/d_load", dir + name + ".scsyndef", completionMsg )
-  
-   def loadMsg : OSCMessage = loadMsg( SynthDef.synthDefDir )
-  
-   def loadMsg( dir: String ) =
-	   OSCMessage( "/d_load", dir + name + ".scsyndef" )
+   def loadMsg( dir: String = defaultDir, completion: Option[ OSCMessage ] = None ) =
+	   OSCSynthDefLoadMessage( dir + sep + name + ".scsyndef", completion )
 
    def play( target: Node = Server.default, args: Seq[ ControlSetMap ] = Nil, addAction: AddAction = addToHead ) : Synth = {
-      val synth	= new Synth( target.server )
-		val msg		= synth.newMsg( name, target, args, addAction )
-		send( target.server, msg )
+      val synth   = new Synth( target.server )
+		val newMsg  = synth.newMsg( name, target, args, addAction )
+		target.server ! recvMsg( newMsg )
 		synth
    }
     
-   def writeDefFile {
-      writeDefFile( SynthDef.synthDefDir, false )
-   }
+   def writeDefFile : Unit = writeDefFile()
 
-   def writeDefFile( dir: String ) {
-      writeDefFile( dir, false )
-   }
-
-   def writeDefFile( overwrite: Boolean ) {
-      writeDefFile( SynthDef.synthDefDir, overwrite )
-   }
-
-   def writeDefFile( dir: String, overwrite: Boolean ) {
+   def writeDefFile( dir: String = defaultDir, overwrite: Boolean = false ) {
       var file = new File( dir, name + ".scsyndef" )
       val exists = file.exists
       if( overwrite ) {
@@ -251,23 +219,20 @@ trait SynthDefBuilder {
 }
 
 object SynthDef {
-//	var verbose = false
-//   var buildGraph: Option[ UGenGraph ] = None
-   var synthDefDir         = System.getProperty( "java.io.tmpdir" )
+   type Completion   = Comp[ SynthDef ]
+   val NoCompletion  = Comp[ SynthDef ]( None, None )  
+
+   var defaultDir    = System.getProperty( "java.io.tmpdir" )
 
    private val sync        = new AnyRef
-//   private var builders    = Map.empty[ Thread, SynthDefBuilder ]
-
    // java.lang.ThreadLocal is around 30% faster than
    // using a synchronized map, plus we don't need
    // to look after its cleaning
    private val builders    = new ThreadLocal[ SynthDefBuilder ] {
       override protected def initialValue = new BuilderImpl
    }
-//   def builder: Option[ SynthDefBuilder ] = builders.get( Thread.currentThread )
    def builder: SynthDefBuilder = builders.get
 
-//  def apply( name: String, func: => Any ) = new SynthDef( name, func, Nil, Nil, Nil )
    def apply( name: String )( thunk: => GE ) : SynthDef = {
       val b = new BuilderImpl
       builders.set( b )
@@ -280,15 +245,14 @@ object SynthDef {
       }
    }
 
-//   def individuate: Int = builder.map( _.individuate ) getOrElse 0
-   def individuate: Int = builder.individuate
+   def recv( server: Server = Server.default, name: String, completion: Completion = NoCompletion )
+           ( thunk: => GE ) : SynthDef = {
+      val d = apply( name )( thunk )
+      d.recv( server, completion )
+      d
+   }
 
-//   def wrap( ugenGraphFunc: () => GE ) : GE = {
-//	   if( buildSynthDef.isEmpty ) {
-//	      throw new Exception( "SynthDef.wrap should be called inside a SynthDef ugenGraphFunc." )
-//	   }
-//      buildSynthDef.get.buildUGenGraph( ugenGraphFunc )
-//   }
+   def individuate: Int = builder.individuate
 
    def writeDefFile( path: String, defs: Seq[ SynthDef ]) {
       val os	= new FileOutputStream( path )

@@ -28,6 +28,8 @@
 
 package de.sciss.synth
 
+import osc._
+
 /**
  *    @version	0.15, 09-May-10
  */

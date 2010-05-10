@@ -34,7 +34,7 @@ class GraphFunction[ T <% GE ]( thunk: => T ) {
 		val synthMsg   = synth.newMsg( synthDef.name, target, List( "i_out" -> outBus, "out" -> outBus ), addAction )
 		if( bytes.remaining > (65535 / 4) ) { // preliminary fix until full size works
 			if( server.isLocal ) {
-				synthDef.load( server, synthMsg )
+				synthDef.load( server, completion = synthMsg )
 			} else {
 				warn( "synthdef may have been too large to send to remote server" )
 				server ! OSCMessage( "/d_recv", bytes, synthMsg )

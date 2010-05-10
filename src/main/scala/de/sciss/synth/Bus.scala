@@ -29,14 +29,13 @@
 package de.sciss.synth
 
 import collection.immutable.{ IndexedSeq => IIdxSeq }
+import osc._
 
 class AllocatorExhaustedException( reason: String )
 extends RuntimeException( reason )
 
-//import de.sciss.tint.sc.{ control => kr, audio => ar } // name conflict
-
 /**
- *    @version	0.12, 28-Apr-10
+ *    @version	0.12, 10-May-10
  */
 object Bus {
 	def control( server: Server = Server.default, numChannels: Int = 1 ) = {

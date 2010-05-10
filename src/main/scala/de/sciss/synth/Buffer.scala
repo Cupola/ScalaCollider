@@ -29,20 +29,21 @@
 package de.sciss.synth
 
 import de.sciss.scalaosc.{ OSCBundle, OSCMessage, OSCPacket }
+import de.sciss.synth.{ Completion => Comp }
 import ugen.{ BufRateScale, FreeSelfWhenDone, PlayBuf }
-import SC._
+import osc._
+import SC._ 
 
 /**
- * 	@version	0.18, 09-May-10
+ * 	@version	0.18, 10-May-10
  */
 object Buffer {
 //   sealed abstract class Completion {
 //      private[Buffer] val message: Option[ Buffer => OSCMessage ]
 //      private[Buffer] val action:  Option[ Buffer => Unit ]
 //   }
-   case class Completion( private[Buffer] val message: Option[ Buffer => OSCMessage ],
-                          private[Buffer] val action:  Option[ Buffer => Unit ])
-   val NoCompletion = Completion( None, None )
+   type Completion = Comp[ Buffer ]
+   val NoCompletion = Comp[ Buffer ]( None, None )
 
    def alloc( server: Server = Server.default, numFrames: Int, numChannels: Int = 1,
               completion: Completion = NoCompletion ) : Buffer = {

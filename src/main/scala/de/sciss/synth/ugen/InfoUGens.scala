@@ -96,24 +96,24 @@ object NumRunningSynths {
 case class NumRunningSynths() extends InfoUGen
 
 trait BufInfoUGenBase extends UGen1Args {
-   def ir( bufNum: GE ) : GE = irExp( bufNum )
-   def kr( bufNum: GE ) : GE = krExp( bufNum )
+   def ir( bufID: GE ) : GE = irExp( bufID )
+   def kr( bufID: GE ) : GE = krExp( bufID )
 }
 
 object BufSampleRate extends BufInfoUGenBase
-case class BufSampleRate( rate: Rate, bufNum: UGenIn ) extends SingleOutUGen( bufNum )
+case class BufSampleRate( rate: Rate, bufID: UGenIn ) extends SingleOutUGen( bufID )
 
 object BufRateScale extends BufInfoUGenBase
-case class BufRateScale( rate: Rate, bufNum: UGenIn ) extends SingleOutUGen( bufNum )
+case class BufRateScale( rate: Rate, bufID: UGenIn ) extends SingleOutUGen( bufID )
 
 object BufFrames extends BufInfoUGenBase
-case class BufFrames( rate: Rate, bufNum: UGenIn ) extends SingleOutUGen( bufNum )
+case class BufFrames( rate: Rate, bufID: UGenIn ) extends SingleOutUGen( bufID )
 
 object BufSamples extends BufInfoUGenBase
-case class BufSamples( rate: Rate, bufNum: UGenIn ) extends SingleOutUGen( bufNum )
+case class BufSamples( rate: Rate, bufID: UGenIn ) extends SingleOutUGen( bufID )
 
 object BufDur extends BufInfoUGenBase
-case class BufDur( rate: Rate, bufNum: UGenIn ) extends SingleOutUGen( bufNum )
+case class BufDur( rate: Rate, bufID: UGenIn ) extends SingleOutUGen( bufID )
 
 object BufChannels extends BufInfoUGenBase
-case class BufChannels( rate: Rate, bufNum: UGenIn ) extends SingleOutUGen( bufNum )
+case class BufChannels( rate: Rate, bufID: UGenIn ) extends SingleOutUGen( bufID )

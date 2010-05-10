@@ -29,9 +29,10 @@
 package de.sciss.synth
 
 import collection.immutable.IntMap
+import osc._
 
 /**
- *    @version 0.12, 24-Apr-10
+ *    @version 0.12, 10-May-10
  */
 object NodeManager {
    abstract sealed class NodeChange { def node: Node; def info: OSCNodeInfo }

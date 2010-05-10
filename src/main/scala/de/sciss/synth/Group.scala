@@ -28,8 +28,10 @@
 
 package de.sciss.synth
 
+import osc._
+
 /**
- *    @version	0.12, 22-Apr-10
+ *    @version	0.12, 10-May-10
  */
 object Group {
     def play: Group = {

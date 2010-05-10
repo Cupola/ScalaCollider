@@ -33,6 +33,7 @@ import java.net.{ ConnectException, InetAddress, InetSocketAddress, SocketAddres
 import java.io.{ BufferedReader, File, InputStreamReader, IOException }
 import java.util.{ Timer, TimerTask }
 import collection.immutable.Queue
+import osc._
 import math._
 
 /**
@@ -162,6 +163,7 @@ abstract class Server extends Model {
    }
 
    def !( p: OSCPacket ) { c.send( p )}
+//   def !( synthDef: SynthDef ) { this ! synthDef.recvMsg }
 
    // XXX should use actor syntax instead, returning an Option[ OSCMessage ] to the current actor
    private def sendAsyncPacket( ap: AsyncOSCPacket, timeOut: Long = 5000 )( success: => Unit )( failure: => Unit ) {

@@ -36,30 +36,30 @@ import GraphBuilder._
  * 	@version	0.12, 16-Apr-10
  */
 object DiskOut {
-  def ar( bufNum: GE, multi: GE ) : GE =
+  def ar( bufID: GE, multi: GE ) : GE =
     simplify( for( List( b, m @ _* ) <-
-                     expand( (bufNum :: multi.outputs.toList): _* ))
+                     expand( (bufID :: multi.outputs.toList): _* ))
                 yield this( b, m ))
 }
-case class DiskOut( bufNum: UGenIn, multi: Seq[ UGenIn ])
-extends SingleOutUGen( (bufNum :: multi.toList): _* ) with AudioRated // with SideEffectUGen
+case class DiskOut( bufID: UGenIn, multi: Seq[ UGenIn ])
+extends SingleOutUGen( (bufID :: multi.toList): _* ) with AudioRated // with SideEffectUGen
 
 object DiskIn {
-  def ar( numChannels: Int, bufNum: GE, loop: GE = 0 ) =
-    simplify( for( List( b, l ) <- expand( bufNum, loop ))
+  def ar( numChannels: Int, bufID: GE, loop: GE = 0 ) =
+    simplify( for( List( b, l ) <- expand( bufID, loop ))
       yield this( numChannels, b, l ))
 }
-case class DiskIn( numChannels: Int, bufNum: UGenIn, loop: UGenIn )
-extends MultiOutUGen( audio, numChannels, List( bufNum, loop )) with AudioRated // with SideEffectUGen // side-effect: advancing sf offset
+case class DiskIn( numChannels: Int, bufID: UGenIn, loop: UGenIn )
+extends MultiOutUGen( audio, numChannels, List( bufID, loop )) with AudioRated // with SideEffectUGen // side-effect: advancing sf offset
 
 object VDiskIn {
   // note: argument 'rate' renamed to 'speed'
-  def ar( numChannels: Int, bufNum: GE, speed: GE = 1, loop: GE = 0, sendID: GE = 0 ) =
-    simplify( for( List( b, s, l, i ) <- expand( bufNum, speed, loop, sendID ))
+  def ar( numChannels: Int, bufID: GE, speed: GE = 1, loop: GE = 0, sendID: GE = 0 ) =
+    simplify( for( List( b, s, l, i ) <- expand( bufID, speed, loop, sendID ))
       yield this( numChannels, b, s, l, i ))
 }
-case class VDiskIn( numChannels: Int, bufNum: UGenIn, speed: UGenIn,
+case class VDiskIn( numChannels: Int, bufID: UGenIn, speed: UGenIn,
                     loop: UGenIn, sendID: UGenIn )
-extends MultiOutUGen( audio, numChannels, List( bufNum, speed, loop, sendID ))
+extends MultiOutUGen( audio, numChannels, List( bufID, speed, loop, sendID ))
 with AudioRated // with SideEffectUGen
  
