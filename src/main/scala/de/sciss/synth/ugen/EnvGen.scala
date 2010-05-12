@@ -66,17 +66,17 @@ with ControlRated
 
 // its output is its input (gate)
 object Pause extends UGen2RArgs {
-  def kr( gate: GE, nodeID: GE ) : GE = make( gate, nodeID )
+  def kr( gate: GE, nodeId: GE ) : GE = make( gate, nodeId )
 }
-case class Pause( gate: UGenIn, nodeID: UGenIn )
-extends SingleOutUGen( gate, nodeID ) with ControlRated
+case class Pause( gate: UGenIn, nodeId: UGenIn )
+extends SingleOutUGen( gate, nodeId ) with ControlRated
 
 // its output is its input (trig)
 object Free extends UGen2RArgs {
-  def kr( trig: GE, nodeID: GE ) : GE = make( trig, nodeID )
+  def kr( trig: GE, nodeId: GE ) : GE = make( trig, nodeId )
 }
-case class Free( trig: UGenIn, nodeID: UGenIn )
-extends SingleOutUGen( trig, nodeID ) with ControlRated
+case class Free( trig: UGenIn, nodeId: UGenIn )
+extends SingleOutUGen( trig, nodeId ) with ControlRated
 
 object EnvGen {
   def ar( envelope: Env, gate: GE = 1, levelScale: GE = 1, levelBias: GE = 0,
