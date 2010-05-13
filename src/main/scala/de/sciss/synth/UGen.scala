@@ -89,7 +89,7 @@ trait UGenProxy {
 //trait ExclusiveUGen     // marker trait: UGen can only occur once in a synthdef
 //trait SideEffectUGen    // marker trait: UGen has side effects
 
-abstract class UGen
+abstract sealed class UGen
 extends RatedGE with UGenProxy {
    // ---- constructor ----
    {

@@ -29,14 +29,55 @@
 package de.sciss.synth
 
 /**
- *	@version	   0.12, 27-Apr-10
+ *	@version	   0.13, 13-May-10
  */
+object Constant {
+   @inline private def cn( f: Float )     = apply( f )
+   @inline private def cn( d: Double )    = apply( d.toFloat )
+   @inline private def cn( b: Boolean )   = apply( if( b ) 1f else 0f )
+
+   @inline private def fold( in: Float, lo: Float, hi: Float ) : Float = {
+      val x = in - lo
+      // avoid the divide if possible
+      if( in >= hi ) {
+         val f = hi + hi - in
+         if (f >= lo) return f
+      } else if( in < lo ) {
+         val f = lo + lo - in
+         if( f < hi ) return f
+      } else return in
+
+      if( hi == lo ) return lo
+      // ok do the divide
+      val range   = hi - lo
+      val range2  = range + range
+      val c       = x - range2 * math.floor( x / range2 ).toFloat
+      lo + (if( c >= range ) range2 - c else c)
+   }
+
+   @inline private def wrap( in: Float, lo: Float, hi: Float ) : Float = {
+      // avoid the divide if possible
+      if( in >= hi ) {
+         val range   = hi - lo
+         val in2     = in - range;
+         if( in2 < hi ) in2 else if( hi == lo ) lo else {
+            in2 - range * math.floor( (in2 - lo) / range ).toFloat
+         }
+      } else if( in < lo ) {
+         val range   = hi - lo
+         val in2     = in + range
+         if( in2 >= lo ) in2 else if( hi == lo ) lo else {
+            in2 - range * math.floor( (in2 - lo) / range ).toFloat
+         }
+      } else in
+   }
+}
+
 case class Constant( value: Float ) extends UGenIn with ScalarRated {
+   import Constant._
+
    override def toString = value.toString
-
-   @inline private def cn( f: Float )  = Constant( f )
-   @inline private def cn( d: Double ) = Constant( d.toFloat )
-
+   
    // unary ops - refine GE to return constants,
    // since this way we can implicitly go back to Float
    override def neg : Constant         = cn( -value )
@@ -74,4 +115,49 @@ case class Constant( value: Float ) extends UGenIn with ScalarRated {
    override def softclip : Constant    = { val absx = math.abs( value ); cn( if( absx <= 0.5f ) value else (absx - 0.25f) / value )}
    override def ramp : Constant        = cn( if( value <= 0 ) 0 else if( value >= 1 ) 1 else value )
    override def scurve : Constant      = cn( if( value <= 0 ) 0 else if( value > 1 ) 1 else value * value * (3 - 2 * value))
+
+   // binary ops
+   def +( b: Constant ) : Constant        = cn( value + b.value )
+   def -( b: Constant ) : Constant        = cn( value - b.value )
+   def *( b: Constant ) : Constant        = cn( value * b.value )
+   def /( b: Constant ) : Constant        = cn( value / b.value )
+   def %( b: Constant ) : Constant        = cn( value % b.value )
+   def ===( b: Constant ) : Constant      = cn( value == b.value )
+   def !==( b: Constant ) : Constant      = cn( value != b.value )
+   def <( b: Constant ) : Constant	      = cn( value < b.value )
+   def >( b: Constant ) : Constant	      = cn( value > b.value )
+   def <=( b: Constant ) : Constant	      = cn( value <= b.value )
+   def >=( b: Constant ) : Constant	      = cn( value >= b.value )
+   def min( b: Constant ) : Constant      = cn( math.min( value, b.value ))
+   def max( b: Constant ) : Constant      = cn( math.max( value, b.value ))
+   def &( b: Constant ) : Constant	      = cn( value.toInt & b.value.toInt )
+   def |( b: Constant ) : Constant	      = cn( value.toInt | b.value.toInt )
+   def ^( b: Constant ) : Constant	      = cn( value.toInt ^ b.value.toInt )
+   def round( b: Constant ) : Constant    = if( b.value == 0 ) this else cn( math.floor( value / b.value + 0.5f ) * b.value )
+   def roundup( b: Constant ) : Constant  = if( b.value == 0 ) this else cn( math.ceil( value / b.value ) * b.value )
+   def trunc( b: Constant ) : Constant    = if( b.value == 0 ) this else cn( math.floor( value / b.value ) * b.value )
+   def atan2( b: Constant ) : Constant    = cn( math.atan2( value, b.value ))
+   def hypot( b: Constant ) : Constant    = cn( math.hypot( value, b.value ))
+   def hypotx( b: Constant ) : Constant   = {
+      val minab = math.min( math.abs( value ), math.abs( b.value ))
+      cn( value + b.value - (math.sqrt(2) - 1) * minab )
+   }
+   def pow( b: Constant ) : Constant      = cn( math.pow( value, b.value ))
+   def ring1( b: Constant ) : Constant    = cn( value * b.value + value )
+   def ring2( b: Constant ) : Constant    = cn( value * b.value + value + b.value )
+   def ring3( b: Constant ) : Constant    = cn( value * value * b.value )
+   def ring4( b: Constant ) : Constant    = { val ab = value * b.value; cn( value * ab - b.value * ab )}
+   def difsqr( b: Constant ) : Constant   = cn( value * value - b.value * b.value )
+   def sumsqr( b: Constant ) : Constant   = cn( value * value + b.value * b.value )
+   def sqrsum( b: Constant ) : Constant   = { val z = value + b.value; cn( z * z )}
+   def sqrdif( b: Constant ) : Constant   = { val z = value - b.value; cn( z * z )}
+   def absdif( b: Constant ) : Constant   = cn( math.abs( value - b.value ))
+   def thresh( b: Constant ) : Constant   = cn( if( value < b.value ) 0 else value )
+   def amclip( b: Constant ) : Constant   = cn( value * 0.5f * (b.value + math.abs( value )))
+   def scaleneg( b: Constant ) : Constant = cn( (math.abs( value ) - value) * (0.5f * b.value + 0.5f) + value )
+   def clip2( b: Constant ) : Constant    = cn( math.max( math.min( value, b.value ), -b.value ))
+   def excess( b: Constant ) : Constant   = cn( value - math.max( math.min( value, b.value ), -b.value ))
+   def fold2( b: Constant ) : Constant    = cn( fold( value, -b.value, b.value ))
+   def wrap2( b: Constant ) : Constant    = cn( wrap( value, -b.value, b.value ))
+   def firstarg( b: Constant ) : Constant = this
 }
