@@ -36,6 +36,7 @@ import GraphBuilder._
  *  @version  0.11, 01-Jan-10
  */
 object MouseX extends UGen4RArgs {
+   def kr : GE = kr()
 	def kr( minVal: GE = 0, maxVal: GE = 1, warp: GE = 0, lag: GE = 0.2f ) : GE =
       make( minVal, maxVal, warp, lag )
 }
@@ -43,6 +44,7 @@ case class MouseX( minVal: UGenIn, maxVal: UGenIn, warp: UGenIn, lag: UGenIn )
 extends SingleOutUGen( minVal, maxVal, warp, lag ) with ControlRated
 
 object MouseY extends UGen4RArgs {
+   def kr : GE = kr()
 	def kr( minVal: GE = 0, maxVal: GE = 1, warp: GE = 0, lag: GE = 0.2f ) : GE =
       make( minVal, maxVal, warp, lag )
 }
@@ -50,6 +52,7 @@ case class MouseY( minVal: UGenIn, maxVal: UGenIn, warp: UGenIn, lag: UGenIn )
 extends SingleOutUGen( minVal, maxVal, warp, lag ) with ControlRated
 
 object MouseButton extends UGen3RArgs {
+   def kr : GE = kr()
 	def kr( minVal: GE = 0, maxVal: GE = 1, lag: GE = 0.2f ) : GE =
       make( minVal, maxVal, lag )
 }

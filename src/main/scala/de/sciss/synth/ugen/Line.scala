@@ -37,9 +37,11 @@ import SC._
  * 	@version	0.13, 22-Apr-10
  */
 object Line extends UGen4Args {
+   def ar : GE = ar()
 	def ar( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = doNothing ) : GE =
       arExp( start, end, dur, doneAction )
 
+   def kr : GE = kr()
 	def kr( start: GE = 0, end: GE = 1, dur: GE = 1, doneAction: GE = doNothing ) : GE =
       krExp( start, end, dur, doneAction )
 }
@@ -48,9 +50,11 @@ extends SingleOutUGen( start, end, dur, doneAction )
 // with SideEffectUGen // side-effect: done-flag
 
 object XLine extends UGen4Args {
+   def ar : GE = ar()
 	def ar( start: GE = 1, end: GE = 2, dur: GE = 1, doneAction: GE = doNothing ) : GE =
       arExp( start, end, dur, doneAction )
 
+   def kr : GE = kr()
 	def kr( start: GE = 1, end: GE = 2, dur: GE = 1, doneAction: GE = doNothing ) : GE =
       krExp( start, end, dur, doneAction )
 }
@@ -79,12 +83,15 @@ case class LinLin( rate: Rate, in: UGenIn, srcLo: UGenIn, srcHi: UGenIn, dstLo: 
 extends SingleOutUGen( in, srcLo, srcHi, dstLo, dstHi )
 
 object AmpComp extends UGen3Args {
+   def ar : GE = ar()
 	def ar( freq: GE = 60.midicps, root: GE = 60.midicps, expon: GE = 0.3333 ) : GE =
       arExp( freq, root, expon )
 
+   def kr : GE = kr()
 	def kr( freq: GE = 60.midicps, root: GE = 60.midicps, expon: GE = 0.3333 ) : GE =
       krExp( freq, root, expon )
 
+   def ir : GE = ir()
 	def ir( freq: GE = 60.midicps, root: GE = 60.midicps, expon: GE = 0.3333 ) : GE =
       irExp( freq, root, expon )
 // XXX checkInputs
@@ -93,12 +100,15 @@ case class AmpComp( rate: Rate, freq: UGenIn, root: UGenIn, expon: UGenIn )
 extends SingleOutUGen( freq, root, expon )
 
 object AmpCompA extends UGen4Args {
+   def ar : GE = ar()
 	def ar( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32, rootAmp: GE = 1 ) : GE =
       arExp( freq, root, minAmp, rootAmp )
 
+   def kr : GE = kr()
 	def kr( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32, rootAmp: GE = 1 ) : GE =
       krExp( freq, root, minAmp, rootAmp )
 
+   def ir : GE = ir()
 	def ir( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32, rootAmp: GE = 1 ) : GE =
       irExp( freq, root, minAmp, rootAmp )
 }
@@ -133,7 +143,8 @@ case class DC( rate: Rate, multi: IIdxSeq[ UGenIn ])
 extends MultiOutUGen( audio, multi.size, multi )
 
 object Silent {
-	def ar( numChannels: Int ) : GE = this( numChannels )
+   def ar : GE = ar()
+	def ar( numChannels: Int = 1 ) : GE = this( numChannels )
 }
 case class Silent( numChannels: Int )
 extends MultiOutUGen( audio, numChannels, Nil ) with AudioRated

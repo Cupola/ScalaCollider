@@ -113,10 +113,12 @@ case class IEnvGen( rate: Rate, index: UGenIn, ienvSeq: Seq[ UGenIn ])
 extends SingleOutUGen( (List( index ) ++ ienvSeq): _* )
 
 object Linen extends UGen5Args {
+   def ar : GE = ar()
 	def ar( gate: GE = 1, attack: GE = 0.01f, sustain: GE = 1, release: GE = 1,
             doneAction: GE = doNothing ) : GE =
       arExp( gate, attack, sustain, release, doneAction )
 
+   def kr : GE = ar()
 	def kr( gate: GE = 1, attack: GE = 0.01f, sustain: GE = 1, release: GE = 1,
             doneAction: GE = doNothing ) : GE =
       krExp( gate, attack, sustain, release, doneAction )

@@ -36,8 +36,10 @@ import GraphBuilder._
  *	@version	0.10, 01-Jan-10
  */
 object PSinGrain extends UGen3Args {
-  def ar( freq: GE = 440, dur: GE = 0.2f, amp: GE = 1 ) : GE = arExp( freq, dur, amp )
-  def kr( freq: GE = 440, dur: GE = 0.2f, amp: GE = 1 ) : GE = krExp( freq, dur, amp )
+   def ar : GE = ar()
+   def ar( freq: GE = 440, dur: GE = 0.2f, amp: GE = 1 ) : GE = arExp( freq, dur, amp )
+   def kr : GE = kr()
+   def kr( freq: GE = 440, dur: GE = 0.2f, amp: GE = 1 ) : GE = krExp( freq, dur, amp )
 }
 case class PSinGrain( rate: Rate, freq: UGenIn, dur: UGenIn, amp: UGenIn )
 extends SingleOutUGen( freq, dur, amp )

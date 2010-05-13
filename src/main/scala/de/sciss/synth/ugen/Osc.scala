@@ -50,15 +50,19 @@ extends SingleOutUGen( bufID, freq, phase )
 // }
 
 object SinOsc extends UGen2Args {
-  def ar( freq: GE = 440, phase: GE = 0 ) : GE = arExp( freq, phase )
-  def kr( freq: GE = 440, phase: GE = 0 ) : GE = krExp( freq, phase )
+   def ar : GE = ar()
+   def ar( freq: GE = 440, phase: GE = 0 ) : GE = arExp( freq, phase )
+   def kr : GE = kr()
+   def kr( freq: GE = 440, phase: GE = 0 ) : GE = krExp( freq, phase )
 }
 case class SinOsc( rate: Rate, freq: UGenIn, phase: UGenIn )
 extends SingleOutUGen( freq, phase )
 
 object SinOscFB extends UGen2Args {
-  def ar( freq: GE = 440, feedback: GE = 0 ) : GE = arExp( freq, feedback )
-  def kr( freq: GE = 440, feedback: GE = 0 ) : GE = krExp( freq, feedback )
+   def ar : GE = ar()
+   def ar( freq: GE = 440, feedback: GE = 0 ) : GE = arExp( freq, feedback )
+   def kr : GE = kr()
+   def kr( freq: GE = 440, feedback: GE = 0 ) : GE = krExp( freq, feedback )
 }
 case class SinOscFB( rate: Rate, freq: UGenIn, feedback: UGenIn )
 extends SingleOutUGen( freq, feedback )
@@ -101,86 +105,106 @@ case class COsc( rate: Rate, bufID: UGenIn, freq: UGenIn, beats: UGenIn )
 extends SingleOutUGen( bufID, freq, beats ) // with SideEffectUGen
 
 object Formant extends UGen3Args {
-  def ar( fundFreq: GE = 440, formFreq: GE = 1760, bw: GE = 880 ) : GE =
-    arExp( fundFreq, formFreq, bw )
+   def ar : GE = ar()
+   def ar( fundFreq: GE = 440, formFreq: GE = 1760, bw: GE = 880 ) : GE =
+      arExp( fundFreq, formFreq, bw )
 
-  def kr( fundFreq: GE = 440, formFreq: GE = 1760, bw: GE = 880 ) : GE =
-    krExp( fundFreq, formFreq, bw )
+   def kr : GE = kr()
+   def kr( fundFreq: GE = 440, formFreq: GE = 1760, bw: GE = 880 ) : GE =
+      krExp( fundFreq, formFreq, bw )
 }
 case class Formant( rate: Rate, fundFreq: UGenIn, formFreq: UGenIn, bw: UGenIn )
 extends SingleOutUGen( fundFreq, formFreq, bw )
 
 object LFSaw extends UGen2Args {
-  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
-  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
+   def ar : GE = ar()
+   def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
+   def kr : GE = kr()
+   def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
 }
 case class LFSaw( rate: Rate, freq: UGenIn, iphase: UGenIn )
 extends SingleOutUGen( freq, iphase )
 
 object LFPar extends UGen2Args {
-  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
-  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
+   def ar : GE = ar()
+   def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
+   def kr : GE = kr()
+   def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
 }
 case class LFPar( rate: Rate, freq: UGenIn, iphase: UGenIn )
 extends SingleOutUGen( freq, iphase )
 
 object LFCub extends UGen2Args {
-  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
-  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
+   def ar : GE = ar()
+   def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
+   def kr : GE = kr()
+   def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
 }
 case class LFCub( rate: Rate, freq: UGenIn, iphase: UGenIn )
 extends SingleOutUGen( freq, iphase )
 
 object LFTri extends UGen2Args {
-  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
-  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
+   def ar : GE = ar()
+   def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
+   def kr : GE = kr()
+   def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
 }
 case class LFTri( rate: Rate, freq: UGenIn, iphase: UGenIn )
 extends SingleOutUGen( freq, iphase )
 
 object LFGauss extends UGen5Args {
-  def ar( dur: GE = 1, width: GE = 0.1f, iphase: GE = 0, loop: GE = 1,
-          doneAction: GE = doNothing ) : GE =
-    arExp( dur, width, iphase, loop, doneAction )
+   def ar : GE = ar()
+   def ar( dur: GE = 1, width: GE = 0.1f, iphase: GE = 0, loop: GE = 1,
+           doneAction: GE = doNothing ) : GE =
+      arExp( dur, width, iphase, loop, doneAction )
 
-  def kr( dur: GE = 1, width: GE = 0.1f, iphase: GE = 0, loop: GE = 1,
-          doneAction: GE = doNothing ) : GE =
-    krExp( dur, width, iphase, loop, doneAction )
+   def kr : GE = kr()
+   def kr( dur: GE = 1, width: GE = 0.1f, iphase: GE = 0, loop: GE = 1,
+           doneAction: GE = doNothing ) : GE =
+      krExp( dur, width, iphase, loop, doneAction )
 }
 case class LFGauss( rate: Rate, dur: UGenIn, width: UGenIn, iphase: UGenIn,
                     loop: UGenIn, doneAction: UGenIn )
 extends SingleOutUGen( dur, width, iphase, loop, doneAction )
 
 object LFPulse extends UGen3Args {
-  def ar( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
-    arExp( freq, iphase, width )
+   def ar : GE = ar()
+   def ar( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
+      arExp( freq, iphase, width )
   
-  def kr( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
-    krExp( freq, iphase, width )
+   def kr : GE = kr()
+   def kr( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
+      krExp( freq, iphase, width )
 }
 case class LFPulse( rate: Rate, freq: UGenIn, iphase: UGenIn, width: UGenIn )
 extends SingleOutUGen( freq, iphase, width )
 
 object VarSaw extends UGen3Args {
-  def ar( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
-    arExp( freq, iphase, width )
+   def ar : GE = ar()
+   def ar( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
+      arExp( freq, iphase, width )
 
-  def kr( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
-    krExp( freq, iphase, width )
+   def kr : GE = kr()
+   def kr( freq: GE = 440, iphase: GE = 0, width: GE = 0.5f ) : GE =
+      krExp( freq, iphase, width )
 }
 case class VarSaw( rate: Rate, freq: UGenIn, iphase: UGenIn, width: UGenIn )
 extends SingleOutUGen( freq, iphase, width )
 
 object Impulse extends UGen2Args {
-  def ar( freq: GE = 440, phase: GE = 0 ) : GE = arExp( freq, phase )
-  def kr( freq: GE = 440, phase: GE = 0 ) : GE = krExp( freq, phase )
+   def ar : GE = ar()
+   def ar( freq: GE = 440, phase: GE = 0 ) : GE = arExp( freq, phase )
+   def kr : GE = kr()
+   def kr( freq: GE = 440, phase: GE = 0 ) : GE = krExp( freq, phase )
 }
 case class Impulse( rate: Rate, freq: UGenIn, phase: UGenIn )
 extends SingleOutUGen( freq, phase )
 
 object SyncSaw extends UGen2Args {
-  def ar( syncFreq: GE = 440, sawFreq: GE = 440 ) : GE = arExp( syncFreq, sawFreq )
-  def kr( syncFreq: GE = 440, sawFreq: GE = 440 ) : GE = krExp( syncFreq, sawFreq )
+   def ar : GE = ar()
+   def ar( syncFreq: GE = 440, sawFreq: GE = 440 ) : GE = arExp( syncFreq, sawFreq )
+   def kr : GE = kr()
+   def kr( syncFreq: GE = 440, sawFreq: GE = 440 ) : GE = krExp( syncFreq, sawFreq )
 }
 case class SyncSaw( rate: Rate, syncFreq: UGenIn, sawFreq: UGenIn )
 extends SingleOutUGen( syncFreq, sawFreq )
@@ -242,16 +266,25 @@ case class Select( rate: Rate, index: UGenIn, multi: Seq[ UGenIn ])
 extends SingleOutUGen( (index :: multi.toList): _* )
 
 object Vibrato {
-  // note: 'rate' argument already taken, using 'beat' instead
-  private def make( rate: Rate, freq: GE = 440, beat: GE = 6, depth: GE = 0.02f,
-                    delay: GE = 0, onset: GE = 0, rateVar: GE = 0.04f,
-                    depthVar: GE = 0.1f, iphase: GE = 0 ) : GE = {
+   def ar : GE = ar()
+   def ar( freq: GE = 440, beat: GE = 6, depth: GE = 0.02f, delay: GE = 0, onset: GE = 0,
+           rateVar: GE = 0.04f, depthVar: GE = 0.1f, iphase: GE = 0 ) : GE =
+      make( audio, freq, beat, depth, delay, onset, rateVar, depthVar, iphase )
 
-    simplify( for( List( f, b, d, dly, o, rv, dv, p ) <-
-                   expand( freq, beat, depth, delay, onset, rateVar, depthVar,
-                           iphase ))
-      yield this( rate, f, b, d, dly, o, rv, dv, p ))
-  }
+   def kr : GE = kr()
+   def kr( freq: GE = 440, beat: GE = 6, depth: GE = 0.02f, delay: GE = 0, onset: GE = 0,
+           rateVar: GE = 0.04f, depthVar: GE = 0.1f, iphase: GE = 0 ) : GE =
+      make( control, freq, beat, depth, delay, onset, rateVar, depthVar, iphase )
+
+   // note: 'rate' argument already taken, using 'beat' instead
+   private def make( rate: Rate, freq: GE = 440, beat: GE = 6, depth: GE = 0.02f,
+                     delay: GE = 0, onset: GE = 0, rateVar: GE = 0.04f,
+                     depthVar: GE = 0.1f, iphase: GE = 0 ) : GE = {
+
+      simplify( for( List( f, b, d, dly, o, rv, dv, p ) <-
+            expand( freq, beat, depth, delay, onset, rateVar, depthVar, iphase ))
+         yield this( rate, f, b, d, dly, o, rv, dv, p ))
+   }
 }
 case class Vibrato( rate: Rate, freq: UGenIn, beat: UGenIn, depth: UGenIn,
                     delay: UGenIn, onset: UGenIn, rateVar: UGenIn,

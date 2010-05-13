@@ -36,8 +36,10 @@ import GraphBuilder._
  *	@version	0.11, 09-Dec-09
  */
 object FSinOsc extends UGen2Args {
-  def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
-  def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
+   def ar : GE = ar()
+   def ar( freq: GE = 440, iphase: GE = 0 ) : GE = arExp( freq, iphase )
+   def kr : GE = kr()
+   def kr( freq: GE = 440, iphase: GE = 0 ) : GE = krExp( freq, iphase )
 }
 case class FSinOsc( rate: Rate, freq: UGenIn, iphase: UGenIn )
 extends SingleOutUGen( freq, iphase )
@@ -82,22 +84,28 @@ extends SingleOutUGen( (List( in, freqScale, freqOffset, decayScale ) ++ specs):
 // DynKlang XXX missing
 
 object Blip extends UGen2Args {
-  def ar( freq: GE = 440, numHarm: GE = 200 ) : GE = arExp( freq, numHarm )
-  def kr( freq: GE = 440, numHarm: GE = 200 ) : GE = krExp( freq, numHarm )
+   def ar : GE = ar()
+   def ar( freq: GE = 440, numHarm: GE = 200 ) : GE = arExp( freq, numHarm )
+   def kr : GE = kr()
+   def kr( freq: GE = 440, numHarm: GE = 200 ) : GE = krExp( freq, numHarm )
 }
 case class Blip( rate: Rate, freq: UGenIn, numHarm: UGenIn )
 extends SingleOutUGen( freq, numHarm )
 
 object Saw extends UGen1Args {
-  def ar( freq: GE = 440 ) : GE = arExp( freq )
-  def kr( freq: GE = 440 ) : GE = krExp( freq )
+   def ar : GE = ar()
+   def ar( freq: GE = 440 ) : GE = arExp( freq )
+   def kr : GE = kr()
+   def kr( freq: GE = 440 ) : GE = krExp( freq )
 }
 case class Saw( rate: Rate, freq: UGenIn )
 extends SingleOutUGen( freq )
 
 object Pulse extends UGen2Args {
-  def ar( freq: GE = 440, width: GE = 0.5f ) : GE = arExp( freq, width )
-  def kr( freq: GE = 440, width: GE = 0.5f ) : GE = krExp( freq, width )
+   def ar : GE = ar()
+   def ar( freq: GE = 440, width: GE = 0.5f ) : GE = arExp( freq, width )
+   def kr : GE = kr()
+   def kr( freq: GE = 440, width: GE = 0.5f ) : GE = krExp( freq, width )
 }
 case class Pulse( rate: Rate, freq: UGenIn, width: UGenIn )
 extends SingleOutUGen( freq, width )

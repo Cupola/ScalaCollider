@@ -164,7 +164,9 @@ object GrayNoise extends NoiseUGen // { type noiseType = GrayNoise }
 case class GrayNoise( rate: Rate, _indiv: Int ) extends SingleOutUGen()
 
 object Crackle extends UGen1Args {
+   def ar : GE = ar()
 	def ar( chaosParam: GE = 1.5f ) : GE = arExp( chaosParam )
+   def kr : GE = kr()
 	def kr( chaosParam: GE = 1.5f ) : GE = krExp( chaosParam )
 }
 // note: Crackle is deterministic in the sense that
@@ -174,9 +176,11 @@ case class Crackle( rate: Rate, chaosParam: UGenIn )
 extends SingleOutUGen( chaosParam )
 
 object Logistic extends UGen3Args {
+   def ar : GE = ar()
 	def ar( chaosParam: GE = 3, freq: GE = 1000, init: GE = 0.5f ) : GE =
       arExp( chaosParam, freq, init )
 
+   def kr : GE = kr()
 	def kr( chaosParam: GE = 3, freq: GE = 1000, init: GE = 0.5f ) : GE =
       krExp( chaosParam, freq, init )
 }
@@ -185,49 +189,65 @@ case class Logistic( rate: Rate, chaosParam: UGenIn, freq: UGenIn, init: UGenIn 
 extends SingleOutUGen( chaosParam, freq, init )
 
 object LFNoise0 extends UGen1ArgsIndiv {
+   def ar : GE = ar()
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
+   def kr : GE = kr()
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFNoise0( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
 object LFNoise1 extends UGen1ArgsIndiv {
+   def ar : GE = ar()
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
+   def kr : GE = kr()
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFNoise1( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
 object LFNoise2 extends UGen1ArgsIndiv {
+   def ar : GE = ar()
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
+   def kr : GE = kr()
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFNoise2( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
 object LFClipNoise extends UGen1ArgsIndiv {
+   def ar : GE = ar()
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
+   def kr : GE = kr()
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFClipNoise( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
 object LFDNoise0 extends UGen1ArgsIndiv {
+   def ar : GE = ar()
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
+   def kr : GE = kr()
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFDNoise0( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
 object LFDNoise1 extends UGen1ArgsIndiv {
+   def ar : GE = ar()
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
+   def kr : GE = kr()
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFDNoise1( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
 object LFDNoise3 extends UGen1ArgsIndiv {
+   def ar : GE = ar()
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
+   def kr : GE = kr()
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFDNoise3( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
 object LFDClipNoise extends UGen1ArgsIndiv {
+   def ar : GE = ar()
 	def ar( freq: GE = 500 ) : GE = arExp( freq )
+   def kr : GE = kr()
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
 case class LFDClipNoise( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
@@ -248,13 +268,17 @@ case class MantissaMask( rate: Rate, in: UGenIn, bits: UGenIn )
 extends SingleOutUGen( in, bits )
 
 object Dust extends UGen1ArgsIndiv {
+   def ar : GE = ar()
 	def ar( density: GE = 1 ) : GE = arExp( density )
+   def kr : GE = kr()
 	def kr( density: GE = 1 ) : GE = krExp( density )
 }
 case class Dust( rate: Rate, density: UGenIn, _indiv: Int ) extends SingleOutUGen( density )
 
 object Dust2 extends UGen1ArgsIndiv {
+   def ar : GE = ar()
 	def ar( density: GE = 1 ) : GE = arExp( density )
+   def kr : GE = kr()
 	def kr( density: GE = 1 ) : GE = krExp( density )
 }
 case class Dust2( rate: Rate, density: UGenIn, _indiv: Int ) extends SingleOutUGen( density )
