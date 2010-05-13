@@ -37,6 +37,7 @@ object ScalaCollider {
 
    def main( args: Array[ String ]) {
       printInfo
+//      new Test
       System.exit( 1 )
    }
 
@@ -44,4 +45,14 @@ object ScalaCollider {
       println( "\n" + name + " v" + versionString + "\n" + copyright +
          ". All rights reserved.\n\nThis is a library which cannot be executed directly.\n" )
    }
+
+//   class Test {
+//      import SC._
+//
+//      val s = new PlainServer()
+//      s.boot
+//      s.addDoWhenBooted {
+//         val b = Buffer.read( s, "sounds/a11wlk01.wav", completion = action( _.play ))
+//      }
+//   }
 }

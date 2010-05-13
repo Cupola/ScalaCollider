@@ -98,11 +98,11 @@ object SC {
 //  implicit def intToStringOrInt( x: Int ) = new StringOrInt( x )
   
    // explicit methods
-   def play( f: GraphFunction[ _ ]) : Synth = f.play
+   def play( thunk: => GE ) : Synth = play()( thunk )
    def play( target: Node = Server.default.defaultGroup, outBus: Int = 0,
              fadeTime: Option[Float] = Some( 0.02f ),
-             addAction: AddAction = addToHead )( f: GraphFunction[ _ ]) : Synth =
-      f.play( target, outBus, fadeTime, addAction )
+             addAction: AddAction = addToHead )( thunk: => GE ) : Synth =
+      new GraphFunction( thunk ).play( target, outBus, fadeTime, addAction )
 
    // String
    def warn( s: String ) : String = {

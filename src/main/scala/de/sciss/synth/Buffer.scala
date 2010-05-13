@@ -244,13 +244,13 @@ case class Buffer( server: Server, id: Int ) extends Model {
    }
 
    // ---- utility methods ----
-   def play( loop: Boolean = false, amp: Float = 1f, out: Int = 0 ) : Synth = {
+   def play : Synth = play()
+   def play( loop: Boolean = false, amp: Float = 1f, out: Int = 0 ) : Synth =
       SC.play( server, out ) { // working around nasty compiler bug
          val ply = PlayBuf.ar( numChannels, id, BufRateScale.kr( id ), loop = if( loop ) 1 else 0 )
          if( !loop ) FreeSelfWhenDone.kr( ply )
          ply * "amp".kr( amp )
       }
-   }
 
    private def makePacket( completion: Completion, forceQuery: Boolean = false ) : Option[ OSCPacket ] = {
       val a = completion.action
