@@ -216,9 +216,10 @@ extends OSCMessage( "/n_info", info.toList( nodeID ): _* ) with OSCNodeChange
 
 case class OSCBufferInfo( bufID: Int, numFrames: Int, numChannels: Int, sampleRate: Float )
 
+// we need List[ Any ] as scala would otherwise expand to List[ Float ]!
 case class OSCBufferInfoMessage( infos: OSCBufferInfo* )
 extends OSCMessage( "/b_info", infos.flatMap( info =>
-   List( info.bufID, info.numFrames, info.numChannels, info.sampleRate )): _* )
+   List[ Any ]( info.bufID, info.numFrames, info.numChannels, info.sampleRate )): _* )
 
 // ---- messages to the server ----
 case class OSCServerNotifyMessage( onOff: Boolean )
@@ -272,7 +273,7 @@ extends OSCMessage( "/b_write", (List( id, path, fileType.id, sampleFormat.id, n
 
 //case class OSCBusValuePair( index: Int, value: Float )
 case class OSCControlBusSetMessage( indicesAndValues: Tuple2[ Int, Float ]* )
-extends OSCMessage( "/c_set", indicesAndValues.flatMap( iv => List( iv._1, iv._2 )): _* )
+extends OSCMessage( "/c_set", indicesAndValues.flatMap( iv => List[ Any ]( iv._1, iv._2 )): _* )
 
 //case class OSCBusValuesPair( index: Int, values: IIdxSeq[ Float ])
 case class OSCControlBusSetnMessage( indicesAndValues: Tuple2[ Int, IIdxSeq[ Float ]]* )
