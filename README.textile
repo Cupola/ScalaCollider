@@ -1,14 +1,12 @@
-h2. ScalaCollider ==<small>-- version 0.12 (built 09-may-10) --</small>==
+h2. ScalaCollider ==<small>-- version 0.12 (built 17-may-10) --</small>==
 
 h3. statement
 
-ScalaCollider is a SuperCollider client for the Scala language. It is (C)opyright 2008-2010 by Hanns Holger Rutz. All rights reserved. ScalaCollider is released under the "GNU General Public License":http://www.sciss.de/scalaCollider/licenses/ScalaCollider-License.txt and comes with absolutely no warranties. To contact the author, send an email to @contact at sciss.de@
-
-For project status, visit "www.sciss.de/scalaCollider":http://www.sciss.de/scalaCollider/ .
+ScalaCollider is a SuperCollider client for the Scala language. It is (C)opyright 2008-2010 by Hanns Holger Rutz. All rights reserved. ScalaCollider is released under the "GNU General Public License":http://github.com/Sciss/ScalaCollider/blob/master/licenses/ScalaCollider-License.txt and comes with absolutely no warranties. To contact the author, send an email to @contact at sciss.de@
 
 h3. requirements / installation
 
-ScalaOSC currently compiles against Scala 2.8.0.RC1. It requires Java 1.6 and SuperCollider 3.3.1+. It depends on ScalaOSC ( "github.com/Sciss/ScalaOSC":http://github.com/Sciss/ScalaOSC ).
+ScalaOSC currently compiles against Scala 2.8.0.RC2. It requires Java 1.6 and SuperCollider 3.3.1+. It depends on ScalaOSC ( "github.com/Sciss/ScalaOSC":http://github.com/Sciss/ScalaOSC ) and ScalaAudioFile ( "github.com/Sciss/ScalaAudioFile":http://github.com/Sciss/ScalaAudioFile
 
 The repository contains a project file for Intellij IDEA 9 CE, and project files for sbt. Targets for sbt:
 
@@ -18,7 +16,7 @@ The repository contains a project file for Intellij IDEA 9 CE, and project files
 * @package@
 * @demo@
 
-The easiest way to install ScalaOSC is to go into your clone of the ScalaOSC git repository, and then execute
+The easiest way to install ScalaOSC and ScalaAudioFile is to go into their respective git repository clones, and then for each execute
 
 @$ sbt publish-local@
 
@@ -26,7 +24,7 @@ After wards, go back into the clone of the ScalaCollider git repository, and sim
 
 @$ sbt update@
 
-which should find ScalaOSC in your local Ivy repository.
+which should find ScalaOSC and ScalaAudioFile in your local Ivy repository.
 
 h3. running the demo
 

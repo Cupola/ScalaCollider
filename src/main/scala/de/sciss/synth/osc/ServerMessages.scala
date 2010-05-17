@@ -30,11 +30,12 @@ package de.sciss.synth.osc
 
 import de.sciss.scalaosc.{ OSCException, OSCMessage, OSCPacket, OSCPacketCodec }
 import de.sciss.scalaosc.OSCPacket._
-import de.sciss.synth.{ AudioFile, ControlBusMap, ControlSetMap, SingleControlBusMap }
+import de.sciss.synth.{ ControlBusMap, ControlSetMap, SingleControlBusMap }
+import de.sciss.synth.io.{ AudioFileType, SampleFormat }
 import java.nio.ByteBuffer
 import collection.breakOut
 import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
-import collection.mutable.{ ListBuffer }
+import collection.mutable.ListBuffer
 
 /**
  *    @version	0.12, 09-May-10
@@ -265,7 +266,7 @@ extends OSCMessage( "/b_readChannel", (List( id, path, fileStartFrame, numFrames
 case class OSCBufferZeroMessage( id: Int, completion: Option[ OSCPacket ])
 extends OSCMessage( "/b_zero", (completion.map( m => List( id, m )) getOrElse List( id )): _* )
 
-case class OSCBufferWriteMessage( id: Int, path: String, fileType: AudioFile.Type, sampleFormat: AudioFile.SampleFormat,
+case class OSCBufferWriteMessage( id: Int, path: String, fileType: AudioFileType, sampleFormat: SampleFormat,
                                   numFrames: Int, startFrame: Int, leaveOpen: Boolean,
                                   completion: Option[ OSCPacket])
 extends OSCMessage( "/b_write", (List( id, path, fileType.id, sampleFormat.id, numFrames, startFrame,

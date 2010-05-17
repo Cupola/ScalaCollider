@@ -225,12 +225,12 @@ object SynthDef {
 
    var defaultDir    = System.getProperty( "java.io.tmpdir" )
 
-   private val sync        = new AnyRef
+//   private val sync        = new AnyRef
    // java.lang.ThreadLocal is around 30% faster than
    // using a synchronized map, plus we don't need
    // to look after its cleaning
    private val builders    = new ThreadLocal[ SynthDefBuilder ] {
-      override protected def initialValue = new BuilderImpl
+      override protected def initialValue = BuilderDummy
    }
    def builder: SynthDefBuilder = builders.get
 

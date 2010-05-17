@@ -30,12 +30,13 @@ package de.sciss.synth
 
 import de.sciss.scalaosc.{ OSCBundle, OSCMessage, OSCPacket }
 import de.sciss.synth.{ Completion => Comp }
+import de.sciss.synth.io.{ AudioFileType, SampleFormat }
 import ugen.{ BufRateScale, FreeSelfWhenDone, PlayBuf }
 import osc._
 import SC._ 
 
 /**
- * 	@version	0.18, 10-May-10
+ * 	@version	0.18, 17-May-10
  */
 object Buffer {
 //   sealed abstract class Completion {
@@ -60,9 +61,9 @@ object Buffer {
    }
 
    def cue( server: Server = Server.default, path: String, startFrame: Int = 0, numChannels: Int = 1,
-            numBufFrames: Int = 32768, completion: Completion = NoCompletion ) : Buffer = {
+            bufFrames: Int = 32768, completion: Completion = NoCompletion ) : Buffer = {
       val b = apply( server )
-      b.alloc( numBufFrames, numChannels, message( b.cueMsg( path, startFrame, completion )))
+      b.alloc( bufFrames, numChannels, message( b.cueMsg( path, startFrame, completion )))
       b
    }
 
@@ -229,15 +230,15 @@ case class Buffer( server: Server, id: Int ) extends Model {
 	def zeroMsg( completion: Option[ OSCPacket ]) =
       OSCBufferZeroMessage( id, completion )
 
-   def write( path: String, fileType: AudioFile.Type = AudioFile.AIFF,
-              sampleFormat: AudioFile.SampleFormat = AudioFile.Float, numFrames: Int = -1, startFrame: Int = 0,
+   def write( path: String, fileType: AudioFileType = AudioFileType.AIFF,
+              sampleFormat: SampleFormat = SampleFormat.Float, numFrames: Int = -1, startFrame: Int = 0,
               leaveOpen: Boolean = false, completion: Completion = NoCompletion) {
 //         path = path ?? { thisProcess.platform.recordingsDir +/+ "SC_" ++ Date.localtime.stamp ++ "." ++ headerFormat };
          server ! writeMsg( path, fileType, sampleFormat, numFrames, startFrame, leaveOpen, makePacket( completion ))
       }
 
-   def writeMsg( path: String, fileType: AudioFile.Type = AudioFile.AIFF,
-                 sampleFormat: AudioFile.SampleFormat = AudioFile.Float, numFrames: Int = -1, startFrame: Int = 0,
+   def writeMsg( path: String, fileType: AudioFileType = AudioFileType.AIFF,
+                 sampleFormat: SampleFormat = SampleFormat.Float, numFrames: Int = -1, startFrame: Int = 0,
                  leaveOpen: Boolean = false, completion: Option[ OSCPacket] = None ) = {
 //      require( isPowerOfTwo( this.numFrames ))
       OSCBufferWriteMessage( id, path, fileType, sampleFormat, numFrames, startFrame, leaveOpen, completion )
