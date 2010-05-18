@@ -80,7 +80,7 @@ abstract class AbstractControlProxy[ Impl ]( outputRates: IIdxSeq[ Rate ])
 extends ControlProxyLike[ Impl ] {
    // ---- constructor ----
    {
-      SynthDef.builder.addControlProxy( this )
+      SynthGraph.builder.addControlProxy( this )
    }
 
    def this( rate: Rate, numOutputs: Int ) =  this( Vector.fill( numOutputs )( rate ))

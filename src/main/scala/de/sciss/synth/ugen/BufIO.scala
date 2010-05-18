@@ -117,7 +117,7 @@ object RecordBuf {
                        loop: GE, trig: GE, doneAction: GE ) =
       simplify( for( List( b, o, r, p, n, l, t, d, m @ _* ) <- expand( (bufID :: offset :: recLevel :: preLevel ::
                      run :: loop :: trig :: doneAction :: multi.outputs.toList) :_* ))
-         yield this( rate, b, o, r, p, n, l, t, d, m, SynthDef.individuate ))
+         yield this( rate, b, o, r, p, n, l, t, d, m, SynthGraph.individuate ))
 }
 case class RecordBuf( rate: Rate, bufID: UGenIn, offset: UGenIn, recLevel: UGenIn, preLevel: UGenIn,
                       run: UGenIn, loop: UGenIn, trig: UGenIn, doneAction: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )

@@ -90,7 +90,7 @@ abstract class AbstractOut {
    private def make( rate: Rate, bus: GE, multi: GE ) : GE = {
       val args = bus :: replaceZeroesWithSilence( multi ).outputs.toList
       simplify( for( b :: m <- expand( args: _* ))
-         yield this( rate, b, m, SynthDef.individuate ))
+         yield this( rate, b, m, SynthGraph.individuate ))
    }
 
    def apply( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ], _indiv: Int ) : GE
@@ -108,7 +108,7 @@ object OffsetOut {
    def ar( bus: GE, multi: GE ) : GE = {
       val args = bus :: replaceZeroesWithSilence( multi ).outputs.toList
       simplify( for( b :: m <- expand( args: _* ))
-         yield this( b, m, SynthDef.individuate ))
+         yield this( b, m, SynthGraph.individuate ))
    }
 }
 case class OffsetOut( bus: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )
@@ -133,7 +133,7 @@ object XOut {
    private def make( rate: Rate, bus: GE, xfade: GE, multi: GE ) : GE = {
       val args = bus :: xfade :: replaceZeroesWithSilence( multi ).outputs.toList
       simplify( for( b :: x :: m <- expand( args: _* ))
-         yield this( rate, b, x, m, SynthDef.individuate ))
+         yield this( rate, b, x, m, SynthGraph.individuate ))
    }
 }
 case class XOut( rate: Rate, bus: UGenIn, xfade: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )

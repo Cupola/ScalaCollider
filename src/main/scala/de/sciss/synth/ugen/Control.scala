@@ -47,7 +47,7 @@ object Control {
    def kr( values: Float* ) : Control = kr( Vector( values: _* ))
 
    private def make( rate: Rate, values: IIdxSeq[ Float ], name: Option[ String ]) : Control = {
-      val specialIndex = SynthDef.builder.addControl( values, name )
+      val specialIndex = SynthGraph.builder.addControl( values, name )
       apply( rate, values.size, specialIndex )
    }
 }
@@ -61,7 +61,7 @@ extends AbstractControlProxy[ ControlProxy ]( rate, values.size ) {
 
 object ControlFactory extends ControlFactoryLike[ ControlProxy ] {
    def build( proxies: ControlProxy* ) : Map[ ControlProxyLike[ _ ], (UGen, Int) ] = {
-      val b = SynthDef.builder
+      val b = SynthGraph.builder
       proxies.groupBy( _.rate ).flatMap( group => {
          val (rate, ps)    = group
          var numChannels   = 0

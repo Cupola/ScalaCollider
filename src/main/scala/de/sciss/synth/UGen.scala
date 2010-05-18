@@ -93,7 +93,7 @@ abstract sealed class UGen
 extends RatedGE with UGenProxy {
    // ---- constructor ----
    {
-      SynthDef.builder.addUGen( this )
+      SynthGraph.builder.addUGen( this )
    }
 
    def name = { val cn = getClass.getName; cn.substring( cn.lastIndexOf( '.' ) + 1 )}
@@ -137,7 +137,7 @@ trait UGen1RArgs { // single rate
 trait UGen1ArgsIndiv {
    def apply( rate: Rate, arg1: UGenIn, _indiv: Int ) : GE
    private def make( rate: Rate, arg1: GE ) : GE =
-      simplify( for( List( a1 ) <- expand( arg1 )) yield this( rate, a1, SynthDef.individuate ))
+      simplify( for( List( a1 ) <- expand( arg1 )) yield this( rate, a1, SynthGraph.individuate ))
 
    protected def arExp( arg1: GE ) : GE = make( audio, arg1 )
    protected def krExp( arg1: GE ) : GE = make( control, arg1 )
@@ -165,7 +165,7 @@ trait UGen2ArgsIndiv {
    def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, _indiv: Int ) : GE
    private def make( rate: Rate, arg1: GE, arg2: GE ) : GE =
       simplify( for( List( a1, a2 ) <- expand( arg1, arg2 ))
-         yield this( rate, a1, a2, SynthDef.individuate ))
+         yield this( rate, a1, a2, SynthGraph.individuate ))
 
    protected def arExp( arg1: GE, arg2: GE ) : GE = make( audio, arg1, arg2 )
    protected def krExp( arg1: GE, arg2: GE ) : GE = make( control, arg1, arg2 )
@@ -175,7 +175,7 @@ trait UGen2ArgsIndiv {
 trait UGen2RArgsIndiv {
    def apply( arg1: UGenIn, arg2: UGenIn, _indiv: Int ) : GE
    protected def make( arg1: GE, arg2: GE ) : GE =
-      simplify( for( List( a1, a2 ) <- expand( arg1, arg2 )) yield this( a1, a2, SynthDef.individuate ))
+      simplify( for( List( a1, a2 ) <- expand( arg1, arg2 )) yield this( a1, a2, SynthGraph.individuate ))
 }
 
 trait UGen3Args {
@@ -203,7 +203,7 @@ trait UGen3ArgsIndiv {
    def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, _indiv: Int ) : GE
    private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE ) : GE =
      simplify( for( List( a1, a2, a3 ) <- expand( arg1, arg2, arg3 ))
-       yield this( rate, a1, a2, a3, SynthDef.individuate ))
+       yield this( rate, a1, a2, a3, SynthGraph.individuate ))
 
    protected def arExp( arg1: GE, arg2: GE, arg3: GE ) : GE =
       make( audio, arg1, arg2, arg3 )
@@ -217,7 +217,7 @@ trait UGen3RArgsIndiv {
    def apply( arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, _indiv: Int ) : GE
    protected def make( arg1: GE, arg2: GE, arg3: GE ) : GE =
       simplify( for( List( a1, a2, a3 ) <- expand( arg1, arg2, arg3 ))
-         yield this( a1, a2, a3, SynthDef.individuate ))
+         yield this( a1, a2, a3, SynthGraph.individuate ))
 }
 
 trait UGen4Args {

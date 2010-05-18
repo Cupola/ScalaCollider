@@ -43,10 +43,7 @@ import File.{ separator => sep }
  *    @version 0.19, 17-May-10
  *    @todo    should add load and loadDir to companion object
  */
-case class SynthDef private ( name: String, constants: IIdxSeq[ Float ],
-                              controlValues: IIdxSeq[ Float ],
-                              controlNames: IIdxSeq[ (String, Int) ],
-                              ugens: IIdxSeq[ SynthDef.RichUGen ]) {
+case class SynthDef( name: String, graph: SynthGraph ) {
 
    import SynthDef._
 
@@ -79,43 +76,7 @@ case class SynthDef private ( name: String, constants: IIdxSeq[ Float ],
 
    private def write( dos: DataOutputStream ) {
       writePascalString( dos, name )
-
-      // ---- constants ----
-      dos.writeShort( constants.size )
-      constants.foreach( c => dos.writeFloat( c.value ))
-
-      // ---- controls ----
-      dos.writeShort( controlValues.size )
-      controlValues.foreach( dos.writeFloat( _ ))
-
-      dos.writeShort( controlNames.size )
-      var count = 0
-      controlNames.foreach( name => {
-         writePascalString( dos, name._1 )
-         dos.writeShort( name._2 )
-         count += 1
-      })
-
-//      if( verbose ) println( "ugens.size = " + ugens.size )
-
-      dos.writeShort( ugens.size )
-      ugens.foreach( ru => {
-         val ugen = ru.ugen
-         writePascalString( dos, ugen.name )
-
-         dos.writeByte( ugen.rate.id )
-         dos.writeShort( ugen.numInputs )
-         dos.writeShort( ugen.numOutputs )
-         dos.writeShort( ugen.specialIndex )
-
-         ru.inputSpecs.foreach( spec => {
-            dos.writeShort( spec._1 )
-            dos.writeShort( spec._2 )
-         })
-         ugen.outputs.foreach( in => dos.writeByte( in.rate.id ))
-      })
-
-      dos.writeShort( 0 ) // variants not supported
+      graph.write( dos )
    }
 
    def load( server: Server = Server.default, dir: String = defaultDir,
@@ -163,7 +124,7 @@ case class SynthDef private ( name: String, constants: IIdxSeq[ Float ],
 
    def testTopoSort {
       var i = 0
-      ugens.foreach( ru => {
+      graph.ugens.foreach( ru => {
          var j = 0
          ru.inputSpecs.foreach( spec => {
             if( (spec._1 >= 0) && (spec._1 <= i) ) {
@@ -178,11 +139,11 @@ case class SynthDef private ( name: String, constants: IIdxSeq[ Float ],
 
    def debugDump {
       var i = 0
-      ugens.foreach( ru => {
+      graph.ugens.foreach( ru => {
          println( "#" + i + " : " + ru.ugen.name +
             (if( ru.ugen.specialIndex != 0 ) "-" + ru.ugen.specialIndex else "") + ru.inputSpecs.map({
-               case (-1, idx)    => constants( idx ).toString
-               case (uidx, oidx) => { val ru = ugens( uidx ); "#" + uidx + " : " + ru.ugen.name +
+               case (-1, idx)    => graph.constants( idx ).toString
+               case (uidx, oidx) => { val ru = graph.ugens( uidx ); "#" + uidx + " : " + ru.ugen.name +
                   (if( oidx > 0 ) "@" + oidx else "") }
             }).mkString( "( ", ", ", " )" ))
          i += 1
@@ -203,45 +164,61 @@ case class SynthDef private ( name: String, constants: IIdxSeq[ Float ],
 //   }
 }
 
-trait SynthDefBuilder {
-   def addUGen( ugen: UGen ) : Unit
-   def addControlProxy( proxy: ControlProxyLike[ _ ]) : Unit
-   def addControl( values: IIdxSeq[ Float ], name: Option[ String ]) : Int
-   def build( name: String ) : SynthDef
+case class SynthGraph( constants: IIdxSeq[ Float ], controlValues: IIdxSeq[ Float ],
+                       controlNames: IIdxSeq[ (String, Int) ], ugens: IIdxSeq[ SynthGraph.RichUGen ]) {
+//   override lazy val hashCode = ... TODO: figure out how case class calculates it...
+   private[synth] def write( dos: DataOutputStream ) {
+      // ---- constants ----
+      dos.writeShort( constants.size )
+      constants.foreach( c => dos.writeFloat( c.value ))
 
-   private var indivCnt = 0
-   def individuate : Int = {
-      val res = indivCnt
-      indivCnt += 1
-      res
+      // ---- controls ----
+      dos.writeShort( controlValues.size )
+      controlValues.foreach( dos.writeFloat( _ ))
+
+      dos.writeShort( controlNames.size )
+      var count = 0
+      controlNames.foreach( name => {
+         writePascalString( dos, name._1 )
+         dos.writeShort( name._2 )
+         count += 1
+      })
+
+//      if( verbose ) println( "ugens.size = " + ugens.size )
+
+      dos.writeShort( ugens.size )
+      ugens.foreach( ru => {
+         val ugen = ru.ugen
+         writePascalString( dos, ugen.name )
+
+         dos.writeByte( ugen.rate.id )
+         dos.writeShort( ugen.numInputs )
+         dos.writeShort( ugen.numOutputs )
+         dos.writeShort( ugen.specialIndex )
+
+         ru.inputSpecs.foreach( spec => {
+            dos.writeShort( spec._1 )
+            dos.writeShort( spec._2 )
+         })
+         ugen.outputs.foreach( in => dos.writeByte( in.rate.id ))
+      })
+
+      dos.writeShort( 0 ) // variants not supported
+   }
+
+   @inline private def writePascalString( dos: DataOutputStream, str: String ) {
+      dos.writeByte( str.size )
+      dos.write( str.getBytes )
    }
 }
 
 object SynthDef {
    type Completion   = Comp[ SynthDef ]
-   val NoCompletion  = Comp[ SynthDef ]( None, None )  
+   val NoCompletion  = Comp[ SynthDef ]( None, None )
 
    var defaultDir    = System.getProperty( "java.io.tmpdir" )
 
-//   private val sync        = new AnyRef
-   // java.lang.ThreadLocal is around 30% faster than
-   // using a synchronized map, plus we don't need
-   // to look after its cleaning
-   private val builders    = new ThreadLocal[ SynthDefBuilder ] {
-      override protected def initialValue = BuilderDummy
-   }
-   def builder: SynthDefBuilder = builders.get
-
-   def apply( name: String )( thunk: => GE ) : SynthDef = {
-      val b = new BuilderImpl
-      builders.set( b )
-      try {
-         thunk
-         b.build( name )
-      } finally {
-         builders.set( BuilderDummy )
-      }
-   }
+   def apply( name: String )( thunk: => GE ) : SynthDef = SynthDef( name, SynthGraph( thunk ))
 
    def recv( server: Server = Server.default, name: String, completion: Completion = NoCompletion )
            ( thunk: => GE ) : SynthDef = {
@@ -250,12 +227,10 @@ object SynthDef {
       d
    }
 
-   def individuate: Int = builder.individuate
-
    def writeDefFile( path: String, defs: Seq[ SynthDef ]) {
       val os	= new FileOutputStream( path )
 	   val dos	= new DataOutputStream( new BufferedOutputStream( os ))
- 
+
 //    try {
       dos.writeInt( 0x53436766 ) 		// magic cookie
       dos.writeInt( 1 ) 				   // version
@@ -266,6 +241,44 @@ object SynthDef {
       dos.close
 //    }
    }
+}
+
+trait SynthGraphBuilder {
+   def addUGen( ugen: UGen ) : Unit
+   def addControlProxy( proxy: ControlProxyLike[ _ ]) : Unit
+   def addControl( values: IIdxSeq[ Float ], name: Option[ String ]) : Int
+   def build : SynthGraph
+
+   private var indivCnt = 0
+   def individuate : Int = {
+      val res = indivCnt
+      indivCnt += 1
+      res
+   }
+}
+
+object SynthGraph {
+//   private val sync        = new AnyRef
+   // java.lang.ThreadLocal is around 30% faster than
+   // using a synchronized map, plus we don't need
+   // to look after its cleaning
+   private val builders    = new ThreadLocal[ SynthGraphBuilder ] {
+      override protected def initialValue = BuilderDummy
+   }
+   def builder: SynthGraphBuilder = builders.get
+
+   def apply( thunk: => GE ) : SynthGraph = {
+      val b = new BuilderImpl
+      builders.set( b )
+      try {
+         thunk
+         b.build
+      } finally {
+         builders.set( BuilderDummy )
+      }
+   }
+
+   def individuate: Int = builder.individuate
 
   // ---- rich ugen ----
 
@@ -273,14 +286,14 @@ object SynthDef {
 
    // ---- graph builder ----
 
-   private object BuilderDummy extends SynthDefBuilder {
-      def build( name: String ) : SynthDef = error( "Out of context" )
+   private object BuilderDummy extends SynthGraphBuilder {
+      def build : SynthGraph = error( "Out of context" )
       def addControl( values: IIdxSeq[ Float ], name: Option[ String ]) : Int = 0
       def addControlProxy( proxy: ControlProxyLike[ _ ]) {}
       def addUGen( ugen: UGen ) {}
    }
 
-   private class BuilderImpl extends SynthDefBuilder {
+   private class BuilderImpl extends SynthGraphBuilder {
       // updated during build
       private var ugens : IIdxSeq[ UGen ]                   = Vector.empty
       private var ugenSet                                   = Set.empty[ UGen ]
@@ -288,13 +301,13 @@ object SynthDef {
       private var controlNames: IIdxSeq[ (String, Int) ]    = Vector.empty
       private var controlProxies                            = Set.empty[ ControlProxyLike[ _ ]]
 
-      def build( name: String ) = {
+      def build = {
          val ctrlProxyMap        = buildControls
          // check inputs
          val (igens, constants)  = indexUGens( ctrlProxyMap )
          val indexedUGens        = sortUGens( igens )
          val richUGens           = indexedUGens.map( iu => RichUGen( iu.ugen, iu.richInputs.map( _.create )))
-         new SynthDef( name, constants, controlValues, controlNames, richUGens )
+         SynthGraph( constants, controlValues, controlNames, richUGens )
       }
 
       private def indexUGens( ctrlProxyMap: Map[ ControlProxyLike[ _ ], (UGen, Int)]) :

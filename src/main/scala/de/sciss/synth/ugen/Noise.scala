@@ -120,7 +120,7 @@ object TWindex {
    private def make( rate: Rate, trig: GE, list: GE, normalize: GE ) : GE =
       simplify( for( List( t, n, l @ _* ) <-
                   expand( (trig :: normalize :: list.outputs.toList): _* ))
-                     yield this( rate, t, l, n, SynthDef.individuate ))
+                     yield this( rate, t, l, n, SynthGraph.individuate ))
 
 //   def apply( rate: Rate, trig: UGenIn, list: Seq[ UGenIn ], normalize: UGenIn ) =
 //      new TWindex( rate, trig, list, normalize )
@@ -131,8 +131,8 @@ extends SingleOutUGen( (trig :: normalize :: list.toList): _* )
 trait NoiseUGen {
    def apply( rate: Rate, _indiv: Int ) : SingleOutUGen
 
-   def ar: SingleOutUGen = this( audio,   SynthDef.individuate )
-   def kr: SingleOutUGen = this( control, SynthDef.individuate )
+   def ar: SingleOutUGen = this( audio,   SynthGraph.individuate )
+   def kr: SingleOutUGen = this( control, SynthGraph.individuate )
 
    private def make( make1: => SingleOutUGen, mul: GE ) : GE = {
 //      val numOutputs = mul.numOutputs
