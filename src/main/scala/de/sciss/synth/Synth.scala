@@ -31,7 +31,7 @@ package de.sciss.synth
 import osc._
 
 /**
- *    @version	0.15, 09-May-10
+ *    @version	0.15, 18-May-10
  */
 case class Synth( server: Server, id: Int )
 extends Node {
@@ -39,7 +39,8 @@ extends Node {
 
 	def this( server: Server = Server.default ) = this( server, server.nodes.nextID )
 
-	def newMsg( defName: String, target: Node, args: Seq[ ControlSetMap ] = Nil, addAction: AddAction = addToHead ) = {
+	def newMsg( defName: String, target: Node = server.defaultGroup, args: Seq[ ControlSetMap ] = Nil,
+               addAction: AddAction = addToHead ) = {
       defNameVar = defName
       OSCSynthNewMessage( defName, id, addAction.id, target.id, args: _* )
    }

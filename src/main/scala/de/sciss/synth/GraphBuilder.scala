@@ -34,7 +34,7 @@ import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
 import ugen.{ BinaryOpUGen, EnvGen, MulAdd, Silent, Out, Poll, UnaryOpUGen }
 
 /**
- * 	@version	0.14, 09-May-10
+ * 	@version	0.14, 18-May-10
  */
 trait GE {
    def outputs : IIdxSeq[ UGenIn ]
@@ -237,8 +237,8 @@ object GraphBuilder {
       if( elements.size == 1 ) elements.head else new UGenInSeq( elements )
    }
      
-   def wrapOut( name: String, thunk: => GE, fadeTime: Option[Float] ) : SynthDef = {
-      SynthDef( name ) {
+   def wrapOut( thunk: => GE, fadeTime: Option[Float] = Some( 0.2f )) =
+      SynthGraph {
          val res1 = thunk
          val rate = Rates.highest( res1.outputs.map( _.rate ): _* )
          if( (rate == audio) || (rate == control) ) {
@@ -251,7 +251,6 @@ object GraphBuilder {
             }
          } else res1
       }
-	}
 
 	def makeFadeEnv( fadeTime: Float ) : GE = {
 		val dt			= "fadeTime".kr( fadeTime )

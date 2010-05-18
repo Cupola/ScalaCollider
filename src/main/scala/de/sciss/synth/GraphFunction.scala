@@ -27,12 +27,13 @@ class GraphFunction[ T <% GE ]( thunk: => T ) {
              addAction: AddAction = addToHead ) : Synth = {
 
 		val server = target.server
-		val defName    = "temp_" + uniqueID // why risk a hashcode clash?
-		val synthDef   = GraphBuilder.wrapOut( defName, thunk, fadeTime )
+		val defName    = "temp_" + uniqueID // more clear than using hashCode
+		val synthDef   = SynthDef( defName, GraphBuilder.wrapOut( thunk, fadeTime ))
 		val synth      = new Synth( server )
 		val bytes      = synthDef.toBytes
 		val synthMsg   = synth.newMsg( synthDef.name, target, List( "i_out" -> outBus, "out" -> outBus ), addAction )
-		if( bytes.remaining > (65535 / 4) ) { // preliminary fix until full size works
+      synth.onEnd { server ! synthDef.freeMsg } // why would we want to accumulate the defs?
+		if( bytes.remaining > (65535 / 4) ) { // "preliminary fix until full size works" (???)
 			if( server.isLocal ) {
 				synthDef.load( server, completion = synthMsg )
 			} else {
