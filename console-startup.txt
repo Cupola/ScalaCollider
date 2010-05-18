@@ -1,5 +1,6 @@
 import math._
 import de.sciss.synth._
 import de.sciss.synth.SC._
+import de.sciss.synth.io._
 import de.sciss.synth.ugen._
 val s = new PlainServer()

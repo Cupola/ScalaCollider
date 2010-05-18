@@ -185,7 +185,7 @@ class ContiguousBlockAllocator( size: Int, pos: Int = 0 ) /* extends BlockAlloca
       split( b, size, true )._1
    }
 
-   private def split( availBlock: Block, n: Int, used: Boolean ) : Tuple2[Block,Block] = {
+   private def split( availBlock: Block, n: Int, used: Boolean ) : (Block, Block) = {
       val result		= availBlock.split( n )
       val newB		   = result._1
       val leftOver	= result._2
@@ -220,7 +220,7 @@ class ContiguousBlockAllocator( size: Int, pos: Int = 0 ) /* extends BlockAlloca
          } else null
       }
 
-      def split( len: Int ) : Tuple2[ Block, Block ] = {
+      def split( len: Int ) : ( Block, Block ) = {
          if( len < size ) {
             (new Block( start, len ), new Block( start + len, size - len ))
          } else if( len == size ) {

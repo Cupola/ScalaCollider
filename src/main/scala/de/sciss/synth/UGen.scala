@@ -307,7 +307,7 @@ extends UGen {
    
    final override def numOutputs = outputRates.size
 	final def outputs: IIdxSeq[ UGenIn ] = outputRates.zipWithIndex.map(
-      tup => OutputProxy( this, tup._2, tup._1 ))
+      tup => UGenOutProxy( this, tup._2, tup._1 ))
 }
 
 abstract class SingleOutUGen( val inputs: UGenIn* ) extends UGen with UGenIn
@@ -318,7 +318,7 @@ extends UGen /* with SideEffectUGen */ {
    final def outputs = Vector.empty
 }
 
-case class OutputProxy( source: UGen, outputIndex: Int, rate: Rate )
+case class UGenOutProxy( source: UGen, outputIndex: Int, rate: Rate )
 extends UGenIn with UGenProxy {
    override def toString = "(" + source + " \\ " + outputIndex + ")"
 }

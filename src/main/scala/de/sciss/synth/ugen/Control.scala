@@ -28,34 +28,62 @@
 
 package de.sciss.synth.ugen
 
-import collection.immutable.{ IndexedSeq => IIdxSeq }
+import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
+import collection.breakOut
 import de.sciss.synth._
 
-// YYY could be a case class if specialIndex
-// was passed as a parameter
-
 /**
- *    @version 0.11, 22-Apr-10
+ *    @version 0.12, 17-May-10
  */
-class Control( val rate: Rate, val values: IIdxSeq[ Float ])
-extends MultiOutUGen( rate, values.size, Nil )
-{
-//  override val specialIndex = SynthDef.buildSynthDef.map( _.allocControl( numOutputs )).getOrElse( 0 )
-
-	override val specialIndex = SynthDef.builder.addControl( this )
-
-//	*isControlUGen { ^true }
-}
-
-class TrigControl( r: Rate, values: IIdxSeq[ Float ])
-extends Control( r, values )
-
 object Control {
-	def kr( values: Float* ) : Control = new Control( control, Vector( values: _* ))
-	def ir( values: Float* ) : Control = new Control( scalar, Vector( values: _* ))
+   /**
+    *    Note: we are not providing further convenience methods,
+    *    as that is the task of ControlProxyFactory...
+    */
+   def ir( values: IIdxSeq[ Float ], name: Option[ String ] = None ) : Control = make( scalar, values, name )
+   def kr( values: IIdxSeq[ Float ], name: Option[ String ] = None ) : Control = make( control, values, name )
+
+   def ir( values: Float* ) : Control = ir( Vector( values: _* ))
+   def kr( values: Float* ) : Control = kr( Vector( values: _* ))
+
+   private def make( rate: Rate, values: IIdxSeq[ Float ], name: Option[ String ]) : Control = {
+      val specialIndex = SynthDef.builder.addControl( values, name )
+      apply( rate, values.size, specialIndex )
+   }
+}
+case class Control private[ugen]( rate: Rate, numChannels: Int, override val specialIndex: Int )
+extends MultiOutUGen( rate, numChannels, Nil )
+
+case class ControlProxy( rate: Rate, values: IIdxSeq[ Float ], name: Option[ String ])
+extends AbstractControlProxy[ ControlProxy ]( rate, values.size ) {
+   def factory = ControlFactory
 }
 
-object TrigControl {
-	def kr( values: Float* ) : Control = new TrigControl( control, Vector( values: _* ))
-	def ir( values: Float* ) : Control = new TrigControl( scalar, Vector( values: _* ))
+object ControlFactory extends ControlFactoryLike[ ControlProxy ] {
+   def build( proxies: ControlProxy* ) : Map[ ControlProxyLike[ _ ], (UGen, Int) ] = {
+      val b = SynthDef.builder
+      proxies.groupBy( _.rate ).flatMap( group => {
+         val (rate, ps)    = group
+         var numChannels   = 0
+         val specialIndex  = ps.map( p => {
+            numChannels += p.values.size
+            b.addControl( p.values, p.name )
+         }).head
+         val ugen: UGen = Control.apply( rate, numChannels, specialIndex )
+         var offset = 0
+         ps.map( p => {
+            val res = p -> (ugen, offset)
+            offset += p.values.size
+            res
+         })
+      })( breakOut )
+   }
 }
+
+//class TrigControl( r: Rate, values: IIdxSeq[ Float ])
+//extends Control( r, values )
+//
+//object TrigControl {
+//	def kr( values: Float* ) : Control = new TrigControl( control, Vector( values: _* ))
+//	def ir( values: Float* ) : Control = new TrigControl( scalar, Vector( values: _* ))
+//}

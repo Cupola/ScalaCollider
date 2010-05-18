@@ -273,11 +273,11 @@ extends OSCMessage( "/b_write", (List( id, path, fileType.id, sampleFormat.id, n
    if( leaveOpen ) 1 else 0 ) ::: completion.map( msg => List( msg )).getOrElse( Nil )): _* )
 
 //case class OSCBusValuePair( index: Int, value: Float )
-case class OSCControlBusSetMessage( indicesAndValues: Tuple2[ Int, Float ]* )
+case class OSCControlBusSetMessage( indicesAndValues: (Int, Float)* )
 extends OSCMessage( "/c_set", indicesAndValues.flatMap( iv => List[ Any ]( iv._1, iv._2 )): _* )
 
 //case class OSCBusValuesPair( index: Int, values: IIdxSeq[ Float ])
-case class OSCControlBusSetnMessage( indicesAndValues: Tuple2[ Int, IIdxSeq[ Float ]]* )
+case class OSCControlBusSetnMessage( indicesAndValues: (Int, IIdxSeq[ Float ])* )
 extends OSCMessage( "/c_setn", indicesAndValues.flatMap( iv => Vector( iv._1, iv._2.size ) ++ iv._2 ): _* )
 
 case class OSCGroupNewInfo( groupID: Int, addAction: Int, targetID: Int )
@@ -285,16 +285,16 @@ case class OSCGroupNewMessage( groups: OSCGroupNewInfo* )
 extends OSCMessage( "/g_new", groups.flatMap( g => List( g.groupID, g.addAction, g.targetID )): _* )
 
 //case class OSCNodeFlagPair( id: Int, flag: Boolean )
-case class OSCGroupDumpTreeMessage( groups: Tuple2[ Int, Boolean ]* )
+case class OSCGroupDumpTreeMessage( groups: (Int, Boolean)* )
 extends OSCMessage( "/g_dumpTree", groups.flatMap( g => List( g._1, if( g._2 ) 1 else 0 )): _* )
 
-case class OSCGroupQueryTreeMessage( groups: Tuple2[ Int, Boolean ]* )
+case class OSCGroupQueryTreeMessage( groups: (Int, Boolean)* )
 extends OSCMessage( "/g_queryTree", groups.flatMap( g => List( g._1, if( g._2 ) 1 else 0 )): _* )
 
-case class OSCGroupHeadMessage( groups: Tuple2[ Int, Int ]* )
+case class OSCGroupHeadMessage( groups: (Int, Int)* )
 extends OSCMessage( "/g_head", groups.flatMap( g => List( g._1, g._2 )): _* )
 
-case class OSCGroupTailMessage( groups: Tuple2[ Int, Int ]* )
+case class OSCGroupTailMessage( groups: (Int, Int)* )
 extends OSCMessage( "/g_tail", groups.flatMap( g => List( g._1, g._2 )): _* )
 
 case class OSCGroupFreeAllMessage( ids: Int* )
@@ -307,7 +307,7 @@ case class OSCSynthNewMessage( defName: String, id: Int, addAction: Int, targetI
 extends OSCMessage( "/s_new",
    (Vector( defName, id, addAction, targetID ) ++ controls.flatMap( _.toSetSeq )): _* )
 
-case class OSCNodeRunMessage( nodes: Tuple2[ Int, Boolean ]* )
+case class OSCNodeRunMessage( nodes: (Int, Boolean)* )
 extends OSCMessage( "/n_run", nodes.flatMap( n => List( n._1, if( n._2 ) 1 else 0 )): _* )
 
 case class OSCNodeSetMessage( id: Int, pairs: ControlSetMap* )
@@ -338,10 +338,10 @@ case class OSCNodeFillInfo( control: Any, numChannels: Int, value: Float )
 case class OSCNodeFillMessage( id: Int, fillings: OSCNodeFillInfo* )
 extends OSCMessage( "/n_fill", (id +: fillings.flatMap( f => Vector( f.control, f.numChannels, f.value ))): _* )
 
-case class OSCNodeBeforeMessage( groups: Tuple2[ Int, Int ]* )
+case class OSCNodeBeforeMessage( groups: (Int, Int)* )
 extends OSCMessage( "/n_before", groups.flatMap( g => List( g._1, g._2 )): _* )
 
-case class OSCNodeAfterMessage( groups: Tuple2[ Int, Int ]* )
+case class OSCNodeAfterMessage( groups: (Int, Int)* )
 extends OSCMessage( "/n_after", groups.flatMap( g => List( g._1, g._2 )): _* )
 
 case class OSCSynthDefRecvMessage( bytes: ByteBuffer, completion: Option[ OSCPacket ])

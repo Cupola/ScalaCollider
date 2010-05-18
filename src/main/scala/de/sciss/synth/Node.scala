@@ -156,13 +156,6 @@ abstract class Node extends Model {
       server ! mapMsg( pairs: _* )
    }
 
-//  	def map( pairs: Tuple2[ Any, Int ]* ) {
-//  		server ! mapMsg( pairs: _* )
-//  	}
-  
-//  	def mapMsg( pairs: Tuple2[ Any, Int ]* ) =
-//  		OSCNodeMapMessage( id, pairs: _* )
-
    def mapMsg( pairs: SingleControlBusMap* ) =
       OSCNodeMapMessage( id, pairs: _* )
    

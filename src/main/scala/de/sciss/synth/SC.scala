@@ -70,7 +70,7 @@ object SC {
    implicit def stringBusControlBus( tup: (String, ControlBus) )  = MultiControlBusMap( tup._1, tup._2.index, tup._2.numChannels )
 
    // pimping
-   implicit def stringToControlFactory( name: String ) = new ControlFactory( name )
+   implicit def stringToControlProxyFactory( name: String ) = new ControlProxyFactory( name )
    implicit def thunkToGraphFunction[ T <% GE ]( thunk: => T ) = new GraphFunction( thunk )
 
 //   // Misc

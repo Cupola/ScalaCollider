@@ -45,13 +45,13 @@ case class FSinOsc( rate: Rate, freq: UGenIn, iphase: UGenIn )
 extends SingleOutUGen( freq, iphase )
 
 object KlangSpec {
-  def fill( n: Int )( thunk: => Tuple3[ GE, GE, GE ]) : List[ KlangSpec ] = {
-    List.fill[ Tuple3[ GE, GE, GE ]]( n )( thunk ).map(
+  def fill( n: Int )( thunk: => (GE, GE, GE) ) : List[ KlangSpec ] = {
+    List.fill[ (GE, GE, GE) ]( n )( thunk ).map(
       (tup) => KlangSpec( tup._1, tup._2, tup._3 ))
   }
 
-  def tabulate( n: Int )( func: (Int) => Tuple3[ GE, GE, GE ]) : List[ KlangSpec ] = {
-    List.tabulate[ Tuple3[ GE, GE, GE ]]( n )( func ).map(
+  def tabulate( n: Int )( func: (Int) => (GE, GE, GE) ) : List[ KlangSpec ] = {
+    List.tabulate[ (GE, GE, GE) ]( n )( func ).map(
       (tup) => KlangSpec( tup._1, tup._2, tup._3 ))
   }
 }

@@ -35,16 +35,18 @@ import ugen.Control
 import osc._
 import SC._
 import collection.immutable.{ IndexedSeq => IIdxSeq, Iterable => IIterable, Seq => ISeq, Stack, Vector }
-import collection.{ breakOut }
+import collection.breakOut
 import de.sciss.scalaosc.{ OSCMessage, OSCPacket }
 import File.{ separator => sep }
 
 /**
- *    @version 0.18, 10-May-10
+ *    @version 0.19, 17-May-10
  *    @todo    should add load and loadDir to companion object
  */
-class SynthDef private ( val name: String, constants: IIdxSeq[ Float ], controlValues: IIdxSeq[ Float ],
-                         controlDescs: IIdxSeq[ ControlDesc ], ugens: IIdxSeq[ SynthDef.RichUGen ]) {
+case class SynthDef private ( name: String, constants: IIdxSeq[ Float ],
+                              controlValues: IIdxSeq[ Float ],
+                              controlNames: IIdxSeq[ (String, Int) ],
+                              ugens: IIdxSeq[ SynthDef.RichUGen ]) {
 
    import SynthDef._
 
@@ -86,15 +88,11 @@ class SynthDef private ( val name: String, constants: IIdxSeq[ Float ], controlV
       dos.writeShort( controlValues.size )
       controlValues.foreach( dos.writeFloat( _ ))
 
-      dos.writeShort( controlDescs.size )
+      dos.writeShort( controlNames.size )
       var count = 0
-      controlDescs.foreach( desc => {
-         desc.name.map( name => {
-            writePascalString( dos, name )
-            dos.writeShort( desc.ugen.specialIndex + desc.ugenOutputIndex )
-         }) getOrElse {
-            println( "Warning: unnamed control " + count + " dropped." )
-         }
+      controlNames.foreach( name => {
+         writePascalString( dos, name._1 )
+         dos.writeShort( name._2 )
          count += 1
       })
 
@@ -207,8 +205,8 @@ class SynthDef private ( val name: String, constants: IIdxSeq[ Float ], controlV
 
 trait SynthDefBuilder {
    def addUGen( ugen: UGen ) : Unit
-   def addControlDesc( desc: ControlDesc ) : Unit
-   def addControl( u: Control ) : Int
+   def addControlProxy( proxy: ControlProxyLike[ _ ]) : Unit
+   def addControl( values: IIdxSeq[ Float ], name: Option[ String ]) : Int
    def build( name: String ) : SynthDef
 
    private var indivCnt = 0
@@ -239,7 +237,6 @@ object SynthDef {
       builders.set( b )
       try {
          thunk
-         b.finish
          b.build( name )
       } finally {
          builders.set( BuilderDummy )
@@ -272,53 +269,43 @@ object SynthDef {
 
   // ---- rich ugen ----
 
-   case class RichUGen( ugen: UGen, inputSpecs: Traversable[ Tuple2[ Int, Int ]])
+   case class RichUGen( ugen: UGen, inputSpecs: Traversable[ (Int, Int) ])
 
    // ---- graph builder ----
 
    private object BuilderDummy extends SynthDefBuilder {
       def build( name: String ) : SynthDef = error( "Out of context" )
-      def addControl( u: Control ) : Int = 0
-      def addControlDesc( desc: ControlDesc ) {}
+      def addControl( values: IIdxSeq[ Float ], name: Option[ String ]) : Int = 0
+      def addControlProxy( proxy: ControlProxyLike[ _ ]) {}
       def addUGen( ugen: UGen ) {}
    }
 
    private class BuilderImpl extends SynthDefBuilder {
       // updated during build
-      private var ugens : IIdxSeq[ UGen ]                = Vector.empty
-      private var ugenSet                                = Set.empty[ UGen ]
-      private var controlValues: IIdxSeq[ Float ]        = Vector.empty
-      private var controlDescs: IIdxSeq[ ControlDesc ]   = Vector.empty
-//      private var controlDescMap                         = Set.empty[ String, ControlDesc ]
-
-      // build results
-      private var finished                               = false
-      private var constants : IIdxSeq[ Float ]           = null
-      private var richUGens : IIdxSeq[ RichUGen ]        = null
-
-      def finish {
-         require( !finished )
-         finished = true
-
-         buildControls
-         // check inputs
-         val (igens, c)    = indexUGens
-         val indexedUGens  = sortUGens( igens )
-         richUGens         = indexedUGens.map( iu => RichUGen( iu.ugen, iu.richInputs.map( _.create ))) 
-         constants         = c
-      }
+      private var ugens : IIdxSeq[ UGen ]                   = Vector.empty
+      private var ugenSet                                   = Set.empty[ UGen ]
+      private var controlValues: IIdxSeq[ Float ]           = Vector.empty
+      private var controlNames: IIdxSeq[ (String, Int) ]    = Vector.empty
+      private var controlProxies                            = Set.empty[ ControlProxyLike[ _ ]]
 
       def build( name: String ) = {
-         new SynthDef( name, constants, controlValues, controlDescs, richUGens )
+         val ctrlProxyMap        = buildControls
+         // check inputs
+         val (igens, constants)  = indexUGens( ctrlProxyMap )
+         val indexedUGens        = sortUGens( igens )
+         val richUGens           = indexedUGens.map( iu => RichUGen( iu.ugen, iu.richInputs.map( _.create )))
+         new SynthDef( name, constants, controlValues, controlNames, richUGens )
       }
 
-      private def indexUGens : Tuple2[ IIdxSeq[ IndexedUGen ], IIdxSeq[ Float ]] = {
+      private def indexUGens( ctrlProxyMap: Map[ ControlProxyLike[ _ ], (UGen, Int)]) :
+         (IIdxSeq[ IndexedUGen ], IIdxSeq[ Float ]) = {
+
          var constantMap   = Map.empty[ Float, RichConstant ]
          var constants     = Vector.empty[ Float ]
          val indexedUGens  = ugens.zipWithIndex.map( tup => new IndexedUGen( tup._1, tup._2 ))
          val ugenMap: Map[ UGen, IndexedUGen ] = indexedUGens.map( iu => (iu.ugen, iu))( breakOut )
          indexedUGens.foreach( iu => {
-            iu.richInputs = iu.ugen.inputs.collect({
+            iu.richInputs = iu.ugen.inputs.map({
                case Constant( value ) => constantMap.get( value ) getOrElse {
                   val rc         = new RichConstant( constants.size )
                   constantMap   += value -> rc
@@ -330,6 +317,13 @@ object SynthDef {
                   iu.parents    :+= iui
                   iui.children  :+= iu
                   new RichUGenProxyBuilder( iui, up.outputIndex )
+               }
+               case ControlOutProxy( proxy, outputIndex, _ ) => {
+                  val (ugen, off) = ctrlProxyMap( proxy )
+                  val iui         = ugenMap( ugen )
+                  iu.parents    :+= iui
+                  iui.children  :+= iu
+                  new RichUGenProxyBuilder( iui, off + outputIndex )
                }
             })( breakOut )
          })
@@ -372,68 +366,26 @@ object SynthDef {
          }
       }
 
-      def addControl( u: Control ) : Int = {
+      def addControl( values: IIdxSeq[ Float ], name: Option[ String ]) : Int = {
          val specialIndex = controlValues.size
-         controlValues ++= u.values
+         controlValues ++= values
+         name.foreach( n => controlNames :+= n -> specialIndex )
          specialIndex
       }
 
-      def addControlDesc( desc: ControlDesc ) {
-//         if( verbose ) println( "ADD CONTROL DESC " + desc.name.getOrElse( "<noname>" ))
-         controlDescs :+= desc
-//         desc.name.foreach( controlDescMap += _ -> desc )
+      def addControlProxy( proxy: ControlProxyLike[ _ ]) {
+         controlProxies += proxy
       }
 
-      private def buildControls {
-//         if( verbose ) println( "buildControls" )
-
-          val irControlDescs	= controlDescs.filter( _.rate == scalar )
-          val krControlDescs	= controlDescs.filter( _.rate == control )
-// XXX tr currently broken
-//    val trControlDescs	= controlDescs.filter( _.rate == trigger )
-
-//    if (nonControlNames.size > 0) {
-//      nonControlNames.do {|cn|
-//                          arguments[cn.argNum] = cn.defaultValue;
-//      };
-//    };
-
-         if( irControlDescs.size > 0 ) {
-//            if( verbose ) println( "irControlDescs.size = " + irControlDescs.size )
-//            val ctrl = Control.ir( irControlDescs.flatMap( _.initValues ))
-            val ctrl = new Control( scalar, irControlDescs.flatMap( _.initValues ))
-            setControlDescSource( irControlDescs, ctrl )
-         }
-// XXX tr currently broken
-//	if( trControlDescs.size > 0 ) {
-//	  if( verbose ) println( "trControlDescs.size = " + trControlDescs.size )
-//      val ctrl = TrigControl.kr( trControlDescs.flatMap( _.initValues ))
-//      setControlDescSource( trControlDescs, ctrl )
-//	}
-         if( krControlDescs.size > 0 ) {
-            val krControlDescsPlain 	= krControlDescs.filter( _.lag.isEmpty )
-            val krControlDescsLagged	= krControlDescs.filter( _.lag.isDefined )
-
-            if( krControlDescsPlain.size > 0 ) {
-//               if( verbose ) println( "krControlDescsPlain.size = " + krControlDescsPlain.size )
-//               val ctrl = Control.kr( krControlDescsPlain.flatMap( _.initValues ))
-               val ctrl = new Control( control, krControlDescsPlain.flatMap( _.initValues ))
-               setControlDescSource( krControlDescsPlain, ctrl )
-            }
-            if( krControlDescsLagged.size > 0 ) {
-               error( "krControlDescsLagged NOT YET IMPLEMENTED" )
-            }
-         }
-      }
-
-      private def setControlDescSource( descs: Seq[ ControlDesc ], source: UGen ) {
-         var off	= 0
-         descs.foreach( desc => {
-            desc.ugen				= source
-            desc.ugenOutputIndex	= off
-            off += desc.numOutputs
-         })
-      }
+      /*
+       *    Manita, how simple things can get as soon as you
+       *    clean up the sclang mess...
+       */
+      private def buildControls: Map[ ControlProxyLike[ _ ], (UGen, Int) ] =
+         controlProxies.groupBy( _.factory ).flatMap( tuple => {
+            val (factory, proxies) = tuple
+            factory.build( proxies.toSeq: _* )
+         })( breakOut )
 
       // ---- IndexedUGen ----
       private class IndexedUGen( val ugen: UGen, var index: Int ) {
@@ -443,7 +395,7 @@ object SynthDef {
       }
 
       private trait RichUGenInBuilder {
-         def create : Tuple2[ Int, Int ]
+         def create : (Int, Int)
       }
 
       private class RichConstant( constIdx: Int ) extends RichUGenInBuilder {

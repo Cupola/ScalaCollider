@@ -79,7 +79,7 @@ extends Bus with ControlRated {
       server ! setMsg( v )
    }
 
-   def set( pairs: Tuple2[ Int, Float ]* ) {
+   def set( pairs: (Int, Float)* ) {
       server ! setMsg( pairs: _* )
    }
 
@@ -87,7 +87,7 @@ extends Bus with ControlRated {
       server ! setnMsg( v )
    }
 
-   def setn( pairs: Tuple2[ Int, IndexedSeq[ Float ]]* ) {
+   def setn( pairs: (Int, IndexedSeq[ Float ])* ) {
       server ! setnMsg( pairs: _* )
    }
 
@@ -96,7 +96,7 @@ extends Bus with ControlRated {
       OSCControlBusSetMessage( (index, v) )
    }
 
-   def setMsg( pairs: Tuple2[ Int, Float ]* ) = {
+   def setMsg( pairs: (Int, Float)* ) = {
       require( pairs.forall( tup => (tup._1 >= 0 && tup._1 < numChannels) ))
       OSCControlBusSetMessage( pairs.map( tup => (tup._1 + index, tup._2) ): _* )
    }
@@ -108,7 +108,7 @@ extends Bus with ControlRated {
       OSCControlBusSetnMessage( (index, iv) )
    }
 
-   def setnMsg( pairs: Tuple2[ Int, IndexedSeq[ Float ]]* ) = {
+   def setnMsg( pairs: (Int, IndexedSeq[ Float ])* ) = {
       require( pairs.forall( tup => (tup._1 >= 0 && (tup._1 + tup._2.size) <= numChannels) ))
       // XXX replace by toIndexedSeq once it has been fixed to be immutable
       val ipairs = pairs.map( tup => (tup._1 + index, Vector( tup._2: _* )))
