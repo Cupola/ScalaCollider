@@ -390,3 +390,18 @@ val x = {
 x.release
 // free the Buffer
 buf.free
+
+//////////////////////////////////////////////////////////////////////////
+
+// trigger and lagged controls
+
+val x = {
+   val trig = "trig".tr             // trigger control
+//   val freq = "freq".kr(440 -> 4.0) // lag control (lag time 4 seconds)
+   val freq = "freq".kr(440) // lag control not yet implemented :-(
+   SinOsc.ar(freq + List(0, 1)) * Decay2.kr(trig, 0.005, 1.0)
+}.play
+
+x.set("trig" -> 1)
+x.set("trig" -> 1, "freq" -> 220)
+x.set("trig" -> 1, "freq" -> 880)

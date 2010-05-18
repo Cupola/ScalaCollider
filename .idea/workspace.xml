@@ -2,14 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" readonly="true" id="01886865-ff38-4eb7-a79d-92e783f03245" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BufIO.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BufIO.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ExampleCmd.txt" afterPath="$PROJECT_DIR$/ExampleCmd.txt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/UGen.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/UGen.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Control.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Control.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ControlProxyFactory.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ControlProxyFactory.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Noise.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Noise.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/InOut.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/InOut.scala" />
     </list>
     <ignored path="ScalaCollider.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -96,7 +92,7 @@
       <file leaf-file-name="ControlProxyFactory.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ControlProxyFactory.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="82" column="16" selection-start="2916" selection-end="2926" vertical-scroll-proportion="0.0">
+            <state line="57" column="13" selection-start="2833" selection-end="2833" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -120,10 +116,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ServerMessages.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="ServerMessages.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="343" column="50" selection-start="14870" selection-end="14870" vertical-scroll-proportion="0.0">
+            <state line="241" column="44" selection-start="9129" selection-end="9129" vertical-scroll-proportion="0.3533424">
               <folding />
             </state>
           </provider>
@@ -138,10 +134,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="UGen.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="UGen.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/UGen.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="95" column="16" selection-start="3101" selection-end="3101" vertical-scroll-proportion="0.23601638">
+            <state line="115" column="0" selection-start="3519" selection-end="3632" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -168,7 +164,7 @@
       <file leaf-file-name="Control.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Control.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="63" column="25" selection-start="2409" selection-end="2409" vertical-scroll-proportion="0.0">
+            <state line="161" column="48" selection-start="5977" selection-end="5977" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -194,12 +190,12 @@
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FSinOsc.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Node.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ControlProxyFactory.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BufIO.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Control.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Noise.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/InOut.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/UGen.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Control.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ControlProxyFactory.scala" />
       </list>
     </option>
   </component>
@@ -514,12 +510,42 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="ugen" />
+              <option name="myItemId" value="osc" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="Control.scala" />
+              <option name="myItemId" value="ServerMessages.scala" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="synth" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="osc" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
@@ -910,13 +936,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="343" column="50" selection-start="14870" selection-end="14870" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FSinOsc.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="53" column="0" selection-start="1728" selection-end="1728" vertical-scroll-proportion="0.0">
@@ -938,23 +957,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ControlProxyFactory.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="82" column="16" selection-start="2916" selection-end="2926" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BufIO.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="119" column="64" selection-start="5727" selection-end="5727" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Control.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="63" column="25" selection-start="2409" selection-end="2409" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -966,6 +971,13 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/UGen.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="115" column="0" selection-start="3519" selection-end="3632" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/InOut.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="135" column="46" selection-start="4871" selection-end="4871" vertical-scroll-proportion="0.0">
@@ -973,9 +985,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/UGen.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Control.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="95" column="16" selection-start="3101" selection-end="3101" vertical-scroll-proportion="0.23601638">
+        <state line="161" column="48" selection-start="5977" selection-end="5977" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ControlProxyFactory.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="57" column="13" selection-start="2833" selection-end="2833" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="241" column="44" selection-start="9129" selection-end="9129" vertical-scroll-proportion="0.3533424">
           <folding />
         </state>
       </provider>
