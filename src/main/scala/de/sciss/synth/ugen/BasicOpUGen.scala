@@ -147,6 +147,7 @@ object UnaryOpUGen {
 case class UnaryOpUGen( rate: Rate, selector: UnaryOpUGen.Op, a: UGenIn )
 extends BasicOpUGen( selector.id, a ) {
    override def toString = a.toString + "." + selector.name
+   override def displayName = selector.name
 }
 
 object BinaryOpUGen {
@@ -362,4 +363,5 @@ extends BasicOpUGen( selector.id, a, b ) {
    } else {
       a.toString + "." + selector.name + "(" + b + ")"
    }
+   override def displayName = selector.name
 }

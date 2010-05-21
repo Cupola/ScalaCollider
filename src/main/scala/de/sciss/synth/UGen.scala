@@ -114,6 +114,7 @@ extends RatedGE with UGenProxy {
    }
 
    def name = { val cn = getClass.getName; cn.substring( cn.lastIndexOf( '.' ) + 1 )}
+   def displayName = name
 //   def outputRates: Seq[ Rate ]
    def inputs: Seq[ UGenIn ]
    def numInputs = inputs.size
