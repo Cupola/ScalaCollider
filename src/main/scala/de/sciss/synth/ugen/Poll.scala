@@ -57,4 +57,4 @@ object Poll {
 }
 case class Poll( rate: Rate, trig: UGenIn, in: UGenIn, label: String, trigID: UGenIn )
 extends SingleOutUGen( (Vector( trig, in, trigID, Constant( label.length )) ++
-   label.getBytes( "ISO-8859-1" ).map( Constant( _ ))): _* ) // with SideEffectUGen
+   label.getBytes( "ISO-8859-1" ).map( Constant( _ ))): _* ) with SideEffectUGen

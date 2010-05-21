@@ -41,7 +41,7 @@ object RandSeed extends UGen2Args {
 	def ir( trig: GE, seed: GE = 56789 ) : GE = irExp( trig, seed )
 }
 case class RandSeed( rate: Rate, trig: UGenIn, seed: UGenIn )
-extends SingleOutUGen( trig, seed )
+extends SingleOutUGen( trig, seed ) with SideEffectUGen
 
 object RandID extends UGen1Args {
 	def kr( id: GE ) : GE = krExp( id )

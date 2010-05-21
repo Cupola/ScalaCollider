@@ -34,7 +34,7 @@ import GraphBuilder._
 
 /**
  *    @author	Hanns Holger Rutz
- *    @version 0.14, 22-Apr-10
+ *    @version 0.15, 21-May-10
  */
 
 sealed abstract class Rate( val id: Int ) {
@@ -87,7 +87,24 @@ trait UGenProxy {
 }
 
 //trait ExclusiveUGen     // marker trait: UGen can only occur once in a synthdef
-//trait SideEffectUGen    // marker trait: UGen has side effects
+
+/**
+ *    Marks a ugen which has side effects
+ *    such as writing to a bus or buffer,
+ *    communicating back to the client, etc.
+ *    Only side-effect ugens are valid roots
+ *    of the ugen graph, that way other
+ *    orphaned non-side-effect ugens are
+ *    automatically removed from the graph.
+ */
+trait SideEffectUGen {
+   me: UGen =>
+
+//   // ---- constructor ----
+//   {
+//      SynthGraph.builder.addUGen( this )
+//   }
+}
 
 abstract sealed class UGen
 extends RatedGE with UGenProxy {
@@ -313,7 +330,7 @@ extends UGen {
 abstract class SingleOutUGen( val inputs: UGenIn* ) extends UGen with UGenIn
 
 abstract class ZeroOutUGen( val inputs: UGenIn* )
-extends UGen /* with SideEffectUGen */ {
+extends UGen with SideEffectUGen {
    final override def numOutputs = 0
    final def outputs = Vector.empty
 }

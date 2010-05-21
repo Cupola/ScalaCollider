@@ -315,7 +315,10 @@ object SynthGraph {
 
          var constantMap   = Map.empty[ Float, RichConstant ]
          var constants     = Vector.empty[ Float ]
-         val indexedUGens  = ugens.zipWithIndex.map( tup => new IndexedUGen( tup._1, tup._2 ))
+         val indexedUGens  = ugens.zipWithIndex.map( tup => {
+            val (ugen, idx) = tup
+            new IndexedUGen( ugen, idx, ugen.isInstanceOf[ SideEffectUGen ])
+         })
          val ugenMap: Map[ UGen, IndexedUGen ] = indexedUGens.map( iu => (iu.ugen, iu))( breakOut )
          indexedUGens.foreach( iu => {
             iu.richInputs = iu.ugen.inputs.map({
@@ -329,6 +332,7 @@ object SynthGraph {
                   val iui         = ugenMap( up.source )
                   iu.parents    :+= iui
                   iui.children  :+= iu
+//                  if( iu.effective && !iui.effective )
                   new RichUGenProxyBuilder( iui, up.outputIndex )
                }
                case ControlOutProxy( proxy, outputIndex, _ ) => {
@@ -336,11 +340,16 @@ object SynthGraph {
                   val iui         = ugenMap( ugen )
                   iu.parents    :+= iui
                   iui.children  :+= iu
+                  // all controls are marked to have side-effects
+                  // so we can save skip this
+//                  iui.effective  |= iu.effective
                   new RichUGenProxyBuilder( iui, off + outputIndex )
                }
             })( breakOut )
+            if( iu.effective ) iu.richInputs.foreach( _.makeEffective )
          })
-         (indexedUGens, constants)
+//         (indexedUGens, constants)
+         (indexedUGens.filter( _.effective ), constants)
       }
 
       /*
@@ -371,13 +380,29 @@ object SynthGraph {
       }
 
       def addUGen( ugen: UGen ) {
-//         if( verbose ) println( "ADD UNIT " + ugen.name + " -> index " + ugensUnsorted.size )
-//         ugens ::= ugen
          if( !ugenSet.contains( ugen )) {
             ugenSet += ugen
             ugens  :+= ugen
          }
       }
+
+//      def addUGen( ugen: UGen ) {
+//         if( !ugenSet.contains( ugen )) {
+//            addUGenInputs( ugen )
+//            ugenSet += ugen
+//            ugens  :+= ugen
+//         }
+//      }
+//
+//      private def addUGenInputs( ugen: UGen ) {
+//         val ius = ugen.inputs.collect({
+//            case u:  UGen        => u
+//            case up: UGenProxy   => up.source
+//         }).filterNot( ugenSet.contains( _ ))
+//         ius.reverse.foreach( addUGenInputs( _ ))
+//         ugenSet ++= ius
+//         ugens   ++= ius.reverse
+//      }
 
       def addControl( values: IIdxSeq[ Float ], name: Option[ String ]) : Int = {
          val specialIndex = controlValues.size
@@ -401,7 +426,7 @@ object SynthGraph {
          })( breakOut )
 
       // ---- IndexedUGen ----
-      private class IndexedUGen( val ugen: UGen, var index: Int ) {
+      private class IndexedUGen( val ugen: UGen, var index: Int, var effective: Boolean ) {
          var parents : IIdxSeq[ IndexedUGen ]   = Vector.empty
          var children  : IIdxSeq[ IndexedUGen ] = Vector.empty
          var richInputs : List[ RichUGenInBuilder ] = null
@@ -409,14 +434,22 @@ object SynthGraph {
 
       private trait RichUGenInBuilder {
          def create : (Int, Int)
+         def makeEffective : Unit
       }
 
       private class RichConstant( constIdx: Int ) extends RichUGenInBuilder {
          def create = (-1, constIdx)
+         def makeEffective {}
       }
 
       private class RichUGenProxyBuilder( iu: IndexedUGen, outIdx: Int ) extends RichUGenInBuilder {
          def create = (iu.index, outIdx)
+         def makeEffective {
+            if( !iu.effective ) {
+               iu.effective = true
+               iu.richInputs.foreach( _.makeEffective )
+            }
+         }
       }
    }
 }

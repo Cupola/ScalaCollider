@@ -78,10 +78,8 @@ object BufRd {
          yield this( rate, numChannels, b, p, l, i ))
 }
 case class BufRd( rate: Rate, numChannels: Int, bufID: UGenIn, phase: UGenIn, loop: UGenIn, interp: UGenIn )
-//class BufRd( val rate: Rate, val numChannels: Int, val bufID: UGenIn, val phase: UGenIn, val loop: UGenIn,
-//             val interp: UGenIn )
 extends MultiOutUGen( rate, numChannels, List( bufID, phase, loop, interp ))
-// with SideEffectUGen // side-effect: done-flag
+// with SideEffectUGen // side-effect: done-flag -- NO, NOT A SIDE-EFFECT!
 
 object BufWr {
    def ar( multi: GE, bufID: GE, phase: GE = 0, loop: GE = 1 ) : GE =
@@ -102,7 +100,7 @@ object BufWr {
 // 	}
 }
 case class BufWr( rate: Rate, bufID: UGenIn, phase: UGenIn, loop: UGenIn, multi: Seq[ UGenIn ])
-extends SingleOutUGen( (bufID :: phase :: loop :: multi.toList): _* ) // with SideEffectUGen
+extends SingleOutUGen( (bufID :: phase :: loop :: multi.toList): _* ) with SideEffectUGen
 
 object RecordBuf {
    def ar( multi: GE, bufID: GE, offset: GE = 0, recLevel: GE = 1, preLevel: GE = 0,
@@ -122,7 +120,7 @@ object RecordBuf {
 case class RecordBuf( rate: Rate, bufID: UGenIn, offset: UGenIn, recLevel: UGenIn, preLevel: UGenIn,
                       run: UGenIn, loop: UGenIn, trig: UGenIn, doneAction: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )
 extends SingleOutUGen( (bufID :: offset :: recLevel :: preLevel :: run :: loop :: trig :: doneAction :: multi.toList): _* )
-// with SideEffectUGen
+with SideEffectUGen
 
 //object Tap {
 //	// Warning: different arg order than sclang!

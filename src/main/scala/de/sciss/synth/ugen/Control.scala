@@ -55,7 +55,7 @@ object Control {
    }
 }
 case class Control private[ugen]( rate: Rate, numChannels: Int, override val specialIndex: Int )
-extends MultiOutUGen( rate, numChannels, Nil )
+extends MultiOutUGen( rate, numChannels, Nil ) with SideEffectUGen
 
 case class ControlProxy( rate: Rate, values: IIdxSeq[ Float ], name: Option[ String ])
 extends AbstractControlProxy[ ControlProxy ]( rate, values.size ) {
@@ -98,7 +98,7 @@ object TrigControl {
    def kr( values: Float* ) : TrigControl = kr( Vector( values: _* ))
 }
 case class TrigControl private[ugen]( numChannels: Int, override val specialIndex: Int )
-extends MultiOutUGen( control, numChannels, Nil ) with ControlRated
+extends MultiOutUGen( control, numChannels, Nil ) with ControlRated with SideEffectUGen
 
 case class TrigControlProxy( rate: Rate, values: IIdxSeq[ Float ], name: Option[ String ])
 extends AbstractControlProxy[ TrigControlProxy ]( rate, values.size ) {
@@ -137,7 +137,7 @@ object AudioControl {
    def ar( values: Float* ) : AudioControl = ar( Vector( values: _* ))
 }
 case class AudioControl private[ugen]( numChannels: Int, override val specialIndex: Int )
-extends MultiOutUGen( audio, numChannels, Nil ) with AudioRated
+extends MultiOutUGen( audio, numChannels, Nil ) with AudioRated with SideEffectUGen
 
 case class AudioControlProxy( rate: Rate, values: IIdxSeq[ Float ], name: Option[ String ])
 extends AbstractControlProxy[ AudioControlProxy ]( rate, values.size ) {

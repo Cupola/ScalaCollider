@@ -43,40 +43,40 @@ case class Done( src: UGenIn ) extends SingleOutUGen( src ) with ControlRated
 object FreeSelf extends UGen1RArgs {
   def kr( in: GE ) : GE = make( in ) // we do not return in like sclang does
 }
-case class FreeSelf( in: UGenIn ) extends ZeroOutUGen( in ) with ControlRated
+case class FreeSelf( in: UGenIn ) extends SingleOutUGen( in ) with ControlRated with SideEffectUGen
 
 object PauseSelf extends UGen1RArgs {
   def kr( in: GE ) : GE = make( in ) // we do not return in like sclang does
 }
-case class PauseSelf( in: UGenIn ) extends ZeroOutUGen( in ) with ControlRated
+case class PauseSelf( in: UGenIn ) extends SingleOutUGen( in ) with ControlRated with SideEffectUGen
 
 // its output is its input (source)
 object FreeSelfWhenDone extends UGen1RArgs {
   def kr( src: GE ) : GE = make( src )
 }
 case class FreeSelfWhenDone( src: UGenIn ) extends SingleOutUGen( src )
-with ControlRated
+with ControlRated with SideEffectUGen
 
 // its output is its input (source)
 object PauseSelfWhenDone extends UGen1RArgs {
   def kr( src: GE ) : GE = make( src )
 }
 case class PauseSelfWhenDone( src: UGenIn ) extends SingleOutUGen( src )
-with ControlRated
+with ControlRated with SideEffectUGen
 
 // its output is its input (gate)
 object Pause extends UGen2RArgs {
   def kr( gate: GE, nodeId: GE ) : GE = make( gate, nodeId )
 }
 case class Pause( gate: UGenIn, nodeId: UGenIn )
-extends SingleOutUGen( gate, nodeId ) with ControlRated
+extends SingleOutUGen( gate, nodeId ) with ControlRated with SideEffectUGen
 
 // its output is its input (trig)
 object Free extends UGen2RArgs {
   def kr( trig: GE, nodeId: GE ) : GE = make( trig, nodeId )
 }
 case class Free( trig: UGenIn, nodeId: UGenIn )
-extends SingleOutUGen( trig, nodeId ) with ControlRated
+extends SingleOutUGen( trig, nodeId ) with ControlRated with SideEffectUGen
 
 object EnvGen {
   def ar( envelope: Env, gate: GE = 1, levelScale: GE = 1, levelBias: GE = 0,
@@ -95,7 +95,7 @@ object EnvGen {
 case class EnvGen( rate: Rate, gate: UGenIn, levelScale: UGenIn, levelBias: UGenIn,
                    timeScale: UGenIn, doneAction: UGenIn, envSeq: Seq[ UGenIn ])
 extends SingleOutUGen( (List( gate, levelScale, levelBias, timeScale, doneAction ) ++ envSeq): _* )
-// with SideEffectUGen  // side-effect: setting done flag
+with SideEffectUGen  // side-effect: done action
 
 object IEnvGen {
   def ar( envelope: IEnv, index: GE ) : GE = {
@@ -126,4 +126,4 @@ object Linen extends UGen5Args {
 case class Linen( rate: Rate, gate: UGenIn, attack: UGenIn, sustain: UGenIn,
                   release: UGenIn, doneAction: UGenIn )
 extends SingleOutUGen( gate, attack, sustain, release, doneAction )
-// with SideEffectUGen // side-effect: done-flag
+with SideEffectUGen // side-effect: done-action

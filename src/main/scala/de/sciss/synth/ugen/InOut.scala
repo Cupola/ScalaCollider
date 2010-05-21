@@ -53,7 +53,7 @@ object LocalIn {
 }
 case class LocalIn( rate: Rate, numChannels: Int )
 extends MultiOutUGen( rate, numChannels, Nil )
-// with SideEffectUGen // ExclusiveUGen
+with SideEffectUGen // XXX not sure we need this really
 
 object LagIn {
    def kr( bus: GE, numChannels: Int = 1, lag: GE = 0.1f ) : GE = {
@@ -124,7 +124,7 @@ object LocalOut {
    }
 }
 case class LocalOut( rate: Rate, multi: Seq[ UGenIn ])
-extends ZeroOutUGen( multi: _* ) // with ExclusiveUGen
+extends ZeroOutUGen( multi: _* )
 
 object XOut {
    def ar( bus: GE, xfade: GE, multi: GE ) : GE = make( audio, bus, xfade, multi )

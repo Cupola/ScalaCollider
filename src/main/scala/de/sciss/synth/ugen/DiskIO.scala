@@ -42,7 +42,7 @@ object DiskOut {
                 yield this( b, m ))
 }
 case class DiskOut( bufID: UGenIn, multi: Seq[ UGenIn ])
-extends SingleOutUGen( (bufID :: multi.toList): _* ) with AudioRated // with SideEffectUGen
+extends SingleOutUGen( (bufID :: multi.toList): _* ) with AudioRated with SideEffectUGen
 
 object DiskIn {
   def ar( numChannels: Int, bufID: GE, loop: GE = 0 ) =
@@ -50,7 +50,7 @@ object DiskIn {
       yield this( numChannels, b, l ))
 }
 case class DiskIn( numChannels: Int, bufID: UGenIn, loop: UGenIn )
-extends MultiOutUGen( audio, numChannels, List( bufID, loop )) with AudioRated // with SideEffectUGen // side-effect: advancing sf offset
+extends MultiOutUGen( audio, numChannels, List( bufID, loop )) with AudioRated with SideEffectUGen // side-effect: advancing sf offset
 
 object VDiskIn {
   // note: argument 'rate' renamed to 'speed'
@@ -61,5 +61,5 @@ object VDiskIn {
 case class VDiskIn( numChannels: Int, bufID: UGenIn, speed: UGenIn,
                     loop: UGenIn, sendID: UGenIn )
 extends MultiOutUGen( audio, numChannels, List( bufID, speed, loop, sendID ))
-with AudioRated // with SideEffectUGen
+with AudioRated with SideEffectUGen
  

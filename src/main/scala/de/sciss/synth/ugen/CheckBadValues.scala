@@ -40,4 +40,4 @@ object CheckBadValues extends UGen3Args {
   def kr( in: GE, id: GE = 0, post: GE = 2 ) : GE = krExp( in, id, post )
 }
 case class CheckBadValues( rate: Rate, in: UGenIn, id: UGenIn, post: UGenIn )
-extends SingleOutUGen( in, id, post )
+extends SingleOutUGen( in, id, post ) with SideEffectUGen

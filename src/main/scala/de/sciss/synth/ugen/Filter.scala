@@ -326,5 +326,5 @@ object DetectSilence extends UGen4Args {
 }
 case class DetectSilence( rate: Rate, in: UGenIn, amp: UGenIn, time: UGenIn,
                           doneAction: UGenIn )
-extends SingleOutUGen( in, amp, time, doneAction )
+extends SingleOutUGen( in, amp, time, doneAction ) with SideEffectUGen // side-effect: done-action
 

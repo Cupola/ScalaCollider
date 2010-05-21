@@ -34,7 +34,7 @@ import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
 import ugen.{ BinaryOpUGen, EnvGen, MulAdd, Silent, Out, Poll, UnaryOpUGen }
 
 /**
- * 	@version	0.14, 18-May-10
+ * 	@version	0.14, 21-May-10
  */
 trait GE {
    def outputs : IIdxSeq[ UGenIn ]
@@ -157,6 +157,7 @@ trait GE {
       Rates.highest( outputs.map( _.rate ): _* ) match {
          case `audio`   => MulAdd.ar( this, mul, add )
          case `control` => MulAdd.kr( this, mul, add )
+         case `scalar`  => this * mul + add
          case r         => error( "Illegal rate " + r )
       }
    }
@@ -237,17 +238,17 @@ object GraphBuilder {
       if( elements.size == 1 ) elements.head else new UGenInSeq( elements )
    }
      
-   def wrapOut( thunk: => GE, fadeTime: Option[Float] = Some( 0.2f )) =
+   def wrapOut( thunk: => GE, fadeTime: Option[Float] = Some(0.02f) ) =
       SynthGraph {
          val res1 = thunk
          val rate = Rates.highest( res1.outputs.map( _.rate ): _* )
          if( (rate == audio) || (rate == control) ) {
             val res2 = fadeTime.map( fdt => makeFadeEnv( fdt ) * res1 ) getOrElse res1
-            val i_out = "i_out".ir
+            val out = "out".kr
             if( rate == audio ) {
-               Out.ar( i_out, res2 )
+               Out.ar( out, res2 )
             } else {
-               Out.kr( i_out, res2 )
+               Out.kr( out, res2 )
             }
          } else res1
       }

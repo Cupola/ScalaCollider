@@ -47,7 +47,7 @@ object Line extends UGen4Args {
 }
 case class Line( rate: Rate, start: UGenIn, end: UGenIn, dur: UGenIn, doneAction: UGenIn )
 extends SingleOutUGen( start, end, dur, doneAction )
-// with SideEffectUGen // side-effect: done-flag
+with SideEffectUGen // side-effect: done-action
 
 object XLine extends UGen4Args {
    def ar : GE = ar()
@@ -60,7 +60,7 @@ object XLine extends UGen4Args {
 }
 case class XLine( rate: Rate, start: UGenIn, end: UGenIn, dur: UGenIn, doneAction: UGenIn )
 extends SingleOutUGen( start, end, dur, doneAction )
-// with SideEffectUGen // side-effect: done-flag
+with SideEffectUGen // side-effect: done-action
 
 object LinExp extends UGen5Args {
 	def ar( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE =
