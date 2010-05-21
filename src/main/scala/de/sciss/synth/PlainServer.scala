@@ -26,19 +26,19 @@
  *  Changelog:
  */
 
-package de.sciss.synth
-
-/**
- *    A minimal subclass that uses direct dispatch
- *
- *    @version 0.11, 09-May-10
- */
-class PlainServer( val name: String = "localhost", val options: ServerOptions = new ServerOptions, val clientID: Int = 0 )
-extends Server {
-   protected def invokeOnMainThread( task: Runnable ) {
-      try {
-         task.run
-      }
-      catch { case e => e.printStackTrace() }
-   }
-}
+//package de.sciss.synth
+//
+///**
+// *    A minimal subclass that uses direct dispatch
+// *
+// *    @version 0.11, 09-May-10
+// */
+//class PlainServer( val name: String = "localhost", val options: ServerOptions = new ServerOptions, val clientID: Int = 0 )
+//extends Server {
+//   protected def invokeOnMainThread( task: Runnable ) {
+//      try {
+//         task.run
+//      }
+//      catch { case e => e.printStackTrace() }
+//   }
+//}

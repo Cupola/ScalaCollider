@@ -32,12 +32,14 @@ import de.sciss.scalaosc.{ OSCChannel, OSCClient, OSCMessage, OSCPacket }
 import java.net.{ ConnectException, InetAddress, InetSocketAddress, SocketAddress }
 import java.io.{ BufferedReader, File, InputStreamReader, IOException }
 import java.util.{ Timer, TimerTask }
+import actors.{ Actor, Channel, DaemonActor, Future, InputChannel, OutputChannel, TIMEOUT }
 import collection.immutable.Queue
+import concurrent.SyncVar
 import osc._
 import math._
 
 /**
- * 	@version    0.15, 09-May-10
+ * 	@version    0.16, 20-May-10
  */
 object Server {
    private val allSync  = new AnyRef
@@ -75,7 +77,9 @@ object Server {
    case class Counts( c: OSCStatusReplyMessage )
 }
 
-abstract class Server extends Model {
+//abstract class Server extends Model {}
+class Server( val name: String = "localhost", val options: ServerOptions = new ServerOptions, val clientID: Int = 0 )
+extends Model {
    import Server._
 
    private var aliveThread: Option[StatusWatcher]	= None
@@ -100,22 +104,22 @@ abstract class Server extends Model {
       val client        = OSCClient( Symbol( options.protocol.value ), 0, host.isLoopbackAddress, ServerCodec )
       client.bufferSize = 0x10000
       client.target     = addr
-      client.action     = multiResponder.messageReceived
+      client.action     = OSCReceiverActor.messageReceived
       client
    }
 
    // ---- constructor ----
    {
       add( this )
-      createNewAllocators
+//      createNewAllocators
 //    resetBufferAutoInfo
    }
 
    // ---- abstract methods ----
-   protected def invokeOnMainThread( task: Runnable ) : Unit
-   val name: String
-   val options: ServerOptions
-   val clientID: Int
+//   protected def invokeOnMainThread( task: Runnable ) : Unit
+//   val name: String
+//   val options: ServerOptions
+//   val clientID: Int
    
    def isConnected = c.isConnected
    def isRunning = condSync.synchronized { conditionVar == Running }
@@ -163,50 +167,81 @@ abstract class Server extends Model {
    }
 
    def !( p: OSCPacket ) { c.send( p )}
-//   def !( synthDef: SynthDef ) { this ! synthDef.recvMsg }
 
-   // XXX should use actor syntax instead, returning an Option[ OSCMessage ] to the current actor
-   private def sendAsyncPacket( ap: AsyncOSCPacket, timeOut: Long = 5000 )( success: => Unit )( failure: => Unit ) {
-      val sync = new AnyRef
-      var handled = false
-      val timer = new Timer( "TimeOut", true )
-      lazy val funSucc: (SocketAddress, Long) => Unit = (addr, when) => {
-//println( "---4" )
-         timer.cancel
-         sync.synchronized {
-            multiResponder.removeListener( ap.replyMessage, funSucc )
-            if( !handled ) {
-//println( "---5" )
-               handled = true
-               invokeOnMainThread( new Runnable {
-                  def run = {
-//println( "---6" )
-                     success
-                  }
-               })
+   def !![ A ]( p: OSCPacket, handler: PartialFunction[ OSCMessage, A ]) : Future[ A ] = {
+      val c    = new Channel[ A ]( Actor.self )
+      val fun  = (res: SyncVar[ A ]) => {
+         val futCh   = new Channel[ A ]( Actor.self )
+         val oh      = new OSCInfHandler( handler, futCh )
+         OSCReceiverActor.addHandler( oh )
+         futCh.react { case r => res.set( r )}
+      }
+      val a = new FutureActor[ A ]( fun, c )
+      a.start()
+      this ! p
+      a
+   }
+
+   def !?( timeOut: Long, p: OSCPacket, handler: PartialFunction[ Any, Unit ]) {
+      val a = new DaemonActor {
+         def act {
+            val futCh   = new Channel[ Any ]( Actor.self )
+            val oh      = new OSCTimeOutHandler( handler, futCh )
+            OSCReceiverActor.addHandler( oh )
+            futCh.reactWithin( timeOut ) {
+               case TIMEOUT   => OSCReceiverActor.removeHandler( oh )
+               case r         =>
             }
          }
       }
-      timer.schedule( new TimerTask {
-         def run = {
-//println( "---1" )
-            invokeOnMainThread( new Runnable {
-               def run = sync.synchronized {
-//println( "---2" )
-                  if( !handled ) {
-//println( "---3" )
-                     multiResponder.removeListener( ap.replyMessage, funSucc )
-                     handled = true
-                     failure
-                  }
-               }
-            })
-         }
-      }, timeOut )
-//println( "---0" )
-      multiResponder.addListener( ap.replyMessage, funSucc )
-      this ! ap.packet
+      a.start()
+      this ! p
+      a
    }
+
+
+//   // XXX should use actor syntax instead, returning an Option[ OSCMessage ] to the current actor
+//   private def sendAsyncPacket( ap: AsyncOSCPacket, timeOut: Long = 5000 )( success: => Unit )( failure: => Unit ) {
+//      val sync = new AnyRef
+//      var handled = false
+//      val timer = new Timer( "TimeOut", true )
+//      lazy val funSucc: (SocketAddress, Long) => Unit = (addr, when) => {
+////println( "---4" )
+//         timer.cancel
+//         sync.synchronized {
+//            multiResponder.removeListener( ap.replyMessage, funSucc )
+//            if( !handled ) {
+////println( "---5" )
+//               handled = true
+//               invokeOnMainThread( new Runnable {
+//                  def run = {
+////println( "---6" )
+//                     success
+//                  }
+//               })
+//            }
+//         }
+//      }
+//      timer.schedule( new TimerTask {
+//         def run = {
+////println( "---1" )
+//            invokeOnMainThread( new Runnable {
+//               def run = sync.synchronized {
+////println( "---2" )
+//                  if( !handled ) {
+////println( "---3" )
+//                     multiResponder.removeListener( ap.replyMessage, funSucc )
+//                     handled = true
+//                     failure
+//                  }
+//               }
+//            })
+//         }
+//      }, timeOut )
+////println( "---0" )
+//      multiResponder.addListener( ap.replyMessage, funSucc )
+//      this ! ap.packet
+//   }
 
    def counts = countsVar
    protected[synth] def counts_=( newCounts: OSCStatusReplyMessage ) {
@@ -329,7 +364,7 @@ abstract class Server extends Model {
             try {
                stopAliveThread
             }
-            catch { case e => printError( "Server.boot", e )}
+            catch { case e2 => printError( "Server.boot", e2 )}
             condition = Offline // pendingCondition = NoPending
             throw e
          }}
@@ -338,16 +373,19 @@ abstract class Server extends Model {
 
    private def serverContacted {
       createNewAllocators
-      sendAsyncPacket( notifyMsg( true )) {
-         initTree
-         condition = Running
-      } {}
+//      this ! notifyMsg( true )
+      this !? (5000L, notifyMsg( true ), {
+         case OSCMessage( "/done", "/notify" ) => {
+            initTree
+            condition = Running
+         }
+      })
    }
 
    private def serverLost {
       nodeMgr.clear
       bufMgr.clear
-      multiResponder.clear
+      OSCReceiverActor.clear
    }
 
    private def bootThreadTerminated {
@@ -413,25 +451,26 @@ abstract class Server extends Model {
    }
   
    def startClient {
+      OSCReceiverActor.start
       c.start
    }
 
-   protected[synth] def addResponderNode( resp: OSCResponderNode ) {
-      multiResponder.addNode( resp )
+   private[synth] def addResponder( resp: OSCResponder ) {
+      OSCReceiverActor.addHandler( resp )
    }
 
-   protected[synth] def removeResponderNode( resp: OSCResponderNode ) {
-      multiResponder.removeNode( resp )
+   private[synth] def removeResponder( resp: OSCResponder ) {
+      OSCReceiverActor.removeHandler( resp )
    }
 
-   protected[synth] def responderSync : AnyRef = multiResponder.nodeSync
+//   protected[synth] def responderSync : AnyRef = multiResponder.nodeSync
 
    def dispose {
       condSync.synchronized {
          remove( this )
-         c.action = (msg: OSCMessage, sender: SocketAddress, time: Long) => ()
-         multiResponder.dispose
-         c.dispose
+         c.dispose // = (msg: OSCMessage, sender: SocketAddress, time: Long) => ()
+         OSCReceiverActor.dispose
+//         c.dispose
       }
    }
 
@@ -495,7 +534,8 @@ abstract class Server extends Model {
          }
          catch { case e: IOException => printError( "BootThread.run", e )} // thrown if process was not built
          finally {
-            invokeOnMainThread( new Runnable { def run = bootThreadTerminated })
+//            invokeOnMainThread( new Runnable { def run = bootThreadTerminated })
+            bootThreadTerminated
          }
       }
    }
@@ -512,6 +552,7 @@ abstract class Server extends Model {
 //      private val	timer			   = new SwingTimer( periodMillis, this )
       private var timer: Option[ Timer ] = None
       private var callServerContacted  = true
+      private val sync           = new AnyRef
 
 //      // ---- constructor ----
 //      timer.setInitialDelay( delayMillis )
@@ -521,7 +562,7 @@ abstract class Server extends Model {
          timer = {
             val t = new Timer( "StatusWatcher", true )
             t.schedule( new TimerTask {
-               def run = invokeOnMainThread( watcher )
+               def run = watcher.run // invokeOnMainThread( watcher )
             }, delayMillis, periodMillis )
             Some( t )
          }
@@ -536,150 +577,162 @@ abstract class Server extends Model {
       }
 
       def run {
-//         if( (pendingCondition == Booting) && (options.protocol.value == 'tcp) && !isConnected ) {
-//            try {
-//               startClient
-//            }
-//            catch { case e: IOException => printError( "Server.status", e )}
-//         } else {
+         sync.synchronized {
             alive -= 1
             if( alive < 0 ) {
                callServerContacted = true
                condition = Offline
             }
-            try {
-               queryCounts
-            }
-            catch { case e: IOException => printError( "Server.status", e )}
-//         }
+         }
+         try {
+            queryCounts
+         }
+         catch { case e: IOException => printError( "Server.status", e )}
       }
 
       def statusReply( msg: OSCStatusReplyMessage ) {
-         alive = deathBounces
-         // note: put the counts before running
-         // because that way e.g. the sampleRate
-         // is instantly available
-         counts = msg
-         if( !isRunning && callServerContacted ) {
-            callServerContacted = false
-            serverContacted
+         sync.synchronized {
+            alive = deathBounces
+            // note: put the counts before running
+            // because that way e.g. the sampleRate
+            // is instantly available
+            counts = msg
+            if( !isRunning && callServerContacted ) {
+               callServerContacted = false
+               serverContacted
+            }
          }
       }
    }
 
-   object multiResponder extends Runnable {
-      private val emptySet          = Set.empty[ OSCResponderNode ]
-      private var mapCmdToNodes     = Map.empty[ String, Set[ OSCResponderNode ]]
-      private var mapMsgListeners   = Map.empty[ OSCMessage, Set[ Function2[ SocketAddress, Long, Unit ]]]
-      val nodeSync   		         = new AnyRef
-      val msgSync		               = new AnyRef
-      private var msgQueue: Queue[ ReceivedMessage ] = Queue.empty
-      private var msgInvoked        = false
-
-      def addNode( node: OSCResponderNode ) {
-         nodeSync.synchronized {
-            mapCmdToNodes += node.name -> (mapCmdToNodes.getOrElse( node.name, emptySet ) + node)
-         }
-      }
-
-      def removeNode( node: OSCResponderNode ) {
-         nodeSync.synchronized {
-            mapCmdToNodes.get( node.name ).foreach( set => {
-               val setNew = set - node
-               if( setNew.isEmpty ) {
-                  mapCmdToNodes -= node.name
-               } else {
-                  mapCmdToNodes += node.name -> setNew
-               }
-            })
-         }
-      }
+   object OSCReceiverActor extends DaemonActor {
+      private case object Clear
+      private case object Dispose
+      private case class  ReceivedMessage( msg: OSCMessage, sender: SocketAddress, time: Long )
+      private case class  AddHandler( h: OSCHandler )
+      private case class  RemoveHandler( h: OSCHandler )
 
       def clear {
-         nodeSync.synchronized {
-            mapMsgListeners = Map.empty
-         }
-      }
-
-      def addListener( msg: OSCMessage, fun: (SocketAddress, Long) => Unit ) {
-         nodeSync.synchronized {
-            mapMsgListeners += msg -> (mapMsgListeners.get( msg ).map( _ + fun ) getOrElse Set( fun ))
-//println( "after add : " + mapMsgListeners )
-         }
-      }
-
-      def removeListener( msg: OSCMessage, fun: (SocketAddress, Long) => Unit ) {
-         nodeSync.synchronized {
-            mapMsgListeners.get( msg ).foreach( set => {
-               val setNew = set - fun
-               if( setNew.isEmpty ) {
-                  mapMsgListeners -= msg
-               } else {
-                  mapMsgListeners += msg -> setNew
-               }
-            })
-//println( "after remove: " + mapMsgListeners )
-         }
+         this ! Clear
       }
 
       def dispose {
-         nodeSync.synchronized { mapCmdToNodes = Map.empty }
+         clear
+         this ! Dispose
+      }
+
+      def addHandler( handler: OSCHandler ) {
+         this ! AddHandler( handler )
+      }
+
+      def removeHandler( handler: OSCHandler ) {
+         this ! RemoveHandler( handler )
       }
 
       // ------------ OSCListener interface ------------
 
       def messageReceived( msg: OSCMessage, sender: SocketAddress, time: Long ) {
-         msgSync.synchronized {
-            msgQueue = msgQueue.enqueue( ReceivedMessage( msg, sender, time ))
-            if( !msgInvoked ) {
-               msgInvoked = true
-               invokeOnMainThread( this )
+         this ! ReceivedMessage( msg, sender, time )
+      }
+
+      def act {
+         var running    = true
+         var handlers   = Set.empty[ OSCHandler ]
+         loopWhile( running )( react {
+            case ReceivedMessage( msg, sender, time ) => {
+               msg match {
+                  case nodeMsg:        OSCNodeChange           => nodeMgr.nodeChange( nodeMsg )
+                  case bufInfoMsg:     OSCBufferInfoMessage    => bufMgr.bufferInfo( bufInfoMsg )
+                  case statusReplyMsg: OSCStatusReplyMessage   => aliveThread.foreach( _.statusReply( statusReplyMsg ))
+                  case _ =>
+               }
+               handlers.foreach( h => if( h.handle( msg )) handlers -= h )
+            }
+            case AddHandler( h )    => handlers += h
+            case RemoveHandler( h ) => if( handlers.contains( h )) { handlers -= h; h.removed }
+            case Clear              => { handlers.foreach( _.removed ); handlers = Set.empty }
+            case Dispose            => running = false
+            case m                  => println( "Received illegal message " + m )
+         })
+      }
+   }
+
+   // -------- internal OSCHandler implementations --------
+
+   private class OSCInfHandler[ A ]( fun: PartialFunction[ OSCMessage, A ], ch: OutputChannel[ A ])
+   extends OSCHandler {
+      def handle( msg: OSCMessage ) : Boolean = {
+         val handled = fun.isDefinedAt( msg )
+         if( handled ) try {
+            ch ! fun.apply( msg )
+         } catch { case e => e.printStackTrace() }
+         handled
+      }
+      def removed {}
+   }
+
+   private class OSCTimeOutHandler( fun: PartialFunction[ Any, Unit ], ch: OutputChannel[ Any ])
+   extends OSCHandler {
+      def handle( msg: OSCMessage ) : Boolean = {
+         val handled = fun.isDefinedAt( msg )
+         if( handled ) try {
+            ch ! fun.apply( msg )
+         } catch { case e => e.printStackTrace() }
+         handled
+      }
+      def removed {
+         if( fun.isDefinedAt( TIMEOUT )) try {
+            fun.apply( TIMEOUT )
+         } catch { case e => e.printStackTrace() }
+      }
+   }
+
+   // -------- internal class FutureActor --------
+
+   /*
+    *    FutureActor in scala.actors is not very accessible...
+    *    We need our own implementation of Future is seems
+    */
+   private class FutureActor[ T ]( fun: SyncVar[ T ] => Unit, channel: Channel[ T ])
+   extends Future[ T ] with DaemonActor {
+      @volatile private var v: Option[T] = None
+
+      private case object Eval
+      
+      def isSet = !v.isEmpty
+
+      def apply(): T = {
+         if( v.isEmpty ) error( "Thread-based operations not supported" )
+         v.get
+      }
+
+      def respond( k: T => Unit ) {
+         v.map( k( _ )) getOrElse {
+            val fut = this !! Eval
+            fut.inputChannel.react {
+               case _ => k( v.get )
             }
          }
       }
 
-      def run {
-         val toProcess = msgSync.synchronized {
-            msgInvoked  = false
-            val result  = msgQueue
-            msgQueue    = Queue.empty
-            result
-         }
-         toProcess.foreach( rm => dispatchMessage( rm.msg, rm.sender, rm.time ))
+      def inputChannel: InputChannel[ T ] = channel
+
+      override def finalize {
+         println( "FutureActor finalized!" )
+         super.finalize
       }
 
-      private def dispatchMessage( msg: OSCMessage, sender: SocketAddress, time: Long ) {
-         msg match {
-            case nodeMsg:         OSCNodeChange           => nodeMgr.nodeChange( nodeMsg )
-            case statusReplyMsg:  OSCStatusReplyMessage   => aliveThread.foreach( _.statusReply( statusReplyMsg ))
-            case bufInfoMsg:      OSCBufferInfoMessage    => bufMgr.bufferInfo( bufInfoMsg )
-            case _ =>
+      def act() {
+         val syncVar = new SyncVar[ T ]
+         
+         { fun( syncVar )} andThen {
+            val syncVal = syncVar.get
+            v = Some( syncVal )
+            channel ! syncVal
+            loop { react {
+               case Eval => reply()
+            }}
          }
-
-         // new stylee
-         val listeners = nodeSync.synchronized { mapMsgListeners.get( msg )}
-//println( "listeners for " + msg + " : " + listeners )
-         listeners.foreach( _.foreach( f => try {
-            f.apply( sender, time )
-         } catch  { case e => printError( "messageReceived", e )}))
-
-         // old stylee -> XXX to be removed           
-         val cmdName = if( msg.name.charAt( 0 ) == 47 ) msg.name else "/" + msg.name
-         val nodes = nodeSync.synchronized { mapCmdToNodes.get( cmdName )}
-         nodes.foreach( _.foreach( resp => {
-            try {
-               resp.messageReceived( msg, sender, time )
-            } catch { case e: Exception => printError( "messageReceived", e )}
-         }))
       }
    }
-
-   // -------- internal class ReceivedMessage --------
-
-   private case class ReceivedMessage( msg: OSCMessage, sender: SocketAddress, time: Long )
 }
-
-//object UniqueID { // XXX needs sync
-//   private var id = 1000
-//   def next : Int = { var result = id; id += 1; result }
-//}

@@ -405,3 +405,15 @@ val x = {
 x.set("trig" -> 1)
 x.set("trig" -> 1, "freq" -> 220)
 x.set("trig" -> 1, "freq" -> 880)
+
+//////////////////////////////////////////////////////////////////////////
+
+// waiting for SendTrig replies
+
+val x = {
+    SendTrig.kr( MouseButton.kr( lag = 0 ), 0, MouseX.kr( lag = 0 ))
+}.play
+val r = OSCResponder.add {
+    case OSCMessage( "/tr", x.id, _, mouseX ) => println( "Dang! " + mouseX )
+}
+r.remove
