@@ -2,12 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" readonly="true" id="01886865-ff38-4eb7-a79d-92e783f03245" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/OSCResponderNode.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/OSCResponderNode.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ExampleCmd.txt" afterPath="$PROJECT_DIR$/ExampleCmd.txt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Server.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Server.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/PlainServer.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/PlainServer.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/OSCResponder.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/AsyncOSCPacket.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/AsyncOSCPacket.scala" />
     </list>
     <ignored path=".idea/workspace.xml" />
     <ignored path="ScalaCollider.iws" />
@@ -85,7 +84,7 @@
       <file leaf-file-name="Server.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Server.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="648" column="42" selection-start="20602" selection-end="20602" vertical-scroll-proportion="0.0">
+            <state line="332" column="44" selection-start="11115" selection-end="11115" vertical-scroll-proportion="-10.423077">
               <folding />
             </state>
           </provider>
@@ -94,16 +93,16 @@
       <file leaf-file-name="ServerMessages.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="153" column="27" selection-start="5299" selection-end="5315" vertical-scroll-proportion="0.0">
+            <state line="231" column="0" selection-start="8473" selection-end="8473" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="OSCResponder.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="OSCResponder.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/OSCResponder.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="33" selection-start="112" selection-end="112" vertical-scroll-proportion="0.10231923">
+            <state line="14" column="27" selection-start="415" selection-end="415" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -118,10 +117,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="OSCResponderNode.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/OSCResponderNode.scala">
+      <file leaf-file-name="Synth.scala" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Synth.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="64" selection-start="873" selection-end="873" vertical-scroll-proportion="0.0">
+            <state line="35" column="11" selection-start="1066" selection-end="1066" vertical-scroll-proportion="-0.13247864">
               <folding />
             </state>
           </provider>
@@ -130,8 +129,10 @@
       <file leaf-file-name="AsyncOSCPacket.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/AsyncOSCPacket.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="4" column="20" selection-start="86" selection-end="100" vertical-scroll-proportion="0.0">
-              <folding />
+            <state line="14" column="3" selection-start="204" selection-end="290" vertical-scroll-proportion="0.0">
+              <folding>
+                <marker date="1274404375000" expanded="true" signature="226:290" placeholder="{...}" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -164,8 +165,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FSinOsc.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Node.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BufIO.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Noise.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/InOut.scala" />
@@ -179,6 +178,8 @@
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/OSCResponderNode.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/PlainServer.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/OSCResponder.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/AsyncOSCPacket.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Server.scala" />
       </list>
     </option>
@@ -370,11 +371,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="osc" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ServerMessages.scala" />
+              <option name="myItemId" value="Server.scala" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -696,7 +693,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="5" y="390" width="1377" height="876" extended-state="0" />
+    <frame x="121" y="22" width="1377" height="876" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286445" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -705,7 +702,7 @@
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39897698" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32992327" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32992327" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286445" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24698795" sideWeight="0.24040921" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -789,9 +786,9 @@
         <state line="36" column="23" selection-start="1218" selection-end="1218" vertical-scroll-proportion="0.01992032" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Synth.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/PlainServer.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="35" column="11" selection-start="1066" selection-end="1066" vertical-scroll-proportion="0.17928287">
+        <state line="17" column="50" selection-start="755" selection-end="755" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -805,7 +802,37 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/AsyncOSCPacket.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="20" selection-start="86" selection-end="100" vertical-scroll-proportion="0.0">
+        <state line="14" column="3" selection-start="204" selection-end="290" vertical-scroll-proportion="0.0">
+          <folding>
+            <marker date="1274404375000" expanded="true" signature="226:290" placeholder="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/OSCResponder.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="14" column="27" selection-start="415" selection-end="415" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="231" column="0" selection-start="8473" selection-end="8473" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Server.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="332" column="44" selection-start="11115" selection-end="11115" vertical-scroll-proportion="-10.423077">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/OSCResponderNode.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="64" selection-start="873" selection-end="873" vertical-scroll-proportion="0.25641027">
           <folding />
         </state>
       </provider>
@@ -817,37 +844,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/OSCResponderNode.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Synth.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="64" selection-start="873" selection-end="873" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/PlainServer.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="50" selection-start="755" selection-end="755" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Server.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="648" column="42" selection-start="20602" selection-end="20602" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="153" column="27" selection-start="5299" selection-end="5315" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/OSCResponder.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="33" selection-start="112" selection-end="112" vertical-scroll-proportion="0.10231923">
+        <state line="35" column="11" selection-start="1066" selection-end="1066" vertical-scroll-proportion="-0.13247864">
           <folding />
         </state>
       </provider>

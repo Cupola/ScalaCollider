@@ -166,6 +166,13 @@ extends Model {
       def free( index: Int ) = allocator.free( index )
    }
 
+   private object uniqueID {
+      private var id = 0
+
+      def nextID = this.synchronized { val res = id; id += 1; res }
+      def reset = this.synchronized { id = 0 }
+   }
+
    def !( p: OSCPacket ) { c.send( p )}
 
    def !![ A ]( p: OSCPacket, handler: PartialFunction[ OSCMessage, A ]) : Future[ A ] = {
@@ -309,7 +316,11 @@ extends Model {
       this ! notifyMsg( onOff )
    }
 
+   def notifyMsg : OSCServerNotifyMessage = notifyMsg()
    def notifyMsg( onOff: Boolean = true ) = OSCServerNotifyMessage( onOff )
+
+   def syncMsg : OSCSyncMessage = syncMsg()
+   def syncMsg( id: Int = uniqueID.nextID ) = OSCSyncMessage( id )
 
    def dumpOSC( mode: Int = OSCChannel.DUMP_TEXT ) {
       c.dumpIncomingOSC( mode, filter = {
@@ -430,6 +441,7 @@ extends Model {
       nodes.reset
       busses.reset
       buffers.reset
+      uniqueID.reset
    }
 
    def quit {

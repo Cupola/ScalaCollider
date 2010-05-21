@@ -150,8 +150,12 @@ object ServerCodec extends OSCPacketCodec {
 }
 // val nodeID: Int, val parentID: Int, val predID: Int, val succID: Int, val headID: Int, val tailID: Int )
 
-case class OSCSyncMessage( id: Int ) extends OSCMessage( "/sync", id )
 case class OSCSyncedMessage( id: Int ) extends OSCMessage( "/synced", id )
+
+case class OSCSyncMessage( id: Int ) extends OSCMessage( "/sync", id )
+//with OSCAsyncMessage {
+//   def replyMessage = OSCSyncedMessage( id )
+//}
 
 case class OSCStatusReplyMessage( numUGens: Int, numSynths: Int, numGroups: Int,
                                   numDefs: Int, avgCPU: Float, peakCPU: Float,
@@ -224,9 +228,10 @@ extends OSCMessage( "/b_info", infos.flatMap( info =>
 
 // ---- messages to the server ----
 case class OSCServerNotifyMessage( onOff: Boolean )
-extends OSCMessage( "/notify", if( onOff ) 1 else 0 ) with AsyncOSCPacket {
-   def replyMessage = OSCMessage( "/done", "/notify" )
-}
+extends OSCMessage( "/notify", if( onOff ) 1 else 0 )
+//with AsyncOSCPacket {
+//   def replyMessage = OSCMessage( "/done", "/notify" )
+//}
 
 case object OSCServerQuitMessage extends OSCMessage( "/quit" )
 
