@@ -729,10 +729,10 @@ extends Model {
 
       def inputChannel: InputChannel[ T ] = channel
 
-      override def finalize {
-         println( "FutureActor finalized!" )
-         super.finalize
-      }
+//      override def finalize {
+//         println( "FutureActor finalized!" )
+//         super.finalize
+//      }
 
       def act() {
          val syncVar = new SyncVar[ T ]
