@@ -29,11 +29,10 @@
 package de.sciss.synth
 
 import de.sciss.scalaosc.{ OSCBundle, OSCMessage, OSCPacket }
-import de.sciss.synth.{ Completion => Comp }
+import de.sciss.synth.{ Completion => Comp, play => scplay }
 import de.sciss.synth.io.{ AudioFileType, SampleFormat }
 import ugen.{ BufRateScale, FreeSelfWhenDone, PlayBuf }
 import osc._
-import SC._ 
 
 /**
  * 	@version	0.18, 17-May-10
@@ -63,7 +62,7 @@ object Buffer {
    def cue( server: Server = Server.default, path: String, startFrame: Int = 0, numChannels: Int = 1,
             bufFrames: Int = 32768, completion: Completion = NoCompletion ) : Buffer = {
       val b = apply( server )
-      b.alloc( bufFrames, numChannels, message( b.cueMsg( path, startFrame, completion )))
+      b.alloc( bufFrames, numChannels, b.cueMsg( path, startFrame, completion ))
       b
    }
 
@@ -247,7 +246,7 @@ case class Buffer( server: Server, id: Int ) extends Model {
    // ---- utility methods ----
    def play : Synth = play()
    def play( loop: Boolean = false, amp: Float = 1f, out: Int = 0 ) : Synth =
-      SC.play( server, out ) { // working around nasty compiler bug
+      scplay( server, out ) { // working around nasty compiler bug
          val ply = PlayBuf.ar( numChannels, id, BufRateScale.kr( id ), loop = if( loop ) 1 else 0 )
          if( !loop ) FreeSelfWhenDone.kr( ply )
          ply * "amp".kr( amp )

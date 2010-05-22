@@ -29,7 +29,6 @@
 package de.sciss.synth.ugen
 
 import de.sciss.synth.{ Constant => c, _ }
-import SC._
 import GraphBuilder._
 
 import math._
@@ -57,7 +56,7 @@ object MulAdd {
     (mul, add) match {
       case (c(0), _)     => add
       case (c(1), c(0))  => in
-      case (c(-1), c(0)) => in.neg
+      case (c(-1), c(0)) => -in
       case (_, c(0))     => in * mul
       case (c(-1), _)    => add - in
       case (c(1), _)     => in + add
@@ -181,7 +180,7 @@ object BinaryOpUGen {
       override val name = "-"
       protected def make1( ac: c, bc: c ) = ac.-( bc )
       override protected[synth] def make1( a: UGenIn, b: UGenIn ) : GE = (a, b) match {
-         case (c(0), _)       => b.neg
+         case (c(0), _)       => -b
          case (_, c(0))       => b
          case _               => super.make1( a, b )
       }
@@ -194,8 +193,8 @@ object BinaryOpUGen {
          case (_, c(0))       => b
          case (c(1), _)       => b
          case (_, c(1))       => a
-         case (c(-1), _)      => b.neg
-         case (_, c(-1))      => a.neg
+         case (c(-1), _)      => -b
+         case (_, c(-1))      => -a
          case _               => super.make1( a, b )
       }
    }
@@ -205,7 +204,7 @@ object BinaryOpUGen {
       protected def make1( ac: c, bc: c ) = ac./( bc )
       override protected[synth] def make1( a: UGenIn, b: UGenIn ) : GE = (a, b) match {
          case (_, c(1))       => a
-         case (_, c(-1))      => a.neg
+         case (_, c(-1))      => -a
          case (_, _) if b.rate == scalar => a * b.reciprocal
          case _               => super.make1( a, b )
       }

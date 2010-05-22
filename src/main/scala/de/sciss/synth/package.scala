@@ -26,31 +26,47 @@
  *  Changelog:
  */
 
-package de.sciss.synth
+package de.sciss
 
 import de.sciss.scalaosc.{ OSCMessage }
 import collection.breakOut
 import collection.immutable.{ IndexedSeq => IIdxSeq }
 import math._
+import synth._
 
 /**
- * 	@version	0.14, 09-May-10
+ * 	@version	0.14, 22-May-10
  */
-object SC {
+package object synth {
    // GEs
-   implicit def floatToGE( x: Float ) = Constant( x )
-   implicit def intToGE( x: Int ) = Constant( x.toFloat )
-   implicit def doubleToGE( x: Double ) = Constant( x.toFloat )
-   implicit def seqOfGEToGE( x: Seq[ GE ]) = new UGenInSeq( x.flatMap( _.outputs )( breakOut ))
+//   implicit def enrichFloat( x: Float ) = RichFloat( x )
+//   implicit def richFloatToConstant[ T <% RichFloat ]( x: T ) = Constant( x.f )
+//   implicit def enrichInt( x: Int ) = RichFloat( x.toFloat )
+//   implicit def enrichDouble( x: Double ) = RichDouble( x )
+//   implicit def richDoubleToFloat[ T <% RichDouble ]( x: T ) = RichFloat( x.d.toFloat )
+
+   implicit def enrichFloat( x: Float ) = RichFloat( x )
+   implicit def enrichInt( x: Int ) = RichFloat( x.toFloat )
+   implicit def enrichDouble( x: Double ) = RichDouble( x )
+//   implicit def richFloatToConstant( x: RichFloat ) = Constant( x.f )
+//   implicit def richDoubleToConstant( x: RichDouble ) = Constant( x.d.toFloat )
+//   implicit def liftFloat[ T <% Float ]( x: T ) = Constant( x )
+   implicit def numToGE[ T <% Double ]( x: T ) = Constant( x.toFloat )
+
+//   implicit def floatToConstant( x: Float ) = Constant( x )
+//   implicit def intToConstant( x: Int ) = Constant( x.toFloat )
+//   implicit def doubleToConstant( x: Double ) = Constant( x.toFloat )
+
+   implicit def seqOfGEToGE[ T <% GE ]( x: Seq[ T ]) : GE = new UGenInSeq( x.flatMap( _.outputs )( breakOut ))
    implicit def doneActionToGE( x: DoneAction ) = Constant( x.id )
 
-   // ...und zurueck
-   implicit def constantToFloat( c: Constant ) = c.value
+//   // ...und zurueck
+//   implicit def constantToFloat( c: Constant ) = c.value
 
-   // why these are necessary now??
-   implicit def seqOfFloatToGE( x: Seq[ Float ]) = new UGenInSeq( x.map( Constant( _ ))( breakOut ))
-   implicit def seqOfIntToGE( x: Seq[ Int ]) = new UGenInSeq( x.map( i => Constant( i.toFloat ))( breakOut ))
-   implicit def seqOfDoubleToGE( x: Seq[ Double ]) = new UGenInSeq( x.map( d => Constant( d.toFloat ))( breakOut ))
+//   // why these are necessary now??
+//   implicit def seqOfFloatToGE( x: Seq[ Float ]) = new UGenInSeq( x.map( Constant( _ ))( breakOut ))
+//   implicit def seqOfIntToGE( x: Seq[ Int ]) = new UGenInSeq( x.map( i => Constant( i.toFloat ))( breakOut ))
+//   implicit def seqOfDoubleToGE( x: Seq[ Double ]) = new UGenInSeq( x.map( d => Constant( d.toFloat ))( breakOut ))
 
    // control mapping
    implicit def intFloatControlSet( tup: (Int, Float) )                    = SingleControlSetMap( tup._1, tup._2 )

@@ -30,8 +30,7 @@
 package de.sciss.synth
 
 import scala.collection.mutable.{ ListBuffer }
-import scala.math.{ max => cmax, _ }
-import SC._
+import scala.math._
 
 /**
  *    @version 0.10, 23-Apr-10
@@ -44,8 +43,8 @@ trait EnvShape {
 trait ConstEnvShape extends EnvShape {
    val id: Int
    val curvature: Float = 0f
-   def idGE: GE = intToGE( id )
-   val curvatureGE: GE = floatToGE( curvature )
+   def idGE: GE = id
+   val curvatureGE: GE = curvature
 
    def levelAt( pos: Float, y1: Float, y2: Float ) : Float
 }
@@ -54,19 +53,19 @@ case object stepShape extends ConstEnvShape {
    def levelAt( pos: Float, y1: Float, y2: Float ) =
       if( pos < 1f ) y1 else y2
 }
-case object linearShape extends ConstEnvShape {
+case object linShape extends ConstEnvShape {
    val id = 1
    def levelAt( pos: Float, y1: Float, y2: Float ) =
       pos * (y2 - y1) + y1
 }
-case object exponentialShape extends ConstEnvShape {
+case object expShape extends ConstEnvShape {
    val id = 2
    def levelAt( pos: Float, y1: Float, y2: Float ) = {
-      val y1Lim = cmax( 0.0001f, y1 )
+      val y1Lim = max( 0.0001f, y1 )
       (y1Lim * pow( y2 / y1Lim, pos )).toFloat
    }
 }
-case object sineShape extends ConstEnvShape {
+case object sinShape extends ConstEnvShape {
    val id = 3
    def levelAt( pos: Float, y1: Float, y2: Float ) =
       (y1 + (y2 - y1) * (-cos( Pi * pos ) * 0.5 + 0.5)).toFloat
@@ -79,7 +78,7 @@ case object welchShape extends ConstEnvShape {
       (y2 - (y2 - y1) * sin( Pi * 0.5 * (1 - pos) )).toFloat
    }
 }
-case class curveShape( override curvature: Float ) extends ConstEnvShape {
+case class curveShape( override val curvature: Float ) extends ConstEnvShape {
    val id = 5
    def levelAt( pos: Float, y1: Float, y2: Float ) = if( abs( curvature ) < 0.0001f ) {
       pos * (y2 - y1) + y1
@@ -89,7 +88,7 @@ case class curveShape( override curvature: Float ) extends ConstEnvShape {
       (y1 + (y2 - y1) * (numer / denom)).toFloat
    }
 }
-case object squaredShape extends ConstEnvShape {
+case object sqrShape extends ConstEnvShape {
    val id = 6
    def levelAt( pos: Float, y1: Float, y2: Float ) = {
       val y1Pow2	= sqrt( y1 )
@@ -98,7 +97,7 @@ case object squaredShape extends ConstEnvShape {
       (yPow2 * yPow2).toFloat
    }
 }
-case object cubedShape extends ConstEnvShape {
+case object cubShape extends ConstEnvShape {
    val id = 7
    def levelAt( pos: Float, y1: Float, y2: Float ) = {
       val y1Pow3	= math.pow( y1, 0.3333333 )
@@ -107,9 +106,9 @@ case object cubedShape extends ConstEnvShape {
       (yPow3 * yPow3 * yPow3).toFloat
    }
 }
-case class varShape( override idGE: GE, override curvatureGE: GE = intToGE( 0 )) extends EnvShape
+case class varShape( override val idGE: GE, override val curvatureGE: GE = 0 ) extends EnvShape
 
-case class EnvSeg( dur: GE, targetLevel: GE, shape: EnvShape = linearShape )
+case class EnvSeg( dur: GE, targetLevel: GE, shape: EnvShape = linShape )
 
 import de.sciss.synth.{ EnvSeg => S }
 
@@ -124,15 +123,15 @@ trait AbstractEnvFactory[ T <: AbstractEnv ] {
 
 	def sine( dur: GE = 1, level: GE = 1 ) : T = {
 	  val durH = dur * 0.5f
-	  create( 0, S( durH, level, sineShape ), S( durH, 0, sineShape ))
+	  create( 0, S( durH, level, sinShape ), S( durH, 0, sinShape ))
 	}
 
-	def perc( attack: GE = 0.01f, release: GE = 1, level: GE = 1,
+	def perc( attack: GE = 0.01, release: GE = 1, level: GE = 1,
              shape: EnvShape = curveShape( -4 )) : T =
       create( 0, S( attack, level, shape ), S( release, 0, shape ))
 
 	def linen( attack: GE = 0.01f, sustain: GE = 1, release: GE = 1,
-              level: GE = 1, shape: EnvShape = linearShape ) : T =
+              level: GE = 1, shape: EnvShape = linShape ) : T =
 		create( 0, S( attack, level, shape ), S( sustain, level, shape ),
                  S( release, 0, shape ))
 }
@@ -142,15 +141,15 @@ object Env extends AbstractEnvFactory[ Env ] {
       new Env( startLevel, segments )
 
 	// envelopes with sustain
-	def cutoff( release: GE = 0.1f, level: GE = 1, shape: EnvShape = linearShape ) : Env = {
+	def cutoff( release: GE = 0.1f, level: GE = 1, shape: EnvShape = linShape ) : Env = {
       val releaseLevel: GE = shape match {
-         case `exponentialShape` => 1e-05f // dbamp( -100 )
+         case `expShape` => 1e-05f // dbamp( -100 )
          case _ => 0
       }
 		new Env( level, List( S( release, releaseLevel, shape )), 0 )
 	}
 
-	def dadsr( delay: GE = 0.1f, attack: GE = 0.01f, decay: GE = 0.3,
+	def dadsr( delay: GE = 0.1f, attack: GE = 0.01f, decay: GE = 0.3f,
          	  sustainLevel: GE = 0.5f, release: GE = 1,
   				  peakLevel: GE = 1, shape: EnvShape = curveShape( -4 ),
               bias: GE = 0 ) =

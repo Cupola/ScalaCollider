@@ -317,7 +317,7 @@ val x = {
 
     // calculate multiply and add for excitation probability
     val dmul = density.reciprocal * 0.5 * amp
-    val dadd = dmul.neg + amp
+    val dadd = -dmul + amp
 
     var signal = Mix.fill(4) {   // mix an array of 4 instruments
         val excitation = PinkNoise.ar(

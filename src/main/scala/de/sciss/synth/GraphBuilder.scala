@@ -28,7 +28,6 @@
 
 package de.sciss.synth
 
-import SC._
 import collection.breakOut
 import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
 import ugen.{ BinaryOpUGen, EnvGen, MulAdd, Silent, Out, Poll, UnaryOpUGen }
@@ -44,7 +43,7 @@ trait GE {
    import UnaryOpUGen._
    
    // unary ops
-   def neg : GE               = Neg.make( this )
+   def unary_- : GE           = Neg.make( this )
 // def bitNot : GE	         = BitNot.make( this )
    def abs : GE	            = Abs.make( this )
 // def toFloat : GE	         = UnOp.make( 'asFloat, this )
@@ -196,7 +195,7 @@ case class UGenInSeq( outputs: IIdxSeq[ UGenIn ]) extends GE {
 
    override def toString = outputs.mkString( "[ ", ", ", " ]" )
 
-   override def neg : GE         = copy( outputs.flatMap( _.neg.outputs ))
+   override def unary_- : GE     = copy( outputs.flatMap( _.unary_-.outputs ))
    override def abs : GE	      = copy( outputs.flatMap( _.abs.outputs ))
    override def ceil : GE	      = copy( outputs.flatMap( _.ceil.outputs ))
    override def floor : GE	      = copy( outputs.flatMap( _.floor.outputs ))
@@ -260,7 +259,7 @@ object GraphBuilder {
       // this is slightly more costly than what sclang does
       // (using non-linear shape plus an extra unary op),
       // but it fadeout is much smoother this way...
-		EnvGen.kr( Env( startVal, List( EnvSeg( 1, 1, curveShape( -4 )), EnvSeg( 1, 0, sineShape )), 1 ),
+		EnvGen.kr( Env( startVal, List( EnvSeg( 1, 1, curveShape( -4 )), EnvSeg( 1, 0, sinShape )), 1 ),
          gate, timeScale = dt, doneAction = freeSelf ).squared
 	}
 

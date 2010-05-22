@@ -29,7 +29,6 @@
 package de.sciss.synth.ugen
 
 import de.sciss.synth._
-import SC._
 import GraphBuilder._
 
 /**
@@ -98,7 +97,7 @@ case class VOsc3( rate: Rate, bufPos: UGenIn, freq1: UGenIn, freq2: UGenIn, freq
 extends SingleOutUGen( bufPos, freq1, freq2, freq3 ) // with SideEffectUGen
 
 object COsc extends UGen3Args {
-  def ar( bufID: GE, freq: GE = 440f, beats: GE = 0.5f ) : GE =
+  def ar( bufID: GE, freq: GE = 440, beats: GE = 0.5f ) : GE =
     arExp( bufID, freq, beats )
 }
 case class COsc( rate: Rate, bufID: UGenIn, freq: UGenIn, beats: UGenIn )

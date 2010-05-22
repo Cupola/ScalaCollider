@@ -33,7 +33,6 @@ import java.nio.ByteBuffer
 import de.sciss.synth.{ Completion => Comp }
 import ugen.Control
 import osc._
-import SC._
 import collection.immutable.{ IndexedSeq => IIdxSeq, Iterable => IIterable, Seq => ISeq, Stack, Vector }
 import collection.breakOut
 import de.sciss.scalaosc.{ OSCMessage, OSCPacket }
@@ -170,7 +169,7 @@ case class SynthGraph( constants: IIdxSeq[ Float ], controlValues: IIdxSeq[ Floa
    private[synth] def write( dos: DataOutputStream ) {
       // ---- constants ----
       dos.writeShort( constants.size )
-      constants.foreach( c => dos.writeFloat( c.value ))
+      constants.foreach( dos.writeFloat( _ ))
 
       // ---- controls ----
       dos.writeShort( controlValues.size )

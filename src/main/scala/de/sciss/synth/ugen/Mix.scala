@@ -29,7 +29,6 @@
 package de.sciss.synth.ugen
 
 import de.sciss.synth._
-import SC._
 
 /**
  *	@version	0.10, 09-Dec-09

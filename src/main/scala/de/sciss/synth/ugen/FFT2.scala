@@ -29,7 +29,6 @@
 package de.sciss.synth.ugen
 
 import de.sciss.synth._
-import SC._
 import GraphBuilder._
 
 // continuous convolution in freq domain

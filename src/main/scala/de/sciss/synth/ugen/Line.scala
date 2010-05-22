@@ -30,8 +30,6 @@ package de.sciss.synth.ugen
 
 import collection.immutable.{ IndexedSeq => IIdxSeq }
 import de.sciss.synth._
-import SC._
-//import Rates._
 
 /**
  * 	@version	0.13, 22-Apr-10
@@ -84,15 +82,15 @@ extends SingleOutUGen( in, srcLo, srcHi, dstLo, dstHi )
 
 object AmpComp extends UGen3Args {
    def ar : GE = ar()
-	def ar( freq: GE = 60.midicps, root: GE = 60.midicps, expon: GE = 0.3333 ) : GE =
+	def ar( freq: GE = 60.midicps, root: GE = 60.midicps, expon: GE = 0.3333f ) : GE =
       arExp( freq, root, expon )
 
    def kr : GE = kr()
-	def kr( freq: GE = 60.midicps, root: GE = 60.midicps, expon: GE = 0.3333 ) : GE =
+	def kr( freq: GE = 60.midicps, root: GE = 60.midicps, expon: GE = 0.3333f ) : GE =
       krExp( freq, root, expon )
 
    def ir : GE = ir()
-	def ir( freq: GE = 60.midicps, root: GE = 60.midicps, expon: GE = 0.3333 ) : GE =
+	def ir( freq: GE = 60.midicps, root: GE = 60.midicps, expon: GE = 0.3333f ) : GE =
       irExp( freq, root, expon )
 // XXX checkInputs
 }
@@ -101,15 +99,15 @@ extends SingleOutUGen( freq, root, expon )
 
 object AmpCompA extends UGen4Args {
    def ar : GE = ar()
-	def ar( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32, rootAmp: GE = 1 ) : GE =
+	def ar( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32f, rootAmp: GE = 1 ) : GE =
       arExp( freq, root, minAmp, rootAmp )
 
    def kr : GE = kr()
-	def kr( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32, rootAmp: GE = 1 ) : GE =
+	def kr( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32f, rootAmp: GE = 1 ) : GE =
       krExp( freq, root, minAmp, rootAmp )
 
    def ir : GE = ir()
-	def ir( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32, rootAmp: GE = 1 ) : GE =
+	def ir( freq: GE = 1000, root: GE = 0, minAmp: GE = 0.32f, rootAmp: GE = 1 ) : GE =
       irExp( freq, root, minAmp, rootAmp )
 }
 case class AmpCompA( rate: Rate, freq: UGenIn, root: UGenIn, minAmp: UGenIn, maxAmp: UGenIn )

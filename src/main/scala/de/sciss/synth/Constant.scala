@@ -80,7 +80,7 @@ case class Constant( value: Float ) extends UGenIn with ScalarRated {
    
    // unary ops - refine GE to return constants,
    // since this way we can implicitly go back to Float
-   override def neg : Constant         = cn( -value )
+   override def unary_- : Constant     = cn( -value )
    override def abs : Constant	      = cn( math.abs( value ))
    override def ceil : Constant	      = cn( math.ceil( value ))
    override def floor : Constant	      = cn( math.floor( value ))
