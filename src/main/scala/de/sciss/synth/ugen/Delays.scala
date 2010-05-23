@@ -29,7 +29,7 @@
 package de.sciss.synth.ugen
 
 import de.sciss.synth._
-import GraphBuilder._
+import SynthGraph._
 
 /**
  * 	@version	0.12, 01-Jan-10

@@ -30,57 +30,11 @@ package de.sciss.synth
 
 import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
 import math._
-import GraphBuilder._
+import SynthGraph._
 
 /**
- *    @author	Hanns Holger Rutz
  *    @version 0.15, 21-May-10
  */
-
-sealed abstract class Rate( val id: Int ) {
-   val methodName: String
-}
-
-object Rates {
-   def highest( rates: Rate* ) = rates.foldLeft[ Rate ]( scalar )( (a, b) => if( a.id > b.id ) a else b )
-}
-
-case object scalar  extends Rate( 0 ) { val methodName = "ir" }
-case object control extends Rate( 1 ) { val methodName = "kr" }
-case object audio   extends Rate( 2 ) { val methodName = "ar" }
-case object demand  extends Rate( 3 ) { val methodName = "dr" }
-
-sealed abstract class DoneAction( val id: Int )
-
-case object doNothing         extends DoneAction( 0 )
-case object pauseSelf         extends DoneAction( 1 )
-case object freeSelf          extends DoneAction( 2 )
-case object freeSelfPred      extends DoneAction( 3 )
-case object freeSelfSucc      extends DoneAction( 4 )
-case object freeSelfPredAll   extends DoneAction( 5 )
-case object freeSelfSuccAll   extends DoneAction( 6 )
-case object freeSelfToHead    extends DoneAction( 7 )
-case object freeSelfToTail    extends DoneAction( 8 )
-case object freeSelfPausePred extends DoneAction( 9 )
-case object freeSelfPauseSucc extends DoneAction( 10 )
-case object freeSelfPredDeep  extends DoneAction( 11 )
-case object freeSelfSuccDeep  extends DoneAction( 12 )
-case object freeAllInGroup    extends DoneAction( 13 )
-case object freeGroup         extends DoneAction( 14 )
-
-trait RatedGE extends GE {
-  def rate : Rate
-}
-
-trait ScalarRated  { def rate = scalar }
-trait ControlRated { def rate = control }
-trait AudioRated   { def rate = audio }
-
-trait UGenIn extends RatedGE {
-   final override def numOutputs = 1
-   final def outputs = Vector( this )
-}
-
 trait UGenProxy {
    def source : UGen
    def outputIndex : Int

@@ -2,40 +2,45 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" readonly="true" id="01886865-ff38-4eb7-a79d-92e783f03245" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Buffer.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Buffer.scala" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/RichNumber.scala" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SC.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Env.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Env.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Node.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Node.scala" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/DoneAction.scala" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraphBuilder.scala" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/UGenIn.scala" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/GEOps.scala" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/GE.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Compander.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Compander.scala" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphBuilder.scala" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Constant.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Constant.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/InOut.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/InOut.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Mix.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Mix.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/RichNumber.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/RichNumber.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BufIO.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BufIO.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ExampleCmd.txt" afterPath="$PROJECT_DIR$/ExampleCmd.txt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/CheckBadValues.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/CheckBadValues.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FSinOsc.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FSinOsc.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Trig.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Trig.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FSinOsc.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FSinOsc.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ConstantOps.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/DiskIO.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/DiskIO.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FreeVerb.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FreeVerb.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Line.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Line.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/PSinGrain.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/PSinGrain.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FreeVerb.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FreeVerb.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/MacUGens.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/MacUGens.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Delays.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Delays.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FFT2.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FFT2.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Filter.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Filter.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FFT2.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FFT2.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Delays.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Delays.scala" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Rate.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BasicOpUGen.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BasicOpUGen.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphFunction.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphFunction.scala" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/UGenInSeqOps.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Hilbert.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Hilbert.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphFunction.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphFunction.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Osc.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Osc.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/PitchShift.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/PitchShift.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphBuilder.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphBuilder.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/EnvGen.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/EnvGen.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Noise.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Noise.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Pan.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Pan.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/UGen.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/UGen.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Poll.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Poll.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Pan.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Pan.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Noise.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Noise.scala" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraph.scala" />
     </list>
     <ignored path=".idea/workspace.xml" />
     <ignored path="ScalaCollider.iws" />
@@ -95,55 +100,10 @@
   <component name="FileColors" enabled="true" enabledForTabs="true" />
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Buffer.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Buffer.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="249" column="44" selection-start="9958" selection-end="9958" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BasicOpUGen.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BasicOpUGen.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="31" column="0" selection-start="1056" selection-end="1056" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="GraphBuilder.scala" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphBuilder.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="54" column="3" selection-start="1862" selection-end="1915" vertical-scroll-proportion="0.44611186">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Line.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Line.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="84" column="76" selection-start="3235" selection-end="3235" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="RichNumber.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/RichNumber.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="57" column="13" selection-start="1851" selection-end="1886" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="Constant.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Constant.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="88" column="22" selection-start="3067" selection-end="3128" vertical-scroll-proportion="0.0">
+            <state line="26" column="101" selection-start="979" selection-end="979" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -152,34 +112,79 @@
       <file leaf-file-name="package.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="54" column="1" selection-start="1571" selection-end="2040" vertical-scroll-proportion="0.0">
+            <state line="54" column="80" selection-start="1999" selection-end="1999" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SynthDef.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala">
+      <file leaf-file-name="GE.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/GE.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="171" column="26" selection-start="5942" selection-end="5942" vertical-scroll-proportion="0.0">
+            <state line="23" column="60" selection-start="794" selection-end="794" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Env.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Env.scala">
+      <file leaf-file-name="Filter.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Filter.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="128" column="30" selection-start="3910" selection-end="3910" vertical-scroll-proportion="0.0">
+            <state line="31" column="7" selection-start="1039" selection-end="1039" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BufIO.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BufIO.scala">
+      <file leaf-file-name="BasicOpUGen.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BasicOpUGen.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="38" column="52" selection-start="1207" selection-end="1207" vertical-scroll-proportion="0.0">
+            <state line="259" column="68" selection-start="9772" selection-end="9772" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ConstantOps.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ConstantOps.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="109" column="35" selection-start="5085" selection-end="5085" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="RichNumber.scala" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/RichNumber.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="335" column="48" selection-start="14267" selection-end="14320" vertical-scroll-proportion="0.17189632">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Trig.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Trig.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="31" column="17" selection-start="1047" selection-end="1047" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Hilbert.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Hilbert.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="31" column="17" selection-start="1050" selection-end="1050" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FFT2.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FFT2.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="31" column="17" selection-start="1047" selection-end="1047" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -195,22 +200,22 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FSinOsc.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FreeVerb.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Pan.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/PitchShift.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/PSinGrain.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/MacUGens.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Noise.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Poll.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Constant.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Filter.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FFT2.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Hilbert.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Trig.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Buffer.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Osc.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SC.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Hilbert.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FFT2.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/GE.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BasicOpUGen.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphBuilder.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Line.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Env.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/RichNumber.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ConstantOps.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/RichNumber.scala" />
       </list>
     </option>
   </component>
@@ -343,6 +348,66 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="UGenIn.scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="synth" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RichNumber.scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="synth" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="package.scala" />
               <option name="myItemType" value="org.jetbrains.plugins.scala.components.ScalaDefsProjectViewProvider$MyClassOwnerTreeNode" />
             </PATH_ELEMENT>
@@ -373,67 +438,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="GraphFunction.scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ScalaCollider" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ScalaCollider" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="synth" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GraphBuilder.scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ScalaCollider" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ScalaCollider" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="synth" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Constant.scala" />
+              <option name="myItemId" value="ConstantOps.scala" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -781,114 +786,114 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Filter.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Pan.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="0" selection-start="1032" selection-end="1032" vertical-scroll-proportion="0.0">
+        <state line="31" column="17" selection-start="1046" selection-end="1046" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FFT2.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/PitchShift.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="0" selection-start="1030" selection-end="1030" vertical-scroll-proportion="0.0">
+        <state line="31" column="17" selection-start="1053" selection-end="1053" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Hilbert.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/PSinGrain.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="0" selection-start="1033" selection-end="1033" vertical-scroll-proportion="0.0">
+        <state line="31" column="17" selection-start="1052" selection-end="1052" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/MacUGens.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="31" column="17" selection-start="1051" selection-end="1051" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Noise.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="32" column="17" selection-start="1075" selection-end="1075" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Poll.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="31" column="17" selection-start="1047" selection-end="1047" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Trig.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="0" selection-start="1030" selection-end="1030" vertical-scroll-proportion="0.0">
+        <state line="31" column="17" selection-start="1047" selection-end="1047" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/InOut.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Hilbert.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="57" column="52" selection-start="1952" selection-end="1952" vertical-scroll-proportion="0.0">
+        <state line="31" column="17" selection-start="1050" selection-end="1050" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Osc.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FFT2.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="155" column="36" selection-start="5530" selection-end="5530" vertical-scroll-proportion="0.0">
+        <state line="31" column="17" selection-start="1047" selection-end="1047" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BufIO.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Filter.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="38" column="52" selection-start="1207" selection-end="1207" vertical-scroll-proportion="0.0">
+        <state line="31" column="7" selection-start="1039" selection-end="1039" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/GE.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="23" column="60" selection-start="794" selection-end="794" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/BasicOpUGen.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="0" selection-start="1056" selection-end="1056" vertical-scroll-proportion="0.0">
+        <state line="259" column="68" selection-start="9772" selection-end="9772" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ConstantOps.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="171" column="26" selection-start="5942" selection-end="5942" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Line.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="84" column="76" selection-start="3235" selection-end="3235" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Buffer.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="249" column="44" selection-start="9958" selection-end="9958" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Env.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="128" column="30" selection-start="3910" selection-end="3910" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="54" column="1" selection-start="1571" selection-end="2040" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/RichNumber.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="57" column="13" selection-start="1851" selection-end="1886" vertical-scroll-proportion="0.0">
+        <state line="109" column="35" selection-start="5085" selection-end="5085" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Constant.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="88" column="22" selection-start="3067" selection-end="3128" vertical-scroll-proportion="0.0">
+        <state line="26" column="101" selection-start="979" selection-end="979" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/GraphBuilder.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="54" column="3" selection-start="1862" selection-end="1915" vertical-scroll-proportion="0.44611186">
+        <state line="54" column="80" selection-start="1999" selection-end="1999" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/RichNumber.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="335" column="48" selection-start="14267" selection-end="14320" vertical-scroll-proportion="0.17189632">
           <folding />
         </state>
       </provider>

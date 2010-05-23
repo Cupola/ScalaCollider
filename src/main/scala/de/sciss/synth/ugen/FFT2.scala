@@ -29,7 +29,7 @@
 package de.sciss.synth.ugen
 
 import de.sciss.synth._
-import GraphBuilder._
+import SynthGraph._
 
 // continuous convolution in freq domain
 object Convolution extends UGen3Args {

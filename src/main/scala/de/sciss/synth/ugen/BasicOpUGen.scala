@@ -29,7 +29,7 @@
 package de.sciss.synth.ugen
 
 import de.sciss.synth.{ Constant => c, _ }
-import GraphBuilder._
+import SynthGraph._
 
 import math._
 
@@ -50,7 +50,7 @@ object MulAdd {
   }
 
   private def make1( in: UGenIn, mul: UGenIn, add: UGenIn ) : GE =
-    make1( Rates.highest( in.rate, mul.rate, add.rate ), in, mul, add )
+    make1( Rate.highest( in.rate, mul.rate, add.rate ), in, mul, add )
 
   private def make1( rate: Rate, in: UGenIn, mul: UGenIn, add: UGenIn ) : GE =
     (mul, add) match {
@@ -155,11 +155,11 @@ object BinaryOpUGen {
    sealed abstract class Op( val id: Int ) {
       def make( a: GE, b: GE ) : GE = BinaryOpUGen.make( this, a, b )
       protected[synth] def make1( a: UGenIn, b: UGenIn ) : GE = (a, b) match {
-         case (ac: c, bc: c)  => make1( ac, bc )
-         case _               => binop.apply( Rates.highest( a.rate, b.rate ), this, a, b )
+         case (c(a), c(b)) => c( make1( a, b ))
+         case _            => binop.apply( Rate.highest( a.rate, b.rate ), this, a, b )
       } 
 
-      protected def make1( a: c, b: c ) : c
+      protected def make1( a: Float, b: Float ) : Float
 
       def name = { val cn = getClass.getName
          val sz   = cn.length
@@ -167,9 +167,12 @@ object BinaryOpUGen {
          cn.charAt( i ).toLower + cn.substring( i + 1, if( cn.charAt( sz - 1 ) == '$' ) sz - 1 else sz )
       }
    }
+
+   import RichFloat._
+
    case object Plus           extends Op(  0 ) {
       override val name = "+"
-      protected def make1( ac: c, bc: c ) = ac.+( bc )
+      protected def make1( a: Float, b: Float ) = a + b
       override protected[synth] def make1( a: UGenIn, b: UGenIn ) : GE = (a, b) match {
          case (c(0), _)       => b
          case (_, c(0))       => b
@@ -178,7 +181,7 @@ object BinaryOpUGen {
    }
    case object Minus          extends Op(  1 ) {
       override val name = "-"
-      protected def make1( ac: c, bc: c ) = ac.-( bc )
+      protected def make1( a: Float, b: Float ) = a - b
       override protected[synth] def make1( a: UGenIn, b: UGenIn ) : GE = (a, b) match {
          case (c(0), _)       => -b
          case (_, c(0))       => b
@@ -187,7 +190,7 @@ object BinaryOpUGen {
    }
    case object Times          extends Op(  2 ) {
       override val name = "*"
-      protected def make1( ac: c, bc: c ) = ac.*( bc )
+      protected def make1( a: Float, b: Float ) = a * b
       override protected[synth] def make1( a: UGenIn, b: UGenIn ) : GE = (a, b) match {
          case (c(0), _)       => a
          case (_, c(0))       => b
@@ -201,7 +204,7 @@ object BinaryOpUGen {
 // case object IDiv           extends Op(  3 )
    case object Div            extends Op(  4 ) {
       override val name = "/"
-      protected def make1( ac: c, bc: c ) = ac./( bc )
+      protected def make1( a: Float, b: Float ) = a / b
       override protected[synth] def make1( a: UGenIn, b: UGenIn ) : GE = (a, b) match {
          case (_, c(1))       => a
          case (_, c(-1))      => -a
@@ -211,127 +214,127 @@ object BinaryOpUGen {
    }
    case object Mod            extends Op(  5 ) {
       override val name = "%"
-      protected def make1( ac: c, bc: c ) = ac.%( bc )
+      protected def make1( a: Float, b: Float ) = a % b
    }
    case object Eq             extends Op(  6 ) {
       override val name = "==="
-      protected def make1( ac: c, bc: c ) = ac.===( bc )
+      protected def make1( a: Float, b: Float ) = if( a == b ) 1f else 0f
    }
    case object Neq            extends Op(  7 ) {
       override val name = "!=="
-      protected def make1( ac: c, bc: c ) = ac.!==( bc )
+      protected def make1( a: Float, b: Float ) = if( a != b ) 1f else 0f
    }
    case object Lt             extends Op(  8 ) {
       override val name = "<"
-      protected def make1( ac: c, bc: c ) = ac.<( bc )
+      protected def make1( a: Float, b: Float ) = if( a < b ) 1f else 0f
    }
    case object Gt             extends Op(  9 ) {
       override val name = ">"
-      protected def make1( ac: c, bc: c ) = ac.>( bc )
+      protected def make1( a: Float, b: Float ) = if( a > b ) 1f else 0f
    }
    case object Leq            extends Op( 10 ) {
       override val name = "<="
-      protected def make1( ac: c, bc: c ) = ac.<=( bc )
+      protected def make1( a: Float, b: Float ) = if( a <= b ) 1f else 0f
    }
    case object Geq            extends Op( 11 ) {
       override val name = ">="
-      protected def make1( ac: c, bc: c ) = ac.>=( bc )
+      protected def make1( a: Float, b: Float ) = if( a >= b ) 1f else 0f
    }
    case object Min            extends Op( 12 ) {
-      protected def make1( ac: c, bc: c ) = ac.min( bc )
+      protected def make1( a: Float, b: Float ) = math.min( a, b )
    }
    case object Max            extends Op( 13 ) {
-      protected def make1( ac: c, bc: c ) = ac.max( bc )
+      protected def make1( a: Float, b: Float ) = math.max( a, b )
    }
    case object BitAnd         extends Op( 14 ) {
       override val name = "&"
-      protected def make1( ac: c, bc: c ) = ac.&( bc )
+      protected def make1( a: Float, b: Float ) = (a.toInt & b.toInt).toFloat
    }
    case object BitOr          extends Op( 15 ) {
       override val name = "|"
-      protected def make1( ac: c, bc: c ) = ac.|( bc )
+      protected def make1( a: Float, b: Float ) = (a.toInt | b.toInt).toFloat
    }
    case object BitXor         extends Op( 16 ) {
       override val name = "^"
-      protected def make1( ac: c, bc: c ) = ac.^( bc )
+      protected def make1( a: Float, b: Float ) = (a.toInt ^ b.toInt).toFloat
    }
 // case object Lcm            extends Op( 17 )
 // case object Gcd            extends Op( 18 )
    case object Round          extends Op( 19 ) {
-      protected def make1( ac: c, bc: c ) = ac.round( bc )
+      protected def make1( a: Float, b: Float ) = rf_round( a, b )
    }
    case object Roundup        extends Op( 20 ) {
-      protected def make1( ac: c, bc: c ) = ac.roundup( bc )
+      protected def make1( a: Float, b: Float ) = rf_roundup( a, b )
    }
    case object Trunc          extends Op( 21 ) {
-      protected def make1( ac: c, bc: c ) = ac.trunc( bc )
+      protected def make1( a: Float, b: Float ) = rf_trunc( a, b )
    }
    case object Atan2          extends Op( 22 ) {
-      protected def make1( ac: c, bc: c ) = ac.atan2( bc )
+      protected def make1( a: Float, b: Float ) = math.atan2( a, b ).toFloat
    }
    case object Hypot          extends Op( 23 ) {
-      protected def make1( ac: c, bc: c ) = ac.hypot( bc )
+      protected def make1( a: Float, b: Float ) = math.hypot( a, b ).toFloat
    }
    case object Hypotx         extends Op( 24 ) {
-      protected def make1( ac: c, bc: c ) = ac.hypotx( bc )
+      protected def make1( a: Float, b: Float ) = rf_hypotx( a, b )
    }
    case object Pow            extends Op( 25 ) {
-      protected def make1( ac: c, bc: c ) = ac.pow( bc )
+      protected def make1( a: Float, b: Float ) = math.pow( a, b ).toFloat
    }
 // case object <<             extends Op( 26 )
 // case object >>             extends Op( 27 )
 // case object UnsgnRghtShft  extends Op( 28 )
 // case object Fill           extends Op( 29 )
    case object Ring1          extends Op( 30 ) {
-      protected def make1( ac: c, bc: c ) = ac.ring1( bc )
+      protected def make1( a: Float, b: Float ) = rf_ring1( a, b )
    }
    case object Ring2          extends Op( 31 ) {
-      protected def make1( ac: c, bc: c ) = ac.ring2( bc )
+      protected def make1( a: Float, b: Float ) = rf_ring2( a, b )
    }
    case object Ring3          extends Op( 32 ) {
-      protected def make1( ac: c, bc: c ) = ac.ring3( bc )
+      protected def make1( a: Float, b: Float ) = rf_ring3( a, b )
    }
    case object Ring4          extends Op( 33 ) {
-      protected def make1( ac: c, bc: c ) = ac.ring4( bc )
+      protected def make1( a: Float, b: Float ) = rf_ring4( a, b )
    }
    case object Difsqr         extends Op( 34 ) {
-      protected def make1( ac: c, bc: c ) = ac.difsqr( bc )
+      protected def make1( a: Float, b: Float ) = rf_difsqr( a, b )
    }
    case object Sumsqr         extends Op( 35 ) {
-      protected def make1( ac: c, bc: c ) = ac.sumsqr( bc )
+      protected def make1( a: Float, b: Float ) = rf_sumsqr( a, b )
    }
    case object Sqrsum         extends Op( 36 ) {
-      protected def make1( ac: c, bc: c ) = ac.sqrsum( bc )
+      protected def make1( a: Float, b: Float ) = rf_sqrsum( a, b )
    }
    case object Sqrdif         extends Op( 37 ) {
-      protected def make1( ac: c, bc: c ) = ac.sqrdif( bc )
+      protected def make1( a: Float, b: Float ) = rf_sqrdif( a, b )
    }
    case object Absdif         extends Op( 38 ) {
-      protected def make1( ac: c, bc: c ) = ac.absdif( bc )
+      protected def make1( a: Float, b: Float ) = rf_absdif( a, b )
    }
    case object Thresh         extends Op( 39 ) {
-      protected def make1( ac: c, bc: c ) = ac.thresh( bc )
+      protected def make1( a: Float, b: Float ) = rf_thresh( a, b )
    }
    case object Amclip         extends Op( 40 ) {
-      protected def make1( ac: c, bc: c ) = ac.amclip( bc )
+      protected def make1( a: Float, b: Float ) = rf_amclip( a, b )
    }
    case object Scaleneg       extends Op( 41 ) {
-      protected def make1( ac: c, bc: c ) = ac.scaleneg( bc )
+      protected def make1( a: Float, b: Float ) = rf_scaleneg( a, b )
    }
    case object Clip2          extends Op( 42 ) {
-      protected def make1( ac: c, bc: c ) = ac.clip2( bc )
+      protected def make1( a: Float, b: Float ) = rf_clip2( a, b )
    }
    case object Excess         extends Op( 43 ) {
-      protected def make1( ac: c, bc: c ) = ac.excess( bc )
+      protected def make1( a: Float, b: Float ) = rf_excess( a, b )
    }
    case object Fold2          extends Op( 44 ) {
-      protected def make1( ac: c, bc: c ) = ac.fold2( bc )
+      protected def make1( a: Float, b: Float ) = rf_fold2( a, b )
    }
    case object Wrap2          extends Op( 45 ) {
-      protected def make1( ac: c, bc: c ) = ac.wrap2( bc )
+      protected def make1( a: Float, b: Float ) = rf_wrap2( a, b )
    }
    case object Firstarg       extends Op( 46 ) {
-      protected def make1( ac: c, bc: c ) = ac.firstarg( bc )
+      protected def make1( a: Float, b: Float ) = a
    }
 // case object Rrand          extends Op( 47 )
 // case object ExpRRand       extends Op( 48 )

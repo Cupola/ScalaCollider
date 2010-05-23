@@ -30,7 +30,7 @@ package de.sciss.synth.ugen
 
 import collection.breakOut
 import de.sciss.synth._
-import GraphBuilder._
+import SynthGraph._
 
 /**
  *    @version	0.13, 22-Apr-10

@@ -3,7 +3,7 @@ package de.sciss.synth
 // ---------------------------- Float ----------------------------
 
 object RichFloat {
-   @inline private def fold( in: Float, lo: Float, hi: Float ) : Float = {
+   @inline private[synth] def rf_fold( in: Float, lo: Float, hi: Float ) : Float = {
       val x = in - lo
       // avoid the divide if possible
       if( in >= hi ) {
@@ -22,7 +22,7 @@ object RichFloat {
       lo + (if( c >= range ) range2 - c else c)
    }
 
-   @inline private def wrap( in: Float, lo: Float, hi: Float ) : Float = {
+   @inline private[synth] def rf_wrap( in: Float, lo: Float, hi: Float ) : Float = {
       // avoid the divide if possible
       if( in >= hi ) {
          val range   = hi - lo
@@ -38,6 +38,68 @@ object RichFloat {
          }
       } else in
    }
+
+   @inline private[synth] def rf_round( a: Float, b: Float ) =
+      if( b == 0 ) a else (math.floor( a / b + 0.5f ) * b).toFloat
+
+   @inline private[synth] def rf_roundup( a: Float, b: Float ) =
+      if( b == 0 ) a else (math.ceil( a / b ) * b).toFloat
+
+   @inline private[synth] def rf_trunc( a: Float, b: Float ) =
+      if( b == 0 ) a else (math.floor( a / b ) * b).toFloat
+
+   @inline private[synth] def rf_hypotx( a: Float, b: Float ) = {
+      val minab = math.min( math.abs( a ), math.abs( b ))
+      (a + b - (math.sqrt(2) - 1) * minab).toFloat
+   }
+
+   @inline private[synth] def rf_ring1( a: Float, b: Float ) =
+      a * b + a
+
+   @inline private[synth] def rf_ring2( a: Float, b: Float ) =
+      a * b + a + b
+
+   @inline private[synth] def rf_ring3( a: Float, b: Float ) =
+      a * a * b
+
+   @inline private[synth] def rf_ring4( a: Float, b: Float ) = {
+      val ab = a * b; a * ab - b * ab
+   }
+
+   @inline private[synth] def rf_difsqr( a: Float, b: Float ) =
+      a * a - b * b
+
+   @inline private[synth] def rf_sumsqr( a: Float, b: Float ) =
+      a * a + b * b
+
+   @inline private[synth] def rf_sqrsum( a: Float, b: Float ) = {
+      val z = a + b; z * z
+   }
+
+   @inline private[synth] def rf_sqrdif( a: Float, b: Float ) = {
+      val z = a - b; z * z
+   }
+
+   @inline private[synth] def rf_absdif( a: Float, b: Float ) = math.abs( a - b )
+
+   @inline private[synth] def rf_thresh( a: Float, b: Float ) =
+      if( a < b ) 0 else a
+
+   @inline private[synth] def rf_amclip( a: Float, b: Float ) =
+      a * 0.5f * (b + math.abs( a ))
+
+   @inline private[synth] def rf_scaleneg( a: Float, b: Float ) =
+      (math.abs( a ) - a) * (0.5f * b + 0.5f) + a
+
+   @inline private[synth] def rf_clip2( a: Float, b: Float ) =
+      math.max( math.min( a, b ), -b )
+
+   @inline private[synth] def rf_excess( a: Float, b: Float ) =
+      a - math.max( math.min( a, b ), -b )
+
+   @inline private[synth] def rf_fold2( a: Float, b: Float ) = rf_fold( a, -b, b )
+
+   @inline private[synth] def rf_wrap2( a: Float, b: Float ) = rf_wrap( a, -b, b )
 }
 
 final case class RichFloat private[synth]( f: Float ) {
@@ -49,10 +111,10 @@ final case class RichFloat private[synth]( f: Float ) {
 
    // unary ops - refine GE to return constants,
    // since this way we can implicitly go back to Float
-//   def unary_- : Float     = -f
-//   def abs : Float	      = math.abs( f )
-//   def ceil : Float	      = math.ceil( f ).toFloat
-//   def floor : Float	      = math.floor( f ).toFloat
+// def unary_- : Float     = -f
+// def abs : Float	      = math.abs( f )
+// def ceil : Float	      = math.ceil( f ).toFloat
+// def floor : Float	      = math.floor( f ).toFloat
    def frac : Float	      = (f - math.floor( f )).toFloat // according to jmc
    def signum : Float      = math.signum( f )
    def squared : Float     = f * f
@@ -80,120 +142,94 @@ final case class RichFloat private[synth]( f: Float ) {
    def sinh : Float        = math.sinh( f ).toFloat
    def cosh : Float        = math.cosh( f ).toFloat
    def tanh : Float        = math.tanh( f ).toFloat
-//   def distort : Float     = f / (1 + math.abs( f ))
-//   def softclip : Float    = { val absx = math.abs( f ); if( absx <= 0.5f ) f else (absx - 0.25f) / f}
-//   def ramp : Float        = if( f <= 0 ) 0 else if( f >= 1 ) 1 else f
-//   def scurve : Float      = if( f <= 0 ) 0 else if( f > 1 ) 1 else f * f * (3 - 2 * f)
+// def distort : Float     = f / (1 + math.abs( f ))
+// def softclip : Float    = { val absx = math.abs( f ); if( absx <= 0.5f ) f else (absx - 0.25f) / f}
+// def ramp : Float        = if( f <= 0 ) 0 else if( f >= 1 ) 1 else f
+// def scurve : Float      = if( f <= 0 ) 0 else if( f > 1 ) 1 else f * f * (3 - 2 * f)
 
    // binary ops
    // note: min, max, <, >, <=, >= are defined in scala.runtime.RichFloat,
    // therefore we do not define them again on Float as that would produce
    // an ambiguity!
-//   def +( b: Float ) : Float        = f + b.f
-//   def -( b: Float ) : Float        = f - b.f
-//   def *( b: Float ) : Float        = f * b.f
-//   def /( b: Float ) : Float        = f / b.f
-//   def %( b: Float ) : Float        = f % b.f
-//   def ===( b: Float ) : Int          = if( f == b ) 1 else 0
-//   def ===( b: Constant ) : Constant  = cn === b
-//   def ===( b: GE ) : GE              = cn === b
-//   def !==( b: Float ) : Int          = if( f != b ) 1 else 0
-//   def !==( b: Constant ) : Constant  = cn !== b
-//   def !==( b: GE ) : GE              = cn !== b
-//   def <( b: Float ) : Float	      = f < b.f
-   def <( b: Constant ) : Constant  = cn.<( b )
+// def +( b: Float ) : Float        = f + b.f
+// def -( b: Float ) : Float        = f - b.f
+   def -( b: GE ) : GE              = cn.-( b )
+// def *( b: Float ) : Float        = f * b.f
+   def *( b: GE ) : GE              = cn.*( b )
+// def /( b: Float ) : Float        = f / b.f
+   def /( b: GE ) : GE              = cn./( b )
+// def %( b: Float ) : Float        = f % b.f
+   def %( b: GE ) : GE              = cn.%( b )
+// def ===( b: Float ) : Int        = if( f == b ) 1 else 0
+   def ===( b: GE ) : GE            = cn.===( b )
+// def !==( b: Float ) : Int        = if( f != b ) 1 else 0
+   def !==( b: GE ) : GE            = cn.!==( b )
+// def <( b: Float ) : Float	      = f < b.f
    def <( b: GE ) : GE              = cn.<( b )
-//   def >( b: Float ) : Float	      = f > b.f
-   def >( b: Constant ) : Constant  = cn.>( b )
+// def >( b: Float ) : Float	      = f > b.f
    def >( b: GE ) : GE              = cn.>( b )
-//   def <=( b: Float ) : Float	      = f <= b.f
-   def <=( b: Constant ) : Constant  = cn.<=( b )
-   def <=( b: GE ) : GE              = cn.<=( b )
-//   def >=( b: Float ) : Float	      = f >= b.f
-   def >=( b: Constant ) : Constant  = cn.>=( b )
-   def >=( b: GE ) : GE              = cn.>=( b )
-//   def min( b: Float ) : Float      = math.min( f, b ).toFloat
-   def min( b: Constant ) : Constant  = cn.min( b )
-   def min( b: GE ) : GE              = cn.min( b )
-//   def max( b: Float ) : Float      = math.max( f, b ).toFloat
-   def max( b: Constant ) : Constant  = cn.max( b )
-   def max( b: GE ) : GE              = cn.max( b )
-//   def &( b: Float ) : Float	      = f.toInt & b.f.toInt
-//   def |( b: Float ) : Float	      = f.toInt | b.f.toInt
-//   def ^( b: Float ) : Float	      = f.toInt ^ b.f.toInt
-   def round( b: Float ) : Float    = if( b == 0 ) f else (math.floor( f / b + 0.5f ) * b).toFloat
-   def round( b: Constant ) : Constant  = cn.round( b )
-   def round( b: GE ) : GE              = cn.round( b )
-   def roundup( b: Float ) : Float  = if( b == 0 ) f else (math.ceil( f / b ) * b).toFloat
-   def roundup( b: Constant ) : Constant  = cn.roundup( b )
-   def roundup( b: GE ) : GE              = cn.roundup( b )
-   def trunc( b: Float ) : Float    = if( b == 0 ) f else (math.floor( f / b ) * b).toFloat
-   def trunc( b: Constant ) : Constant  = cn.trunc( b )
-   def trunc( b: GE ) : GE              = cn.trunc( b )
+// def <=( b: Float ) : Float	      = f <= b.f
+   def <=( b: GE ) : GE             = cn.<=( b )
+// def >=( b: Float ) : Float	      = f >= b.f
+   def >=( b: GE ) : GE             = cn.>=( b )
+// def min( b: Float ) : Float      = math.min( f, b ).toFloat
+   def min( b: GE ) : GE            = cn.min( b )
+// def max( b: Float ) : Float      = math.max( f, b ).toFloat
+   def max( b: GE ) : GE            = cn.max( b )
+// def &( b: Float ) : Float	      = f.toInt & b.f.toInt
+   def &( b: GE ) : GE              = cn.&( b )
+// def |( b: Float ) : Float	      = f.toInt | b.f.toInt
+   def |( b: GE ) : GE              = cn.|( b )
+// def ^( b: Float ) : Float	      = f.toInt ^ b.f.toInt
+   def ^( b: GE ) : GE              = cn.^( b )
+   def round( b: Float ) : Float    = rf_round( f, b )
+   def round( b: GE ) : GE          = cn.round( b )
+   def roundup( b: Float ) : Float  = rf_roundup( f, b )
+   def roundup( b: GE ) : GE        = cn.roundup( b )
+   def trunc( b: Float ) : Float    = rf_trunc( f, b )
+   def trunc( b: GE ) : GE          = cn.trunc( b )
    def atan2( b: Float ) : Float    = math.atan2( f, b ).toFloat
-   def atan2( b: Constant ) : Constant  = cn.atan2( b )
-   def atan2( b: GE ) : GE              = cn.atan2( b )
+   def atan2( b: GE ) : GE          = cn.atan2( b )
    def hypot( b: Float ) : Float    = math.hypot( f, b ).toFloat
-   def hypot( b: Constant ) : Constant  = cn.hypot( b )
-   def hypot( b: GE ) : GE              = cn.hypot( b )
-   def hypotx( b: Float ) : Float   = {
-      val minab = math.min( math.abs( f ), math.abs( b ))
-      (f + b - (math.sqrt(2) - 1) * minab).toFloat
-   }
-   def hypotx( b: Constant ) : Constant  = cn.hypotx( b )
-   def hypotx( b: GE ) : GE              = cn.hypotx( b )
+   def hypot( b: GE ) : GE          = cn.hypot( b )
+   def hypotx( b: Float ) : Float   = rf_hypotx( f, b )
+   def hypotx( b: GE ) : GE         = cn.hypotx( b )
    def pow( b: Float ) : Float      = math.pow( f, b ).toFloat
-   def pow( b: Constant ) : Constant  = cn.pow( b )
-   def pow( b: GE ) : GE              = cn.pow( b )
-//   def ring1( b: Float ) : Float    = f * b + f
-//   def ring1( b: Constant ) : Constant  = cn.ring1( b )
-//   def ring1( b: GE ) : GE              = cn.ring1( b )
-//   def ring2( b: Float ) : Float    = f * b + f + b
-//   def ring2( b: Constant ) : Constant  = cn.ring2( b )
-//   def ring2( b: GE ) : GE              = cn.ring2( b )
-//   def ring3( b: Float ) : Float    = f * f * b
-//   def ring3( b: Constant ) : Constant  = cn.ring3( b )
-//   def ring3( b: GE ) : GE              = cn.ring3( b )
-//   def ring4( b: Float ) : Float    = { val ab = f * b; f * ab - b * ab }
-//   def ring4( b: Constant ) : Constant  = cn.ring4( b )
-//   def ring4( b: GE ) : GE              = cn.ring4( b )
-   def difsqr( b: Float ) : Float   = f * f - b * b
-   def difsqr( b: Constant ) : Constant  = cn.difsqr( b )
-   def difsqr( b: GE ) : GE              = cn.difsqr( b )
-   def sumsqr( b: Float ) : Float   = f * f + b * b
-   def sumsqr( b: Constant ) : Constant  = cn.sumsqr( b )
-   def sumsqr( b: GE ) : GE              = cn.sumsqr( b )
-   def sqrsum( b: Float ) : Float   = { val z = f + b; z * z }
-   def sqrsum( b: Constant ) : Constant  = cn.sqrsum( b )
-   def sqrsum( b: GE ) : GE              = cn.sqrsum( b )
-   def sqrdif( b: Float ) : Float   = { val z = f - b; z * z }
-   def sqrdif( b: Constant ) : Constant  = cn.sqrdif( b )
-   def sqrdif( b: GE ) : GE              = cn.sqrdif( b )
-   def absdif( b: Float ) : Float   = math.abs( f - b )
-   def absdif( b: Constant ) : Constant  = cn.absdif( b )
-   def absdif( b: GE ) : GE              = cn.absdif( b )
-//   def thresh( b: Float ) : Float   = if( f < b ) 0 else f
-//   def thresh( b: Constant ) : Constant  = cn.thresh( b )
-//   def thresh( b: GE ) : GE              = cn.thresh( b )
-//   def amclip( b: Float ) : Float   = f * 0.5f * (b + math.abs( f ))
-//   def amclip( b: Constant ) : Constant  = cn.amclip( b )
-//   def amclip( b: GE ) : GE              = cn.amclip( b )
-//   def scaleneg( b: Float ) : Float = (math.abs( f ) - f) * (0.5f * b + 0.5f) + f
-//   def scaleneg( b: Constant ) : Constant  = cn.scaleneg( b )
-//   def scaleneg( b: GE ) : GE              = cn.scaleneg( b )
-   def clip2( b: Float ) : Float    = math.max( math.min( f, b ), -b )
-   def clip2( b: Constant ) : Constant  = cn.clip2( b )
-   def clip2( b: GE ) : GE              = cn.clip2( b )
-//   def excess( b: Float ) : Float   = f - math.max( math.min( f, b ), -b )
-//   def excess( b: Constant ) : Constant  = cn.excess( b )
-//   def excess( b: GE ) : GE              = cn.excess( b )
-   def fold2( b: Float ) : Float    = fold( f, -b, b )
-   def fold2( b: Constant ) : Constant  = cn.fold2( b )
-   def fold2( b: GE ) : GE              = cn.fold2( b )
-   def wrap2( b: Float ) : Float    = wrap( f, -b, b )
-   def wrap2( b: Constant ) : Constant  = cn.wrap2( b )
-   def wrap2( b: GE ) : GE              = cn.wrap2( b )
-//   def firstarg( b: Float ) : Float = f
+   def pow( b: GE ) : GE            = cn.pow( b )
+   def ring1( b: Float ) : Float    = rf_ring1( f, b )
+   def ring1( b: GE ) : GE          = cn.ring1( b )
+   def ring2( b: Float ) : Float    = rf_ring2( f, b )
+   def ring2( b: GE ) : GE          = cn.ring2( b )
+   def ring3( b: Float ) : Float    = rf_ring3( f, b )
+   def ring3( b: GE ) : GE          = cn.ring3( b )
+   def ring4( b: Float ) : Float    = rf_ring4( f, b )
+   def ring4( b: GE ) : GE          = cn.ring4( b )
+   def difsqr( b: Float ) : Float   = rf_difsqr( f, b )
+   def difsqr( b: GE ) : GE         = cn.difsqr( b )
+   def sumsqr( b: Float ) : Float   = rf_sumsqr( f, b )
+   def sumsqr( b: GE ) : GE         = cn.sumsqr( b )
+   def sqrsum( b: Float ) : Float   = rf_sqrsum( f, b )
+   def sqrsum( b: GE ) : GE         = cn.sqrsum( b )
+   def sqrdif( b: Float ) : Float   = rf_sqrdif( f, b )
+   def sqrdif( b: GE ) : GE         = cn.sqrdif( b )
+   def absdif( b: Float ) : Float   = rf_absdif( f, b )
+   def absdif( b: GE ) : GE         = cn.absdif( b )
+   def thresh( b: Float ) : Float   = rf_thresh( f, b )
+   def thresh( b: GE ) : GE         = cn.thresh( b )
+   def amclip( b: Float ) : Float   = rf_amclip( f, b )
+   def amclip( b: GE ) : GE         = cn.amclip( b )
+   def scaleneg( b: Float ) : Float = rf_scaleneg( f, b )
+   def scaleneg( b: GE ) : GE       = cn.scaleneg( b )
+   def clip2( b: Float ) : Float    = rf_clip2( f, b )
+   def clip2( b: GE ) : GE          = cn.clip2( b )
+   def excess( b: Float ) : Float   = rf_excess( f, b )
+   def excess( b: GE ) : GE         = cn.excess( b )
+   def fold2( b: Float ) : Float    = rf_fold2( f, b )
+   def fold2( b: GE ) : GE          = cn.fold2( b )
+   def wrap2( b: Float ) : Float    = rf_wrap2( f, b )
+   def wrap2( b: GE ) : GE          = cn.wrap2( b )
+// def firstarg( b: Float ) : Float = d
+   def firstarg( b: GE ) : GE       = cn.firstarg( b )
 }
 
 // ---------------------------- Double ----------------------------
@@ -282,89 +318,70 @@ final case class RichDouble private[synth]( d: Double ) {
 //   def scurve : Double     = if( d <= 0 ) 0 else if( d > 1 ) 1 else d * d * (3 - 2 * d)
 
    // binary ops
-   def <( b: Constant ) : Constant  = cn.<( b )
-   def <( b: GE ) : GE              = cn.<( b )
-   def >( b: Constant ) : Constant  = cn.>( b )
-   def >( b: GE ) : GE              = cn.>( b )
-   def <=( b: Constant ) : Constant  = cn.<=( b )
-   def <=( b: GE ) : GE              = cn.<=( b )
-   def >=( b: Constant ) : Constant  = cn.>=( b )
-   def >=( b: GE ) : GE              = cn.>=( b )
-   def min( b: Constant ) : Constant  = cn.min( b )
-   def min( b: GE ) : GE              = cn.min( b )
-   def max( b: Constant ) : Constant  = cn.max( b )
-   def max( b: GE ) : GE              = cn.max( b )
-   def round( b: Double ) : Double    = if( b == 0 ) d else (math.floor( d / b + 0.5 ) * b)
-   def round( b: Constant ) : Constant  = cn.round( b )
-   def round( b: GE ) : GE              = cn.round( b )
-   def roundup( b: Double ) : Double  = if( b == 0 ) d else (math.ceil( d / b ) * b)
-   def roundup( b: Constant ) : Constant  = cn.roundup( b )
-   def roundup( b: GE ) : GE              = cn.roundup( b )
-   def trunc( b: Double ) : Double    = if( b == 0 ) d else (math.floor( d / b ) * b)
-   def trunc( b: Constant ) : Constant  = cn.trunc( b )
-   def trunc( b: GE ) : GE              = cn.trunc( b )
-   def atan2( b: Double ) : Double    = math.atan2( d, b )
-   def atan2( b: Constant ) : Constant  = cn.atan2( b )
-   def atan2( b: GE ) : GE              = cn.atan2( b )
-   def hypot( b: Double ) : Double    = math.hypot( d, b )
-   def hypot( b: Constant ) : Constant  = cn.hypot( b )
-   def hypot( b: GE ) : GE              = cn.hypot( b )
-   def hypotx( b: Double ) : Double   = {
+   def -( b: GE ) : GE                 = cn.-( b )
+   def *( b: GE ) : GE                 = cn.*( b )
+   def /( b: GE ) : GE                 = cn./( b )
+   def %( b: GE ) : GE                 = cn.%( b )
+   def ===( b: GE ) : GE               = cn.===( b )
+   def !==( b: GE ) : GE               = cn.!==( b )
+   def <( b: GE ) : GE                 = cn.<( b )
+   def >( b: GE ) : GE                 = cn.>( b )
+   def <=( b: GE ) : GE                = cn.<=( b )
+   def >=( b: GE ) : GE                = cn.>=( b )
+   def min( b: GE ) : GE               = cn.min( b )
+   def max( b: GE ) : GE               = cn.max( b )
+   def &( b: GE ) : GE                 = cn.&( b )
+   def |( b: GE ) : GE                 = cn.|( b )
+   def ^( b: GE ) : GE                 = cn.^( b )
+   def round( b: Double ) : Double     = if( b == 0 ) d else (math.floor( d / b + 0.5 ) * b)
+   def round( b: GE ) : GE             = cn.round( b )
+   def roundup( b: Double ) : Double   = if( b == 0 ) d else (math.ceil( d / b ) * b)
+   def roundup( b: GE ) : GE           = cn.roundup( b )
+   def trunc( b: Double ) : Double     = if( b == 0 ) d else (math.floor( d / b ) * b)
+   def trunc( b: GE ) : GE             = cn.trunc( b )
+   def atan2( b: Double ) : Double     = math.atan2( d, b )
+   def atan2( b: GE ) : GE             = cn.atan2( b )
+   def hypot( b: Double ) : Double     = math.hypot( d, b )
+   def hypot( b: GE ) : GE             = cn.hypot( b )
+   def hypotx( b: Double ) : Double    = {
       val minab = math.min( math.abs( d ), math.abs( b ))
       (d + b - (math.sqrt(2) - 1) * minab)
    }
-   def hypotx( b: Constant ) : Constant  = cn.hypotx( b )
-   def hypotx( b: GE ) : GE              = cn.hypotx( b )
-   def pow( b: Double ) : Double      = math.pow( d, b )
-   def pow( b: Constant ) : Constant  = cn.pow( b )
-   def pow( b: GE ) : GE              = cn.pow( b )
-//   def ring1( b: Double ) : Double    = d * b + d
-//   def ring1( b: Constant ) : Constant  = cn.ring1( b )
-//   def ring1( b: GE ) : GE              = cn.ring1( b )
-//   def ring2( b: Double ) : Double    = d * b + d + b
-//   def ring2( b: Constant ) : Constant  = cn.ring2( b )
-//   def ring2( b: GE ) : GE              = cn.ring2( b )
-//   def ring3( b: Double ) : Double    = d * d * b
-//   def ring3( b: Constant ) : Constant  = cn.ring3( b )
-//   def ring3( b: GE ) : GE              = cn.ring3( b )
-//   def ring4( b: Double ) : Double    = { val ab = d * b; d * ab - b * ab }
-//   def ring4( b: Constant ) : Constant  = cn.ring4( b )
-//   def ring4( b: GE ) : GE              = cn.ring4( b )
-   def difsqr( b: Double ) : Double   = d * d - b * b
-   def difsqr( b: Constant ) : Constant  = cn.difsqr( b )
-   def difsqr( b: GE ) : GE              = cn.difsqr( b )
-   def sumsqr( b: Double ) : Double   = d * d + b * b
-   def sumsqr( b: Constant ) : Constant  = cn.sumsqr( b )
-   def sumsqr( b: GE ) : GE              = cn.sumsqr( b )
-   def sqrsum( b: Double ) : Double   = { val z = d + b; z * z }
-   def sqrsum( b: Constant ) : Constant  = cn.sqrsum( b )
-   def sqrsum( b: GE ) : GE              = cn.sqrsum( b )
-   def sqrdif( b: Double ) : Double   = { val z = d - b; z * z }
-   def sqrdif( b: Constant ) : Constant  = cn.sqrdif( b )
-   def sqrdif( b: GE ) : GE              = cn.sqrdif( b )
-   def absdif( b: Double ) : Double   = math.abs( d - b )
-   def absdif( b: Constant ) : Constant  = cn.absdif( b )
-   def absdif( b: GE ) : GE              = cn.absdif( b )
-//   def thresh( b: Double ) : Double   = if( d < b ) 0 else d
-//   def thresh( b: Constant ) : Constant  = cn.thresh( b )
-//   def thresh( b: GE ) : GE              = cn.thresh( b )
-//   def amclip( b: Double ) : Double   = d * 0.5 * (b + math.abs( d ))
-//   def amclip( b: Constant ) : Constant  = cn.amclip( b )
-//   def amclip( b: GE ) : GE              = cn.amclip( b )
-//   def scaleneg( b: Double ) : Double = (math.abs( d ) - d) * (0.5 * b + 0.5) + d
-//   def scaleneg( b: Constant ) : Constant  = cn.scaleneg( b )
-//   def scaleneg( b: GE ) : GE              = cn.scaleneg( b )
-   def clip2( b: Double ) : Double    = math.max( math.min( d, b ), -b )
-   def clip2( b: Constant ) : Constant  = cn.clip2( b )
-   def clip2( b: GE ) : GE              = cn.clip2( b )
-//   def excess( b: Double ) : Double   = d - math.max( math.min( d, b ), -b )
-//   def excess( b: Constant ) : Constant  = cn.excess( b )
-//   def excess( b: GE ) : GE              = cn.excess( b )
-   def fold2( b: Double ) : Double    = fold( d, -b, b )
-   def fold2( b: Constant ) : Constant  = cn.fold2( b )
-   def fold2( b: GE ) : GE              = cn.fold2( b )
-   def wrap2( b: Double ) : Double    = wrap( d, -b, b )
-   def wrap2( b: Constant ) : Constant  = cn.wrap2( b )
-   def wrap2( b: GE ) : GE              = cn.wrap2( b )
-//   def firstarg( b: Double ) : Double = d
+   def hypotx( b: GE ) : GE            = cn.hypotx( b )
+   def pow( b: Double ) : Double       = math.pow( d, b )
+   def pow( b: GE ) : GE               = cn.pow( b )
+   def ring1( b: Double ) : Double     = d * b + d
+   def ring1( b: GE ) : GE             = cn.ring1( b )
+   def ring2( b: Double ) : Double     = d * b + d + b
+   def ring2( b: GE ) : GE             = cn.ring2( b )
+   def ring3( b: Double ) : Double     = d * d * b
+   def ring3( b: GE ) : GE             = cn.ring3( b )
+   def ring4( b: Double ) : Double     = { val ab = d * b; d * ab - b * ab }
+   def ring4( b: GE ) : GE             = cn.ring4( b )
+   def difsqr( b: Double ) : Double    = d * d - b * b
+   def difsqr( b: GE ) : GE            = cn.difsqr( b )
+   def sumsqr( b: Double ) : Double    = d * d + b * b
+   def sumsqr( b: GE ) : GE            = cn.sumsqr( b )
+   def sqrsum( b: Double ) : Double    = { val z = d + b; z * z }
+   def sqrsum( b: GE ) : GE            = cn.sqrsum( b )
+   def sqrdif( b: Double ) : Double    = { val z = d - b; z * z }
+   def sqrdif( b: GE ) : GE            = cn.sqrdif( b )
+   def absdif( b: Double ) : Double    = math.abs( d - b )
+   def absdif( b: GE ) : GE            = cn.absdif( b )
+   def thresh( b: Double ) : Double    = if( d < b ) 0 else d
+   def thresh( b: GE ) : GE            = cn.thresh( b )
+   def amclip( b: Double ) : Double    = d * 0.5 * (b + math.abs( d ))
+   def amclip( b: GE ) : GE            = cn.amclip( b )
+   def scaleneg( b: Double ) : Double  = (math.abs( d ) - d) * (0.5 * b + 0.5) + d
+   def scaleneg( b: GE ) : GE          = cn.scaleneg( b )
+   def clip2( b: Double ) : Double     = math.max( math.min( d, b ), -b )
+   def clip2( b: GE ) : GE             = cn.clip2( b )
+   def excess( b: Double ) : Double    = d - math.max( math.min( d, b ), -b )
+   def excess( b: GE ) : GE            = cn.excess( b )
+   def fold2( b: Double ) : Double     = fold( d, -b, b )
+   def fold2( b: GE ) : GE             = cn.fold2( b )
+   def wrap2( b: Double ) : Double     = wrap( d, -b, b )
+   def wrap2( b: GE ) : GE             = cn.wrap2( b )
+// def firstarg( b: Double ) : Double  = d
+   def firstarg( b: GE ) : GE          = cn.firstarg( b )
 }

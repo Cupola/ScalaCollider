@@ -29,7 +29,7 @@
 package de.sciss.synth.ugen
 
 import de.sciss.synth.{ Constant => c, _ }
-import GraphBuilder._
+import SynthGraph._
 
 /**
  *	@version	0.11, 09-Dec-09
