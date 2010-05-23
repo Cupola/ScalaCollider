@@ -47,6 +47,7 @@ case object addReplace  extends AddAction( 4 )
  *    @version    0.14, 22-Apr-10
  */
 abstract class Node extends Model {
+   import Model._
 
    // ---- abstract ----
    val server: Server
@@ -64,24 +65,22 @@ abstract class Node extends Model {
 
    def onGo( thunk: => Unit ) {
       register
-      lazy val l: (AnyRef) => Unit = _ match {
+      lazy val l: Listener = addListener {
          case NodeManager.NodeGo( _, _ ) => {
             removeListener( l )
             thunk
          }
       }
-      addListener( l )
    }
 
    def onEnd( thunk: => Unit ) {
       register
-      lazy val l: (AnyRef) => Unit = _ match {
+      lazy val l: Listener = addListener {
          case NodeManager.NodeEnd( _, _ ) => {
             removeListener( l )
             thunk
          }
       }
-      addListener( l )
    }
 
    protected[synth] def updated( change: NodeManager.NodeChange ) {

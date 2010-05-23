@@ -37,17 +37,54 @@ import collection.immutable.{ IndexedSeq => IIdxSeq }
  *
  *    @version 0.11, 23-May-10
  */
-trait UGenIn extends RatedGE {
+sealed trait UGenIn extends RatedGE {
    final override def numOutputs = 1
    final def outputs = Vector( this )
 }
 
 /**
- *    A collection of UGenIn objects, wrapped as a graph element.
- *    This is mainly used in multi-channel expansion.
+ *    A scalar constant used as an input to a UGen.
+ *    These constants are stored in a separate table of
+ *    the synth graph.
  */
-case class UGenInSeq( outputs: IIdxSeq[ UGenIn ]) extends GE {
-   override def toString = outputs.mkString( "[", ", ", "]" )
+case class Constant( value: Float ) extends UGenIn with ScalarRated {
+   override def toString = value.toString
 
-//   override private[synth] def ops = new UGenInSeqOps( this )
+   override private[synth] def ops = new ConstantOps( this )
+
+   // special binop handling
+   override def +( b: GE ) : GE        = b match {
+      case Constant( bval ) => Constant( value + bval )
+      case _ => super.+( b )
+   }
+}
+
+/**
+ *    A SingleOutUGen is a UGen which has exactly one output, and
+ *    hence can directly function as input to another UGen without expansion.
+ */
+abstract class SingleOutUGen( val inputs: UGenIn* ) extends UGen with UGenIn
+
+/**
+ *    A UGenOutProxy refers to a particular output of a multi-channel UGen.
+ *    A sequence of these form the representation of a multi-channel-expanded
+ *    UGen. 
+ */
+case class UGenOutProxy( source: UGen, outputIndex: Int, rate: Rate )
+extends UGenIn with UGenProxy {
+   override def toString = "(" + source + " \\ " + outputIndex + ")"
+}
+
+/**
+ *    A ControlOutProxy is similar to a UGenOutProxy in that it denotes
+ *    an output channel of a control UGen. However it refers to a control-proxy
+ *    instead of a real control ugen, since the proxies are synthesized into
+ *    actual ugens only at the end of a synth graph creation, in order to
+ *    clumb several controls together. ControlOutProxy instance are typically
+ *    returned from the ControlProxyFactory class, that is, using the package
+ *    implicits, from calls such as "myControl".kr.
+ */
+case class ControlOutProxy( source: ControlProxyLike[ _ ], outputIndex: Int, rate: Rate )
+extends UGenIn {
+   override def toString = "(" + source + " \\ " + outputIndex + ")"
 }

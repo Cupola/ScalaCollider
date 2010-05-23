@@ -103,8 +103,3 @@ extends ControlProxyLike[ Impl ] {
 	final def outputs: IIdxSeq[ UGenIn ] = outputRates.zipWithIndex.map(
       tup => ControlOutProxy( this, tup._2, tup._1 ))
 }
-
-case class ControlOutProxy( source: ControlProxyLike[ _ ], outputIndex: Int, rate: Rate )
-extends UGenIn {
-   override def toString = "(" + source + " \\ " + outputIndex + ")"
-}

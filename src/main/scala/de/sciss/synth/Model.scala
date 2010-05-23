@@ -30,29 +30,47 @@ package de.sciss.synth
 
 import scala.collection.immutable.{ Queue }
 
+/**
+ *    A Model implements the publish-subscribe pattern for
+ *    generic (untyped) messages. Observers subscribe by
+ *    calling <code>addListener</code> with an appropriate matcher
+ *    function. When the Model dispatches a message, it
+ *    invokes the apply method of all observers who are
+ *    defined for the given message. Dispatching is
+ *    synchronous, but exceptions are caught. 
+ *
+ *    @version 0.11, 23-May-10
+ */
+object Model {
+   type Listener = PartialFunction[ AnyRef, Unit ]
+}
 trait Model {
-   private var listeners   = Queue.empty[ AnyRef => Unit ]
+   import Model._
+
+   private var listeners   = Queue.empty[ Listener ]
    private val sync        = new AnyRef
 
    protected def dispatch( change: AnyRef ) {
       listeners.foreach( l => try {
-         l.apply( change )
+         if( l.isDefinedAt( change )) l( change )
       } catch {
-         case e: MatchError => // ignored
          case e => e.printStackTrace() // catch, but print
       })
    }
 
-   def addListener( l: AnyRef => Unit ) {
+   def addListener( l: Listener ) : Listener = {
       sync.synchronized {
          listeners = listeners.enqueue( l )
       }
+      l
    }
 
-   def removeListener( l: AnyRef => Unit ) {
-      var filtered: Queue[ AnyRef => Unit ] = Queue.empty
+   def removeListener( l: Listener ) : Listener = {
       sync.synchronized {
-         listeners = listeners.filterNot( _ == l )
+         // multi set diff just removes one instance --
+         // observers could register more than once if they want
+         listeners = listeners.diff( List( l ))
       }
+      l
    }
 }

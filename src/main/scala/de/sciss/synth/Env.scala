@@ -35,12 +35,12 @@ import scala.math._
 /**
  *    @version 0.10, 23-Apr-10
  */
-trait EnvShape {
+sealed abstract class EnvShape {
    def idGE: GE
    def curvatureGE: GE
 }
 
-trait ConstEnvShape extends EnvShape {
+sealed abstract class ConstEnvShape extends EnvShape {
    val id: Int
    val curvature: Float = 0f
    def idGE: GE = id

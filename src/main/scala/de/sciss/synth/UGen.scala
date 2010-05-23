@@ -60,7 +60,7 @@ trait SideEffectUGen {
 //   }
 }
 
-abstract sealed class UGen
+abstract class UGen
 extends RatedGE with UGenProxy {
    // ---- constructor ----
    {
@@ -76,10 +76,10 @@ extends RatedGE with UGenProxy {
    def specialIndex = 0
    def outputIndex = 0
 
-   def checkInputs : Option[String] = {
-      // checkValidInputs
-      None
-   }
+//   def checkInputs : Option[String] = {
+//      // checkValidInputs
+//      None
+//   }
    
 //   def optimizeGraph {
 //      // nothing
@@ -88,186 +88,6 @@ extends RatedGE with UGenProxy {
    override def toString: String = {
       name + "." + rate.methodName + inputs.mkString( "(", ", ", ")" )
    }
-}
-
-trait UGen1Args {
-   def apply( rate: Rate, arg1: UGenIn ) : GE
-   private def make( rate: Rate, arg1: GE ) : GE =
-      simplify( for( List( a1 ) <- expand( arg1 )) yield this( rate, a1 ))
-
-   protected def arExp( arg1: GE ) : GE = make( audio, arg1 )
-   protected def krExp( arg1: GE ) : GE = make( control, arg1 )
-   protected def irExp( arg1: GE ) : GE = make( scalar, arg1 )
-}
-
-trait UGen1RArgs { // single rate
-   def apply( arg1: UGenIn ) : GE
-   protected def make( arg1: GE ) : GE =
-      simplify( for( List( a1 ) <- expand( arg1 )) yield this( a1 ))
-}
-
-trait UGen1ArgsIndiv {
-   def apply( rate: Rate, arg1: UGenIn, _indiv: Int ) : GE
-   private def make( rate: Rate, arg1: GE ) : GE =
-      simplify( for( List( a1 ) <- expand( arg1 )) yield this( rate, a1, SynthGraph.individuate ))
-
-   protected def arExp( arg1: GE ) : GE = make( audio, arg1 )
-   protected def krExp( arg1: GE ) : GE = make( control, arg1 )
-   protected def irExp( arg1: GE ) : GE = make( scalar, arg1 )
-}
-
-trait UGen2Args {
-   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn ) : GE
-   private def make( rate: Rate, arg1: GE, arg2: GE ) : GE =
-      simplify( for( List( a1, a2 ) <- expand( arg1, arg2 ))
-         yield this( rate, a1, a2 ))
-
-   protected def arExp( arg1: GE, arg2: GE ) : GE = make( audio, arg1, arg2 )
-   protected def krExp( arg1: GE, arg2: GE ) : GE = make( control, arg1, arg2 )
-   protected def irExp( arg1: GE, arg2: GE ) : GE = make( scalar, arg1, arg2 )
-}
-
-trait UGen2RArgs { // single rate
-   def apply( arg1: UGenIn, arg2: UGenIn ) : GE
-   protected def make( arg1: GE, arg2: GE ) : GE =
-      simplify( for( List( a1, a2 ) <- expand( arg1, arg2 )) yield this( a1, a2 ))
-}
-
-trait UGen2ArgsIndiv {
-   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, _indiv: Int ) : GE
-   private def make( rate: Rate, arg1: GE, arg2: GE ) : GE =
-      simplify( for( List( a1, a2 ) <- expand( arg1, arg2 ))
-         yield this( rate, a1, a2, SynthGraph.individuate ))
-
-   protected def arExp( arg1: GE, arg2: GE ) : GE = make( audio, arg1, arg2 )
-   protected def krExp( arg1: GE, arg2: GE ) : GE = make( control, arg1, arg2 )
-   protected def irExp( arg1: GE, arg2: GE ) : GE = make( scalar, arg1, arg2 )
-}
-
-trait UGen2RArgsIndiv {
-   def apply( arg1: UGenIn, arg2: UGenIn, _indiv: Int ) : GE
-   protected def make( arg1: GE, arg2: GE ) : GE =
-      simplify( for( List( a1, a2 ) <- expand( arg1, arg2 )) yield this( a1, a2, SynthGraph.individuate ))
-}
-
-trait UGen3Args {
-   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn ) : GE
-   private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE ) : GE =
-      simplify( for( List( a1, a2, a3 ) <- expand( arg1, arg2, arg3 ))
-         yield this( rate, a1, a2, a3 ))
-
-   protected def arExp( arg1: GE, arg2: GE, arg3: GE ) : GE =
-      make( audio, arg1, arg2, arg3 )
-   protected def krExp( arg1: GE, arg2: GE, arg3: GE ) : GE =
-      make( control, arg1, arg2, arg3 )
-   protected def irExp( arg1: GE, arg2: GE, arg3: GE ) : GE =
-      make( scalar, arg1, arg2, arg3 )
-}
-
-trait UGen3RArgs { // single rate
-   def apply( arg1: UGenIn, arg2: UGenIn, arg3: UGenIn ) : GE
-   protected def make( arg1: GE, arg2: GE, arg3: GE ) : GE =
-      simplify( for( List( a1, a2, a3 ) <- expand( arg1, arg2, arg3 ))
-         yield this( a1, a2, a3 ))
-}
-
-trait UGen3ArgsIndiv {
-   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, _indiv: Int ) : GE
-   private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE ) : GE =
-     simplify( for( List( a1, a2, a3 ) <- expand( arg1, arg2, arg3 ))
-       yield this( rate, a1, a2, a3, SynthGraph.individuate ))
-
-   protected def arExp( arg1: GE, arg2: GE, arg3: GE ) : GE =
-      make( audio, arg1, arg2, arg3 )
-   protected def krExp( arg1: GE, arg2: GE, arg3: GE ) : GE =
-      make( control, arg1, arg2, arg3 )
-   protected def irExp( arg1: GE, arg2: GE, arg3: GE ) : GE =
-      make( scalar, arg1, arg2, arg3 )
-}
-
-trait UGen3RArgsIndiv {
-   def apply( arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, _indiv: Int ) : GE
-   protected def make( arg1: GE, arg2: GE, arg3: GE ) : GE =
-      simplify( for( List( a1, a2, a3 ) <- expand( arg1, arg2, arg3 ))
-         yield this( a1, a2, a3, SynthGraph.individuate ))
-}
-
-trait UGen4Args {
-   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn ) : GE
-   private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE =
-      simplify( for( List( a1, a2, a3, a4 ) <- expand( arg1, arg2, arg3, arg4 ))
-         yield this( rate, a1, a2, a3, a4 ))
-  
-   protected def arExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE =
-      make( audio, arg1, arg2, arg3, arg4 )
-   protected def krExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE =
-      make( control, arg1, arg2, arg3, arg4 )
-   protected def irExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE =
-      make( scalar, arg1, arg2, arg3, arg4 )
-}
-
-trait UGen4RArgs {
-   def apply( arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn ) : GE
-   protected def make( arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE =
-      simplify( for( List( a1, a2, a3, a4 ) <- expand( arg1, arg2, arg3, arg4 ))
-         yield this( a1, a2, a3, a4 ))
-}
-
-trait UGen5Args {
-   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn, arg5: UGenIn ) : GE
-   private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE ) : GE =
-      simplify( for( List( a1, a2, a3, a4, a5 ) <- expand( arg1, arg2, arg3, arg4, arg5 ))
-         yield this( audio, a1, a2, a3, a4, a5 ))
-  
-   protected def arExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE ) : GE =
-      make( audio, arg1, arg2, arg3, arg4, arg5 )
-   protected def krExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE ) : GE =
-      make( control, arg1, arg2, arg3, arg4, arg5 )
-   protected def irExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE ) : GE =
-      make( scalar, arg1, arg2, arg3, arg4, arg5 )
-}
-
-trait UGen5RArgs {
-   def apply( arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn, arg5: UGenIn ) : GE
-   protected def make( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE ) : GE =
-      simplify( for( List( a1, a2, a3, a4, a5 ) <- expand( arg1, arg2, arg3, arg4, arg5 ))
-         yield this( a1, a2, a3, a4, a5 ))
-}
-
-trait UGen6Args {
-   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn,
-              arg5: UGenIn, arg6: UGenIn ) : GE
-   private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE, arg4: GE,
-                     arg5: GE, arg6: GE ) : GE =
-      simplify( for( List( a1, a2, a3, a4, a5, a6 ) <- expand( arg1, arg2, arg3, arg4, arg5, arg6 ))
-         yield this( audio, a1, a2, a3, a4, a5, a6 ))
-
-   protected def arExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE ) : GE =
-      make( audio, arg1, arg2, arg3, arg4, arg5, arg6 )
-   protected def krExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE ) : GE =
-      make( control, arg1, arg2, arg3, arg4, arg5, arg6 )
-   protected def irExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE ) : GE =
-      make( scalar, arg1, arg2, arg3, arg4, arg5, arg6 )
-}
-
-trait UGen7Args {
-   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn,
-              arg5: UGenIn, arg6: UGenIn, arg7: UGenIn ) : GE
-   private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE, arg4: GE,
-                     arg5: GE, arg6: GE, arg7: GE ) : GE =
-      simplify( for( List( a1, a2, a3, a4, a5, a6, a7 ) <-
-                  expand( arg1, arg2, arg3, arg4, arg5, arg6, arg7 ))
-         yield this( audio, a1, a2, a3, a4, a5, a6, a7 ))
-
-   protected def arExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE,
-                        arg6: GE, arg7: GE ) : GE =
-      make( audio, arg1, arg2, arg3, arg4, arg5, arg6, arg7 )
-   protected def krExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE,
-                        arg6: GE, arg7: GE ) : GE =
-      make( control, arg1, arg2, arg3, arg4, arg5, arg6, arg7 )
-   protected def irExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE,
-                        arg6: GE, arg7: GE ) : GE =
-      make( scalar, arg1, arg2, arg3, arg4, arg5, arg6, arg7 )
 }
 
 // a class for UGens with multiple outputs
@@ -282,15 +102,8 @@ extends UGen {
       tup => UGenOutProxy( this, tup._2, tup._1 ))
 }
 
-abstract class SingleOutUGen( val inputs: UGenIn* ) extends UGen with UGenIn
-
 abstract class ZeroOutUGen( val inputs: UGenIn* )
 extends UGen with SideEffectUGen {
    final override def numOutputs = 0
    final def outputs = Vector.empty
-}
-
-case class UGenOutProxy( source: UGen, outputIndex: Int, rate: Rate )
-extends UGenIn with UGenProxy {
-   override def toString = "(" + source + " \\ " + outputIndex + ")"
 }

@@ -33,6 +33,7 @@ import de.sciss.synth.{ Completion => Comp, play => scplay }
 import de.sciss.synth.io.{ AudioFileType, SampleFormat }
 import ugen.{ BufRateScale, FreeSelfWhenDone, PlayBuf }
 import osc._
+import Model._
 
 /**
  * 	@version	0.18, 17-May-10
@@ -257,13 +258,12 @@ case class Buffer( server: Server, id: Int ) extends Model {
       if( forceQuery || a.isDefined ) {
          register
          a.foreach( action => {
-            lazy val l: AnyRef => Unit = {
+            lazy val l: Listener = addListener {
                case BufferManager.BufferInfo( _, _ ) => {
                   removeListener( l )
                   action( b )
                }
             }
-            addListener( l )
          })
       }
       (completion.message, a) match {

@@ -54,12 +54,12 @@ object MulAdd {
 
   private def make1( rate: Rate, in: UGenIn, mul: UGenIn, add: UGenIn ) : GE =
     (mul, add) match {
-      case (c(0), _)     => add
-      case (c(1), c(0))  => in
+      case (c(0),  _)    => add
+      case (c(1),  c(0)) => in
+      case (c(1),  _)    => in + add
       case (c(-1), c(0)) => -in
-      case (_, c(0))     => in * mul
+      case (_,     c(0)) => in * mul
       case (c(-1), _)    => add - in
-      case (c(1), _)     => in + add
       case _             => this( rate, in, mul, add )
    }
 }

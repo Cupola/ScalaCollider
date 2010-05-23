@@ -1,5 +1,5 @@
 /*
- *  Constant.scala
+ *  UGenInSeq.scala
  *  (ScalaCollider)
  *
  *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
@@ -28,17 +28,14 @@
 
 package de.sciss.synth
 
+import collection.immutable.{ IndexedSeq => IIdxSeq }
+
 /**
- *	@version	   0.13, 13-May-10
+ *    A collection of UGenIn objects, wrapped as a graph element.
+ *    This is mainly used in multi-channel expansion.
  */
-case class Constant( value: Float ) extends UGenIn with ScalarRated {
-   override def toString = value.toString
+case class UGenInSeq( outputs: IIdxSeq[ UGenIn ]) extends GE {
+   override def toString = outputs.mkString( "[", ", ", "]" )
 
-   override private[synth] def ops = new ConstantOps( this )
-
-   // special binop handling
-   override def +( b: GE ) : GE        = b match {
-      case Constant( bval ) => Constant( value + bval )
-      case _ => super.+( b )
-   }
+//   override private[synth] def ops = new UGenInSeqOps( this )
 }
