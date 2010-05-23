@@ -1,5 +1,5 @@
 /*
- *  SC.scala
+ *  package.scala
  *  (ScalaCollider)
  *
  *  Copyright (c) 2008-2010 Hanns Holger Rutz. All rights reserved.
