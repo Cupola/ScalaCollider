@@ -80,6 +80,8 @@ object Server {
 //abstract class Server extends Model {}
 class Server( val name: String = "localhost", val options: ServerOptions = new ServerOptions, val clientID: Int = 0 )
 extends Model {
+   server =>
+
    import Server._
 
    private var aliveThread: Option[StatusWatcher]	= None
@@ -195,6 +197,7 @@ extends Model {
             val futCh   = new Channel[ Any ]( Actor.self )
             val oh      = new OSCTimeOutHandler( handler, futCh )
             OSCReceiverActor.addHandler( oh )
+            server ! p // only after addHandler!
             futCh.reactWithin( timeOut ) {
                case TIMEOUT   => OSCReceiverActor.removeHandler( oh )
                case r         =>
@@ -202,7 +205,9 @@ extends Model {
          }
       }
       a.start()
-      this ! p
+// NOTE: race condition, addHandler might take longer than
+// the /done, notify!
+//      this ! p
       a
    }
 
