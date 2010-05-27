@@ -30,7 +30,7 @@ package de.sciss.synth
 
 object ScalaCollider {
    val name          = "ScalaCollider"
-   val version       = 0.11
+   val version       = 0.13
    val copyright     = "(C)opyright 2008-2010 Hanns Holger Rutz"
 
    def versionString = (version + 0.001).toString.substring( 0, 4 )

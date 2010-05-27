@@ -2,7 +2,7 @@ import sbt._
 import java.io.{ IOException, RandomAccessFile }
 
 class ScalaColliderProject( info: ProjectInfo ) extends DefaultProject( info ) { 
-   val dep1 = "de.sciss" %% "scalaosc" % "0.13"
+   val dep1 = "de.sciss" %% "scalaosc" % "0.14"
    val dep2 = "de.sciss" %% "scalaaudiofile" % "0.10"
    lazy val demo = demoAction
 

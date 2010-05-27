@@ -28,11 +28,12 @@
 
 package de.sciss.synth
 
-import de.sciss.scalaosc.{ OSCChannel, OSCClient, OSCMessage, OSCPacket }
-import java.net.{ ConnectException, InetAddress, InetSocketAddress, SocketAddress }
+import de.sciss.scalaosc.{ OSCChannel, OSCClient, OSCMessage, OSCPacket, OSCTransport, TCP, UDP }
+import java.net.{ ConnectException, DatagramSocket, InetAddress, InetSocketAddress, ServerSocket, SocketAddress }
 import java.io.{ BufferedReader, File, InputStreamReader, IOException }
 import java.util.{ Timer, TimerTask }
 import actors.{ Actor, Channel, DaemonActor, Future, InputChannel, OutputChannel, TIMEOUT }
+import collection.breakOut
 import collection.immutable.Queue
 import concurrent.SyncVar
 import osc._
@@ -47,6 +48,38 @@ object Server {
    var default: Server  = null
 
 //   def all     = allVar
+
+   def defaultCmdPath = new File( System.getenv( "SC_HOME" ), "scsynth" ).getAbsolutePath
+
+   @throws( classOf[ IOException ])
+   def boot( name: String = "localhost", cmdPath: String = defaultCmdPath, transport: OSCTransport = UDP,
+             port: Int = 0, options: Iterable[ ServerOption[ _ ]] = Nil ) : BootingServer = {
+
+      // check for automatic port assignment
+      val port0 = if( port == 0 ) transport match {
+         case TCP => {
+            val ss = new ServerSocket( 0 )
+            try {
+               ss.getLocalPort()
+            } finally {
+               ss.close()
+            }
+         }
+         case UDP => {
+            val ds = new DatagramSocket()
+            try {
+               ds.getLocalPort()
+            } finally {
+               ds.close()
+            }
+         }
+         case x => error( "Unsupported transport : " + x.name )
+      } else port
+
+      val addr = new InetSocketAddress( "127.0.0.1", port0 )
+      val c    = createClient( transport, addr )
+      new BootingImpl( name, c, port0, cmdPath, options, true )
+   }
 
    private def add( s: Server ) {
       allSync.synchronized {
@@ -75,43 +108,192 @@ object Server {
    private case object NoPending extends Condition
 
    case class Counts( c: OSCStatusReplyMessage )
+
+   private def createClient( transport: OSCTransport, addr: InetSocketAddress ) : OSCClient = {
+      val client        = OSCClient( transport, 0, addr.getAddress.isLoopbackAddress, ServerCodec )
+      client.bufferSize = 0x10000
+      client.target     = addr
+//      client.action     = OSCReceiverActor.messageReceived
+      client
+   }
+
+   // -------- internal class BootThread --------
+
+   object BootingImpl {
+      case object Abort
+      case object QueryServer
+      case object Aborted
+   }
+   
+   private class BootingImpl @throws( classOf[ IOException ])
+      ( name: String, c: OSCClient, port: Int, cmdPath: String, options: Iterable[ ServerOption[ _ ]],
+        createAliveThread: Boolean )
+   extends DaemonActor with BootingServer {
+      booting =>
+
+      import BootingImpl._
+
+      val p = {
+         val file        = new File( cmdPath )
+         val optionList : List[ String ] = options.flatMap( o =>
+            if( o.value != o.default ) List( o.switch, o.stringValue ) else Nil )( breakOut )
+         val processArgs = cmdPath :: (c.transport match {
+            case TCP => "-t"
+            case UDP => "-u"
+         }) :: port.toString :: optionList
+
+//         val processArgs = options.toRealtimeArgs.toArray
+         val pb          = new ProcessBuilder( processArgs: _* )
+            .directory( file.getParentFile )
+            .redirectErrorStream( true )
+         pb.start    // throws IOException if command not found or not executable
+      }
+      val inReader   = new BufferedReader( new InputStreamReader( p.getInputStream ))
+      val postActor  = new DaemonActor {
+         def act {
+            var isOpen = true
+            loopWhile( isOpen ) {
+               val line = inReader.readLine
+               isOpen = line != null
+               if( isOpen ) println( line )
+            }
+         }
+      }
+
+      val processThread = new Thread {
+         override def run = try {
+            p.waitFor()
+         } catch { case e: InterruptedException =>
+            p.destroy()
+         } finally {
+            println( "scsynth terminated (" + p.exitValue +")" )
+            booting ! Aborted
+         }            
+      }
+
+      // ...and go
+      postActor.start
+      processThread.start
+      booting.start
+
+      private def abortHandler( server: Option[ Server ]) {
+         processThread.interrupt()
+         val from = sender
+         loop { react {
+            case Aborted => {
+               server.foreach( _.bootThreadTerminated )
+               from ! ()
+            }
+            case _ =>
+         }}
+      }
+
+      def act {
+         loop {
+            if( processThread.isAlive ) {
+               try {
+                  c.start
+//                  c.dumpOSC(1)
+                  c.action = (msg, addr, when) => booting ! msg
+                  loop {
+                     c.send( OSCServerNotifyMessage( true ))
+                     reactWithin( 5000 ) {
+                        case TIMEOUT =>
+                        case Abort => abortHandler( None )
+                        case OSCMessage( "/done", "/notify" ) => loop {
+                           c.send( OSCStatusMessage )
+                           reactWithin( 500 ) {
+                              case TIMEOUT =>
+                              case Abort => abortHandler( None )
+                              case counts: OSCStatusReplyMessage => {
+                                 val s = new Server( name, c /*, options */)
+                                 s.counts = counts
+                                 loop { react {
+                                    case QueryServer => reply( s )
+                                    case Abort => abortHandler( Some( s ))
+                                    case Aborted => {
+                                       s.bootThreadTerminated
+                                       loop { react {
+                                          case Abort => reply ()
+                                          case QueryServer => reply( s )
+//                                          case _ =>
+                                       }}
+                                    }
+//                                    case _ =>
+                                 }}
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+               catch { case e: ConnectException => { // thrown when in TCP mode and socket not yet available
+                  reactWithin( 500 ) {
+                     case Abort => abortHandler( None )
+                  }
+               }}
+            } else loop { react {
+               case Abort => reply ()
+//               case _ =>
+            }}
+         }
+      }
+
+
+//         // note that we optimistically assume that if we boot the server, it
+//         // will not die (exhausting deathBounces). if it crashes, the boot
+//         // thread's process will know anyway. this way we avoid stupid
+//         // server offline notifications when using slow asynchronous commands
+//         if( createAliveThread ) startAliveThread( 1.0f, 0.25f, Int.MaxValue )
+
+      lazy val server : Future[ Server ] = booting !! (QueryServer, { case s: Server => s })
+      lazy val abort : Future[ Unit ] = booting !! (Abort, { case _ => ()})
+//      def isStopped : Boolean
+   }
+}
+
+trait BootingServer {
+   def server : Future[ Server ]
+   def abort : Future[ Unit ]
 }
 
 //abstract class Server extends Model {}
-class Server( val name: String = "localhost", val options: ServerOptions = new ServerOptions, val clientID: Int = 0 )
+class Server private( val name: String, c: OSCClient, val options: ServerOptions = new ServerOptions, val clientID: Int = 0 )
 extends Model {
    server =>
 
    import Server._
 
    private var aliveThread: Option[StatusWatcher]	= None
-   private var bootThread: Option[BootThread]		= None
+//   private var bootThread: Option[BootThread]		= None
    private var countsVar							      = new OSCStatusReplyMessage( 0, 0, 0, 0, 0f, 0f, 0.0, 0.0 )
-   private var collBootCompletion					   = Queue.empty[ (Server) => Unit ]
+//   private var collBootCompletion					   = Queue.empty[ (Server) => Unit ]
    private val condSync                            = new AnyRef
-   private var conditionVar: Condition 			   = Offline
+   private var conditionVar: Condition 			   = Running // Offline
    private var pendingCondition: Condition      	= NoPending
 //   private var bufferAllocatorVar: ContiguousBlockAllocator = null
-   private val host                                = InetAddress.getByName( options.host.value )
+//   private val host                                = InetAddress.getByName( options.host.value )
 
-   val addr                                        = new InetSocketAddress( host, options.port.value )
-   def isLocal                                     = host.isLoopbackAddress || host.isSiteLocalAddress
+//   val addr                                        = new InetSocketAddress( host, options.port.value )
    val rootNode                                    = new Group( this, 0 )
    val defaultGroup                                = new Group( this, 1 )
    val nodeMgr                                     = new NodeManager( this )
    val bufMgr                                      = new BufferManager( this )
    var latency                                     = 0.2f
 
-   private val c                                   = {
-      val client        = OSCClient( Symbol( options.protocol.value ), 0, host.isLoopbackAddress, ServerCodec )
-      client.bufferSize = 0x10000
-      client.target     = addr
-      client.action     = OSCReceiverActor.messageReceived
-      client
-   }
+//   private val c                                   = {
+//      val client        = OSCClient( Symbol( options.protocol.value ), 0, host.isLoopbackAddress, ServerCodec )
+//      client.bufferSize = 0x10000
+//      client.target     = addr
+//      client.action     = OSCReceiverActor.messageReceived
+//      client
+//   }
 
    // ---- constructor ----
    {
+      OSCReceiverActor.start
+      c.action = OSCReceiverActor.messageReceived
+      initTree
       add( this )
 //      createNewAllocators
 //    resetBufferAutoInfo
@@ -122,6 +304,14 @@ extends Model {
 //   val name: String
 //   val options: ServerOptions
 //   val clientID: Int
+
+   def isLocal : Boolean = c.target match {
+      case i: InetSocketAddress => {
+         val host = i.getAddress
+         host.isLoopbackAddress || host.isSiteLocalAddress
+      }
+      case _ => false
+   }
    
    def isConnected = c.isConnected
    def isRunning = condSync.synchronized { conditionVar == Running }
@@ -211,50 +401,6 @@ extends Model {
       a
    }
 
-
-//   // XXX should use actor syntax instead, returning an Option[ OSCMessage ] to the current actor
-//   private def sendAsyncPacket( ap: AsyncOSCPacket, timeOut: Long = 5000 )( success: => Unit )( failure: => Unit ) {
-//      val sync = new AnyRef
-//      var handled = false
-//      val timer = new Timer( "TimeOut", true )
-//      lazy val funSucc: (SocketAddress, Long) => Unit = (addr, when) => {
-////println( "---4" )
-//         timer.cancel
-//         sync.synchronized {
-//            multiResponder.removeListener( ap.replyMessage, funSucc )
-//            if( !handled ) {
-////println( "---5" )
-//               handled = true
-//               invokeOnMainThread( new Runnable {
-//                  def run = {
-////println( "---6" )
-//                     success
-//                  }
-//               })
-//            }
-//         }
-//      }
-//      timer.schedule( new TimerTask {
-//         def run = {
-////println( "---1" )
-//            invokeOnMainThread( new Runnable {
-//               def run = sync.synchronized {
-////println( "---2" )
-//                  if( !handled ) {
-////println( "---3" )
-//                     multiResponder.removeListener( ap.replyMessage, funSucc )
-//                     handled = true
-//                     failure
-//                  }
-//               }
-//            })
-//         }
-//      }, timeOut )
-////println( "---0" )
-//      multiResponder.addListener( ap.replyMessage, funSucc )
-//      this ! ap.packet
-//   }
-
    def counts = countsVar
    protected[synth] def counts_=( newCounts: OSCStatusReplyMessage ) {
       countsVar = newCounts
@@ -280,12 +426,12 @@ extends Model {
             } else if( newCondition == Running ) {
                if( pendingCondition == Booting ) {
                   pendingCondition = NoPending
-                  collBootCompletion.foreach( action => try {
-                        action.apply( this )
-                     }
-                     catch { case e => e.printStackTrace() }
-                  )
-                  collBootCompletion = Queue.empty
+//                  collBootCompletion.foreach( action => try {
+//                        action.apply( this )
+//                     }
+//                     catch { case e => e.printStackTrace() }
+//                  )
+//                  collBootCompletion = Queue.empty
                }
             }
             dispatch( newCondition )
@@ -338,54 +484,54 @@ extends Model {
       })
    }
 
-   def boot: Unit = boot( true )
-   def boot( createAliveThread: Boolean ) {
-      if( !isLocal ) error( "Server.boot : only allowed for local servers!" )
-
-//      val whenBooted = (s: Server) => {
-//         try {
-////            println( "notification is on" )
-//            s.register
-//            s.initTree
-//         }
-//         catch { case e: IOException => printError( "Server.boot", e )}
-//      }
+//   def boot: Unit = boot( true )
+//   def boot( createAliveThread: Boolean ) {
+//      if( !isLocal ) error( "Server.boot : only allowed for local servers!" )
 //
-      condSync.synchronized {
-         if( pendingCondition != NoPending ) {
-            println( "Server:boot - ongoing operations" )
-            return
-         }
-         if( conditionVar == Running ) {
-            println( "Server:boot - already running" )
-            return
-         }
-
-         pendingCondition  = Booting
-         condition         = Booting
-
-         try {
-//            createNewAllocators
-// XXX resetBufferAutoInfo
-
-//            addDoWhenBooted( whenBooted )
-            if( bootThread.isEmpty ) {
-               val thread	= new BootThread( createAliveThread )
-               bootThread	= Some( thread )
-               thread.start
-            } else error( "Illegal state : boot thread still set" )
-         }
-         catch { case e => {
-//            removeDoWhenBooted( whenBooted )
-            try {
-               stopAliveThread
-            }
-            catch { case e2 => printError( "Server.boot", e2 )}
-            condition = Offline // pendingCondition = NoPending
-            throw e
-         }}
-      }
-   }
+////      val whenBooted = (s: Server) => {
+////         try {
+//////            println( "notification is on" )
+////            s.register
+////            s.initTree
+////         }
+////         catch { case e: IOException => printError( "Server.boot", e )}
+////      }
+////
+//      condSync.synchronized {
+//         if( pendingCondition != NoPending ) {
+//            println( "Server:boot - ongoing operations" )
+//            return
+//         }
+//         if( conditionVar == Running ) {
+//            println( "Server:boot - already running" )
+//            return
+//         }
+//
+//         pendingCondition  = Booting
+//         condition         = Booting
+//
+//         try {
+////            createNewAllocators
+//// XXX resetBufferAutoInfo
+//
+////            addDoWhenBooted( whenBooted )
+//            if( bootThread.isEmpty ) {
+//               val thread	= new BootThread( createAliveThread )
+//               bootThread	= Some( thread )
+//               thread.start
+//            } else error( "Illegal state : boot thread still set" )
+//         }
+//         catch { case e => {
+////            removeDoWhenBooted( whenBooted )
+//            try {
+//               stopAliveThread
+//            }
+//            catch { case e2 => printError( "Server.boot", e2 )}
+//            condition = Offline // pendingCondition = NoPending
+//            throw e
+//         }}
+//      }
+//   }
 
    private def serverContacted {
       createNewAllocators
@@ -406,7 +552,7 @@ extends Model {
 
    private def bootThreadTerminated {
       condSync.synchronized {
-         bootThread = None
+//         bootThread = None
          stopAliveThread
          condition = Offline
       }
@@ -423,24 +569,24 @@ extends Model {
       addDoWhenBooted( actionFunc )
    }
 
-   def addDoWhenBooted( action: (Server) => Unit ) {
-      condSync.synchronized {
-         if( condition == Running ) {
-            try {
-               action.apply( this )
-            }
-            catch { case e => e.printStackTrace() }
-         } else {
-            collBootCompletion = collBootCompletion.enqueue( action )
-         }
-      }
-   }
-  
-   def removeDoWhenBooted( action: (Server) => Unit ) {
-      condSync.synchronized {
-         collBootCompletion = collBootCompletion.filterNot( _ == action )
-      }
-   }
+//   def addDoWhenBooted( action: (Server) => Unit ) {
+//      condSync.synchronized {
+//         if( condition == Running ) {
+//            try {
+//               action.apply( this )
+//            }
+//            catch { case e => e.printStackTrace() }
+//         } else {
+//            collBootCompletion = collBootCompletion.enqueue( action )
+//         }
+//      }
+//   }
+//
+//   def removeDoWhenBooted( action: (Server) => Unit ) {
+//      condSync.synchronized {
+//         collBootCompletion = collBootCompletion.filterNot( _ == action )
+//      }
+//   }
  
    private def createNewAllocators {
       nodes.reset
@@ -467,10 +613,10 @@ extends Model {
       catch { case e: IOException => printError( "Server.cleanUpAfterQuit", e )}
    }
   
-   def startClient {
-      OSCReceiverActor.start
-      c.start
-   }
+//   def startClient {
+//      OSCReceiverActor.start
+//      c.start
+//   }
 
    private[synth] def addResponder( resp: OSCResponder ) {
       OSCReceiverActor.addHandler( resp )
@@ -492,70 +638,6 @@ extends Model {
    }
 
    override def toString = "<" + name + ">"
-
-   // -------- internal class BootThread -------- 
-
-   private class BootThread( createAliveThread: Boolean )
-   extends Thread {
-      var keepRunning = true
-
-      private val program     = options.programPath.value
-//      println( "Booting '" + program + "'" )
-      private val file        = new File( program )
-      private val processArgs = options.toRealtimeArgs.toArray
-      private val pb          = new ProcessBuilder( processArgs: _* )
-         .directory( file.getParentFile )
-         .redirectErrorStream( true )
-
-      override def run {
-         try {
-            val p          = pb.start
-            val inReader   = new BufferedReader( new InputStreamReader( p.getInputStream ))
-            new Thread( new Runnable {
-               def run {
-                  while( true ) {
-                     val line = inReader.readLine
-                     if( line != null ) println( line ) else return
-                  }
-               }
-            }).start
-
-            // connect phase
-            var cStarted   = false
-            var pRunning   = true
-            while( keepRunning && pRunning && !cStarted ) {
-               try {
-                  startClient
-                  cStarted = true
-                  // note that we optimistically assume that if we boot the server, it
-                  // will not die (exhausting deathBounces). if it crashes, the boot
-                  // thread's process will know anyway. this way we avoid stupid
-                  // server offline notifications when using slow asynchronous commands
-                  if( createAliveThread ) startAliveThread( 1.0f, 0.25f, Int.MaxValue )
-               }
-               catch { case e: ConnectException => Thread.sleep( 500 )} // thrown when in TCP mode and socket not yet available
-               try {
-                  p.exitValue // throws an exception if process still running
-                  pRunning	= false
-               }
-               catch { case e: IllegalThreadStateException => } // gets thrown if we call exitValue() while sc still running
-            }
-
-            if( keepRunning && pRunning ) {
-               p.waitFor()
-            } else {
-               p.destroy()
-            }
-
-            println( "scsynth terminated (" + p.exitValue +")" )
-         }
-         catch { case e: IOException => printError( "BootThread.run", e )} // thrown if process was not built
-         finally {
-//            invokeOnMainThread( new Runnable { def run = bootThreadTerminated })
-            bootThreadTerminated
-         }
-      }
-   }
 
    // -------- internal class StatusWatcher --------
 
@@ -622,7 +704,7 @@ extends Model {
       }
    }
 
-   object OSCReceiverActor extends DaemonActor {
+   private object OSCReceiverActor extends DaemonActor {
       private case object Clear
       private case object Dispose
       private case class  ReceivedMessage( msg: OSCMessage, sender: SocketAddress, time: Long )
@@ -701,50 +783,6 @@ extends Model {
          if( fun.isDefinedAt( TIMEOUT )) try {
             fun.apply( TIMEOUT )
          } catch { case e => e.printStackTrace() }
-      }
-   }
-
-   // -------- internal class FutureActor --------
-
-   /*
-    *    FutureActor in scala.actors is not very accessible...
-    *    We need our own implementation of Future is seems
-    */
-   private class FutureActor[ T ]( fun: SyncVar[ T ] => Unit, channel: Channel[ T ])
-   extends Future[ T ] with DaemonActor {
-      @volatile private var v: Option[T] = None
-
-      private case object Eval
-      
-      def isSet = !v.isEmpty
-
-      def apply(): T = {
-         if( v.isEmpty ) error( "Thread-based operations not supported" )
-         v.get
-      }
-
-      def respond( k: T => Unit ) {
-         v.map( k( _ )) getOrElse {
-            val fut = this !! Eval
-            fut.inputChannel.react {
-               case _ => k( v.get )
-            }
-         }
-      }
-
-      def inputChannel: InputChannel[ T ] = channel
-
-      def act() {
-         val syncVar = new SyncVar[ T ]
-         
-         { fun( syncVar )} andThen {
-            val syncVal = syncVar.get
-            v = Some( syncVal )
-            channel ! syncVal
-            loop { react {
-               case Eval => reply()
-            }}
-         }
       }
    }
 }

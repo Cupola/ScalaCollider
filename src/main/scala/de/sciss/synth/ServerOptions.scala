@@ -61,6 +61,39 @@ extends ServerOption[String]( sw, defau )
 //class ServerSymbolOption( sw: String, defau: Symbol )
 //extends ServerOption[Symbol]( sw, defau )
 
+object ServerOptions {
+//     private[scsynth] def toRealtimeArgs( opts: Seq[ ServerOption[ _ ]]) : List[ String ] = {
+//      val result = new ListBuffer[String]()
+//
+//      result += programPath.stringValue
+//      protocol.value match {
+//         case "tcp" => result += "-t"
+//         case "udp" => result += "-u"
+//         case _ => error( protocol.stringValue )
+//      }
+//      result += port.stringValue
+//      if( inDeviceName.value == outDeviceName.value ) {
+//         if( inDeviceName.value != "" ) {
+//            result += "-H"
+//            result += inDeviceName.stringValue
+//         }
+//      } else {
+//         result += "-H"
+//         result += inDeviceName.stringValue
+//         result += outDeviceName.stringValue
+//      }
+//
+//      rtSwitchOptions.foreach { option =>
+//         if( option.value != option.default ) {
+//            result += "-" + option.switch
+//            result += option.stringValue
+//         }
+//      }
+//
+//      result.toList
+//   }
+}
+
 class ServerOptions {
    var initialNodeID = 1000
   
