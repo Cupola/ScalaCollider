@@ -29,61 +29,273 @@
 package de.sciss.synth
 
 import collection.mutable.ListBuffer
+import io.{ AudioFileType, SampleFormat }
 import java.io.File
+import de.sciss.scalaosc.{ OSCTransport, TCP, UDP }
+import java.net.{DatagramSocket, ServerSocket}
 
 /**
- *    @author		Hanns Holger Rutz
- * 	@version    0.13, 09-May-10
+ * 	@version    0.14, 27-May-10
  */
-class ServerOption[T]( val switch: String, val default: T ) {
-   protected var valu = default
-   def value : T = valu
-   def value_=( newValue: T ) : ServerOption[T] = {
-//    println( "switch " + switch + "; newValue " + newValue )
-      valu = newValue
-      this
+trait ServerOptionsLike {
+   def programPath:           String
+   def controlBusChannels:    Int
+   def audioBusChannels:      Int
+   def outputBusChannels:     Int
+   def blockSize:             Int
+   def sampleRate:            Int
+   def audioBuffers:          Int
+   def maxNodes:              Int
+   def maxSynthDefs:          Int
+   def memorySize:            Int
+   def wireBuffers:           Int
+   def randomSeeds:           Int
+   def loadSynthDefs:         Boolean
+   def machPortName:          Option[ (String, String) ]
+   def verbosity:             Int
+   def plugInsPaths:          List[ String ]
+   def restrictedPath:        Option[ String ]
+   def memoryLocking:         Boolean
+
+//   // client only
+//   def clientID:              Int
+//   def nodeIDOffset:          Int
+
+   // realtime only
+   def host:                  String
+   def port:                  Int
+   def transport:             OSCTransport
+   def inputStreamsEnabled:   Option[ String ]
+   def outputStreamsEnabled:  Option[ String ]
+   def deviceName:            Option[ String ]
+   def deviceNames:           Option[ (String, String) ]
+   def inputBusChannels:      Int
+   def hardwareBlockSize:     Int
+   def zeroConf:              Boolean
+   def maxLogins:             Int
+   def sessionPassword:       Option[ String ]
+
+   // nonrealtime only
+   def nrtCommandPath:        String
+   def nrtInputPath:          Option[ String ]
+   def nrtOutputPath:         String
+   def nrtHeaderFormat:       AudioFileType
+   def nrtSampleFormat:       SampleFormat
+
+   def toRealtimeArgs:        List[ String ]
+//   def toNonRealtimeArgs:     List[ String ]
+
+   def firstPrivateBus: Int = outputBusChannels + inputBusChannels
+}
+
+abstract class ServerOptions extends ServerOptionsLike
+
+object ServerOptionsBuilder {
+   private def toRealtimeArgs( o: ServerOptionsLike ): List[ String ] = {
+      val result = new ListBuffer[ String ]()
+
+      result += o.programPath
+      o.transport match {
+         case TCP => {
+            result += "-t"
+            result += o.port.toString
+         }
+         case UDP => {
+            result += "-u"
+            result += o.port.toString
+         }
+      }
+      if( o.controlBusChannels != 4096 ) {
+         result += "-c"
+         result += o.controlBusChannels.toString
+      }
+      if( o.audioBusChannels != 128 ) {
+         result += "-a"
+         result += o.audioBusChannels.toString
+      }
+      if( o.inputBusChannels != 8 ) {
+         result += "-i"
+         result += o.inputBusChannels.toString
+      }
+      if( o.outputBusChannels != 8 ) {
+         result += "-o"
+         result += o.outputBusChannels.toString
+      }
+      if( o.blockSize != 64 ) {
+          result += "-z"
+          result += o.blockSize.toString
+      }
+      if( o.hardwareBlockSize != 0 ) {
+          result += "-Z"
+          result += o.hardwareBlockSize.toString
+      }
+      if( o.sampleRate != 0 ) {
+         result += "-S"
+         result += o.sampleRate.toString
+      }
+      if( o.audioBuffers != 1024 ) {
+         result += "-b"
+         result += o.audioBuffers.toString
+      }
+      if( o.maxNodes != 1024 ) {
+         result += "-n"
+         result += o.maxNodes.toString
+      }
+      if( o.maxSynthDefs != 1024 ) {
+         result += "-d"
+         result += o.maxSynthDefs.toString
+      }
+      if( o.memorySize != 8192 ) {
+         result += "-m"
+         result += o.memorySize.toString
+      }
+      if( o.wireBuffers != 64 ) {
+         result += "-w"
+         result += o.wireBuffers.toString
+      }
+      if( o.randomSeeds != 64 ) {
+         result += "-r"
+         result += o.randomSeeds.toString
+      }
+      if( !o.loadSynthDefs ) {
+         result += "-D"
+         result += "0"
+      }
+      if( !o.zeroConf ) {
+         result += "-R"
+         result += "0"
+      }
+      if( o.maxLogins != 64 ) {
+         result += "-l"
+         result += o.maxLogins.toString
+      }
+      o.sessionPassword.foreach( pwd => {
+         result += "-p"
+         result += pwd
+      })
+      o.inputStreamsEnabled.foreach( stream => {
+         result += "-I"
+         result += stream
+      })
+      o.outputStreamsEnabled.foreach( stream => {
+         result += "-O"
+         result += stream
+      })
+      o.machPortName.foreach( tup => {
+         result += "-M"
+         result += tup._1
+         result += tup._2
+      })
+      o.deviceNames.foreach( tup => {
+         val (inDev, outDev) = tup
+         result += "-H"
+         result += tup._1
+         result += tup._2
+      })
+      o.deviceName.foreach( n => {
+         result += "-H"
+         result += n
+      })
+      if( o.verbosity != 0 ) {
+         result += "-v"
+         result += o.verbosity.toString
+      }
+      if( o.plugInsPaths.nonEmpty ) {
+         result += "-U"
+         result += o.plugInsPaths.mkString( ":" )
+      }
+      o.restrictedPath.foreach( path => {
+         result += "-P"
+         result += path
+      })
+      if( o.memoryLocking ) {
+         result += "-L"
+      }
+
+      result.toList
+   }
+}
+
+class ServerOptionsBuilder extends ServerOptionsLike {
+   var programPath:           String = new File( System.getenv( "SC_HOME" ), "scsynth" ).getAbsolutePath
+   var controlBusChannels:    Int                        = 4096
+   var audioBusChannels:      Int                        = 128
+   var outputBusChannels:     Int                        = 8
+   var blockSize:             Int                        = 64
+   var sampleRate:            Int                        = 0
+   var audioBuffers:          Int                        = 1024
+   var maxNodes:              Int                        = 1024
+   var maxSynthDefs:          Int                        = 1024
+   var memorySize:            Int                        = 8192
+   var wireBuffers:           Int                        = 64
+   var randomSeeds:           Int                        = 64
+   var loadSynthDefs:         Boolean                    = true
+   var machPortName:          Option[ (String, String) ] = None
+   var verbosity:             Int                        = 0
+   var plugInsPaths:          List[ String ]             = Nil
+   var restrictedPath:        Option[ String ]           = None
+   var memoryLocking:         Boolean                    = false
+
+//   // client only
+//   var clientID:              Int                        = 0
+//   var nodeIDOffset:          Int                        = 1000
+
+   // realtime only
+   var host:                  String                     = "127.0.0.1"
+   var port:                  Int                        = 57110
+   var transport:             OSCTransport               = UDP
+   var inputStreamsEnabled:   Option[ String ]           = None
+   var outputStreamsEnabled:  Option[ String ]           = None
+
+   private var deviceNameVar:  Option[ String ] = None
+   private var deviceNamesVar: Option[ (String, String) ] = None
+
+   def deviceName:            Option[ String ] = deviceNameVar
+   def deviceNames:           Option[ (String, String) ] = deviceNamesVar
+   def deviceName_=( value: Option[ String ]) {
+      deviceNameVar = value
+      if( value.isDefined ) deviceNamesVar = None
+   }
+   def deviceNames_=( value: Option[ (String, String) ]) {
+      deviceNamesVar = value
+      if( value.isDefined ) deviceNameVar = None
    }
 
-   def stringValue: String = valu.toString
-}
+   var inputBusChannels:      Int                        = 8
+   var hardwareBlockSize:     Int                        = 0
+   var zeroConf:              Boolean                    = true
+   var maxLogins:             Int                        = 64
+   var sessionPassword:       Option[ String ]           = None
 
-class ServerIntOption( sw: String, defau: Int )
-extends ServerOption[Int]( sw, defau )
+   // nonrealtime only
+   var nrtCommandPath:        String                     = ""
+   var nrtInputPath:          Option[ String ]           = None
+   var nrtOutputPath:         String                     = ""
+   var nrtHeaderFormat:       AudioFileType              = AudioFileType.AIFF
+   var nrtSampleFormat:       SampleFormat               = SampleFormat.Float
 
-class ServerBooleanOption( sw: String, defau: Boolean )
-extends ServerOption[Boolean]( sw, defau ) {
-   override def stringValue: String = if( valu ) "1" else "0"
-}
+   def toRealtimeArgs : List[ String ] = ServerOptionsBuilder.toRealtimeArgs( this )
+   def build : ServerOptions = new Impl(
+      programPath, controlBusChannels, audioBusChannels, outputBusChannels, blockSize, sampleRate, audioBuffers,
+      maxNodes, maxSynthDefs, memorySize, wireBuffers, randomSeeds, loadSynthDefs, machPortName, verbosity,
+      plugInsPaths, restrictedPath, memoryLocking, host, port, transport, inputStreamsEnabled, outputStreamsEnabled,
+      deviceNames, deviceName, inputBusChannels, hardwareBlockSize, zeroConf, maxLogins, sessionPassword,
+      nrtCommandPath,
+      nrtInputPath, nrtOutputPath, nrtHeaderFormat, nrtSampleFormat )
 
-class ServerStringOption( sw: String, defau: String )
-extends ServerOption[String]( sw, defau )
-
-//class ServerSymbolOption( sw: String, defau: Symbol )
-//extends ServerOption[Symbol]( sw, defau )
-
-object ServerOptions {
-//     private[scsynth] def toRealtimeArgs( opts: Seq[ ServerOption[ _ ]]) : List[ String ] = {
+//   def toNonRealtimeArgs : List[ String ] = {
 //      val result = new ListBuffer[String]()
 //
 //      result += programPath.stringValue
-//      protocol.value match {
-//         case "tcp" => result += "-t"
-//         case "udp" => result += "-u"
-//         case _ => error( protocol.stringValue )
-//      }
-//      result += port.stringValue
-//      if( inDeviceName.value == outDeviceName.value ) {
-//         if( inDeviceName.value != "" ) {
-//            result += "-H"
-//            result += inDeviceName.stringValue
-//         }
-//      } else {
-//         result += "-H"
-//         result += inDeviceName.stringValue
-//         result += outDeviceName.stringValue
-//      }
+//      result += "-N"
+//      result += nrtCmdPath.stringValue
+//      result += nrtInputPath.stringValue
+//      result += nrtOutputPath.stringValue
+//      result += sampleRate.stringValue
+//      result += nrtHeaderFormat.stringValue
+//      result += nrtSampleFormat.stringValue
 //
-//      rtSwitchOptions.foreach { option =>
+//      switchOptions.foreach { option =>
 //         if( option.value != option.default ) {
 //            result += "-" + option.switch
 //            result += option.stringValue
@@ -92,115 +304,22 @@ object ServerOptions {
 //
 //      result.toList
 //   }
-}
 
-class ServerOptions {
-   var initialNodeID = 1000
-  
-   val programPath		      = new ServerStringOption( "",
-      new File( System.getenv( "SC_HOME" ), "scsynth" ).getAbsolutePath ) // sorry dan...
-   val controlBusChannels	   = new ServerIntOption( "c", 4096 )
-   val audioBusChannels		   = new ServerIntOption( "a",  128 )
-   val outputBusChannels		= new ServerIntOption( "o",    8 )
-   val blockSize				   = new ServerIntOption( "z",   64 )
-   val sampleRate			      = new ServerIntOption( "S",    0 )
-   val audioBuffers		   	= new ServerIntOption( "b", 1024 )
-   val maxNodes				   = new ServerIntOption( "n", 1024 )
-   val maxSynthDefs		   	= new ServerIntOption( "d", 1024 )
-   val memSize		   	   	= new ServerIntOption( "m", 8192 )
-   val wireBuffers		   	= new ServerIntOption( "w",   64 )
-   val randomSeeds			   = new ServerIntOption( "r",   64 )
-   val loadSynthDefs			   = new ServerBooleanOption( "D", true )
-   val machPortName			   = new ServerStringOption( "M", "" )
-   val verbosity			   	= new ServerIntOption( "v", 0 )
-   val plugInsPath			   = new ServerStringOption( "U", "" )
-
-   // realtime only
-   val host					      = new ServerStringOption( "", "127.0.0.1" )
-   val port					      = new ServerIntOption( "", 57100 ) // distinguish from sclang so we happily coexist
-//   val protocol				   = new ServerSymbolOption( "", 'udp )
-   val protocol				   = new ServerStringOption( "", "udp" )
-   val inputStreamsEnabled	   = new ServerStringOption( "I", "" )
-   val outputStreamsEnabled	= new ServerStringOption( "O", "" )
-   val inDeviceName		   	= new ServerStringOption( "", "" )
-   val outDeviceName		   	= new ServerStringOption( "", "" )
-   val inputBusChannels		   = new ServerIntOption( "i",    8 )
-   val hardwareBlockSize		= new ServerIntOption( "Z",    0 )
-   val zeroConf			   	= new ServerBooleanOption( "R", true )
-   val maxLogins				   = new ServerIntOption( "l",   64 )
-   val sessionPassword		   = new ServerStringOption( "p", "" )
-
-   // nonrealtime only
-   val nrtCmdPath    		   = new ServerStringOption( "", "" )
-   val nrtInputPath    		   = new ServerStringOption( "", "_" )
-   val nrtOutputPath   		   = new ServerStringOption( "", "" )
-   val nrtHeaderFormat   	   = new ServerStringOption( "", "AIFF" )
-   val nrtSampleFormat   	   = new ServerStringOption( "", "float32" )
-
-   private val switchOptions = List(
-      controlBusChannels, audioBusChannels, outputBusChannels,
-      blockSize, audioBuffers, maxNodes,
-      maxSynthDefs, memSize, wireBuffers, randomSeeds, loadSynthDefs,
-      machPortName, verbosity, plugInsPath
-   )
-  
-   private val rtSwitchOptions = switchOptions ::: List(
-      sampleRate, inputStreamsEnabled, outputStreamsEnabled, inputBusChannels,
-      hardwareBlockSize, zeroConf, maxLogins, sessionPassword
-   )
-
-   def toRealtimeArgs : List[ String ] = {
-      val result = new ListBuffer[String]()
-    
-      result += programPath.stringValue
-      protocol.value match {
-         case "tcp" => result += "-t"
-         case "udp" => result += "-u"
-         case _ => error( protocol.stringValue )
-      }
-      result += port.stringValue
-      if( inDeviceName.value == outDeviceName.value ) {
-         if( inDeviceName.value != "" ) {
-            result += "-H"
-            result += inDeviceName.stringValue
-         }
-      } else {
-         result += "-H"
-         result += inDeviceName.stringValue
-         result += outDeviceName.stringValue
-      }
-    
-      rtSwitchOptions.foreach { option =>
-         if( option.value != option.default ) {
-            result += "-" + option.switch
-            result += option.stringValue
-         }
-      }
-    
-      result.toList
+   private class Impl( val programPath: String, val controlBusChannels: Int, val audioBusChannels: Int,
+                       val outputBusChannels: Int, val blockSize: Int, val sampleRate: Int, val audioBuffers: Int,
+                       val maxNodes: Int, val maxSynthDefs: Int, val memorySize: Int, val wireBuffers: Int,
+                       val randomSeeds: Int, val loadSynthDefs: Boolean, val machPortName: Option[ (String, String) ],
+                       val verbosity: Int, val plugInsPaths: List[ String ], val restrictedPath: Option[ String ],
+                       val memoryLocking: Boolean, val host: String, val port: Int, val transport: OSCTransport,
+                       val inputStreamsEnabled: Option[ String ], val outputStreamsEnabled: Option[ String ],
+                       val deviceNames: Option[ (String, String) ], val deviceName: Option[ String ],
+                       val inputBusChannels: Int,
+                       val hardwareBlockSize: Int, val zeroConf: Boolean, val maxLogins: Int,
+                       val sessionPassword: Option[ String ], val nrtCommandPath: String,
+                       val nrtInputPath: Option[ String ],
+                       val nrtOutputPath: String, val nrtHeaderFormat: AudioFileType,
+                       val nrtSampleFormat: SampleFormat )
+   extends ServerOptions {
+      def toRealtimeArgs : List[ String ] = ServerOptionsBuilder.toRealtimeArgs( this )
    }
-
-   def toNonRealtimeArgs : List[ String ] = {
-      val result = new ListBuffer[String]()
-
-      result += programPath.stringValue
-      result += "-N"
-      result += nrtCmdPath.stringValue
-      result += nrtInputPath.stringValue
-      result += nrtOutputPath.stringValue
-      result += sampleRate.stringValue
-      result += nrtHeaderFormat.stringValue
-      result += nrtSampleFormat.stringValue
-
-      switchOptions.foreach { option =>
-         if( option.value != option.default ) {
-            result += "-" + option.switch
-            result += option.stringValue
-         }
-      }
-
-      result.toList
-   }
-
-   def firstPrivateBus = outputBusChannels.value + inputBusChannels.value
 }

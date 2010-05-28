@@ -40,7 +40,7 @@ import osc._
 import math._
 
 /**
- * 	@version    0.16, 20-May-10
+ * 	@version    0.16, 27-May-10
  */
 object Server {
    private val allSync  = new AnyRef
@@ -52,11 +52,19 @@ object Server {
    def defaultCmdPath = new File( System.getenv( "SC_HOME" ), "scsynth" ).getAbsolutePath
 
    @throws( classOf[ IOException ])
-   def boot( name: String = "localhost", cmdPath: String = defaultCmdPath, transport: OSCTransport = UDP,
-             port: Int = 0, options: Iterable[ ServerOption[ _ ]] = Nil ) : BootingServer = {
+   def boot: BootingServer = boot()
 
-      // check for automatic port assignment
-      val port0 = if( port == 0 ) transport match {
+   @throws( classOf[ IOException ])
+   def boot( name: String = "localhost", options: ServerOptions = (new ServerOptionsBuilder).build,
+             clientOptions: ClientOptions = (new ClientOptionsBuilder).build ) : BootingServer = {
+
+      val addr = new InetSocketAddress( options.host, options.port )
+      val c    = createClient( options.transport, addr )
+      new BootingImpl( name, c, addr, options, clientOptions, true )
+   }
+
+   def allocPort( transport: OSCTransport ) : Int = {
+      transport match {
          case TCP => {
             val ss = new ServerSocket( 0 )
             try {
@@ -74,11 +82,7 @@ object Server {
             }
          }
          case x => error( "Unsupported transport : " + x.name )
-      } else port
-
-      val addr = new InetSocketAddress( "127.0.0.1", port0 )
-      val c    = createClient( transport, addr )
-      new BootingImpl( name, c, port0, cmdPath, options, true )
+      }
    }
 
    private def add( s: Server ) {
@@ -102,7 +106,7 @@ object Server {
 
    abstract sealed class Condition
    case object Running extends Condition
-   case object Booting extends Condition
+//   case object Booting extends Condition
    case object Offline extends Condition
    private case object Terminating extends Condition
    private case object NoPending extends Condition
@@ -120,31 +124,23 @@ object Server {
    // -------- internal class BootThread --------
 
    object BootingImpl {
+      case object Start
       case object Abort
       case object QueryServer
       case object Aborted
    }
    
    private class BootingImpl @throws( classOf[ IOException ])
-      ( name: String, c: OSCClient, port: Int, cmdPath: String, options: Iterable[ ServerOption[ _ ]],
-        createAliveThread: Boolean )
-   extends DaemonActor with BootingServer {
-      booting =>
-
+      ( val name: String, c: OSCClient, val addr: InetSocketAddress, val options: ServerOptions,
+        clientOptions: ClientOptions, createAliveThread: Boolean )
+   extends BootingServer {
       import BootingImpl._
 
       val p = {
-         val file        = new File( cmdPath )
-         val optionList : List[ String ] = options.flatMap( o =>
-            if( o.value != o.default ) List( o.switch, o.stringValue ) else Nil )( breakOut )
-         val processArgs = cmdPath :: (c.transport match {
-            case TCP => "-t"
-            case UDP => "-u"
-         }) :: port.toString :: optionList
-
-//         val processArgs = options.toRealtimeArgs.toArray
-         val pb          = new ProcessBuilder( processArgs: _* )
-            .directory( file.getParentFile )
+         val processArgs   = options.toRealtimeArgs
+         val directory     = new File( options.programPath ).getParentFile
+         val pb            = new ProcessBuilder( processArgs: _* )
+            .directory( directory )
             .redirectErrorStream( true )
          pb.start    // throws IOException if command not found or not executable
       }
@@ -167,77 +163,82 @@ object Server {
             p.destroy()
          } finally {
             println( "scsynth terminated (" + p.exitValue +")" )
-            booting ! Aborted
+            bootActor ! Aborted
          }            
       }
 
-      // ...and go
-      postActor.start
-      processThread.start
-      booting.start
-
-      private def abortHandler( server: Option[ Server ]) {
-         processThread.interrupt()
-         val from = sender
-         loop { react {
-            case Aborted => {
-               server.foreach( _.bootThreadTerminated )
-               from ! ()
-            }
-            case _ =>
-         }}
-      }
-
-      def act {
-         loop {
-            if( processThread.isAlive ) {
-               try {
-                  c.start
-//                  c.dumpOSC(1)
-                  c.action = (msg, addr, when) => booting ! msg
-                  loop {
-                     c.send( OSCServerNotifyMessage( true ))
-                     reactWithin( 5000 ) {
-                        case TIMEOUT =>
-                        case Abort => abortHandler( None )
-                        case OSCMessage( "/done", "/notify" ) => loop {
-                           c.send( OSCStatusMessage )
-                           reactWithin( 500 ) {
-                              case TIMEOUT =>
-                              case Abort => abortHandler( None )
-                              case counts: OSCStatusReplyMessage => {
-                                 val s = new Server( name, c /*, options */)
-                                 s.counts = counts
-                                 loop { react {
-                                    case QueryServer => reply( s )
-                                    case Abort => abortHandler( Some( s ))
-                                    case Aborted => {
-                                       s.bootThreadTerminated
-                                       loop { react {
-                                          case Abort => reply ()
-                                          case QueryServer => reply( s )
-//                                          case _ =>
-                                       }}
-                                    }
-//                                    case _ =>
-                                 }}
+      val bootActor: DaemonActor = new DaemonActor {
+         def act { react { case Start => {
+            dispatch( BootingServer.Booting )
+            loop {
+               if( processThread.isAlive ) {
+                  try {
+                     c.start
+   //                  c.dumpOSC(1)
+                     c.action = (msg, addr, when) => this ! msg
+                     loop {
+                        c.send( OSCServerNotifyMessage( true ))
+                        reactWithin( 5000 ) {
+                           case TIMEOUT => // loop is retried
+                           case Abort => abortHandler( None )
+                           case OSCMessage( "/done", "/notify" ) => loop {
+                              c.send( OSCStatusMessage )
+                              reactWithin( 500 ) {
+                                 case TIMEOUT => // loop is retried
+                                 case Abort => abortHandler( None )
+                                 case counts: OSCStatusReplyMessage => {
+                                    val s = new Server( name, c, addr, options, clientOptions )
+                                    s.counts = counts
+                                    dispatch( BootingServer.Running( s ))
+                                    s.initTree
+                                    loop { react {
+                                       case QueryServer => reply( s )
+                                       case Abort => abortHandler( Some( s ))
+                                       case Aborted => {
+                                          s.bootThreadTerminated
+                                          loop { react {
+                                             case Abort => reply ()
+                                             case QueryServer => reply( s )
+   //                                          case _ =>
+                                          }}
+                                       }
+   //                                    case _ =>
+                                    }}
+                                 }
                               }
                            }
                         }
                      }
                   }
-               }
-               catch { case e: ConnectException => { // thrown when in TCP mode and socket not yet available
-                  reactWithin( 500 ) {
-                     case Abort => abortHandler( None )
-                  }
+                  catch { case e: ConnectException => { // thrown when in TCP mode and socket not yet available
+                     reactWithin( 500 ) {
+                        case Abort => abortHandler( None )
+                     }
+                  }}
+               } else loop { react {
+                  case Abort => reply ()
+   //               case _ =>
                }}
-            } else loop { react {
-               case Abort => reply ()
-//               case _ =>
-            }}
-         }
+            }
+         }}}
+
+         private def abortHandler( server: Option[ Server ]) {
+             processThread.interrupt()
+             val from = sender
+             loop { react {
+                case Aborted => {
+                   server.foreach( _.bootThreadTerminated )
+                   from ! ()
+                }
+                case _ =>
+             }}
+          }
       }
+
+      // ...and go
+      postActor.start
+      processThread.start
+      bootActor.start
 
 
 //         // note that we optimistically assume that if we boot the server, it
@@ -246,20 +247,33 @@ object Server {
 //         // server offline notifications when using slow asynchronous commands
 //         if( createAliveThread ) startAliveThread( 1.0f, 0.25f, Int.MaxValue )
 
-      lazy val server : Future[ Server ] = booting !! (QueryServer, { case s: Server => s })
-      lazy val abort : Future[ Unit ] = booting !! (Abort, { case _ => ()})
+      def start { bootActor ! Start }
+      lazy val server : Future[ Server ] = bootActor !! (QueryServer, { case s: Server => s })
+      lazy val abort : Future[ Unit ] = bootActor !! (Abort, { case _ => ()})
 //      def isStopped : Boolean
    }
 }
 
-trait BootingServer {
+trait ServerLike extends Model {
+   def name: String
+   def options: ServerOptions
+   def addr: InetSocketAddress
+}
+
+object BootingServer {
+   case object Booting
+   case class Running( server: Server )
+}
+trait BootingServer extends ServerLike {
+   def start : Unit
    def server : Future[ Server ]
    def abort : Future[ Unit ]
 }
 
 //abstract class Server extends Model {}
-class Server private( val name: String, c: OSCClient, val options: ServerOptions = new ServerOptions, val clientID: Int = 0 )
-extends Model {
+class Server private( val name: String, c: OSCClient, val addr: InetSocketAddress, val options: ServerOptions,
+                      val clientOptions: ClientOptions )
+extends ServerLike {
    server =>
 
    import Server._
@@ -279,66 +293,36 @@ extends Model {
    val defaultGroup                                = new Group( this, 1 )
    val nodeMgr                                     = new NodeManager( this )
    val bufMgr                                      = new BufferManager( this )
-   var latency                                     = 0.2f
-
-//   private val c                                   = {
-//      val client        = OSCClient( Symbol( options.protocol.value ), 0, host.isLoopbackAddress, ServerCodec )
-//      client.bufferSize = 0x10000
-//      client.target     = addr
-//      client.action     = OSCReceiverActor.messageReceived
-//      client
-//   }
+//   var latency                                     = 0.2f
 
    // ---- constructor ----
    {
       OSCReceiverActor.start
       c.action = OSCReceiverActor.messageReceived
-      initTree
-      add( this )
-//      createNewAllocators
-//    resetBufferAutoInfo
+      add( server )
    }
 
-   // ---- abstract methods ----
-//   protected def invokeOnMainThread( task: Runnable ) : Unit
-//   val name: String
-//   val options: ServerOptions
-//   val clientID: Int
-
-   def isLocal : Boolean = c.target match {
-      case i: InetSocketAddress => {
-         val host = i.getAddress
-         host.isLoopbackAddress || host.isSiteLocalAddress
-      }
-      case _ => false
+   def isLocal : Boolean = {
+      val host = addr.getAddress
+      host.isLoopbackAddress || host.isSiteLocalAddress
    }
    
    def isConnected = c.isConnected
    def isRunning = condSync.synchronized { conditionVar == Running }
-   def isBooting = condSync.synchronized { conditionVar == Booting }
+//   def isBooting = condSync.synchronized { conditionVar == Booting }
    def isOffline = condSync.synchronized { conditionVar == Offline }
 //   def bufferAllocator = bufferAllocatorVar
 
    object nodes {
-      private var allocator : NodeIDAllocator = _
-    
-      reset
-    
-      def nextID = { allocator.alloc }
-      def reset = { allocator = new NodeIDAllocator( clientID, options.initialNodeID )}
+      private var allocator = new NodeIDAllocator( clientOptions.clientID, clientOptions.nodeIDOffset )
+
+      def nextID = allocator.alloc
    }
   
    object busses {
-      private var controlAllocator : ContiguousBlockAllocator = _
-      private var audioAllocator : ContiguousBlockAllocator = _
-    
-      reset
-    
-      def reset = {
-    	   controlAllocator	= new ContiguousBlockAllocator( options.controlBusChannels.value )
-    	   audioAllocator		= new ContiguousBlockAllocator( options.audioBusChannels.value, options.firstPrivateBus )
-      }
-    
+      private var controlAllocator = new ContiguousBlockAllocator( options.controlBusChannels )
+      private var audioAllocator = new ContiguousBlockAllocator( options.audioBusChannels, options.firstPrivateBus )
+
       def allocControl( numChannels: Int ) = controlAllocator.alloc( numChannels )
       def allocAudio( numChannels: Int ) = audioAllocator.alloc( numChannels )
       def freeControl( index: Int ) = controlAllocator.free( index )
@@ -346,13 +330,7 @@ extends Model {
    }
 
    object buffers {
-      private var allocator: ContiguousBlockAllocator = _
-
-      reset
-
-      def reset = {
-         allocator = new ContiguousBlockAllocator( options.audioBuffers.value )
-      }
+      private var allocator = new ContiguousBlockAllocator( options.audioBuffers )
 
       def alloc( numChannels: Int ) = allocator.alloc( numChannels )
       def free( index: Int ) = allocator.free( index )
@@ -360,9 +338,7 @@ extends Model {
 
    private object uniqueID {
       private var id = 0
-
       def nextID = this.synchronized { val res = id; id += 1; res }
-      def reset = this.synchronized { id = 0 }
    }
 
    def !( p: OSCPacket ) { c.send( p )}
@@ -402,7 +378,7 @@ extends Model {
    }
 
    def counts = countsVar
-   protected[synth] def counts_=( newCounts: OSCStatusReplyMessage ) {
+   private[synth] def counts_=( newCounts: OSCStatusReplyMessage ) {
       countsVar = newCounts
       dispatch( Counts( newCounts ))
    }
@@ -416,24 +392,25 @@ extends Model {
    }
   
    def condition = condSync.synchronized { conditionVar }
-   protected[synth] def condition_=( newCondition: Condition ) {
+   private[synth] def condition_=( newCondition: Condition ) {
       condSync.synchronized {
          if( newCondition != conditionVar ) {
             conditionVar = newCondition
             if( newCondition == Offline ) {
                pendingCondition = NoPending
                serverLost
-            } else if( newCondition == Running ) {
-               if( pendingCondition == Booting ) {
-                  pendingCondition = NoPending
+            }
+//            else if( newCondition == Running ) {
+//               if( pendingCondition == Booting ) {
+//                  pendingCondition = NoPending
 //                  collBootCompletion.foreach( action => try {
 //                        action.apply( this )
 //                     }
 //                     catch { case e => e.printStackTrace() }
 //                  )
 //                  collBootCompletion = Queue.empty
-               }
-            }
+//               }
+//            }
             dispatch( newCondition )
          }
       }
@@ -460,16 +437,6 @@ extends Model {
       this ! OSCStatusMessage
    }
 
-   // note: this is called register instead of
-   // notify to avoid conflict with notify in java.lang.Object
-   def register : Unit = register( true )
-   def register( onOff: Boolean ) {
-      this ! notifyMsg( onOff )
-   }
-
-   def notifyMsg : OSCServerNotifyMessage = notifyMsg()
-   def notifyMsg( onOff: Boolean = true ) = OSCServerNotifyMessage( onOff )
-
    def syncMsg : OSCSyncMessage = syncMsg()
    def syncMsg( id: Int = uniqueID.nextID ) = OSCSyncMessage( id )
 
@@ -481,66 +448,6 @@ extends Model {
       c.dumpOutgoingOSC( mode, filter = {
          case OSCStatusMessage => false
          case _ => true
-      })
-   }
-
-//   def boot: Unit = boot( true )
-//   def boot( createAliveThread: Boolean ) {
-//      if( !isLocal ) error( "Server.boot : only allowed for local servers!" )
-//
-////      val whenBooted = (s: Server) => {
-////         try {
-//////            println( "notification is on" )
-////            s.register
-////            s.initTree
-////         }
-////         catch { case e: IOException => printError( "Server.boot", e )}
-////      }
-////
-//      condSync.synchronized {
-//         if( pendingCondition != NoPending ) {
-//            println( "Server:boot - ongoing operations" )
-//            return
-//         }
-//         if( conditionVar == Running ) {
-//            println( "Server:boot - already running" )
-//            return
-//         }
-//
-//         pendingCondition  = Booting
-//         condition         = Booting
-//
-//         try {
-////            createNewAllocators
-//// XXX resetBufferAutoInfo
-//
-////            addDoWhenBooted( whenBooted )
-//            if( bootThread.isEmpty ) {
-//               val thread	= new BootThread( createAliveThread )
-//               bootThread	= Some( thread )
-//               thread.start
-//            } else error( "Illegal state : boot thread still set" )
-//         }
-//         catch { case e => {
-////            removeDoWhenBooted( whenBooted )
-//            try {
-//               stopAliveThread
-//            }
-//            catch { case e2 => printError( "Server.boot", e2 )}
-//            condition = Offline // pendingCondition = NoPending
-//            throw e
-//         }}
-//      }
-//   }
-
-   private def serverContacted {
-      createNewAllocators
-//      this ! notifyMsg( true )
-      this !? (5000L, notifyMsg( true ), {
-         case OSCMessage( "/done", "/notify" ) => {
-            initTree
-            condition = Running
-         }
       })
    }
 
@@ -557,47 +464,9 @@ extends Model {
          condition = Offline
       }
    }
-  
-   // note: we do _not_ reset the nodeIDallocator here
-   def initTree {
-      nodeMgr.register( defaultGroup )
-      this ! defaultGroup.newMsg( rootNode, addToHead )
-   }
-  
-   def addDoWhenBooted( action: => Unit ) {
-      val actionFunc = (s: Server) => action
-      addDoWhenBooted( actionFunc )
-   }
-
-//   def addDoWhenBooted( action: (Server) => Unit ) {
-//      condSync.synchronized {
-//         if( condition == Running ) {
-//            try {
-//               action.apply( this )
-//            }
-//            catch { case e => e.printStackTrace() }
-//         } else {
-//            collBootCompletion = collBootCompletion.enqueue( action )
-//         }
-//      }
-//   }
-//
-//   def removeDoWhenBooted( action: (Server) => Unit ) {
-//      condSync.synchronized {
-//         collBootCompletion = collBootCompletion.filterNot( _ == action )
-//      }
-//   }
- 
-   private def createNewAllocators {
-      nodes.reset
-      busses.reset
-      buffers.reset
-      uniqueID.reset
-   }
 
    def quit {
       this ! quitMsg
-//      println( "/quit sent" )
       cleanUpAfterQuit
    }
 
@@ -612,11 +481,6 @@ extends Model {
       }
       catch { case e: IOException => printError( "Server.cleanUpAfterQuit", e )}
    }
-  
-//   def startClient {
-//      OSCReceiverActor.start
-//      c.start
-//   }
 
    private[synth] def addResponder( resp: OSCResponder ) {
       OSCReceiverActor.addHandler( resp )
@@ -626,7 +490,10 @@ extends Model {
       OSCReceiverActor.removeHandler( resp )
    }
 
-//   protected[synth] def responderSync : AnyRef = multiResponder.nodeSync
+   private[synth] def initTree {
+      nodeMgr.register( defaultGroup )
+      server ! defaultGroup.newMsg( rootNode, addToHead )
+   }
 
    def dispose {
       condSync.synchronized {
@@ -698,7 +565,8 @@ extends Model {
             counts = msg
             if( !isRunning && callServerContacted ) {
                callServerContacted = false
-               serverContacted
+//               serverContacted
+               condition = Running
             }
          }
       }

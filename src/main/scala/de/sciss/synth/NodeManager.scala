@@ -119,6 +119,7 @@ class NodeManager( server: Server ) extends Model {
 	}
 
    def getNode( id: Int ) : Option[ Node ] = sync.synchronized { nodes.get( id )}
+//   def getAll : Iterable[ Node ] = sync.synchronized { nodes }
 
    def clear {
       val rootNode = server.rootNode // new Group( server, 0 )
