@@ -417,3 +417,32 @@ val r = OSCResponder.add {
     case OSCMessage( "/tr", x.id, _, mouseX ) => println( "Dang! " + mouseX )
 }
 r.remove
+
+//////////////////////////////////////////////////////////////////////////
+
+// exporting a synth graph diagram as PDF.
+// requires that the iTextPDF v5 jar is in the system classpath
+
+val df = SynthDef("AnalogBubbles", SynthGraph.wrapOut({
+    val f = LFSaw.kr(0.4).madd(24, LFSaw.kr(List(8, 7.23)).madd(3, 80)).midicps // glissando function
+    CombN.ar(SinOsc.ar(f)*0.04, 0.2, 0.2, 4) // echoing sine wave
+}, None ))
+val f = viewDef( df )
+f.display.setBackground( java.awt.Color.white )
+
+val width    = f.display.getWidth
+val height   = f.display.getHeight
+val pageSize = new com.itextpdf.text.Rectangle(0, 0, width, height)
+val doc      = new com.itextpdf.text.Document(pageSize, 0, 0, 0, 0)
+val fileName = "/Users/rutz/Desktop/output.pdf"
+val stream   = new java.io.FileOutputStream(fileName)
+val writer   = com.itextpdf.text.pdf.PdfWriter.getInstance(doc, stream)
+doc.open
+val cb       = writer.getDirectContent
+val tp       = cb.createTemplate(width, height)
+val g2       = tp.createGraphics(width, height)
+f.display.paintDisplay(g2, new java.awt.Dimension(width, height))
+g2.dispose
+cb.addTemplate(tp, 0, 0)
+doc.close
+stream.close

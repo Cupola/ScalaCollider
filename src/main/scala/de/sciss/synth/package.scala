@@ -60,7 +60,7 @@ package object synth {
 //   implicit def intToConstant( x: Int ) = Constant( x.toFloat )
 //   implicit def doubleToConstant( x: Double ) = Constant( x.toFloat )
 
-   implicit def seqOfGEToGE( x: Seq[ GE ]) : GE = new UGenInSeq( x.flatMap( _.outputs )( breakOut ))
+   implicit def seqOfGEToGE( x: Seq[ GE ]) = new UGenInSeq( x.flatMap( _.outputs )( breakOut ))
    implicit def doneActionToGE( x: DoneAction ) = Constant( x.id )
 
 //   // ...und zurueck
