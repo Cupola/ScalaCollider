@@ -285,6 +285,9 @@ extends OSCMessage( "/c_set", indicesAndValues.flatMap( iv => List[ Any ]( iv._1
 case class OSCControlBusSetnMessage( indicesAndValues: (Int, IIdxSeq[ Float ])* )
 extends OSCMessage( "/c_setn", indicesAndValues.flatMap( iv => Vector( iv._1, iv._2.size ) ++ iv._2 ): _* )
 
+case class OSCControlBusGetMessage( index: Int* ) // fucking hell: indices is defined for SeqLike
+extends OSCMessage( "/c_get", index: _* )
+
 case class OSCGroupNewInfo( groupID: Int, addAction: Int, targetID: Int )
 case class OSCGroupNewMessage( groups: OSCGroupNewInfo* )
 extends OSCMessage( "/g_new", groups.flatMap( g => List( g.groupID, g.addAction, g.targetID )): _* )

@@ -29,6 +29,7 @@
 package de.sciss.synth
 
 import collection.immutable.{ IndexedSeq => IIdxSeq }
+import collection.mutable.{ ListBuffer }
 import osc._
 
 class AllocatorExhaustedException( reason: String )
@@ -113,6 +114,21 @@ extends Bus with ControlRated {
       // XXX replace by toIndexedSeq once it has been fixed to be immutable
       val ipairs = pairs.map( tup => (tup._1 + index, Vector( tup._2: _* )))
       OSCControlBusSetnMessage( ipairs: _* )
+   }
+
+   def getMsg = {
+      require( numChannels == 1 )
+      OSCControlBusGetMessage( index )
+   }
+
+   def getMsg( offset: Int = 0 ) = {
+      require( offset >= 0 && offset < numChannels )
+      OSCControlBusGetMessage( offset + index )
+   }
+
+   def getMsg( offsets: Int* ) = {
+      require( offsets.forall( o => (o >= 0 && o < numChannels) ))
+      OSCControlBusGetMessage( offsets.map( _ + index ): _* )
    }
 }
 
