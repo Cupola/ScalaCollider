@@ -65,22 +65,24 @@ abstract class Node extends Model {
 
    def onGo( thunk: => Unit ) {
       register
-      lazy val l: Listener = addListener {
+      lazy val l: Listener = {
          case NodeManager.NodeGo( _, _ ) => {
             removeListener( l )
             thunk
          }
       }
+      addListener( l )
    }
 
    def onEnd( thunk: => Unit ) {
       register
-      lazy val l: Listener = addListener {
+      lazy val l: Listener = {
          case NodeManager.NodeEnd( _, _ ) => {
             removeListener( l )
             thunk
          }
       }
+      addListener( l )
    }
 
    protected[synth] def updated( change: NodeManager.NodeChange ) {

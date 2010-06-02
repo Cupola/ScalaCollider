@@ -258,12 +258,13 @@ case class Buffer( server: Server, id: Int ) extends Model {
       if( forceQuery || a.isDefined ) {
          register
          a.foreach( action => {
-            lazy val l: Listener = addListener {
+            lazy val l: Listener = {
                case BufferManager.BufferInfo( _, _ ) => {
                   removeListener( l )
                   action( b )
                }
             }
+            addListener( l )
          })
       }
       (completion.message, a) match {
