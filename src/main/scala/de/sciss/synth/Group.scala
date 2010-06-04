@@ -31,7 +31,7 @@ package de.sciss.synth
 import osc._
 
 /**
- *    @version	0.12, 10-May-10
+ *    @version	0.12, 04-Jun-10
  */
 object Group {
     def play: Group = {
@@ -67,6 +67,9 @@ object Group {
 	  	group.server ! group.newMsg( target, addReplace )
       group
 	}
+
+   def apply( server: Server ) : Group = apply( server, server.nodes.nextID )
+   def apply() : Group = apply( Server.default )
 }
 
 case class Group( server: Server, id: Int )

@@ -31,13 +31,14 @@ package de.sciss.synth
 import osc._
 
 /**
- *    @version	0.15, 18-May-10
+ *    @version	0.15, 04-Jun-10
  */
 case class Synth( server: Server, id: Int )
 extends Node {
    private var defNameVar = ""
 
-	def this( server: Server = Server.default ) = this( server, server.nodes.nextID )
+	def this( server: Server ) = this( server, server.nodes.nextID )
+   def this() = this( Server.default )
 
 	def newMsg( defName: String, target: Node = server.defaultGroup, args: Seq[ ControlSetMap ] = Nil,
                addAction: AddAction = addToHead ) = {
@@ -75,5 +76,6 @@ object Synth {
 	def replace( target: Node, defName: String, args: Seq[ ControlSetMap ] = Nil ) : Synth =
       play( defName, args, target, addReplace )
 
-   def apply( server: Server = Server.default ) : Synth = apply( server, server.nodes.nextID )
+   def apply( server: Server ) : Synth = apply( server, server.nodes.nextID )
+   def apply() : Synth = apply( Server.default )
 }
