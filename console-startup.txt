@@ -1,6 +1,14 @@
 import math._
 import de.sciss.synth._
-import de.sciss.synth.SC._
 import de.sciss.synth.io._
+import de.sciss.synth.osc._
 import de.sciss.synth.ugen._
-val s = new PlainServer()
+val so = new ServerOptionsBuilder()
+var s: Server = null
+def boot {
+   val booting = Server.boot( options = so.build )
+   booting.addListener {
+      case BootingServer.Running( srv ) => s = srv
+   }
+   booting.start
+}

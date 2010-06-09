@@ -1,4 +1,4 @@
-h2. ScalaCollider ==<small>-- version 0.12 (built 17-may-10) --</small>==
+h2. ScalaCollider ==<small>-- version 0.14 (built 09-jun-10) --</small>==
 
 h3. statement
 
@@ -6,7 +6,7 @@ ScalaCollider is a SuperCollider client for the Scala language. It is (C)opyrigh
 
 h3. requirements / installation
 
-ScalaOSC currently compiles against Scala 2.8.0.RC2. It requires Java 1.6 and SuperCollider 3.3.1+. It depends on ScalaOSC ( "github.com/Sciss/ScalaOSC":http://github.com/Sciss/ScalaOSC ) and ScalaAudioFile ( "github.com/Sciss/ScalaAudioFile":http://github.com/Sciss/ScalaAudioFile
+ScalaCollider currently compiles against Scala 2.8.0.RC2. Note that RC3 currently has a bug that prevents ScalaCollider from compiling. It requires Java 1.6 and SuperCollider 3.3.1+. It depends on ScalaOSC ( "github.com/Sciss/ScalaOSC":http://github.com/Sciss/ScalaOSC ) and ScalaAudioFile ( "github.com/Sciss/ScalaAudioFile":http://github.com/Sciss/ScalaAudioFile
 
 The repository contains a project file for Intellij IDEA 9 CE, and project files for sbt. Targets for sbt:
 
@@ -28,7 +28,11 @@ which should find ScalaOSC and ScalaAudioFile in your local Ivy repository.
 
 h3. running the demo
 
-The demo target starts a REPL and executes the file @console-startup.txt@ which by default imports the necessary packages and creates a default server. make sure that @s.options.programPath.value@ is set correctly. ScalaCollider will by default read the environment variable @SC_HOME@. Environment variables are stored depending on your operating system. On OS X, if you use the app-bundle of ScalaCollider-Swing, you can access them from the terminal:
+The demo target starts a REPL and executes the file @console-startup.txt@ which by default imports the necessary packages, creates a server-options builder bound tot @so@ and defines a @boot@ method. make sure that @so.programPath@ is set correctly:
+
+@scala> so.programPath = "/to/my/scsynth"@
+
+You might omit this, as ScalaCollider will by default read the environment variable @SC_HOME@. Environment variables are stored depending on your operating system. On OS X, if you use the app-bundle of ScalaCollider-Swing, you can access them from the terminal:
 
 pre. $ touch ~/.MacOSX/environment.plist
 $ open ~/.MacOSX/environment.plist
@@ -37,7 +41,7 @@ On the other hand, if you run ScalaCollider from a Bash terminal, you instead ed
 
 Finally, to boot the server:
 
-@scala> s.boot@
+@scala> boot@
 
 Please refer to @ExampleCmd.txt@ for some example code. There is also an introductory video for the "Swing frontend":http://github.com/Sciss/ScalaColliderSwing at "www.screencast.com/t/YjUwNDZjMT":http://www.screencast.com/t/YjUwNDZjMT
 

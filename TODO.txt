@@ -1,6 +1,6 @@
 - for missing UGens, refer to ugen_list.scd
 
-18-May-10
+09-Jun-10
 
 - the Buffer delay UGens set a 'done' flag when they are finished playing. // which ones?
 
@@ -8,4 +8,4 @@
 [OK]	Buffer
 [OK]	ControlDesc
 [OK]	Node
-	Server
+[getting there]	Server
