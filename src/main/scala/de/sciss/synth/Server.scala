@@ -40,7 +40,7 @@ import osc._
 import math._
 
 /**
- * 	@version    0.16, 27-May-10
+ * 	@version    0.16, 09-Jun-10
  */
 object Server {
    private val allSync  = new AnyRef
@@ -127,7 +127,7 @@ object Server {
       case object Start
       case object Abort
       case object QueryServer
-      case object Aborted
+//      case object Aborted
    }
    
    private class BootingImpl @throws( classOf[ IOException ])
@@ -163,7 +163,7 @@ object Server {
             p.destroy()
          } finally {
             println( "scsynth terminated (" + p.exitValue +")" )
-            bootActor ! Aborted
+            bootActor ! BootingServer.Aborted
          }            
       }
 
@@ -191,11 +191,17 @@ object Server {
                                     s.counts = counts
                                     dispatch( BootingServer.Running( s ))
                                     s.initTree
+                                    // note that we optimistically assume that if we boot the server, it
+                                    // will not die (exhausting deathBounces). if it crashes, the boot
+                                    // thread's process will know anyway. this way we avoid stupid
+                                    // server offline notifications when using slow asynchronous commands
+                                    if( createAliveThread ) s.startAliveThread( 1.0f, 0.25f, Int.MaxValue )
                                     loop { react {
                                        case QueryServer => reply( s )
                                        case Abort => abortHandler( Some( s ))
-                                       case Aborted => {
+                                       case BootingServer.Aborted => {
                                           s.bootThreadTerminated
+                                          dispatch( BootingServer.Aborted )
                                           loop { react {
                                              case Abort => reply ()
                                              case QueryServer => reply( s )
@@ -226,8 +232,9 @@ object Server {
              processThread.interrupt()
              val from = sender
              loop { react {
-                case Aborted => {
+                case BootingServer.Aborted => {
                    server.foreach( _.bootThreadTerminated )
+                   dispatch( BootingServer.Aborted )
                    from ! ()
                 }
                 case _ =>
@@ -240,17 +247,12 @@ object Server {
       processThread.start
       bootActor.start
 
-
-//         // note that we optimistically assume that if we boot the server, it
-//         // will not die (exhausting deathBounces). if it crashes, the boot
-//         // thread's process will know anyway. this way we avoid stupid
-//         // server offline notifications when using slow asynchronous commands
-//         if( createAliveThread ) startAliveThread( 1.0f, 0.25f, Int.MaxValue )
-
       def start { bootActor ! Start }
       lazy val server : Future[ Server ] = bootActor !! (QueryServer, { case s: Server => s })
       lazy val abort : Future[ Unit ] = bootActor !! (Abort, { case _ => ()})
 //      def isStopped : Boolean
+
+      override def toString = "<" + name + ">"
    }
 }
 
@@ -263,6 +265,7 @@ trait ServerLike extends Model {
 object BootingServer {
    case object Booting
    case class Running( server: Server )
+   case object Aborted
 }
 trait BootingServer extends ServerLike {
    def start : Unit
