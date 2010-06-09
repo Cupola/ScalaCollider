@@ -6,7 +6,7 @@ ScalaCollider is a SuperCollider client for the Scala language. It is (C)opyrigh
 
 h3. requirements / installation
 
-ScalaCollider currently compiles against Scala 2.8.0.RC2. Note that RC3 currently has a bug that prevents ScalaCollider from compiling. It requires Java 1.6 and SuperCollider 3.3.1+. It depends on ScalaOSC ( "github.com/Sciss/ScalaOSC":http://github.com/Sciss/ScalaOSC ) and ScalaAudioFile ( "github.com/Sciss/ScalaAudioFile":http://github.com/Sciss/ScalaAudioFile
+ScalaCollider currently compiles against Scala 2.8.0.RC2. Note that RC3 currently has a bug that prevents ScalaCollider from compiling. It requires Java 1.6 and SuperCollider 3.3.1+. It depends on ScalaOSC ( "github.com/Sciss/ScalaOSC":http://github.com/Sciss/ScalaOSC ) and ScalaAudioFile ( "github.com/Sciss/ScalaAudioFile":http://github.com/Sciss/ScalaAudioFile )
 
 The repository contains a project file for Intellij IDEA 9 CE, and project files for sbt. Targets for sbt:
 
@@ -20,7 +20,7 @@ The easiest way to install ScalaOSC and ScalaAudioFile is to go into their respe
 
 @$ sbt publish-local@
 
-After wards, go back into the clone of the ScalaCollider git repository, and simply run
+Afterwards, go back into the clone of the ScalaCollider git repository, and simply run
 
 @$ sbt update@
 
@@ -28,7 +28,7 @@ which should find ScalaOSC and ScalaAudioFile in your local Ivy repository.
 
 h3. running the demo
 
-The demo target starts a REPL and executes the file @console-startup.txt@ which by default imports the necessary packages, creates a server-options builder bound tot @so@ and defines a @boot@ method. make sure that @so.programPath@ is set correctly:
+The demo target starts a REPL and executes the file @console-startup.txt@ which by default imports the necessary packages, creates a server-options builder bound to @so@ and defines a @boot@ method. make sure that @so.programPath@ is set correctly:
 
 @scala> so.programPath = "/to/my/scsynth"@
 
