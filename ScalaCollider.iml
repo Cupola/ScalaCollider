@@ -31,7 +31,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC2/compile/scalaaudiofile_2.8.0.RC2-0.11.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC4/compile/scalaosc_2.8.0.RC4-0.16.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -40,7 +40,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC2/compile/scalaosc_2.8.0.RC2-0.15.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC4/compile/scalaaudiofile_2.8.0.RC4-0.12.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

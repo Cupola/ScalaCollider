@@ -28,6 +28,8 @@
 
 package de.sciss.synth
 
+import ugen.SinOsc
+
 object ScalaCollider {
    val name          = "ScalaCollider"
    val version       = 0.15
@@ -37,7 +39,7 @@ object ScalaCollider {
 
    def main( args: Array[ String ]) {
       printInfo
-//      new Test
+//      test
       System.exit( 1 )
    }
 
@@ -46,13 +48,12 @@ object ScalaCollider {
          ". All rights reserved.\n\nThis is a library which cannot be executed directly.\n" )
    }
 
-//   class Test {
-//      import SC._
-//
-//      val s = new PlainServer()
-//      s.boot
-//      s.addDoWhenBooted {
-//         val b = Buffer.read( s, "sounds/a11wlk01.wav", completion = action( _.play ))
-//      }
+//   def test {
+//      val x = SynthGraph.wrapOut( SinOsc.ar )
+//      x.ugens.zipWithIndex.foreach( tup => {
+//         val (ru, idx) = tup
+//         println( "#" + idx + " : " + ru.ugen.name + "( " + ru.ugen.numInputs + " / " + ru.ugen.numOutputs + " ) -> " +
+//            ru.inputSpecs )
+//      })
 //   }
 }

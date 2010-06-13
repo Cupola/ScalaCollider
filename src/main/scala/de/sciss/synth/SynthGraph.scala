@@ -330,11 +330,15 @@ object SynthGraph {
        *    Manita, how simple things can get as soon as you
        *    clean up the sclang mess...
        */
-      private def buildControls: Map[ ControlProxyLike[ _ ], (UGen, Int) ] =
+      private def buildControls: Map[ ControlProxyLike[ _ ], (UGen, Int) ] = {
          controlProxies.groupBy( _.factory ).flatMap( tuple => {
             val (factory, proxies) = tuple
-            factory.build( proxies.toSeq: _* )
+// WARNING: there is a bug in scala 2.8.0.RC4 + RC5 that creates
+// a Stream if we'd call toSeq
+//            factory.build( proxies.toSeq: _* )
+            factory.build( proxies.toIndexedSeq: _* )
          })( breakOut )
+      }
 
       // ---- IndexedUGen ----
       private class IndexedUGen( val ugen: UGen, var index: Int, var effective: Boolean ) {
