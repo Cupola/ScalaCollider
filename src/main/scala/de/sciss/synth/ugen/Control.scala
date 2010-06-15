@@ -70,7 +70,7 @@ object ControlFactory extends ControlFactoryLike[ ControlProxy ] {
    // XXX eventually we should try to factor this out for all controlfactories...
    def build( proxies: ControlProxy* ) : Map[ ControlProxyLike[ _ ], (UGen, Int) ] = {
       val b = SynthGraph.builder
-      proxies.groupBy( _.rate ).flatMap( group => {
+      proxies.toList.groupBy( _.rate ).flatMap( group => { // warning: toList required to ensure collection is strict!
          val (rate, ps)    = group
          var numChannels   = 0
          val specialIndex  = ps.map( p => {

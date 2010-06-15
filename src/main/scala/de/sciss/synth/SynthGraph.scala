@@ -333,10 +333,7 @@ object SynthGraph {
       private def buildControls: Map[ ControlProxyLike[ _ ], (UGen, Int) ] = {
          controlProxies.groupBy( _.factory ).flatMap( tuple => {
             val (factory, proxies) = tuple
-// WARNING: there is a bug in scala 2.8.0.RC4 + RC5 that creates
-// a Stream if we'd call toSeq
-//            factory.build( proxies.toSeq: _* )
-            factory.build( proxies.toIndexedSeq: _* )
+            factory.build( proxies.toSeq: _* )
          })( breakOut )
       }
 
