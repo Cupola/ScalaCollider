@@ -114,7 +114,7 @@ case class Buffer( server: Server, id: Int ) extends Model {
 
    def free { server ! freeMsg }
 
-	def free( completion: Option[ OSCMessage ]) {
+	def free( completion: Option[ OSCMessage ] = None ) {
 		server ! freeMsg( completion, true )
 	}
 
@@ -127,7 +127,7 @@ case class Buffer( server: Server, id: Int ) extends Model {
     *                      <code>false</code> here, and manually release the id, using the <code>release</code>
     *                      method
     */
-	def freeMsg( completion: Option[ OSCMessage ], release: Boolean = true ) = {
+	def freeMsg( completion: Option[ OSCMessage ] = None, release: Boolean = true ) = {
       if( release ) this.release
       OSCBufferFreeMessage( id, completion )
 	}
@@ -150,7 +150,7 @@ case class Buffer( server: Server, id: Int ) extends Model {
 
 	def closeMsg: OSCBufferCloseMessage = closeMsg( None )
 
-	def closeMsg( completion: Option[ OSCMessage ]) =
+	def closeMsg( completion: Option[ OSCMessage ] = None ) =
       OSCBufferCloseMessage( id, completion )
 
 //	def alloc { server ! allocMsg }
