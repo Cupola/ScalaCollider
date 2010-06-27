@@ -189,6 +189,7 @@ object Server {
                                  case counts: OSCStatusReplyMessage => {
                                     val s = new Server( name, c, addr, options, clientOptions )
                                     s.counts = counts
+                                    dispatch( BootingServer.Preparing( s ))
                                     s.initTree
                                     dispatch( BootingServer.Running( s ))
                                     // note that we optimistically assume that if we boot the server, it
@@ -263,9 +264,11 @@ trait ServerLike extends Model {
 }
 
 object BootingServer {
-   case object Booting
-   case class Running( server: Server )
-   case object Aborted
+   sealed abstract class Condition
+   case object Booting extends Condition
+   case class Preparing( server: Server ) extends Condition
+   case class Running( server: Server ) extends Condition
+   case object Aborted extends Condition
 }
 trait BootingServer extends ServerLike {
    def start : Unit
