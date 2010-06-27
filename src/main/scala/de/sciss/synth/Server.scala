@@ -40,7 +40,7 @@ import osc._
 import math._
 
 /**
- * 	@version    0.16, 09-Jun-10
+ * 	@version    0.16, 27-Jun-10
  */
 object Server {
    private val allSync  = new AnyRef
@@ -189,8 +189,8 @@ object Server {
                                  case counts: OSCStatusReplyMessage => {
                                     val s = new Server( name, c, addr, options, clientOptions )
                                     s.counts = counts
-                                    dispatch( BootingServer.Running( s ))
                                     s.initTree
+                                    dispatch( BootingServer.Running( s ))
                                     // note that we optimistically assume that if we boot the server, it
                                     // will not die (exhausting deathBounces). if it crashes, the boot
                                     // thread's process will know anyway. this way we avoid stupid
