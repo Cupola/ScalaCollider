@@ -30,6 +30,9 @@ package de.sciss.synth
 
 import collection.immutable.{ IndexedSeq => IIdxSeq }
 
+/**
+ *    @version 0.11, 01-Jul-10
+ */
 trait ControlSetMap {
    def toSetSeq: IIdxSeq[ Any ]
    def toSetnSeq: IIdxSeq[ Any ]
@@ -47,18 +50,33 @@ extends ControlSetMap {
    def toSetnSeq: IIdxSeq[ Any ] = key +: values.size +: values
 }
 
-trait ControlBusMap {
+trait ControlKBusMap {
 //   def toMapSeq: IIdxSeq[ Any ]
    def toMapnSeq: IIdxSeq[ Any ]
 }
 
-case class SingleControlBusMap protected[synth]( key: Any, index: Int )
-extends ControlBusMap {
+case class SingleControlKBusMap protected[synth]( key: Any, index: Int )
+extends ControlKBusMap {
    def toMapSeq: IIdxSeq[ Any ]  = Vector( key, index )
    def toMapnSeq: IIdxSeq[ Any ] = Vector( key, index, 1 )
 }
 
-case class MultiControlBusMap protected[synth]( key: Any, index: Int, numChannels: Int )
-extends ControlBusMap {
+case class MultiControlKBusMap protected[synth]( key: Any, index: Int, numChannels: Int )
+extends ControlKBusMap {
    def toMapnSeq: IIdxSeq[ Any ] = Vector( key, index, numChannels )
+}
+
+trait ControlABusMap {
+   def toMapanSeq: IIdxSeq[ Any ]
+}
+
+case class SingleControlABusMap protected[synth]( key: Any, index: Int )
+extends ControlABusMap {
+   def toMapaSeq: IIdxSeq[ Any ]  = Vector( key, index )
+   def toMapanSeq: IIdxSeq[ Any ] = Vector( key, index, 1 )
+}
+
+case class MultiControlABusMap protected[synth]( key: Any, index: Int, numChannels: Int )
+extends ControlABusMap {
+   def toMapanSeq: IIdxSeq[ Any ] = Vector( key, index, numChannels )
 }

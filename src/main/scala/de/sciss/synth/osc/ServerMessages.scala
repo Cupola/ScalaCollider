@@ -30,15 +30,15 @@ package de.sciss.synth.osc
 
 import de.sciss.scalaosc.{ OSCException, OSCMessage, OSCPacket, OSCPacketCodec }
 import de.sciss.scalaosc.OSCPacket._
-import de.sciss.synth.{ ControlBusMap, ControlSetMap, SingleControlBusMap }
 import de.sciss.synth.io.{ AudioFileType, SampleFormat }
 import java.nio.ByteBuffer
 import collection.breakOut
 import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
 import collection.mutable.ListBuffer
+import de.sciss.synth._
 
 /**
- *    @version	0.13, 19-Jun-10
+ *    @version	0.13, 01-Jul-10
  */
 trait OSCMessageCodec {
 	def decodeMessage( name: String, b: ByteBuffer ) : OSCMessage
@@ -404,14 +404,20 @@ case class OSCNodeFreeMessage( ids: Int* )
 extends OSCMessage( "/n_free", ids: _* )
 with OSCSyncCmd
 
-case class OSCNodeMapMessage( id: Int, mappings: SingleControlBusMap* )
+case class OSCNodeMapMessage( id: Int, mappings: SingleControlKBusMap* )
 extends OSCMessage( "/n_map", (id +: mappings.flatMap( _.toMapSeq )): _* )
 with OSCSyncCmd
 
-//case class OSCNodeMapInfo( control: Any, index: Int, numChannels: Int )
-
-case class OSCNodeMapnMessage( id: Int, mappings: ControlBusMap* )
+case class OSCNodeMapnMessage( id: Int, mappings: ControlKBusMap* )
 extends OSCMessage( "/n_mapn", (id +: mappings.flatMap( _.toMapnSeq )): _* )
+with OSCSyncCmd
+
+case class OSCNodeMapaMessage( id: Int, mappings: SingleControlABusMap* )
+extends OSCMessage( "/n_mapa", (id +: mappings.flatMap( _.toMapaSeq )): _* )
+with OSCSyncCmd
+
+case class OSCNodeMapanMessage( id: Int, mappings: ControlABusMap* )
+extends OSCMessage( "/n_mapan", (id +: mappings.flatMap( _.toMapanSeq )): _* )
 with OSCSyncCmd
 
 case class OSCNodeFillInfo( control: Any, numChannels: Int, value: Float )

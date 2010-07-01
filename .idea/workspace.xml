@@ -2,11 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" readonly="true" id="01886865-ff38-4eb7-a79d-92e783f03245" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Server.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Server.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Node.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Node.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ControlMappings.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ControlMappings.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala" />
     </list>
-    <ignored path=".idea/workspace.xml" />
     <ignored path="ScalaCollider.iws" />
+    <ignored path=".idea/workspace.xml" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,10 +75,46 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Server.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Server.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Server.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="270" column="40" selection-start="9979" selection-end="9979" vertical-scroll-proportion="1.7875507">
+            <state line="270" column="40" selection-start="9979" selection-end="9979" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ControlMappings.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ControlMappings.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="33" column="30" selection-start="1101" selection-end="1101" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Node.scala" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Node.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="176" column="19" selection-start="4623" selection-end="4623" vertical-scroll-proportion="0.43537414">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ServerMessages.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="419" column="65" selection-start="16387" selection-end="16387" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="package.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="83" column="69" selection-start="3973" selection-end="3973" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -91,22 +130,22 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/NodeManager.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Bus.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/FutureActor.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Node.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Synth.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Group.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraph.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Control.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Buffer.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala" />
         <option value="$PROJECT_DIR$/project/build.properties" />
         <option value="$PROJECT_DIR$/project/build/ScalaCollider.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ScalaCollider.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Server.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ControlMappings.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Node.scala" />
       </list>
     </option>
   </component>
@@ -314,12 +353,102 @@
               <option name="myItemId" value="main" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="synth" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Node.scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="synth" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ControlMappings.scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="synth" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="osc" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ScalaCollider" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="Favorites" />
       <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -335,9 +464,9 @@
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
-    <property name="options.searchVisible" value="true" />
-    <property name="options.splitter.details.proportions" value="0.2" />
     <property name="dynamic.classpath" value="false" />
+    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -554,7 +683,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="5" y="22" width="1362" height="877" extended-state="0" />
+    <frame x="-16" y="194" width="1380" height="878" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286445" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -565,7 +694,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32977912" sideWeight="0.0" order="0" side_tool="false" content_ui="tabs" x="508" y="69" width="387" height="782" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3095417" sideWeight="0.0" order="0" side_tool="false" content_ui="tabs" x="508" y="69" width="387" height="782" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39897698" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32736573" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
@@ -612,16 +741,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Control.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="72" column="118" selection-start="2809" selection-end="2809" vertical-scroll-proportion="0.020463847" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FSinOsc.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="73" column="27" selection-start="2606" selection-end="2606" vertical-scroll-proportion="0.12005457" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Noise.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="142" column="22" selection-start="5422" selection-end="5422" vertical-scroll-proportion="0.01992032" />
@@ -652,11 +771,6 @@
         <state line="152" column="57" selection-start="5243" selection-end="5243" vertical-scroll-proportion="0.020325202" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="156" column="29" selection-start="5331" selection-end="5331" vertical-scroll-proportion="0.69721115" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/GE.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="82" column="27" selection-start="2898" selection-end="2898" vertical-scroll-proportion="0.76095617" />
@@ -665,11 +779,6 @@
     <entry file="file://$PROJECT_DIR$/project/build/ScalaCollider.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="5" column="52" selection-start="245" selection-end="245" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="39" column="14" selection-start="1186" selection-end="1209" vertical-scroll-proportion="0.020297699" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ScalaCollider.scala">
@@ -684,14 +793,40 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraph.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="124" column="43" selection-start="4362" selection-end="4362" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="124" column="43" selection-start="4362" selection-end="4362" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Server.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="270" column="40" selection-start="9979" selection-end="9979" vertical-scroll-proportion="1.7875507">
+        <state line="270" column="40" selection-start="9979" selection-end="9979" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ControlMappings.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="33" column="30" selection-start="1101" selection-end="1101" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/package.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="83" column="69" selection-start="3973" selection-end="3973" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="419" column="65" selection-start="16387" selection-end="16387" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Node.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="176" column="19" selection-start="4623" selection-end="4623" vertical-scroll-proportion="0.43537414">
           <folding />
         </state>
       </provider>

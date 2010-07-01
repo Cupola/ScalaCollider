@@ -44,7 +44,7 @@ case object addAfter    extends AddAction( 3 )
 case object addReplace  extends AddAction( 4 )
 
 /**
- *    @version    0.14, 22-Apr-10
+ *    @version    0.14, 01-Jul-10
  */
 abstract class Node extends Model {
    import Model._
@@ -152,33 +152,33 @@ abstract class Node extends Model {
   		setMsg( "gate" -> value )
 	}
 
-   def map( pairs: SingleControlBusMap* ) {
+   def map( pairs: SingleControlKBusMap* ) {
       server ! mapMsg( pairs: _* )
    }
 
-   def mapMsg( pairs: SingleControlBusMap* ) =
+   def mapMsg( pairs: SingleControlKBusMap* ) =
       OSCNodeMapMessage( id, pairs: _* )
    
-//   def mapn( control: ControlID, index: Int, numControls: Int ) {
-//      server ! mapnMsg( OSCNodeMapInfo( control, index, numControls ))
-//   }
-
-//   def mapn( control: ControlID, bus: ControlBus ) {
-//      server ! mapnMsg( OSCNodeMapInfo( control, bus.index, bus.numChannels ))
-//   }
-
-  	def mapn( mappings: ControlBusMap* ) {
+  	def mapn( mappings: ControlKBusMap* ) {
   		server ! mapnMsg( mappings: _* )
   	}
   	
-//   def mapnMsg( control: ControlID, index: Int, numControls: Int ) =
-//      OSCNodeMapnMessage( id, OSCNodeMapInfo( control, index, numControls ))
-
-//   def mapnMsg( control: ControlID, bus: ControlBus ) =
-//      OSCNodeMapnMessage( id, OSCNodeMapInfo( control, bus.index, bus.numChannels ))
-
-  	def mapnMsg( mappings: ControlBusMap* ) =
+  	def mapnMsg( mappings: ControlKBusMap* ) =
   		OSCNodeMapnMessage( id, mappings: _* )
+
+   def mapa( pairs: SingleControlABusMap* ) {
+      server ! mapaMsg( pairs: _* )
+   }
+
+   def mapaMsg( pairs: SingleControlABusMap* ) =
+      OSCNodeMapaMessage( id, pairs: _* )
+
+  	def mapan( mappings: ControlABusMap* ) {
+  		server ! mapanMsg( mappings: _* )
+  	}
+
+  	def mapanMsg( mappings: ControlABusMap* ) =
+  		OSCNodeMapanMessage( id, mappings: _* )
 
    def fill( control: Any, numChannels: Int, value: Float ) {
       server ! fillMsg( control, numChannels, value )

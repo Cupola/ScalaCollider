@@ -81,12 +81,16 @@ package object synth {
    implicit def intFloatsControlSet( tup: (Int, IIdxSeq[ Float ]))         = MultiControlSetMap( tup._1, tup._2 )
    implicit def stringFloatsControlSet( tup: (String, IIdxSeq[ Float ]))   = MultiControlSetMap( tup._1, tup._2 )
 
-   implicit def intIntControlBus( tup: (Int, Int) )               = SingleControlBusMap( tup._1, tup._2 )
-   implicit def stringIntControlBus( tup: (String, Int) )         = SingleControlBusMap( tup._1, tup._2 )
-   implicit def intIntIntControlBus( tup: (Int, Int, Int) )       = MultiControlBusMap( tup._1, tup._2, tup._3 )
-   implicit def stringIntIntControlBus( tup: (String, Int, Int) ) = MultiControlBusMap( tup._1, tup._2, tup._3 )
-   implicit def intBusControlBus( tup: (Int, ControlBus) )        = MultiControlBusMap( tup._1, tup._2.index, tup._2.numChannels )
-   implicit def stringBusControlBus( tup: (String, ControlBus) )  = MultiControlBusMap( tup._1, tup._2.index, tup._2.numChannels )
+   implicit def intIntControlKBus( tup: (Int, Int) )                 = SingleControlKBusMap( tup._1, tup._2 )
+   implicit def stringIntControlKBus( tup: (String, Int) )           = SingleControlKBusMap( tup._1, tup._2 )
+   implicit def intIntControlABus( tup: (Int, Int) )                 = SingleControlABusMap( tup._1, tup._2 )
+   implicit def stringIntControlABus( tup: (String, Int) )           = SingleControlABusMap( tup._1, tup._2 )
+//   implicit def intIntIntControlBus( tup: (Int, Int, Int) )        = MultiControlBusMap( tup._1, tup._2, tup._3 )
+//   implicit def stringIntIntControlBus( tup: (String, Int, Int) )  = MultiControlBusMap( tup._1, tup._2, tup._3 )
+   implicit def intKBusControlKBus( tup: (Int, ControlBus) )         = MultiControlKBusMap( tup._1, tup._2.index, tup._2.numChannels )
+   implicit def stringKBusControlKBus( tup: (String, ControlBus) )   = MultiControlKBusMap( tup._1, tup._2.index, tup._2.numChannels )
+   implicit def intABusControlABus( tup: (Int, AudioBus) )           = MultiControlABusMap( tup._1, tup._2.index, tup._2.numChannels )
+   implicit def stringABusControlABus( tup: (String, AudioBus) )     = MultiControlABusMap( tup._1, tup._2.index, tup._2.numChannels )
 
    // pimping
    implicit def stringToControlProxyFactory( name: String ) = new ControlProxyFactory( name )
