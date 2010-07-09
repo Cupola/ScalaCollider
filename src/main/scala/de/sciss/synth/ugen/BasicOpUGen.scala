@@ -34,7 +34,7 @@ import SynthGraph._
 import math._
 
 /**
- *    @version 0.12, 13-May-10
+ *    @version 0.12, 09-Jul-10
  */
 object MulAdd {
   def ar( in: GE, mul: GE, add: GE ) : GE = {
@@ -175,7 +175,7 @@ object BinaryOpUGen {
       protected def make1( a: Float, b: Float ) = a + b
       override protected[synth] def make1( a: UGenIn, b: UGenIn ) : GE = (a, b) match {
          case (c(0), _)       => b
-         case (_, c(0))       => b
+         case (_, c(0))       => a
          case _               => super.make1( a, b )
       }
    }
@@ -184,7 +184,7 @@ object BinaryOpUGen {
       protected def make1( a: Float, b: Float ) = a - b
       override protected[synth] def make1( a: UGenIn, b: UGenIn ) : GE = (a, b) match {
          case (c(0), _)       => -b
-         case (_, c(0))       => b
+         case (_, c(0))       => a
          case _               => super.make1( a, b )
       }
    }
