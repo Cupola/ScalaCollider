@@ -33,6 +33,9 @@ import ugen.{ EnvGen, Out, Silent }
 import collection.breakOut
 import collection.immutable.{ IndexedSeq => IIdxSeq, Stack => IStack }
 
+/**
+ *    @version 0.11, 09-Jul-10
+ */
 case class SynthGraph( constants: IIdxSeq[ Float ], controlValues: IIdxSeq[ Float ],
                        controlNames: IIdxSeq[ (String, Int) ], ugens: IIdxSeq[ SynthGraph.RichUGen ]) {
 //   override lazy val hashCode = ... TODO: figure out how case class calculates it...
@@ -179,13 +182,14 @@ object SynthGraph {
    def builder: SynthGraphBuilder = builders.get
 
    def apply( thunk: => GE ) : SynthGraph = {
-      val b = new BuilderImpl
+      val b    = new BuilderImpl
+      val old  = builders.get()
       builders.set( b )
       try {
          thunk
          b.build
       } finally {
-         builders.set( BuilderDummy )
+         builders.set( old ) // BuilderDummy
       }
    }
 

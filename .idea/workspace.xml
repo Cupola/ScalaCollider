@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" readonly="true" id="01886865-ff38-4eb7-a79d-92e783f03245" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/DoneAction.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/DoneAction.scala" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/AsyncOSCPacket.scala" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraph.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraph.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path=".idea/workspace.xml" />
@@ -64,10 +63,19 @@
   <component name="FileColors" enabled="true" enabledForTabs="true" />
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="DoneAction.scala" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/DoneAction.scala">
+      <file leaf-file-name="SynthGraph.scala" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraph.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="112" column="3" selection-start="3760" selection-end="3760" vertical-scroll-proportion="0.9205298">
+            <state line="36" column="30" selection-start="1208" selection-end="1208" vertical-scroll-proportion="0.2027027">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SynthGraphBuilder.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraphBuilder.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="32" column="6" selection-start="1075" selection-end="1075" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -87,7 +95,6 @@
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Synth.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Group.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraph.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Control.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Buffer.scala" />
         <option value="$PROJECT_DIR$/project/build.properties" />
@@ -99,6 +106,7 @@
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Node.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/DoneAction.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraph.scala" />
       </list>
     </option>
   </component>
@@ -137,6 +145,8 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
+      <pane id="Favorites" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -429,8 +439,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Favorites" />
-      <pane id="PackagesPane" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -447,9 +455,9 @@
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
-    <property name="dynamic.classpath" value="false" />
-    <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
+    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="dynamic.classpath" value="false" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -666,7 +674,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="15" y="22" width="1380" height="878" extended-state="0" />
+    <frame x="5" y="22" width="1380" height="878" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286445" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -677,7 +685,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3298272" sideWeight="0.0" order="0" side_tool="false" content_ui="tabs" x="508" y="69" width="387" height="782" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.31780615" sideWeight="0.0" order="0" side_tool="false" content_ui="tabs" x="508" y="69" width="387" height="782" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39897698" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32736573" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
@@ -724,11 +732,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Env.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="208" column="21" selection-start="7013" selection-end="7013" vertical-scroll-proportion="0.7808765" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/Buffer.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="152" column="57" selection-start="5243" selection-end="5243" vertical-scroll-proportion="0.020325202" />
@@ -784,11 +787,6 @@
         <state line="270" column="40" selection-start="9979" selection-end="9979" vertical-scroll-proportion="0.02027027" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraph.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="124" column="43" selection-start="4362" selection-end="4362" vertical-scroll-proportion="0.01986755" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/osc/ServerMessages.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="419" column="65" selection-start="16387" selection-end="16387" vertical-scroll-proportion="0.24503312" />
@@ -801,7 +799,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/DoneAction.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="112" column="3" selection-start="3760" selection-end="3760" vertical-scroll-proportion="0.9205298">
+        <state line="112" column="3" selection-start="3760" selection-end="3760" vertical-scroll-proportion="0.8410596" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraphBuilder.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="32" column="6" selection-start="1075" selection-end="1075" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraph.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="36" column="30" selection-start="1208" selection-end="1208" vertical-scroll-proportion="0.2027027">
           <folding />
         </state>
       </provider>
