@@ -169,10 +169,10 @@ object SynthDef {
 
    var defaultDir    = System.getProperty( "java.io.tmpdir" )
 
-   def apply( name: String )( thunk: => GE ) : SynthDef = SynthDef( name, SynthGraph( thunk ))
+   def apply( name: String )( thunk: => Unit ) : SynthDef = SynthDef( name, SynthGraph( thunk ))
 
    def recv( server: Server = Server.default, name: String, completion: Completion = NoCompletion )
-           ( thunk: => GE ) : SynthDef = {
+           ( thunk: => Unit ) : SynthDef = {
       val d = apply( name )( thunk )
       d.recv( server, completion )
       d
