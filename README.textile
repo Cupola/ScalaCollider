@@ -6,7 +6,7 @@ ScalaCollider is a SuperCollider client for the Scala language. It is (C)opyrigh
 
 h3. requirements / installation
 
-ScalaCollider currently compiles against Scala 2.8.0.RC2. Note that RC3 currently has a bug that prevents ScalaCollider from compiling. It requires Java 1.6 and SuperCollider 3.3.1+. It depends on ScalaOSC ( "github.com/Sciss/ScalaOSC":http://github.com/Sciss/ScalaOSC ) and ScalaAudioFile ( "github.com/Sciss/ScalaAudioFile":http://github.com/Sciss/ScalaAudioFile )
+ScalaCollider currently compiles against Scala 2.8.0. It requires Java 1.6 and SuperCollider 3.3.1+. It depends on ScalaOSC ( "github.com/Sciss/ScalaOSC":http://github.com/Sciss/ScalaOSC ) and ScalaAudioFile ( "github.com/Sciss/ScalaAudioFile":http://github.com/Sciss/ScalaAudioFile )
 
 The repository contains a project file for Intellij IDEA 9 CE, and project files for sbt. Targets for sbt:
 
