@@ -210,3 +210,64 @@ private[ugen] trait UGen7Args {
                         arg6: GE, arg7: GE ) : GE =
       make( scalar, arg1, arg2, arg3, arg4, arg5, arg6, arg7 )
 }
+
+private[ugen] trait UGen9ArgsIndiv {
+   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn, arg5: UGenIn,
+              arg6: UGenIn, arg7: UGenIn, arg8: UGenIn, arg9: UGenIn, _indiv: Int ) : GE
+   private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE,
+                     arg7: GE, arg8: GE, arg9: GE ) : GE =
+     simplify( for( List( a1, a2, a3, a4, a5, a6, a7, a8, a9 ) <-
+      expand( arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 ))
+       yield this( rate, a1, a2, a3, a4, a5, a6, a7, a8, a9, individuate ))
+
+   protected def arExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE, arg7: GE, arg8: GE,
+                        arg9: GE ) : GE =
+      make( audio, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 )
+   protected def krExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE, arg7: GE, arg8: GE,
+                        arg9: GE ) : GE =
+      make( control, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 )
+   protected def irExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE, arg7: GE, arg8: GE,
+                        arg9: GE ) : GE =
+      make( scalar, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 )
+}
+
+private[ugen] trait UGen10ArgsIndiv {
+   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn, arg5: UGenIn,
+              arg6: UGenIn, arg7: UGenIn, arg8: UGenIn, arg9: UGenIn, arg10: UGenIn, _indiv: Int ) : GE
+   private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE,
+                     arg7: GE, arg8: GE, arg9: GE, arg10: GE ) : GE =
+     simplify( for( List( a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 ) <-
+      expand( arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 ))
+       yield this( rate, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, individuate ))
+
+   protected def arExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE, arg7: GE, arg8: GE,
+                        arg9: GE, arg10: GE ) : GE =
+      make( audio, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 )
+   protected def krExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE, arg7: GE, arg8: GE,
+                        arg9: GE, arg10: GE ) : GE =
+      make( control, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 )
+   protected def irExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE, arg7: GE, arg8: GE,
+                        arg9: GE, arg10: GE ) : GE =
+      make( scalar, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 )
+}
+
+private[ugen] trait UGen12ArgsIndiv {
+   def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn, arg5: UGenIn,
+              arg6: UGenIn, arg7: UGenIn, arg8: UGenIn, arg9: UGenIn, arg10: UGenIn, arg11: UGenIn,
+              arg12: UGenIn, _indiv: Int ) : GE
+   private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE,
+                     arg7: GE, arg8: GE, arg9: GE, arg10: GE, arg11: GE, arg12: GE ) : GE =
+     simplify( for( List( a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12 ) <-
+      expand( arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 ))
+       yield this( rate, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, individuate ))
+
+   protected def arExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE, arg7: GE, arg8: GE,
+                        arg9: GE, arg10: GE, arg11: GE, arg12: GE ) : GE =
+      make( audio, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 )
+   protected def krExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE, arg7: GE, arg8: GE,
+                        arg9: GE, arg10: GE, arg11: GE, arg12: GE ) : GE =
+      make( control, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 )
+   protected def irExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE, arg7: GE, arg8: GE,
+                        arg9: GE, arg10: GE, arg11: GE, arg12: GE ) : GE =
+      make( scalar, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 )
+}

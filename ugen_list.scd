@@ -14,7 +14,6 @@ FFT, IFFT, PV_JensenAndersen, PV_MagFreeze, PV_RectComb2, PV_BrickWall, PV_Phase
 AccelerometerX, AccelerometerY, AccelerometerZ,
 QuadN, QuadL, QuadC, CuspN, CuspL, GbmanN, GbmanL, HenonN, HenonL, HenonC, LatoocarfianN, LatoocarfianC, LatoocarfianL, LinCongN, LinCongL, LinCongC, StandardN, StandardL, FBSineN, FBSineL, FBSineC, LorenzL,
 Spring, Ball, TBall,
-Gendy1, Gendy2, Gendy3,
 StereoConvolution2L, PartConv,
 Pluck,
 MoogFF
