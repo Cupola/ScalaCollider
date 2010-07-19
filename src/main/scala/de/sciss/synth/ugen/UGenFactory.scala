@@ -194,6 +194,13 @@ private[ugen] trait UGen6Args {
       make( scalar, arg1, arg2, arg3, arg4, arg5, arg6 )
 }
 
+private[ugen] trait UGen6RArgs {
+   def apply( arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn, arg5: UGenIn, arg6: UGenIn ) : GE
+   protected def make( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE ) : GE =
+      simplify( for( List( a1, a2, a3, a4, a5, a6 ) <- expand( arg1, arg2, arg3, arg4, arg5, arg6 ))
+         yield this( a1, a2, a3, a4, a5, a6 ))
+}
+
 private[ugen] trait UGen7Args {
    def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn,
               arg5: UGenIn, arg6: UGenIn, arg7: UGenIn ) : GE
