@@ -31,6 +31,9 @@ package de.sciss.synth.ugen
 import de.sciss.synth.{ audio, control, GE, Rate, SynthGraph, UGenIn, scalar }
 import SynthGraph._  // simplify, individuate
 
+/**
+ *    @version 0.11, 19-Jul-10
+ */
 private[ugen] trait UGen1Args {
    def apply( rate: Rate, arg1: UGenIn ) : GE
    private def make( rate: Rate, arg1: GE ) : GE =
@@ -229,6 +232,16 @@ private[ugen] trait UGen9ArgsIndiv {
    protected def irExp( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE, arg7: GE, arg8: GE,
                         arg9: GE ) : GE =
       make( scalar, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 )
+}
+
+private[ugen] trait UGen10RArgs {
+   def apply( arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn, arg5: UGenIn, arg6: UGenIn, arg7: UGenIn,
+              arg8: UGenIn, arg9: UGenIn, arg10: UGenIn ) : GE
+   protected def make( arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE, arg6: GE, arg7: GE, arg8: GE,
+                       arg9: GE, arg10: GE ) : GE =
+      simplify( for( List( a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 ) <-
+         expand( arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 ))
+            yield this( a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 ))
 }
 
 private[ugen] trait UGen10ArgsIndiv {

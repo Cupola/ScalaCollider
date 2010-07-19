@@ -2,13 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" readonly="true" id="01886865-ff38-4eb7-a79d-92e783f03245" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/GVerb.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ugen_list.scd" afterPath="$PROJECT_DIR$/ugen_list.scd" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Gendyn.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/UGenFactory.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/UGenFactory.scala" />
     </list>
-    <ignored path=".idea/workspace.xml" />
     <ignored path="ScalaCollider.iws" />
+    <ignored path=".idea/workspace.xml" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,19 +64,28 @@
   <component name="FileColors" enabled="true" enabledForTabs="true" />
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Gendyn.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Gendyn.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Gendyn.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="25" column="31" selection-start="973" selection-end="973" vertical-scroll-proportion="0.01986755">
+            <state line="25" column="31" selection-start="973" selection-end="973" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="UGenFactory.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="GVerb.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/GVerb.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="33" column="27" selection-start="1079" selection-end="1079" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="UGenFactory.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/UGenFactory.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="26" column="17" selection-start="982" selection-end="982" vertical-scroll-proportion="0.0">
+            <state line="34" column="30" selection-start="1173" selection-end="1173" vertical-scroll-proportion="0.1589404">
               <folding />
             </state>
           </provider>
@@ -86,7 +94,7 @@
       <file leaf-file-name="FreeVerb.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FreeVerb.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="36" column="7" selection-start="1101" selection-end="1110" vertical-scroll-proportion="0.0">
+            <state line="44" column="0" selection-start="1402" selection-end="1776" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -120,7 +128,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Buffer.scala" />
         <option value="$PROJECT_DIR$/project/build/ScalaCollider.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ScalaCollider.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/Server.scala" />
@@ -133,9 +140,10 @@
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthGraph.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala" />
         <option value="$PROJECT_DIR$/project/build.properties" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FreeVerb.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/UGenFactory.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Gendyn.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FreeVerb.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/GVerb.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/UGenFactory.scala" />
       </list>
     </option>
   </component>
@@ -174,8 +182,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="Favorites" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -447,40 +453,6 @@
               <option name="myItemId" value="ugen" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="UGenFactory.scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ScalaCollider" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ScalaCollider" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="synth" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ugen" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -546,75 +518,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="FSinOsc.scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ScalaCollider" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ScalaCollider" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="synth" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ugen" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="FreeVerb.scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ScalaCollider" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ScalaCollider" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="synth" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ugen" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="EnvGen.scala" />
+              <option name="myItemId" value="GVerb.scala" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -670,7 +574,9 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Favorites" />
       <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -686,9 +592,9 @@
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
-    <property name="dynamic.classpath" value="false" />
-    <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
+    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="dynamic.classpath" value="false" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -963,11 +869,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/DoneAction.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="112" column="3" selection-start="3760" selection-end="3760" vertical-scroll-proportion="0.8410596" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/SynthDef.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="130" column="37" selection-start="4479" selection-end="4479" vertical-scroll-proportion="0.0" />
@@ -1015,42 +916,43 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/project/build/ScalaCollider.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="0" selection-start="0" selection-end="791" vertical-scroll-proportion="0.38513514">
-          <folding />
-        </state>
+        <state line="20" column="0" selection-start="0" selection-end="791" vertical-scroll-proportion="0.38513514" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Noise.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="107" column="49" selection-start="3847" selection-end="3847" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FSinOsc.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="53" column="45" selection-start="1811" selection-end="1811" vertical-scroll-proportion="0.0">
+        <state line="53" column="45" selection-start="1811" selection-end="1811" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Gendyn.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="25" column="31" selection-start="973" selection-end="973" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FreeVerb.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="36" column="7" selection-start="1101" selection-end="1110" vertical-scroll-proportion="0.0">
+        <state line="44" column="0" selection-start="1402" selection-end="1776" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Noise.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/GVerb.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="107" column="49" selection-start="3847" selection-end="3847" vertical-scroll-proportion="0.0">
+        <state line="33" column="27" selection-start="1079" selection-end="1079" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/UGenFactory.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="17" selection-start="982" selection-end="982" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Gendyn.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="25" column="31" selection-start="973" selection-end="973" vertical-scroll-proportion="0.01986755">
+        <state line="34" column="30" selection-start="1173" selection-end="1173" vertical-scroll-proportion="0.1589404">
           <folding />
         </state>
       </provider>

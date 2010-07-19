@@ -1,6 +1,6 @@
 // these ugens are still missing
 
-[ SendReply, AudioControl, GVerb, LagControl,
+[ SendReply, LagControl,
 DecodeB2, PanB2, PanB, BiPanB2,
 GrainSin, GrainFM, GrainBuf, GrainIn, Warp1,
 BeatTrack, Loudness, Onsets, KeyTrack, MFCC, BeatTrack2, SpecFlatness, SpecPcile, SpecCentroid,
