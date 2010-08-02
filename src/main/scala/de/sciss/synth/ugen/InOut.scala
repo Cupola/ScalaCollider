@@ -35,8 +35,9 @@ import SynthGraph._
  *    @version	0.12, 22-Apr-10
  */
 object In {
-   def ar( bus: GE, numChannels: Int = 1 ) : GE = make( audio, bus, numChannels )
+   def ar( bus: GE, numChannels: Int = 1 ) : GE = make( audio,   bus, numChannels )
    def kr( bus: GE, numChannels: Int = 1 ) : GE = make( control, bus, numChannels )
+   def ir( bus: GE, numChannels: Int = 1 ) : GE = make( scalar,  bus, numChannels )
 
    protected def make( rate: Rate, bus: GE, numChannels: Int ) : GE = {
       simplify( for( List( b ) <- expand( bus )) yield this( rate, b, numChannels ))
@@ -86,7 +87,7 @@ abstract class AbstractOut {
    def ar( bus: GE, multi: GE ) : GE = make( audio, bus, multi )
    def kr( bus: GE, multi: GE ) : GE = make( control, bus, multi )
 
-   private def make( rate: Rate, bus: GE, multi: GE ) : GE = {
+   protected def make( rate: Rate, bus: GE, multi: GE ) : GE = {
       val args = bus :: replaceZeroesWithSilence( multi ).outputs.toList
       simplify( for( b :: m <- expand( args: _* ))
          yield this( rate, b, m, SynthGraph.individuate ))
@@ -95,7 +96,9 @@ abstract class AbstractOut {
    def apply( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ], _indiv: Int ) : GE
 }
 
-object Out extends AbstractOut
+object Out extends AbstractOut {
+   def ir( bus: GE, multi: GE ) : GE = make( scalar, bus, multi )
+}
 case class Out( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )
 extends ZeroOutUGen( (bus :: multi.toList): _* )
 

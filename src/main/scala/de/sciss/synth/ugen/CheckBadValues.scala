@@ -32,11 +32,12 @@ import de.sciss.synth._
 import SynthGraph._
 
 /**
- *    @version	0.10, 02-Jan-10
+ *    @version	0.10, 02-Aug-10
  */
 object CheckBadValues extends UGen3Args {
-  def ar( in: GE, id: GE = 0, post: GE = 2 ) : GE = arExp( in, id, post )
-  def kr( in: GE, id: GE = 0, post: GE = 2 ) : GE = krExp( in, id, post )
+   def ar( in: GE, id: GE = 0, post: GE = 2 ) : GE = arExp( in, id, post )
+   def kr( in: GE, id: GE = 0, post: GE = 2 ) : GE = krExp( in, id, post )
+   def ir( in: GE, id: GE = 0, post: GE = 2 ) : GE = irExp( in, id, post )
 }
 case class CheckBadValues( rate: Rate, in: UGenIn, id: UGenIn, post: UGenIn )
 extends SingleOutUGen( in, id, post ) with SideEffectUGen

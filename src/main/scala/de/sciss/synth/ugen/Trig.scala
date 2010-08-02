@@ -199,6 +199,7 @@ with ControlRated
 object InRange extends UGen3Args {
    def ar( in: GE, min: GE = 0, max: GE = 0 ) : GE = arExp( in, min, max )
    def kr( in: GE, min: GE = 0, max: GE = 0 ) : GE = krExp( in, min, max )
+   def ir( in: GE, min: GE = 0, max: GE = 0 ) : GE = irExp( in, min, max )
 }
 case class InRange( rate: Rate, in: UGenIn, min: UGenIn, max: UGenIn )
 extends SingleOutUGen( in, min, max )
@@ -209,6 +210,9 @@ object InRect extends UGen6Args {
 
    def kr( x: GE, y: GE, left: GE = 0, top: GE = 0, right: GE = 1, bottom: GE = 1 ) : GE =
       krExp( x, y, left, top, right, bottom )
+
+   def ir( x: GE, y: GE, left: GE = 0, top: GE = 0, right: GE = 1, bottom: GE = 1 ) : GE =
+      irExp( x, y, left, top, right, bottom )
 }
 case class InRect( rate: Rate, x: UGenIn, y: UGenIn, left: UGenIn, top: UGenIn,
                    right: UGenIn, bottom: UGenIn )
@@ -217,6 +221,7 @@ extends SingleOutUGen( x, y, left, top, right, bottom )
 object Fold extends UGen3Args {
    def ar( in: GE, min: GE = 0, max: GE = 0 ) : GE = arExp( in, min, max )
    def kr( in: GE, min: GE = 0, max: GE = 0 ) : GE = krExp( in, min, max )
+   def ir( in: GE, min: GE = 0, max: GE = 0 ) : GE = irExp( in, min, max )
 }
 case class Fold( rate: Rate, in: UGenIn, min: UGenIn, max: UGenIn )
 extends SingleOutUGen( in, min, max )
@@ -224,6 +229,7 @@ extends SingleOutUGen( in, min, max )
 object Clip extends UGen3Args {
    def ar( in: GE, min: GE = 0, max: GE = 0 ) : GE = arExp( in, min, max )
    def kr( in: GE, min: GE = 0, max: GE = 0 ) : GE = krExp( in, min, max )
+   def ir( in: GE, min: GE = 0, max: GE = 0 ) : GE = irExp( in, min, max )
 }
 case class Clip( rate: Rate, in: UGenIn, min: UGenIn, max: UGenIn )
 extends SingleOutUGen( in, min, max )

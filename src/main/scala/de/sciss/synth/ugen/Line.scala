@@ -66,6 +66,9 @@ object LinExp extends UGen5Args {
 
 	def kr( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE =
       krExp( in, srcLo, srcHi, dstLo, dstHi )
+
+   def ir( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE =
+      irExp( in, srcLo, srcHi, dstLo, dstHi )
 }
 case class LinExp( rate: Rate, in: UGenIn, srcLo: UGenIn, srcHi: UGenIn, dstLo: UGenIn, dstHi: UGenIn )
 extends SingleOutUGen( in, srcLo, srcHi, dstLo, dstHi )
@@ -76,6 +79,9 @@ object LinLin extends UGen5Args {
 
 	def kr( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE =
       krExp( in, srcLo, srcHi, dstLo, dstHi )
+
+   def ir( in: GE, srcLo: GE = 0, srcHi: GE = 1, dstLo: GE = 1, dstHi: GE = 2 ) : GE =
+      irExp( in, srcLo, srcHi, dstLo, dstHi )
 }
 case class LinLin( rate: Rate, in: UGenIn, srcLo: UGenIn, srcHi: UGenIn, dstLo: UGenIn, dstHi: UGenIn )
 extends SingleOutUGen( in, srcLo, srcHi, dstLo, dstHi )
