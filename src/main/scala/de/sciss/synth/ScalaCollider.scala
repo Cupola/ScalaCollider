@@ -28,8 +28,6 @@
 
 package de.sciss.synth
 
-import ugen.SinOsc
-
 object ScalaCollider {
    val name          = "ScalaCollider"
    val version       = 0.16
@@ -49,11 +47,35 @@ object ScalaCollider {
    }
 
 //   def test {
-//      val x = SynthGraph.wrapOut( SinOsc.ar )
-//      x.ugens.zipWithIndex.foreach( tup => {
-//         val (ru, idx) = tup
-//         println( "#" + idx + " : " + ru.ugen.name + "( " + ru.ugen.numInputs + " / " + ru.ugen.numOutputs + " ) -> " +
-//            ru.inputSpecs )
-//      })
+//      import ugen._
+////      SynthGraph {
+////         LinLin.kr( "thresh".kr( 1.0e-2 ), 1.0e-3, 1.0e-1, 32, 4 )
+////         Out.ar( 0, DC.ar( 0 ))
+////      }
+//
+//      SynthGraph.wrapOut {
+//          var n = 1        // number of keys playing
+//          Mix.fill(n) {    // mix an array of notes
+//              // calculate delay based on a random note
+//              val pitch  = IRand(36, 89)
+//              val strike = Impulse.ar(Rand(0.1,0.5), Rand(0,2*math.Pi)) * 0.1    // random period for each key
+//              val hammerEnv = Decay2.ar(strike, 0.008, 0.04)    // excitation envelope
+//              Pan2.ar(
+//                  // array of 3 strings per note
+//                  Mix.tabulate(3)( (i) => {
+//                      // detune strings, calculate delay time :
+//                      val detune = Array(-0.05, 0, 0.04)(i)
+//                      val delayTime = 1 / (pitch + detune).midicps
+//                      // each string gets own exciter :
+//                      val hammer = LFNoise2.ar(3000) * hammerEnv   // 3000 Hz was chosen by ear..
+//                      CombL.ar(hammer,   // used as a string resonator
+//                          delayTime,     // max delay time
+//                          delayTime,     // actual delay time
+//                          6)             // decay time of string
+//                  }),
+//                  (pitch - 36)/27 - 1    // pan position: lo notes left, hi notes right
+//              )
+//          }
+//      }
 //   }
 }

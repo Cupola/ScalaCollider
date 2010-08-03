@@ -446,3 +446,18 @@ g2.dispose
 cb.addTemplate(tp, 0, 0)
 doc.close
 stream.close
+
+//////////////////////////////////////////////////////////////////////////
+
+FFT example:
+
+val b = Buffer.alloc( s, 2048 )  // LocalBuf not yet implemented
+val df = SynthDef( "mag-above" ) {
+   val in  = WhiteNoise.ar( 0.2 )
+   val fft = FFT( "buf".kr, in )
+   val flt = PV_MagAbove( fft, MouseX.kr( 0, 10 ))
+   Out.ar( "out".kr( 0 ), IFFT( flt ) * List( 0.5, 0.5 ))
+}
+df.recv( s )
+val x = Synth.play( "mag-above", List( "buf" -> b.id ))
+x.free

@@ -31,10 +31,11 @@ package de.sciss.synth
 import java.io.DataOutputStream
 import ugen.{ EnvGen, Out, Silent }
 import collection.breakOut
-import collection.immutable.{ IndexedSeq => IIdxSeq, Stack => IStack }
+import collection.mutable.{ Buffer => MBuffer, Map => MMap, Set => MSet, Stack => MStack }
+import collection.immutable.{ IndexedSeq => IIdxSeq }
 
 /**
- *    @version 0.11, 09-Jul-10
+ *    @version 0.12, 02-Aug-10
  */
 case class SynthGraph( constants: IIdxSeq[ Float ], controlValues: IIdxSeq[ Float ],
                        controlNames: IIdxSeq[ (String, Int) ], ugens: IIdxSeq[ SynthGraph.RichUGen ]) {
@@ -210,29 +211,33 @@ object SynthGraph {
 
    private class BuilderImpl extends SynthGraphBuilder {
       // updated during build
-      private var ugens : IIdxSeq[ UGen ]                   = Vector.empty
-      private var ugenSet                                   = Set.empty[ UGen ]
-      private var controlValues: IIdxSeq[ Float ]           = Vector.empty
-      private var controlNames: IIdxSeq[ (String, Int) ]    = Vector.empty
-      private var controlProxies                            = Set.empty[ ControlProxyLike[ _ ]]
+      private val ugens          = MBuffer.empty[ UGen ]
+      private var ugenSet        = MSet.empty[ UGen ]
+      private var controlValues  = IIdxSeq.empty[ Float ]
+      private var controlNames   = IIdxSeq.empty[ (String, Int) ]
+      private var controlProxies = MSet.empty[ ControlProxyLike[ _ ]]
 
       def build = {
          val ctrlProxyMap        = buildControls
          // check inputs
          val (igens, constants)  = indexUGens( ctrlProxyMap )
          val indexedUGens        = sortUGens( igens )
-         val richUGens           = indexedUGens.map( iu => RichUGen( iu.ugen, iu.richInputs.map( _.create )))
+         val richUGens : IIdxSeq[ RichUGen ] =
+            indexedUGens.map( iu => RichUGen( iu.ugen, iu.richInputs.map( _.create )))( breakOut )
          SynthGraph( constants, controlValues, controlNames, richUGens )
       }
 
       private def indexUGens( ctrlProxyMap: Map[ ControlProxyLike[ _ ], (UGen, Int)]) :
-         (IIdxSeq[ IndexedUGen ], IIdxSeq[ Float ]) = {
+         (MBuffer[ IndexedUGen ], IIdxSeq[ Float ]) = {
 
-         var constantMap   = Map.empty[ Float, RichConstant ]
-         var constants     = Vector.empty[ Float ]
+         val constantMap   = MMap.empty[ Float, RichConstant ]
+         var constants     = IIdxSeq.empty[ Float ]
+         var numIneff      = ugens.size
          val indexedUGens  = ugens.zipWithIndex.map( tup => {
             val (ugen, idx) = tup
-            new IndexedUGen( ugen, idx, ugen.isInstanceOf[ SideEffectUGen ])
+            val eff        = ugen.isInstanceOf[ SideEffectUGen ]
+            if( eff ) numIneff -= 1
+            new IndexedUGen( ugen, idx, eff )
          })
          val ugenMap: Map[ UGen, IndexedUGen ] = indexedUGens.map( iu => (iu.ugen, iu))( breakOut )
          indexedUGens.foreach( iu => {
@@ -245,26 +250,28 @@ object SynthGraph {
                }
                case up: UGenProxy => {
                   val iui         = ugenMap( up.source )
-                  iu.parents    :+= iui
-                  iui.children  :+= iu
-//                  if( iu.effective && !iui.effective )
+                  iu.parents     += iui
+                  iui.children   += iu
                   new RichUGenProxyBuilder( iui, up.outputIndex )
                }
                case ControlOutProxy( proxy, outputIndex, _ ) => {
                   val (ugen, off) = ctrlProxyMap( proxy )
                   val iui         = ugenMap( ugen )
-                  iu.parents    :+= iui
-                  iui.children  :+= iu
-                  // all controls are marked to have side-effects
-                  // so we can save skip this
-//                  iui.effective  |= iu.effective
+                  iu.parents     += iui
+                  iui.children   += iu
                   new RichUGenProxyBuilder( iui, off + outputIndex )
                }
             })( breakOut )
-            if( iu.effective ) iu.richInputs.foreach( _.makeEffective )
+            if( iu.effective ) iu.richInputs.foreach( numIneff -= _.makeEffective )
          })
-//         (indexedUGens, constants)
-         (indexedUGens.filter( _.effective ), constants)
+         val filtered = if( numIneff == 0 ) indexedUGens else {
+            val res = indexedUGens.filter( _.effective )
+            res foreach { iu =>
+               iu.children = iu.children.filter( _.effective )
+            }
+            res
+         }
+         (filtered, constants)
       }
 
       /*
@@ -277,47 +284,27 @@ object SynthGraph {
        *    mNumWireBufs might be different, so it's a space not a
        *    time issue.
        */
-      private def sortUGens( indexedUGens: IIdxSeq[ IndexedUGen ]) : IIdxSeq[ IndexedUGen ] = {
+      private def sortUGens( indexedUGens: MBuffer[ IndexedUGen ]) : Array[ IndexedUGen ] = {
          indexedUGens.foreach( iu => iu.children = iu.children.sortWith( (a, b) => a.index > b.index ))
-         var sorted  = Vector.empty[ IndexedUGen ]
-         var avail   = IStack( indexedUGens.filter( _.parents.isEmpty ) : _* )
+         val sorted  = new Array[ IndexedUGen ]( indexedUGens.size )
+         val avail   = MStack( indexedUGens.filter( _.parents.isEmpty ) : _* )
+         var cnt     = 0
          while( avail.nonEmpty ) {
-            val iu   = avail.top
-            avail    = avail.pop
-            iu.index = sorted.size
-            sorted :+= iu
-            iu.children.foreach( iuc => {
-               iuc.parents = iuc.parents.patch( iuc.parents.indexOf( iu ), Nil, 1 ) // why so difficult to remove?
-               if( iuc.parents.isEmpty ) avail = avail.push( iuc )
-            })
+            val iu   = avail.pop
+            iu.index = cnt
+            sorted( cnt ) = iu
+            cnt     += 1
+            iu.children foreach { iuc =>
+               iuc.parents.remove( iuc.parents.indexOf( iu ))
+               if( iuc.parents.isEmpty ) /* avail =*/ avail.push( iuc )
+            }
          }
          sorted
       }
 
       def addUGen( ugen: UGen ) {
-         if( !ugenSet.contains( ugen )) {
-            ugenSet += ugen
-            ugens  :+= ugen
-         }
+         if( ugenSet.add( ugen )) ugens += ugen
       }
-
-//      def addUGen( ugen: UGen ) {
-//         if( !ugenSet.contains( ugen )) {
-//            addUGenInputs( ugen )
-//            ugenSet += ugen
-//            ugens  :+= ugen
-//         }
-//      }
-//
-//      private def addUGenInputs( ugen: UGen ) {
-//         val ius = ugen.inputs.collect({
-//            case u:  UGen        => u
-//            case up: UGenProxy   => up.source
-//         }).filterNot( ugenSet.contains( _ ))
-//         ius.reverse.foreach( addUGenInputs( _ ))
-//         ugenSet ++= ius
-//         ugens   ++= ius.reverse
-//      }
 
       def addControl( values: IIdxSeq[ Float ], name: Option[ String ]) : Int = {
          val specialIndex = controlValues.size
@@ -343,29 +330,35 @@ object SynthGraph {
 
       // ---- IndexedUGen ----
       private class IndexedUGen( val ugen: UGen, var index: Int, var effective: Boolean ) {
-         var parents : IIdxSeq[ IndexedUGen ]   = Vector.empty
-         var children  : IIdxSeq[ IndexedUGen ] = Vector.empty
+         val parents    = MBuffer.empty[ IndexedUGen ]
+         var children   = MBuffer.empty[ IndexedUGen ]
          var richInputs : List[ RichUGenInBuilder ] = null
+
+         override def toString = "IndexedUGen(" + ugen + ", " + index + ", " + effective + ") : richInputs = " + richInputs
       }
 
       private trait RichUGenInBuilder {
          def create : (Int, Int)
-         def makeEffective : Unit
+         def makeEffective : Int
       }
 
       private class RichConstant( constIdx: Int ) extends RichUGenInBuilder {
          def create = (-1, constIdx)
-         def makeEffective {}
+         def makeEffective = 0
+         override def toString = "RichConstant(" + constIdx + ")"
       }
 
       private class RichUGenProxyBuilder( iu: IndexedUGen, outIdx: Int ) extends RichUGenInBuilder {
          def create = (iu.index, outIdx)
-         def makeEffective {
+         def makeEffective = {
             if( !iu.effective ) {
                iu.effective = true
-               iu.richInputs.foreach( _.makeEffective )
-            }
+               var numEff = 1
+               iu.richInputs.foreach( numEff += _.makeEffective )
+               numEff
+            } else 0
          }
+         override def toString = "RichUGenProxyBuilder(" + iu + ", " + outIdx + ")"
       }
    }
 }
