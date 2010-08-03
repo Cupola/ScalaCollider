@@ -76,6 +76,33 @@ object BufRd {
       simplify( for( List( b, p, l, i ) <- expand( bufID, phase, loop, interp ))
          yield this( rate, numChannels, b, p, l, i ))
 }
+/**
+ * A UGen which reads the content of a buffer, using an index pointer.
+ *
+ * Warning: if the supplied `bufID` refers to a buffer whose number of channels
+ * differs from `numChannels`, the UGen will fail silently.
+ *
+ * An alternative to `BufRd` is `PlayBuf`. While `PlayBuf` plays
+ * through the buffer by itself, `BufRd` only moves its read point by the phase input
+ * and therefore has no pitch input. `PlayBuf` uses cubic interplation, while
+ * `BufRd` has variable interpolation. `PlayBuf` can determine the end of the buffer
+ * and issue a done-action.
+ *
+ * @param   numChannels    number of channels that the buffer will be.
+ *    Since this is an integer constant, a change in the number of channels must
+ *    be reflected by creating different SynthDefs.
+ *
+ * @param   bufID          the identifier of the buffer to use
+ * @param   phase          audio rate frame-index into the buffer.
+ * @param   loop           1 to enable looping, 0 to disable looping. this can be modulated.
+ * @param   interpolation  1 for no interpolation, 2 for linear, and 4 for cubic interpolation
+ *
+ * @see  [[de.sciss.synth.ugen.PlayBuf]]
+ * @see  [[de.sciss.synth.ugen.BufWr]]
+ * @see  [[de.sciss.synth.ugen.Phasor]]
+ * @see  [[de.sciss.synth.ugen.BufFrames]]
+ * @see  [[de.sciss.synth.ugen.BufRateScale]]
+ */
 case class BufRd( rate: Rate, numChannels: Int, bufID: UGenIn, phase: UGenIn, loop: UGenIn, interp: UGenIn )
 extends MultiOutUGen( rate, numChannels, List( bufID, phase, loop, interp ))
 // with SideEffectUGen // side-effect: done-flag -- NO, NOT A SIDE-EFFECT!

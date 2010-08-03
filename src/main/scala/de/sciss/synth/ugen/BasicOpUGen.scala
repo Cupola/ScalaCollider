@@ -65,9 +65,15 @@ extends SingleOutUGen( in, mul, add ) {
    override def toString = in.toString + ".madd(" + mul + ", " + add + ")"
 }
 
-abstract class BasicOpUGen( override val specialIndex: Int, inputs: UGenIn* )
+private[ugen] abstract class BasicOpUGen( override val specialIndex: Int, inputs: UGenIn* )
 extends SingleOutUGen( inputs: _* )
 
+/**
+ *    Unary operations are generally constructed by calling one of the methods of <code>GEOps</code>.
+ *
+ *    @see  GEOps
+ *    @see  BinaryOpUGen
+ */
 object UnaryOpUGen {
    sealed abstract class Op( val id: Int ) {
       def make( a: GE ) : GE = UnaryOpUGen.make( this, a )
@@ -145,6 +151,12 @@ extends BasicOpUGen( selector.id, a ) {
    override def displayName = selector.name
 }
 
+/**
+ *    Binary operations are generally constructed by calling one of the methods of <code>GEOps</code>.
+ *
+ *    @see  GEOps
+ *    @see  UnaryOpUGen
+ */
 object BinaryOpUGen {
    binop =>
 

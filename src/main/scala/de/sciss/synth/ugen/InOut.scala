@@ -70,6 +70,35 @@ object InFeedback {
     simplify( for( List( b ) <- expand( bus )) yield this( b, numChannels ))
   }
 }
+/**
+ * A UGen which reads a signal from an audio bus with a current or one cycle old timestamp
+ *
+ * Audio buses adhere to the concept of a cycle timestamp, which increases for each audio block
+ * calculated. When the various output ugens (`Out`, `OffsetOut`, `XOut`) write data to a bus,
+ * they mix it with any data from the current cycle, but overwrite any data from the previous cycle.
+ * (`ReplaceOut` overwrites all data regardless.) Thus depending on node order and what synths are
+ * writing to the bus, the data on a given bus may be from the current cycle or be one cycle old at
+ * the time of reading.
+ *
+ * `In.ar` checks the timestamp of any data it reads in and zeros any data from the previous
+ * cycle (for use within that node; the data remains on the bus). This is fine for audio data,
+ * as it avoids feedback, but for control data it is useful to be able to read data from any place
+ * in the node order. For this reason `In.kr` also reads data that is older than the current cycle.
+ *
+ * In some cases one might also want to read audio from a node later in the current node order.
+ * This can be achieved with `InFeedback`. It reads from the previous cycle, and hence introduces
+ * a '''delay''' of one block size, which by default is 64 sample frames (equal to about 1.45 ms
+ * at 44.1 kHz sample rate).
+ *
+ * @param   bus         the index of the audio bus to read in from.
+ * @param   numChannels the number of channels (i.e. adjacent buses) to read in. Since
+ *    this is a constant, a change in number of channels of the underlying bus must
+ *    be reflected by creating different SynthDefs.
+ *
+ * @see  [[de.sciss.synth.ugen.In]]
+ * @see  [[de.sciss.synth.ugen.LocalIn]]
+ * @see  [[de.sciss.synth.ugen.ControlDur]]
+ */
 case class InFeedback( bus: UGenIn, numChannels: Int )
 extends MultiOutUGen( audio, numChannels, List( bus ))
 with AudioRated // with SideEffectUGen
