@@ -461,3 +461,17 @@ val df = SynthDef( "mag-above" ) {
 df.recv( s )
 val x = Synth.play( "mag-above", List( "buf" -> b.id ))
 x.free
+
+//////////////////////////////////////////////////////////////////////////
+
+Demand example:
+
+import Float.{ PositiveInfinity => inf }
+
+val x = {
+   val freq = DemandEnvGen.ar(
+      Dseq( List( 204, 400, 201, 502, 300, 200 ), inf ),
+      Drand( List( 1.01, 0.2, 0.1, 2 ), inf ) * MouseY.kr( 0.01, 3, 1 ),
+      cubShape.id )
+   SinOsc.ar( freq * List( 1, 1.01 )) * 0.1
+}.play

@@ -32,7 +32,7 @@ import de.sciss.synth._
 import SynthGraph._
 
 /**
- *  @version  0.10, 01-Jan-10
+ *  @version  0.10, 05-Aug-10
  */
 object Done extends UGen1RArgs {
   def kr( src: GE ) : GE = make( src )
@@ -42,11 +42,19 @@ case class Done( src: UGenIn ) extends SingleOutUGen( src ) with ControlRated
 object FreeSelf extends UGen1RArgs {
   def kr( in: GE ) : GE = make( in ) // we do not return in like sclang does
 }
+/**
+ * @see  [[de.sciss.synth.ugen.Free]]
+ * @see  [[de.sciss.synth.ugen.PauseSelf]]
+ */
 case class FreeSelf( in: UGenIn ) extends SingleOutUGen( in ) with ControlRated with SideEffectUGen
 
 object PauseSelf extends UGen1RArgs {
   def kr( in: GE ) : GE = make( in ) // we do not return in like sclang does
 }
+/**
+ * @see  [[de.sciss.synth.ugen.Pause]]
+ * @see  [[de.sciss.synth.ugen.FreeSelf]]
+ */
 case class PauseSelf( in: UGenIn ) extends SingleOutUGen( in ) with ControlRated with SideEffectUGen
 
 // its output is its input (source)
@@ -64,18 +72,43 @@ case class PauseSelfWhenDone( src: UGenIn ) extends SingleOutUGen( src )
 with ControlRated with SideEffectUGen
 
 // its output is its input (gate)
+/**
+ * @see  [[de.sciss.synth.ugen.PauseSelf]]
+ * @see  [[de.sciss.synth.ugen.Free]]
+ */
 object Pause extends UGen2RArgs {
-  def kr( gate: GE, nodeId: GE ) : GE = make( gate, nodeId )
+  def kr( gate: GE, nodeID: GE ) : GE = make( gate, nodeID )
 }
-case class Pause( gate: UGenIn, nodeId: UGenIn )
-extends SingleOutUGen( gate, nodeId ) with ControlRated with SideEffectUGen
+/**
+ * A UGen which pauses and resumes another node.
+ * Note that the UGen initially assumes the node is running, that is,
+ * if `gate` is initially 1, this will '''not''' resume a paused node.
+ * Instead, the gate must go to zero and back to one to resume the node.
+ * Additionally, this UGen will only cause action if the gate value
+ * changes, that is, if the node is paused or resumed otherwise, this
+ * UGen will not interfere with that action, unless the gate value is
+ * adjusted.
+ * 
+ * @param   gate     when 0, node is paused, when 1, node is resumed
+ * @param   nodeID	the node to be paused or resumed
+ *
+ * @see  [[de.sciss.synth.ugen.Free]]
+ * @see  [[de.sciss.synth.ugen.PauseSelf]]
+ */
+case class Pause( gate: UGenIn, nodeID: UGenIn )
+extends SingleOutUGen( gate, nodeID ) with ControlRated with SideEffectUGen
 
 // its output is its input (trig)
+
 object Free extends UGen2RArgs {
-  def kr( trig: GE, nodeId: GE ) : GE = make( trig, nodeId )
+  def kr( trig: GE, nodeID: GE ) : GE = make( trig, nodeID )
 }
-case class Free( trig: UGenIn, nodeId: UGenIn )
-extends SingleOutUGen( trig, nodeId ) with ControlRated with SideEffectUGen
+/**
+ * @see  [[de.sciss.synth.ugen.Pause]]
+ * @see  [[de.sciss.synth.ugen.FreeSelf]]
+ */
+case class Free( trig: UGenIn, nodeID: UGenIn )
+extends SingleOutUGen( trig, nodeID ) with ControlRated with SideEffectUGen
 
 object EnvGen {
   def ar( envelope: Env, gate: GE = 1, levelScale: GE = 1, levelBias: GE = 0,

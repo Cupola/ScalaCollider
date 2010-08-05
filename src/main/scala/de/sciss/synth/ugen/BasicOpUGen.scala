@@ -342,6 +342,10 @@ object BinaryOpUGen {
       protected def make1( a: Float, b: Float ) = rf_wrap2( a, b )
    }
    case object Firstarg       extends Op( 46 ) {
+      override protected[synth] def make1( a: UGenIn, b: UGenIn ) : GE = (a, b) match {
+         case (c(a), c(b)) => c( make1( a, b ))
+         case _            => FirstargUGen( Rate.highest( a.rate, b.rate ), a, b )
+      }
       protected def make1( a: Float, b: Float ) = a
    }
 // case object Rrand          extends Op( 47 )
@@ -374,4 +378,12 @@ extends BasicOpUGen( selector.id, a, b ) {
       a.toString + "." + selector.name + "(" + b + ")"
    }
    override def displayName = selector.name
+}
+
+// Special case since it should not be erased. Might be that we
+// better transform BinaryOpUGen from case class to regular class with extractor?
+case class FirstargUGen( rate: Rate, a: UGenIn, b: UGenIn )
+extends BasicOpUGen( BinaryOpUGen.Firstarg.id, a, b ) with SideEffectUGen {
+   override def name = "BinaryOpUGen"
+//   override def displayName = "firstarg"
 }

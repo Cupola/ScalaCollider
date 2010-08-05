@@ -29,7 +29,7 @@
 package de.sciss.synth
 
 /**
- *    @version 0.11, 23-May-10
+ *    @version 0.11, 05-Aug-10
  */
 object Rate {
    def highest( rates: Rate* ) = rates.foldLeft[ Rate ]( scalar )( (a, b) => if( a.id > b.id ) a else b )
@@ -54,3 +54,4 @@ trait RatedGE extends GE {
 trait ScalarRated  { def rate = scalar }
 trait ControlRated { def rate = control }
 trait AudioRated   { def rate = audio }
+

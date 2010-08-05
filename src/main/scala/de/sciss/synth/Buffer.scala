@@ -219,6 +219,75 @@ case class Buffer( server: Server, id: Int ) extends Model {
       OSCBufferReadChannelMessage( id, path, fileStartFrame, numFrames, bufStartFrame, leaveOpen, channels.toList,
          completion )
 
+   /**
+    * Sets the contents of the buffer by replacing
+    * individual sample values. An error is thrown if any of the given
+    * offsets is out of range.
+    *
+    * @param   pairs a list of modifications to the buffer contents, each element
+    *          being a sample offset and the sample value. The sample offset ranges
+    *          from zero to the number of samples in the buffer (exclusive), i.e.
+    *          `numChannels * numFrames`. For instance, in a stereo-buffer, the offset
+    *          for the right channel's fifth frame is `(5-1) * 2 + 1 = 9`.
+    */
+   def set( pairs: (Int, Float)* ) {
+      server ! setMsg( pairs: _* )
+   }
+
+   /**
+    * Sets the entire contents of the buffer.
+    * An error is thrown if the number of given values does not match the number
+    * of samples in the buffer.
+    *
+    * @param   v  the new content of the buffer. the size of the sequence must be
+    *          exactly the number of samples in the buffer, i.e.
+    *          `numChannels * numFrames`. Values are channel-interleaved, that is
+    *          for a stereo-buffer the first element specifies the value of the
+    *          first frame of the left channel, the second element specifies the value
+    *          of the first frame of the right channel, followed by the second frame
+    *          of the left channel, etc.
+    */
+   def setn( v: IndexedSeq[ Float ]) {
+      server ! setnMsg( v )
+   }
+
+   /**
+    * Sets the contents of the buffer by replacing
+    * individual contiguous chunks of data. An error is thrown if any of the given
+    * ranges lies outside the valid range of the entire buffer.
+    *
+    * @param   pairs a list of modifications to the buffer contents, each element
+    *          being a sample offset and a chunk of values. The data is channel-interleaved,
+    *          e.g. for a stereo-buffer,, the offset for the right channel's fifth frame
+    *          is `(5-1) * 2 + 1 = 9`. Accordingly, values in the float-sequences are
+    *          considered channel-interleaved, i.e. for a stereo buffer and an even offset,
+    *          the first element of the sequence refers to frame `offset / 2` of the
+    *          left channel, the second element to frame `offset / 2` of the right channel,
+    *          followed by frame `offset / 2 + 1` of the left channel, and so on. 
+    */
+   def setn( pairs: (Int, IndexedSeq[ Float ])* ) {
+      server ! setnMsg( pairs: _* )
+   }
+
+   def setMsg( pairs: (Int, Float)* ) = {
+      val numSmp = numChannels * numFrames
+      require( pairs.forall( tup => (tup._1 >= 0 && tup._1 < numSmp) ))
+      OSCBufferSetMessage( id, pairs: _* )
+   }
+
+   def setnMsg( v: IndexedSeq[ Float ]) = {
+      val numSmp = numChannels * numFrames
+      require( v.size == numFrames )
+      OSCBufferSetnMessage( id, (0, v.toIndexedSeq) )
+   }
+
+   def setnMsg( pairs: (Int, IndexedSeq[ Float ])* ) = {
+      val numSmp = numChannels * numFrames
+      require( pairs.forall( tup => (tup._1 >= 0 && (tup._1 + tup._2.size) <= numSmp) ))
+      val ipairs = pairs.map( tup => (tup._1, tup._2.toIndexedSeq ))
+      OSCBufferSetnMessage( id, ipairs: _* )
+   }
+   
    def zero { server ! zeroMsg }
 
    def zero( completion: Option[ OSCPacket ]) {

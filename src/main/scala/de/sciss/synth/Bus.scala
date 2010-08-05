@@ -104,15 +104,12 @@ extends Bus with ControlRated {
 
    def setnMsg( v: IndexedSeq[ Float ]) = {
       require( v.size == numChannels )
-      // XXX replace by toIndexedSeq once it has been fixed to be immutable
-      val iv = Vector( v: _* )
-      OSCControlBusSetnMessage( (index, iv) )
+      OSCControlBusSetnMessage( (index, v.toIndexedSeq) )
    }
 
    def setnMsg( pairs: (Int, IndexedSeq[ Float ])* ) = {
       require( pairs.forall( tup => (tup._1 >= 0 && (tup._1 + tup._2.size) <= numChannels) ))
-      // XXX replace by toIndexedSeq once it has been fixed to be immutable
-      val ipairs = pairs.map( tup => (tup._1 + index, Vector( tup._2: _* )))
+      val ipairs = pairs.map( tup => (tup._1 + index, tup._2.toIndexedSeq ))
       OSCControlBusSetnMessage( ipairs: _* )
    }
 

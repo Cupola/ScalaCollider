@@ -38,7 +38,7 @@ import collection.mutable.ListBuffer
 import de.sciss.synth._
 
 /**
- *    @version	0.13, 01-Jul-10
+ *    @version	0.13, 05-Aug-10
  */
 trait OSCMessageCodec {
 	def decodeMessage( name: String, b: ByteBuffer ) : OSCMessage
@@ -330,6 +330,14 @@ case class OSCBufferWriteMessage( id: Int, path: String, fileType: AudioFileType
 extends OSCMessage( "/b_write", (List( id, path, fileType.id, sampleFormat.id, numFrames, startFrame,
    if( leaveOpen ) 1 else 0 ) ::: completion.map( msg => List( msg )).getOrElse( Nil )): _* )
 with OSCAsyncSend
+
+case class OSCBufferSetMessage( id: Int, indicesAndValues: (Int, Float)* )
+extends OSCMessage( "/b_set", (id +: indicesAndValues.flatMap( iv => List[ Any ]( iv._1, iv._2 ))): _* )
+with OSCSyncCmd
+
+case class OSCBufferSetnMessage( id: Int, indicesAndValues: (Int, IIdxSeq[ Float ])* )
+extends OSCMessage( "/b_setn", (id +: indicesAndValues.flatMap( iv => Vector( iv._1, iv._2.size ) ++ iv._2 )): _* )
+with OSCSyncCmd
 
 //case class OSCBusValuePair( index: Int, value: Float )
 case class OSCControlBusSetMessage( indicesAndValues: (Int, Float)* )

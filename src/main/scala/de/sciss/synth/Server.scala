@@ -40,7 +40,7 @@ import osc._
 import math._
 
 /**
- * 	@version    0.16, 27-Jun-10
+ * 	@version    0.16, 03-Aug-10
  */
 object Server {
    private val allSync  = new AnyRef
@@ -61,6 +61,28 @@ object Server {
       val addr = new InetSocketAddress( options.host, options.port )
       val c    = createClient( options.transport, addr )
       new BootingImpl( name, c, addr, options, clientOptions, true )
+   }
+
+   def test( code: Server => Unit ) : Unit = test()( code )
+   
+   /**
+    *    Utility method to test code quickly with a running server. This boots a
+    *    server and executes the passed in code when the server is up. A shutdown
+    *    hook is registered to make sure the server is destroyed when the VM exits.
+    */
+   def test( options: ServerOptions = (new ServerOptionsBuilder).build )( code: Server => Unit ) {
+      val b = boot( options = options )
+      val sync = new AnyRef
+      var s : Server = null
+      b.addListener {
+         case BootingServer.Running( srv ) => sync.synchronized { s = srv }; code( srv )
+      }
+      Runtime.getRuntime().addShutdownHook( new Thread { override def run = sync.synchronized {
+         if( s != null ) {
+            if( s.condition != Server.Offline ) s.quit
+         } else b.abort
+      }})
+      b.start
    }
 
    def allocPort( transport: OSCTransport ) : Int = {

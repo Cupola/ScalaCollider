@@ -32,7 +32,7 @@ import de.sciss.synth._
 import SynthGraph._
 
 /**
- *    @version	0.12, 22-Apr-10
+ *    @version	0.12, 05-Aug-10
  */
 object In {
    def ar( bus: GE, numChannels: Int = 1 ) : GE = make( audio,   bus, numChannels )
@@ -117,33 +117,33 @@ abstract class AbstractOut {
    def kr( bus: GE, multi: GE ) : GE = make( control, bus, multi )
 
    protected def make( rate: Rate, bus: GE, multi: GE ) : GE = {
-      val args = bus :: replaceZeroesWithSilence( multi ).outputs.toList
+      val args = bus +: replaceZeroesWithSilence( multi ).outputs
       simplify( for( b :: m <- expand( args: _* ))
          yield this( rate, b, m, SynthGraph.individuate ))
    }
 
-   def apply( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ], _indiv: Int ) : GE
+   def apply( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ], _indiv: Int ) : UGen
 }
 
 object Out extends AbstractOut {
    def ir( bus: GE, multi: GE ) : GE = make( scalar, bus, multi )
 }
 case class Out( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )
-extends ZeroOutUGen( (bus :: multi.toList): _* )
+extends ZeroOutUGen( (bus +: multi): _* )
 
 object ReplaceOut extends AbstractOut
 case class ReplaceOut( rate: Rate, bus: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )
-extends ZeroOutUGen( (bus :: multi.toList): _* )
+extends ZeroOutUGen( (bus +: multi): _* )
 
 object OffsetOut {
    def ar( bus: GE, multi: GE ) : GE = {
-      val args = bus :: replaceZeroesWithSilence( multi ).outputs.toList
+      val args = bus +: replaceZeroesWithSilence( multi ).outputs
       simplify( for( b :: m <- expand( args: _* ))
          yield this( b, m, SynthGraph.individuate ))
    }
 }
 case class OffsetOut( bus: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )
-extends ZeroOutUGen( (bus :: multi.toList): _* ) with AudioRated
+extends ZeroOutUGen( (bus +: multi): _* ) with AudioRated
 
 object LocalOut {
    def ar( multi: GE ) : GE = make( audio, multi )
@@ -162,10 +162,10 @@ object XOut {
    def kr( bus: GE, xfade: GE, multi: GE ) : GE = make( control, bus, xfade, multi )
 
    private def make( rate: Rate, bus: GE, xfade: GE, multi: GE ) : GE = {
-      val args = bus :: xfade :: replaceZeroesWithSilence( multi ).outputs.toList
+      val args = bus +: xfade +: replaceZeroesWithSilence( multi ).outputs
       simplify( for( b :: x :: m <- expand( args: _* ))
          yield this( rate, b, x, m, SynthGraph.individuate ))
    }
 }
 case class XOut( rate: Rate, bus: UGenIn, xfade: UGenIn, multi: Seq[ UGenIn ], _indiv: Int )
-extends ZeroOutUGen( (bus :: xfade :: multi.toList): _* )
+extends ZeroOutUGen( (bus +: xfade +: multi): _* )
