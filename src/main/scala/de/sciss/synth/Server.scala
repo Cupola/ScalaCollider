@@ -193,22 +193,27 @@ object Server {
          def act { react { case Start => {
             dispatch( BootingServer.Booting )
             loop {
+//println( "---0")
                if( processThread.isAlive ) {
+//println( "---1")
                   try {
+//println( "---2")
                      c.start
-   //                  c.dumpOSC(1)
+//println( "---3")
+//                     c.dumpOSC(1)
                      c.action = (msg, addr, when) => this ! msg
                      loop {
-                        c.send( OSCServerNotifyMessage( true ))
+                        c ! OSCServerNotifyMessage( true )
                         reactWithin( 5000 ) {
                            case TIMEOUT => // loop is retried
                            case Abort => abortHandler( None )
                            case OSCMessage( "/done", "/notify" ) => loop {
-                              c.send( OSCStatusMessage )
+                              c ! OSCStatusMessage
                               reactWithin( 500 ) {
                                  case TIMEOUT => // loop is retried
                                  case Abort => abortHandler( None )
                                  case counts: OSCStatusReplyMessage => {
+//println( "AQUI")
                                     val s = new Server( name, c, addr, options, clientOptions )
                                     s.counts = counts
                                     dispatch( BootingServer.Preparing( s ))
@@ -239,11 +244,14 @@ object Server {
                         }
                      }
                   }
-                  catch { case e: ConnectException => { // thrown when in TCP mode and socket not yet available
+                  catch { case e: ConnectException => // thrown when in TCP mode and socket not yet available
+//                     println( "---4")
                      reactWithin( 500 ) {
                         case Abort => abortHandler( None )
-                     }
-                  }}
+                        case TIMEOUT => // println( "---5")
+                     }                 
+//                     case x => println( "YOOOO " + x )
+                  }
                } else loop { react {
                   case Abort => reply ()
    //               case _ =>
@@ -369,7 +377,7 @@ extends ServerLike {
       def nextID = this.synchronized { val res = id; id += 1; res }
    }
 
-   def !( p: OSCPacket ) { c.send( p )}
+   def !( p: OSCPacket ) { c ! p }
 
    def !![ A ]( p: OSCPacket, handler: PartialFunction[ OSCMessage, A ]) : Future[ A ] = {
       val c    = new Channel[ A ]( Actor.self )
