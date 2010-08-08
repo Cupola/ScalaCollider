@@ -30,7 +30,7 @@ package de.sciss.synth
 
 import collection.breakOut
 import collection.immutable.{ IndexedSeq => IIdxSeq }
-import ugen.{BinaryOpUGen, MulAdd, Poll}
+import ugen.{ BinaryOpUGen, MulAdd, Poll }
 
 /**
  *    The UGen graph is constructed from interconnecting graph elements (GE).

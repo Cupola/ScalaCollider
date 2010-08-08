@@ -32,7 +32,10 @@ import de.sciss.scalaosc.{ OSCBundle, OSCMessage, OSCPacket }
 import de.sciss.synth.{ Completion => Comp, play => scplay }
 import de.sciss.synth.io.{ AudioFileType, SampleFormat }
 import ugen.{ BufRateScale, FreeSelfWhenDone, PlayBuf }
-import osc._
+import osc.{ OSCBufferAllocMessage, OSCBufferAllocReadChannelMessage, OSCBufferAllocReadMessage,
+             OSCBufferCloseMessage, OSCBufferFreeMessage, OSCBufferReadChannelMessage, OSCBufferReadMessage,
+             OSCBufferQueryMessage, OSCBufferSetMessage, OSCBufferSetnMessage, OSCBufferWriteMessage,
+             OSCBufferZeroMessage }
 import Model._
 
 /**

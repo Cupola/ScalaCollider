@@ -31,8 +31,10 @@ package de.sciss
 import de.sciss.scalaosc.{ OSCMessage }
 import collection.breakOut
 import collection.immutable.{ IndexedSeq => IIdxSeq }
-import math._
-import synth._
+import synth.{ addToHead, AddAction, AudioBus, ControlBus, Completion, Constant, ControlProxyFactory, DoneAction, GE,
+               GraphFunction, Group, MultiControlSetMap, MultiControlABusMap, MultiControlKBusMap, Node,
+               RichDouble, RichFloat, Server, SingleControlABusMap, SingleControlKBusMap, SingleControlSetMap,
+               Synth, UGenInSeq }
 
 /**
  * 	@version	0.14, 22-May-10

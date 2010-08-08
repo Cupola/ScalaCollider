@@ -28,9 +28,6 @@
 
 package de.sciss.synth
 
-import collection.immutable.{ Seq => ISeq }
-import math._
-
 /**
  * 	@version	0.13, 22-Apr-10
  */
@@ -214,8 +211,8 @@ class ContiguousBlockAllocator( size: Int, pos: Int = 0 ) /* extends BlockAlloca
 
       def join( b:Block ) : Block = {
          if( adjoins( b )) {
-            val newStart	= min( start, b.start )
-            val newSize		= max( start + size, b.start + b.size ) - newStart
+            val newStart	= math.min( start, b.start )
+            val newSize		= math.max( start + size, b.start + b.size ) - newStart
             new Block( newStart, newSize )
          } else null
       }

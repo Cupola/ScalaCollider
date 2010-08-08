@@ -28,8 +28,7 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth.{ Constant => c, _ }
-import SynthGraph._
+import de.sciss.synth.{ Constant => c, GE, Rate, SingleOutUGen, UGenIn }
 
 object Gendy1 extends UGen10ArgsIndiv {
   def ar( ampDist: GE = 1, durDist: GE = 1, adParam: GE = 1, ddParam: GE = 1,

@@ -28,8 +28,9 @@
 
 package de.sciss.synth
 
-import collection.immutable.{ IndexedSeq => IIdxSeq }
-import osc._
+import osc.{ OSCGroupHeadMessage, OSCGroupTailMessage, OSCNodeAfterMessage, OSCNodeBeforeMessage, OSCNodeFillInfo,
+             OSCNodeFillMessage, OSCNodeFreeMessage, OSCNodeMapMessage, OSCNodeMapaMessage, OSCNodeMapanMessage,
+             OSCNodeMapnMessage, OSCNodeRunMessage, OSCNodeSetMessage, OSCNodeSetnMessage, OSCNodeTraceMessage }
 
 /**
  *    @version	0.15, 10-May-10

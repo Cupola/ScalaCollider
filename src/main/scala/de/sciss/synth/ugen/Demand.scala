@@ -28,7 +28,8 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth._
+import de.sciss.synth.{ audio, control, demand, doNothing, GE, MultiOutUGen, Rate, SingleOutUGen, SynthGraph,
+                        UGen, UGenIn }
 import SynthGraph._
 import Float.{ PositiveInfinity => inf }
 

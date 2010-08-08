@@ -28,9 +28,7 @@
 
 package de.sciss.synth
 
-import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
-import math._
-import SynthGraph._
+import collection.immutable.{ IndexedSeq => IIdxSeq }
 
 /**
  *    @version 0.15, 21-May-10

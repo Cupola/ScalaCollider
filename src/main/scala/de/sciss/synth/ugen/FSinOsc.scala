@@ -28,7 +28,7 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth.{ Constant => c, _ }
+import de.sciss.synth.{ Constant => c, audio, GE, Rate, SingleOutUGen, SynthGraph, UGenIn }
 import SynthGraph._
 
 /**

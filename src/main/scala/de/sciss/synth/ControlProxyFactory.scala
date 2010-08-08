@@ -29,7 +29,6 @@
 package de.sciss.synth
 
 import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
-import math._
 import ugen.{ AudioControlProxy, ControlProxy, TrigControlProxy }
 
 /**

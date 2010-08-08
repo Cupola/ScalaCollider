@@ -28,8 +28,7 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth._
-import SynthGraph._
+import de.sciss.synth.{ GE, Rate, SingleOutUGen, UGenIn }
 
 // continuous convolution in freq domain
 object Convolution extends UGen3Args {

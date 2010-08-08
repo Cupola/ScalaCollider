@@ -28,9 +28,7 @@
 
 package de.sciss.synth
 
-import collection.immutable.{ IndexedSeq => IIdxSeq }
-import collection.mutable.{ ListBuffer }
-import osc._
+import osc.{ OSCControlBusGetMessage, OSCControlBusSetMessage, OSCControlBusSetnMessage }
 
 class AllocatorExhaustedException( reason: String )
 extends RuntimeException( reason )

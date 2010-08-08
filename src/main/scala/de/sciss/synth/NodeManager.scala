@@ -29,7 +29,8 @@
 package de.sciss.synth
 
 import collection.immutable.IntMap
-import osc._
+import osc.{ OSCGroupInfo, OSCNodeChange, OSCNodeGoMessage, OSCNodeEndMessage, OSCNodeMoveMessage,
+             OSCNodeOffMessage, OSCNodeOnMessage, OSCNodeInfo, OSCSynthInfo }
 
 /**
  *    @version 0.12, 10-May-10

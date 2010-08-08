@@ -28,7 +28,7 @@
 
 package de.sciss.synth
 
-import osc._
+import osc.{ OSCSynthNewMessage }
 
 /**
  *    @version	0.15, 04-Jun-10

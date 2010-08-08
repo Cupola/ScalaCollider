@@ -32,7 +32,7 @@ import java.io.{ ByteArrayOutputStream, BufferedOutputStream, DataOutputStream, 
 import java.nio.ByteBuffer
 import de.sciss.synth.{ Completion => Comp }
 import ugen.Control
-import osc._
+import osc.{ OSCSynthDefFreeMessage, OSCSynthDefLoadMessage, OSCSynthDefRecvMessage }
 import collection.immutable.{ IndexedSeq => IIdxSeq, Iterable => IIterable, Seq => ISeq, Stack, Vector }
 import collection.breakOut
 import de.sciss.scalaosc.{ OSCMessage, OSCPacket }

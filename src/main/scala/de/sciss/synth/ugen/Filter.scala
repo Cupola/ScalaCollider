@@ -28,8 +28,7 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth._
-import SynthGraph._
+import de.sciss.synth.{ GE, Rate, SideEffectUGen, SingleOutUGen, UGenIn }
 
 /**
  * 	@version	0.12, 01-Jan-10

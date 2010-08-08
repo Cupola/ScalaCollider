@@ -28,8 +28,7 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth._
-import SynthGraph._
+import de.sciss.synth.{ ControlRated, GE, Rate, SingleOutUGen, UGenIn }
 
 object FFT extends UGen6RArgs {
    def apply( buf: GE, in: GE, hop: GE = 0.5f, winType: GE = 0, active: GE = 1, winSize: GE = 0 ) : GE =

@@ -28,10 +28,9 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth.{ Constant => c, _ }
+import de.sciss.synth.{ scalar, Constant => c, GE, Rate, RichFloat, SideEffectUGen, SingleOutUGen, SynthGraph,
+                        UGenIn }
 import SynthGraph._
-
-import math._
 
 /**
  *    @version 0.12, 02-Aug-10

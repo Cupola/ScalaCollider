@@ -28,11 +28,10 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth._
-import SynthGraph._
+import de.sciss.synth.{ GE, Rate, SingleOutUGen, UGenIn }
 
 /**
- * 	@version	0.12, 01-Jan-10
+ * 	@version	0.12, 08-Aug-10
  */
 object Delay1 extends UGen1Args {
 	def ar( in: GE ) : GE = arExp( in )
@@ -146,12 +145,74 @@ extends SingleOutUGen( in, maxDelayTime, delayTime, decayTime )
 
 // ---- the following delays use shared buffers ----
 
-// BufDelayN XXX
-// BufDelayL XXX
-// BufDelayC XXX
-// BufCombN XXX
-// BufCombL XXX
-// BufCombC XXX
-// BufAllpassN XXX
-// BufAllpassL XXX
-// BufAllpassC XXX
+object BufDelayN extends UGen3Args {
+   // XXX in.asAudioRateInput
+	def ar( bufID: GE, in: GE, delayTime: GE = 0.2f ) : GE =
+      arExp( bufID, in, delayTime )
+}
+case class BufDelayN( rate: Rate, bufID: UGenIn, in: UGenIn, delayTime: UGenIn )
+extends SingleOutUGen( bufID, in, delayTime )
+
+object BufDelayL extends UGen3Args {
+   // XXX in.asAudioRateInput
+	def ar( bufID: GE, in: GE, delayTime: GE = 0.2f ) : GE =
+      arExp( bufID, in, delayTime )
+}
+case class BufDelayL( rate: Rate, bufID: UGenIn, in: UGenIn, delayTime: UGenIn )
+extends SingleOutUGen( bufID, in, delayTime )
+
+object BufDelayC extends UGen3Args {
+   // XXX in.asAudioRateInput
+	def ar( bufID: GE, in: GE, delayTime: GE = 0.2f ) : GE =
+      arExp( bufID, in, delayTime )
+}
+case class BufDelayC( rate: Rate, bufID: UGenIn, in: UGenIn, delayTime: UGenIn )
+extends SingleOutUGen( bufID, in, delayTime )
+
+object BufCombN extends UGen4Args {
+   // XXX in.asAudioRateInput
+	def ar( bufID: GE, in: GE, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      arExp( bufID, in, delayTime, decayTime )
+}
+case class BufCombN( rate: Rate, bufID: UGenIn, in: UGenIn, delayTime: UGenIn, decayTime: UGenIn )
+extends SingleOutUGen( bufID, in, delayTime, decayTime )
+
+object BufCombL extends UGen4Args {
+   // XXX in.asAudioRateInput
+	def ar( bufID: GE, in: GE, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      arExp( bufID, in, delayTime, decayTime )
+}
+case class BufCombL( rate: Rate, bufID: UGenIn, in: UGenIn, delayTime: UGenIn, decayTime: UGenIn )
+extends SingleOutUGen( bufID, in, delayTime, decayTime )
+
+object BufCombC extends UGen4Args {
+   // XXX in.asAudioRateInput
+	def ar( bufID: GE, in: GE, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      arExp( bufID, in, delayTime, decayTime )
+}
+case class BufCombC( rate: Rate, bufID: UGenIn, in: UGenIn, delayTime: UGenIn, decayTime: UGenIn )
+extends SingleOutUGen( bufID, in, delayTime, decayTime )
+
+object BufAllpassN extends UGen4Args {
+   // XXX in.asAudioRateInput
+	def ar( bufID: GE, in: GE, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      arExp( bufID, in, delayTime, decayTime )
+}
+case class BufAllpassN( rate: Rate, bufID: UGenIn, in: UGenIn, delayTime: UGenIn, decayTime: UGenIn )
+extends SingleOutUGen( bufID, in, delayTime, decayTime )
+
+object BufAllpassL extends UGen4Args {
+   // XXX in.asAudioRateInput
+	def ar( bufID: GE, in: GE, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      arExp( bufID, in, delayTime, decayTime )
+}
+case class BufAllpassL( rate: Rate, bufID: UGenIn, in: UGenIn, delayTime: UGenIn, decayTime: UGenIn )
+extends SingleOutUGen( bufID, in, delayTime, decayTime )
+
+object BufAllpassC extends UGen4Args {
+   // XXX in.asAudioRateInput
+	def ar( bufID: GE, in: GE, delayTime: GE = 0.2f, decayTime: GE = 1 ) : GE =
+      arExp( bufID, in, delayTime, decayTime )
+}
+case class BufAllpassC( rate: Rate, bufID: UGenIn, in: UGenIn, delayTime: UGenIn, decayTime: UGenIn )
+extends SingleOutUGen( bufID, in, delayTime, decayTime )

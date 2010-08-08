@@ -28,8 +28,6 @@
 
 package de.sciss.synth
 
-import collection.immutable.{ IndexedSeq => IIdxSeq }
-
 /**
  *    An element that can be used as an input to a UGen.
  *    This is after multi-channel-expansion, hence implementing

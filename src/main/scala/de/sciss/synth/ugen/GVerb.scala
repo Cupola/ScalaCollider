@@ -28,8 +28,7 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth._
-import SynthGraph._
+import de.sciss.synth.{ audio, AudioRated, GE, MultiOutUGen, UGenIn }
 
 object GVerb extends UGen10RArgs {
   def ar( in: GE, roomSize: GE = 10, revTime: GE = 3, damping: GE = 0.5f, inputBW: GE = 0.5f, spread: GE = 15,

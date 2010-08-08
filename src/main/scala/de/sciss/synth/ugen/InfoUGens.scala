@@ -28,7 +28,7 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth._
+import de.sciss.synth.{ GE, Rate, ScalarRated, SingleOutUGen, UGenIn }
 
 /**
  *	@version	0.12, 07-Feb-10

@@ -28,8 +28,7 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth._
-import SynthGraph._
+import de.sciss.synth.{ AudioRated, GE, SingleOutUGen, UGenIn }
 
 /**
  *  @version  0.10, 01-Jan-10

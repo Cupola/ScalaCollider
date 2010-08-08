@@ -36,8 +36,8 @@ import actors.{ Actor, Channel, DaemonActor, Future, InputChannel, OutputChannel
 import collection.breakOut
 import collection.immutable.Queue
 import concurrent.SyncVar
-import osc._
-import math._
+import osc.{ OSCBufferInfoMessage, OSCHandler, OSCNodeChange, OSCResponder, OSCServerNotifyMessage,
+             OSCServerQuitMessage, OSCStatusMessage, OSCStatusReplyMessage, OSCSyncMessage, ServerCodec }
 
 /**
  * 	@version    0.16, 03-Aug-10

@@ -28,7 +28,8 @@
 
 package de.sciss.synth
 
-import osc._
+import osc.{ OSCGroupDeepFreeMessage, OSCGroupDumpTreeMessage, OSCGroupFreeAllMessage, OSCGroupHeadMessage,
+             OSCGroupNewInfo, OSCGroupNewMessage, OSCGroupQueryTreeMessage, OSCGroupTailMessage }
 
 /**
  *    @version	0.12, 04-Jun-10

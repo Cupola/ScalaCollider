@@ -29,7 +29,7 @@
 package de.sciss.synth.ugen
 
 import collection.breakOut
-import de.sciss.synth._
+import de.sciss.synth.{ audio, control, GE, Rate, ScalarRated, SideEffectUGen, SingleOutUGen, SynthGraph, UGenIn }
 import SynthGraph._
 
 /**
@@ -119,7 +119,7 @@ object TWindex {
    private def make( rate: Rate, trig: GE, list: GE, normalize: GE ) : GE =
       simplify( for( List( t, n, l @ _* ) <-
                   expand( (trig :: normalize :: list.outputs.toList): _* ))
-                     yield this( rate, t, l, n, SynthGraph.individuate ))
+                     yield this( rate, t, l, n, individuate ))
 
 //   def apply( rate: Rate, trig: UGenIn, list: Seq[ UGenIn ], normalize: UGenIn ) =
 //      new TWindex( rate, trig, list, normalize )
@@ -130,8 +130,8 @@ extends SingleOutUGen( (trig :: normalize :: list.toList): _* )
 trait NoiseUGen {
    def apply( rate: Rate, _indiv: Int ) : SingleOutUGen
 
-   def ar: SingleOutUGen = this( audio,   SynthGraph.individuate )
-   def kr: SingleOutUGen = this( control, SynthGraph.individuate )
+   def ar: SingleOutUGen = this( audio,   individuate )
+   def kr: SingleOutUGen = this( control, individuate )
 
    private def make( make1: => SingleOutUGen, mul: GE ) : GE = {
 //      val numOutputs = mul.numOutputs

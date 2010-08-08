@@ -28,7 +28,7 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth._
+import de.sciss.synth.{ GE }
 
 /**
  *	@version	0.10, 09-Dec-09

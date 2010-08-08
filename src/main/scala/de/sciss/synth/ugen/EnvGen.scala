@@ -28,7 +28,8 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth._
+import de.sciss.synth.{ audio, control, doNothing, ControlRated, Env, GE, IEnv, Rate, SideEffectUGen, SingleOutUGen,
+                        SynthGraph, UGenIn }
 import SynthGraph._
 
 /**

@@ -30,7 +30,8 @@ package de.sciss.synth.ugen
 
 import collection.immutable.{ IndexedSeq => IIdxSeq, Seq => ISeq }
 import collection.breakOut
-import de.sciss.synth._
+import de.sciss.synth.{ scalar, control, audio, AbstractControlProxy, AudioRated, ControlFactoryLike,
+                        ControlProxyLike, ControlRated, MultiOutUGen, Rate, SideEffectUGen, SynthGraph, UGen }
 
 /**
  *    @version 0.12, 17-May-10
