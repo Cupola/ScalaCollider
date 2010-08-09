@@ -143,8 +143,22 @@ trait DemandRateUGen {
 }
 
 object Dseries extends UGen3RArgsIndiv {
-	def apply( start: GE = 1, step: GE = 1, length: GE = inf ) : GE = make( start, step, length )
+	def apply( start: GE = 0, step: GE = 1, length: GE = inf ) : GE = make( start, step, length )
 }
+
+/**
+ * A demand-rate UGen which produces an arithmetic (linear) series.
+ *
+ * The arguments can be constant or any other ugens.
+ *
+ * @param   start the start value of the series
+ * @param   step  the incremental step by which the series changes. the step is
+ *          added to the previous value on each demand.
+ * @param   length   the number of elements to produces (maybe be infinite)
+ *
+ * @see  [[de.sciss.synth.ugen.Dgeom]]
+ * @see  [[de.sciss.synth.ugen.Dseq]]
+ */
 case class Dseries( start: UGenIn, step: UGenIn, length: UGenIn, _indiv: Int )
 extends SingleOutUGen( start, step, length ) with DemandRateUGen
 
@@ -192,6 +206,9 @@ trait AbstractSeqDemand {
 }
 
 object Dseq extends AbstractSeqDemand
+/**
+ * @see  [[de.sciss.synth.ugen.Dseries]]
+ */
 case class Dseq( repeats: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
 extends SingleOutUGen( (repeats +: seq): _* ) with DemandRateUGen
 

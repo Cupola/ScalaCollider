@@ -39,6 +39,20 @@ object Trig1 extends UGen2Args {
   def ar( in: GE, dur: GE = 0.1f ) : GE = arExp( in, dur )
   def kr( in: GE, dur: GE = 0.1f ) : GE = krExp( in, dur )
 }
+
+/**
+ * A UGen which outputs a value of 1 for a given duration when triggered.
+ *
+ * When a trigger occurs at the input, a value of 1 is output for the specified duration,
+ * otherwise zero is output. When a new trigger occurs while this ugens outputs 1, the
+ * hold-time is reset to the duration.
+ *
+ * @param   trig  the trigger. This can be any signal. A trigger happens when the signal changes
+ *    from non-positive to positive.
+ * @param   dur   the duration for which the ugens holds the value of 1 when triggered
+ *
+ * @see  [[de.sciss.synth.ugen.Trig]]
+ */
 case class Trig1( rate: Rate, in: UGenIn, dur: UGenIn )
 extends SingleOutUGen( in, dur )
 
@@ -70,6 +84,17 @@ object Latch extends UGen2Args {
   def ar( in: GE, trig: GE ) : GE = arExp( in, trig )
   def kr( in: GE, trig: GE ) : GE = krExp( in, trig )
 }
+/**
+ * A sample-and-hold UGen. When triggered, a new value is taken from the input and
+ * hold until the next trigger occurs.
+ *
+ * @param   in    the input signal
+ * @param   trig  the trigger. The can be any signal. A trigger happens when the signal changes from
+ *    non-positive to positive.
+ *
+ * @see  [[de.sciss.synth.ugen.Gate]]
+ * @see  [[de.sciss.synth.ugen.Demand]]
+ */
 case class Latch( rate: Rate, in: UGenIn, trig: UGenIn )
 extends SingleOutUGen( in, trig )
 
@@ -77,6 +102,9 @@ object Gate extends UGen2Args {
   def ar( in: GE, trig: GE ) : GE = arExp( in, trig )
   def kr( in: GE, trig: GE ) : GE = krExp( in, trig )
 }
+/**
+ * @see  [[de.sciss.synth.ugen.Latch]]
+ */
 case class Gate( rate: Rate, in: UGenIn, trig: UGenIn )
 extends SingleOutUGen( in, trig )
 

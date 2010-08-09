@@ -50,6 +50,39 @@ object PlayBuf {
       simplify( for( List( b, s, t, p, l, d ) <- expand( bufID, speed, trig, startPos, loop, doneAction ))
          yield this( rate, numChannels, b, s, t, p, l, d ))
 }
+
+/**
+ * A UGen to play back samples from a buffer in memory.
+ *
+ * `PlayBuf` provides a kind of high-level interface to sample-playback, whereas `BufRd`
+ * represents a kind of lower-level access. While `BufRd` has a random-access-pointer
+ * in the form of a phase input, `PlayBuf` advances the phase automatically based on
+ * a given playback speed. `PlayBuf` uses cubic interpolation.
+ *
+ * @param   numChannels the number of channels that the buffer will be. Since
+ *    this is a constant, a change in number of channels of the underlying bus must
+ *    be reflected by creating different SynthDefs. If a buffer identifier is used of a buffer
+ *    that has a different numChannels then specified in the PlayBuf, it will fail silently.
+ * @param   bufID       the identifier of the buffer to use
+ * @param   rate        1.0 advances the play head by the server's sample rate each second,
+ *    so 2.0 means doubling speed (and pitch), and 0.5 means half speed (and half pitch).
+ *    Negative numbers can be used for backwards playback. If the underlying buffer
+ *    represents a sound at a different sample rate, the rate should be
+ *    multiplied by `BufRateScale.kr( bufID )` to obtain the correct speed.
+ * @param   trig        a trigger which causes a jump to the given startPos. A trigger occurs when a
+ *    signal changes from non-positive to positive (e.g. <= 0 to > 0).
+ * @param   startPos    sample frame to start playback. This is read when a trigger occurs.
+ * @param   loop        1 to loop after the play head reaches the buffer end, 0 to not loop. this can be modulated.
+ * @param   doneAction  what to do when the play head reaches the buffer end.
+ *
+ * @see  [[de.sciss.synth.ugen.BufRd]]
+ * @see  [[de.sciss.synth.ugen.DiskIn]]
+ * @see  [[de.sciss.synth.ugen.RecordBuf]]
+ * @see  [[de.sciss.synth.DoneAction]]
+ * @see  [[de.sciss.synth.ugen.Done]]
+ * @see  [[de.sciss.synth.ugen.BufRateScale]]
+ * @see  [[de.sciss.synth.ugen.BufFrames]]  
+ */
 case class PlayBuf( rate: Rate, numChannels: Int, bufID: UGenIn, speed: UGenIn, trig: UGenIn, startPos: UGenIn,
                     loop: UGenIn, doneAction: UGenIn )
 extends MultiOutUGen( rate, numChannels, List( bufID, speed, trig, startPos, loop, doneAction ))

@@ -109,6 +109,23 @@ object InTrig {
       simplify( for( List( b ) <- expand( bus )) yield this( b, numChannels ))
    }
 }
+
+/**
+ * A UGen which generates a trigger anytime a control bus is set.
+ *
+ * Any time the bus is "touched" i.e. has its value set (using `"/c_set"` etc.), a single
+ * impulse trigger will be generated. Its amplitude is the value that the bus was set to.
+ * Note that if a signal is continuously written to that bus, for instance using
+ * `Out.kr`, only one initial trigger is generated once that ugen starts writing, but
+ * no successive triggers are generated.
+ *
+ * @param   bus         the index of the control bus to read in from.
+ * @param   numChannels the number of channels (i.e. adjacent buses) to read in. Since
+ *    this is a constant, a change in number of channels of the underlying bus must
+ *    be reflected by creating different SynthDefs.
+ *
+ * @see  [[de.sciss.synth.ugen.In]]
+ */
 case class InTrig( bus: UGenIn, numChannels: Int )
 extends MultiOutUGen( control, numChannels, List( bus ))
 with ControlRated // with SideEffectUGen

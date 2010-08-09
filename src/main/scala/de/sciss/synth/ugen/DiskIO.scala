@@ -40,6 +40,20 @@ object DiskOut {
                      expand( (bufID :: multi.outputs.toList): _* ))
                 yield this( b, m ))
 }
+/**
+ * A UGen which writes a signal to a soundfile on disk. To achieve this efficiently, a buffer is
+ * needs to be provides which is used to buffer the incoming signal.
+ *
+ * @param   bufID the buffer used internally by the UGen. this number of frames in the buffer must
+ *    be a power of two (this is currently not checked!). The buffer must have been initialized
+ *    with a `write` command whose `leaveOpen` argument is true. Note that the number of channels of
+ *    the buffer and of the input signal must be the same, otherwise `DiskOut` will fail silently
+ *    (and not write anything to the file).
+ * @param   multi the signal to be recorded.
+ *
+ * @see  [[de.sciss.synth.Buffer#write]]
+ */
+// @see  [[de.sciss.synth.Buffer#write( String, AudioFileType, SampleFormat, Int, Int, Boolean, Completion )]]
 case class DiskOut( bufID: UGenIn, multi: Seq[ UGenIn ])
 extends SingleOutUGen( (bufID :: multi.toList): _* ) with AudioRated with SideEffectUGen
 

@@ -39,9 +39,20 @@ import ugen.{ BinaryOpUGen, MulAdd, Poll }
  *    Constants, and collections of UGen inputs which result from
  *    multichannel expansion (UGenInSeq). 
  *
- *    @version 0.11, 23-May-10
+ *    @version 0.11, 09-Aug-10
  */
 trait GE {
+   /**
+    * Decomposes the graph element into its distinct outputs. For a single-output UGen
+    * or a Constant,  this will just return that UGen or Constant (wrapped in a Vector),
+    * for multi-channel UGens this will return the corresponding output proxies. For
+    * sequences wrapped into a UGenInSeq, this will return the underlying elements.
+    *
+    * @return  the sequence containing the output elements of the graph element. When
+    *          being certain about the number of elements returned, pattern matching can
+    *          be used to extract the different channels, e.g.
+    *          `val Seq( left, right ) = Pan.ar( ... ).outputs`
+    */
    def outputs : IIdxSeq[ UGenIn ]
    def numOutputs : Int = outputs.size
    def `\\`( idx: Int ) : UGenIn = outputs( idx )
