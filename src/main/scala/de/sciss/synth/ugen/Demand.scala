@@ -46,6 +46,28 @@ object Demand {
          yield this( rate, t, r, m.toIndexedSeq ))
    }
 }
+
+/**
+ * A UGen which polls results from demand-rate ugens.
+ * When there is a trigger at the `trig` input, a value is demanded from each ugen in the `multi` input
+ * and output. The unit generators in the list should be demand-rate.
+ * When there is a trigger at the reset input, the demand rate ugens in the list are reset.
+ *
+ * Note: By design, a reset trigger only resets the demand ugens; it does not reset the value at Demand's output.
+ * Demand continues to hold its value until the next value is demanded, at which point its output value will
+ * be the first expected item in the `multi` argument.
+ *
+ * Note: One demand-rate ugen represents a single stream of values, so that embedding the same ugen twice
+ * calls this stream twice per demand, possibly yielding different values. To embed the same sequence
+ * twice, either make sure the ugen is demanded only once, or create two instances of the ugen.
+ *
+ * @param   trig  trigger. Can be any signal. A trigger happens when the signal changes from non-positive to positive.
+ * @param   reset trigger. Resets the list of ugens (`multi`) when triggered.
+ * @param   multi a demand-rate signal (possibly multi-channel) which is read at each trigger
+ *
+ * @see  [[de.sciss.synth.ugen.Duty]]
+ * @see  [[de.sciss.synth.ugen.TDuty]]
+ */
 case class Demand( rate: Rate, trig: UGenIn, reset: UGenIn, multi: IndexedSeq[ UGenIn ])
 extends MultiOutUGen( rate, multi.size, trig +: reset +: multi )
 
@@ -60,6 +82,10 @@ object Duty extends UGen4Args {
 
 	// XXX checkInputs
 }
+/**
+ * @see  [[de.sciss.synth.ugen.TDuty]]
+ * @see  [[de.sciss.synth.ugen.Demand]]
+ */
 case class Duty( rate: Rate, dur: UGenIn, reset: UGenIn, doneAction: UGenIn, level: UGenIn )
 extends SingleOutUGen( dur, reset, doneAction, level )
 
@@ -74,6 +100,11 @@ object TDuty extends UGen5Args {
 
 	// XXX checkInputs
 }
+
+/**
+ * @see  [[de.sciss.synth.ugen.Duty]]
+ * @see  [[de.sciss.synth.ugen.Demand]]
+ */
 case class TDuty( rate: Rate, dur: UGenIn, reset: UGenIn, doneAction: UGenIn, level: UGenIn, gapFirst: UGenIn )
 extends SingleOutUGen( dur, reset, doneAction, level, gapFirst )
 
@@ -111,58 +142,73 @@ trait DemandRateUGen {
    def rate = demand
 }
 
-object Dseries extends UGen3RArgs {
+object Dseries extends UGen3RArgsIndiv {
 	def apply( start: GE = 1, step: GE = 1, length: GE = inf ) : GE = make( start, step, length )
 }
-case class Dseries( start: UGenIn, step: UGenIn, length: UGenIn )
+case class Dseries( start: UGenIn, step: UGenIn, length: UGenIn, _indiv: Int )
 extends SingleOutUGen( start, step, length ) with DemandRateUGen
 
-object Dgeom extends UGen3RArgs {
+object Dgeom extends UGen3RArgsIndiv {
 	def apply( start: GE = 1, grow: GE = 2, length: GE = inf ) : GE = make( start, grow, length )
 }
-case class Dgeom( start: UGenIn, grow: UGenIn, length: UGenIn )
+case class Dgeom( start: UGenIn, grow: UGenIn, length: UGenIn, _indiv: Int )
 extends SingleOutUGen( start, grow, length ) with DemandRateUGen
 
-object Dbufrd extends UGen3RArgs {
+object Dbufrd extends UGen3RArgsIndiv {
 	def apply( bufID: GE, phase: GE = 0, loop: GE = 1 ) : GE = make( bufID, phase, loop )
 }
-case class Dbufrd( bufID: UGenIn, phase: UGenIn, loop: UGenIn )
+
+/**
+ * A demand-rate UGen that reads out a buffer. All inputs can be either demand ugen or any other ugen.
+ *
+ * @param   bufID the identifier of the buffer to read out
+ * @param   phase the frame index into the buffer
+ * @param   loop  whether to wrap an exceeding phase around the buffer length (1) or not (0)
+ *
+ * @see  [[de.sciss.synth.ugen.BufRd]]
+ * @see  [[de.sciss.synth.ugen.Dbufwr]] 
+ */
+case class Dbufrd( bufID: UGenIn, phase: UGenIn, loop: UGenIn, _indiv: Int )
 extends SingleOutUGen( bufID, phase, loop ) with DemandRateUGen
 
-object Dbufwr extends UGen4RArgs {
+/**
+ * @see  [[de.sciss.synth.ugen.BufWd]]
+ * @see  [[de.sciss.synth.ugen.Dbufrd]] 
+ */
+object Dbufwr extends UGen4RArgsIndiv {
 	def apply( input: GE, bufID: GE, phase: GE = 0, loop: GE = 1 ) : GE = make( input, bufID, phase, loop )
 }
-case class Dbufwr( input: UGenIn, bufID: UGenIn, phase: UGenIn, loop: UGenIn )
+case class Dbufwr( input: UGenIn, bufID: UGenIn, phase: UGenIn, loop: UGenIn, _indiv: Int )
 extends SingleOutUGen( input, bufID, phase, loop ) with DemandRateUGen
 
 trait AbstractSeqDemand {
    def apply( seq: GE, repeats: GE = 1 ) : GE = make( repeats, seq )
-   def apply( repeats: UGenIn, seq: Seq[ UGenIn ]) : UGen
+   def apply( repeats: UGenIn, seq: Seq[ UGenIn ], _indiv: Int ) : UGen
 
    private def make( repeats: GE, seq: GE ) : GE = {
       val args = repeats +: seq.outputs
-      simplify( for( r :: s <- expand( args: _* )) yield this( r, s ))
+      simplify( for( r :: s <- expand( args: _* )) yield this( r, s, individuate ))
    }
 }
 
 object Dseq extends AbstractSeqDemand
-case class Dseq( repeats: UGenIn, seq: Seq[ UGenIn ])
+case class Dseq( repeats: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
 extends SingleOutUGen( (repeats +: seq): _* ) with DemandRateUGen
 
 object Dser extends AbstractSeqDemand
-case class Dser( repeats: UGenIn, seq: Seq[ UGenIn ])
+case class Dser( repeats: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
 extends SingleOutUGen( (repeats +: seq): _* ) with DemandRateUGen
 
 object Dshuf extends AbstractSeqDemand
-case class Dshuf( repeats: UGenIn, seq: Seq[ UGenIn ])
+case class Dshuf( repeats: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
 extends SingleOutUGen( (repeats +: seq): _* ) with DemandRateUGen
 
 object Drand extends AbstractSeqDemand
-case class Drand( repeats: UGenIn, seq: Seq[ UGenIn ])
+case class Drand( repeats: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
 extends SingleOutUGen( (repeats +: seq): _* ) with DemandRateUGen
 
 object Dxrand extends AbstractSeqDemand
-case class Dxrand( repeats: UGenIn, seq: Seq[ UGenIn ])
+case class Dxrand( repeats: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
 extends SingleOutUGen( (repeats +: seq): _* ) with DemandRateUGen
 
 object Dswitch1 {
@@ -170,10 +216,10 @@ object Dswitch1 {
 
    private def make( index: GE, seq: GE ) : GE = {
       val args = index +: seq.outputs
-      simplify( for( i :: s <- expand( args: _* )) yield this( i, s ))
+      simplify( for( i :: s <- expand( args: _* )) yield this( i, s, individuate ))
    }
 }
-case class Dswitch1( index: UGenIn, seq: Seq[ UGenIn ])
+case class Dswitch1( index: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
 extends SingleOutUGen( (index +: seq): _* ) with DemandRateUGen
 
 object Dswitch {
@@ -181,53 +227,52 @@ object Dswitch {
 
    private def make( index: GE, seq: GE ) : GE = {
       val args = index +: seq.outputs
-      simplify( for( i :: s <- expand( args: _* )) yield this( i, s ))
+      simplify( for( i :: s <- expand( args: _* )) yield this( i, s, individuate ))
    }
 }
-case class Dswitch( index: UGenIn, seq: Seq[ UGenIn ])
+case class Dswitch( index: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
 extends SingleOutUGen( (index +: seq): _* ) with DemandRateUGen
 
-
-object Dwhite extends UGen3RArgs {
+object Dwhite extends UGen3RArgsIndiv {
 	def apply( lo: GE = 0, hi: GE = 1, length: GE = inf ) : GE = make( lo, hi, length )
 }
-case class Dwhite( lo: UGenIn, hi: UGenIn, length: UGenIn )
+case class Dwhite( lo: UGenIn, hi: UGenIn, length: UGenIn, _indiv: Int )
 extends SingleOutUGen( lo, hi, length ) with DemandRateUGen
 
-object Diwhite extends UGen3RArgs {
+object Diwhite extends UGen3RArgsIndiv {
 	def apply( lo: GE = 0, hi: GE = 1, length: GE = inf ) : GE = make( lo, hi, length )
 }
-case class Diwhite( lo: UGenIn, hi: UGenIn, length: UGenIn )
+case class Diwhite( lo: UGenIn, hi: UGenIn, length: UGenIn, _indiv: Int )
 extends SingleOutUGen( lo, hi, length ) with DemandRateUGen
 
-object Dbrown extends UGen4RArgs {
+object Dbrown extends UGen4RArgsIndiv {
 	def apply( lo: GE = 0, hi: GE = 1, step: GE = 0.01f, length: GE = inf ) : GE = make( lo, hi, step, length )
 }
-case class Dbrown( lo: UGenIn, hi: UGenIn, step: UGenIn, length: UGenIn )
+case class Dbrown( lo: UGenIn, hi: UGenIn, step: UGenIn, length: UGenIn, _indiv: Int )
 extends SingleOutUGen( lo, hi, step, length ) with DemandRateUGen
 
-object Dibrown extends UGen4RArgs {
+object Dibrown extends UGen4RArgsIndiv {
 	def apply( lo: GE = 0, hi: GE = 1, step: GE = 0.01f, length: GE = inf ) : GE = make( lo, hi, step, length )
 }
-case class Dibrown( lo: UGenIn, hi: UGenIn, step: UGenIn, length: UGenIn )
+case class Dibrown( lo: UGenIn, hi: UGenIn, step: UGenIn, length: UGenIn, _indiv: Int )
 extends SingleOutUGen( lo, hi, step, length ) with DemandRateUGen
 
-object Dstutter extends UGen2RArgs {
+object Dstutter extends UGen2RArgsIndiv {
 	def apply( n: GE, in: GE ) : GE = make( n, in )
 }
-case class Dstutter( n: UGenIn, in: UGenIn )
+case class Dstutter( n: UGenIn, in: UGenIn, _indiv: Int )
 extends SingleOutUGen( n, in ) with DemandRateUGen
 
-object Donce extends UGen1RArgs {
+object Donce extends UGen1RArgsIndiv {
 	def apply( in: GE ) : GE = make( in )
 }
-case class Donce( in: UGenIn )
+case class Donce( in: UGenIn, _indiv: Int )
 extends SingleOutUGen( in ) with DemandRateUGen
 
-object Dreset extends UGen2RArgs {
+object Dreset extends UGen2RArgsIndiv {
 	def apply( in: GE, reset: GE = 0 ) : GE = make( in, reset )
 }
-case class Dreset( in: UGenIn, reset: UGenIn )
+case class Dreset( in: UGenIn, reset: UGenIn, _indiv: Int )
 extends SingleOutUGen( in, reset ) with DemandRateUGen
 
 // Dpoll

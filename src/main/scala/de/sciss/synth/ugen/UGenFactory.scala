@@ -60,6 +60,12 @@ private[ugen] trait UGen1ArgsIndiv {
    protected def irExp( arg1: GE ) : GE = make( scalar, arg1 )
 }
 
+private[ugen] trait UGen1RArgsIndiv {
+   def apply( arg1: UGenIn, _indiv: Int ) : UGen
+   protected def make( arg1: GE ) : GE =
+      simplify( for( List( a1 ) <- expand( arg1 )) yield this( a1, individuate ))
+}
+
 private[ugen] trait UGen2Args {
    def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn ) : UGen
    private def make( rate: Rate, arg1: GE, arg2: GE ) : GE =
@@ -155,6 +161,13 @@ private[ugen] trait UGen4RArgs {
    protected def make( arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE =
       simplify( for( List( a1, a2, a3, a4 ) <- expand( arg1, arg2, arg3, arg4 ))
          yield this( a1, a2, a3, a4 ))
+}
+
+private[ugen] trait UGen4RArgsIndiv {
+   def apply( arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn, _indiv: Int ) : UGen
+   protected def make( arg1: GE, arg2: GE, arg3: GE, arg4: GE ) : GE =
+      simplify( for( List( a1, a2, a3, a4 ) <- expand( arg1, arg2, arg3, arg4 ))
+         yield this( a1, a2, a3, a4, individuate ))
 }
 
 private[ugen] trait UGen5Args {

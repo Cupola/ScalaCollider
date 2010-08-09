@@ -156,6 +156,20 @@ object Sweep extends UGen2Args {
   def ar( trig: GE, freq: GE ) : GE = arExp( trig, freq )
   def kr( trig: GE, freq: GE ) : GE = krExp( trig, freq )
 }
+/**
+ * A UGen which starts a linear raise from zero each time it is
+ * triggered.
+ *
+ * @param   trig  the trigger that restarts the ramp, when passing from
+ *    non-positive to positive
+ * @param   freq  the amount of increment of the output signal per second.
+ *    In SCLang this argument is named `rate`, while ScalaCollider uses
+ *    `freq` to avoid conflict with the UGen's calculation rate.
+ *
+ * @see  [[de.sciss.synth.ugen.Ramp]]
+ * @see  [[de.sciss.synth.ugen.Phasor]]
+ * @see  [[de.sciss.synth.ugen.Line]]
+ */
 case class Sweep( rate: Rate, trig: UGenIn, freq: UGenIn )
 extends SingleOutUGen( trig, freq )
 

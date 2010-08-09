@@ -52,12 +52,20 @@ extends SingleOutUGen( id ) // with ExclusiveUGen
 object Rand extends UGen2RArgsIndiv {
 	def apply( lo: GE = 0, hi: GE = 1 ) : GE = make( lo, hi )
 }
+/**
+ * @see  [[de.sciss.synth.ugen.TRand]]
+ * @see  [[de.sciss.synth.ugen.IRand]]
+ */
 case class Rand( lo: UGenIn, hi: UGenIn, _indiv: Int ) extends SingleOutUGen( lo, hi )
 with ScalarRated
 
 object IRand extends UGen2RArgsIndiv {
 	def apply( lo: GE = 0, hi: GE = 127 ) : GE = make( lo, hi )
 }
+/**
+ * @see  [[de.sciss.synth.ugen.TIRand]]
+ * @see  [[de.sciss.synth.ugen.Rand]]
+ */
 case class IRand( lo: UGenIn, hi: UGenIn, _indiv: Int ) extends SingleOutUGen( lo, hi )
 with ScalarRated
 
@@ -65,6 +73,11 @@ object TRand extends UGen3ArgsIndiv {
 	def ar( lo: GE = 0, hi: GE = 1, trig: GE ) : GE = arExp( lo, hi, trig )
 	def kr( lo: GE = 0, hi: GE = 1, trig: GE ) : GE = krExp( lo, hi, trig )
 }
+
+/**
+ * @see  [[de.sciss.synth.ugen.TIRand]]
+ * @see  [[de.sciss.synth.ugen.Rand]]
+ */
 case class TRand( rate: Rate, lo: UGenIn, hi: UGenIn, trig: UGenIn, _indiv: Int )
 extends SingleOutUGen( lo, hi, trig )
 
@@ -72,6 +85,19 @@ object TIRand extends UGen3ArgsIndiv {
 	def ar( lo: GE = 0, hi: GE = 127, trig: GE ) : GE = arExp( lo, hi, trig )
 	def kr( lo: GE = 0, hi: GE = 127, trig: GE ) : GE = krExp( lo, hi, trig )
 }
+
+/**
+ * A triggered random number generator UGen, using a uniform distribution of
+ * integer values.
+ *
+ * @param   lo the lower bound (inclusive) of the distribution interval
+ * @param   hi the upper bound (inclusive) of the distribution interval
+ * @param   trig  the trigger signal that causes a new random number to be generated
+ *    each time the trigger changes from nonpositive to positive
+ *
+ * @see  [[de.sciss.synth.ugen.TRand]]
+ * @see  [[de.sciss.synth.ugen.IRand]]
+ */
 case class TIRand( rate: Rate, lo: UGenIn, hi: UGenIn, trig: UGenIn, _indiv: Int )
 extends SingleOutUGen( lo, hi, trig )
 

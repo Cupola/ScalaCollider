@@ -123,6 +123,22 @@ object Ramp extends UGen2Args {
 	def ar( in: GE, time: GE = 0.1f ) : GE = arExp( in, time )
 	def kr( in: GE, time: GE = 0.1f ) : GE = krExp( in, time )
 }
+
+/**
+ * A UGen which produces a linear lag (time smear) regarding
+ * and input signal. Other than `Lag` which is a feedback
+ * filter with exponential decay, `Ramp` applies a linear
+ * ramp. This is achieved by sampling the input signal
+ * at regular intervals given by the `lagTime` and starting
+ * a new line segment after each interval.
+ *
+ * @param   in       the signal to smooth out
+ * @param   lagTime  the ramp-time (seconds) which is also the
+ *                   interval of the sampling
+ *
+ * @see  [[de.sciss.synth.ugen.Lag]]
+ * @see  [[de.sciss.synth.ugen.Sweep]]
+ */
 case class Ramp( rate: Rate, in: UGenIn, time: UGenIn )
 extends SingleOutUGen( in, time )
 
