@@ -28,7 +28,7 @@
 
 package de.sciss.synth
 
-import de.sciss.scalaosc.OSCMessage
+import de.sciss.osc.OSCMessage
 
 object GraphFunction {
    private var uniqueIDCnt = 0

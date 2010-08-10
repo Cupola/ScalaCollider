@@ -28,7 +28,7 @@
 
 package de.sciss
 
-import de.sciss.scalaosc.{ OSCMessage }
+import de.sciss.osc.{ OSCMessage }
 import collection.breakOut
 import collection.immutable.{ IndexedSeq => IIdxSeq }
 import synth.{ addToHead, AddAction, AudioBus, ControlBus, Completion, Constant, ControlProxyFactory, DoneAction, GE,

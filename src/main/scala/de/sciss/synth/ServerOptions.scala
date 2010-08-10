@@ -31,7 +31,7 @@ package de.sciss.synth
 import collection.mutable.ListBuffer
 import io.{ AudioFileType, SampleFormat }
 import java.io.File
-import de.sciss.scalaosc.{ OSCTransport, TCP, UDP }
+import de.sciss.osc.{ OSCTransport, TCP, UDP }
 import java.net.{DatagramSocket, ServerSocket}
 
 /**

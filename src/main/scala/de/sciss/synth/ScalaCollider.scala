@@ -47,7 +47,7 @@ object ScalaCollider {
    }
 
    def test2 {
-      import de.sciss.scalaosc._
+      import de.sciss.osc._
       val so = new ServerOptionsBuilder
       so.transport = TCP
       so.port = 44444

@@ -28,7 +28,7 @@
 
 package de.sciss.synth
 
-import de.sciss.scalaosc.{ OSCBundle, OSCMessage, OSCPacket }
+import de.sciss.osc.{ OSCBundle, OSCMessage, OSCPacket }
 import de.sciss.synth.{ Completion => Comp, play => scplay }
 import de.sciss.synth.io.{ AudioFileType, SampleFormat }
 import ugen.{ BufRateScale, FreeSelfWhenDone, PlayBuf }

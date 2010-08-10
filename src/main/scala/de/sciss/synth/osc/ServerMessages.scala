@@ -28,8 +28,8 @@
 
 package de.sciss.synth.osc
 
-import de.sciss.scalaosc.{ OSCException, OSCMessage, OSCPacket, OSCPacketCodec }
-import de.sciss.scalaosc.OSCPacket._
+import de.sciss.osc.{ OSCException, OSCMessage, OSCPacket, OSCPacketCodec }
+import OSCPacket._
 import de.sciss.synth.io.{ AudioFileType, SampleFormat }
 import java.nio.ByteBuffer
 import collection.breakOut
@@ -40,10 +40,10 @@ import de.sciss.synth._
 /**
  *    @version	0.13, 05-Aug-10
  */
-trait OSCMessageCodec {
-	def decodeMessage( name: String, b: ByteBuffer ) : OSCMessage
-}
-
+//trait OSCMessageCodec {
+//	def decodeMessage( name: String, b: ByteBuffer ) : OSCMessage
+//}
+//
 object ServerCodec extends OSCPacketCodec {
 	private val decodeStatusReply: (String, ByteBuffer) => OSCMessage = (name, b) => {
 		// ",iiiiiffdd"

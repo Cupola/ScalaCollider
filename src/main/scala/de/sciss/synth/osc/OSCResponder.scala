@@ -1,6 +1,6 @@
 package de.sciss.synth.osc
 
-import de.sciss.scalaosc.OSCMessage
+import de.sciss.osc.OSCMessage
 import de.sciss.synth.Server
 
 trait OSCHandler {

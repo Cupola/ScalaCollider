@@ -35,7 +35,7 @@ import ugen.Control
 import osc.{ OSCSynthDefFreeMessage, OSCSynthDefLoadMessage, OSCSynthDefRecvMessage }
 import collection.immutable.{ IndexedSeq => IIdxSeq, Iterable => IIterable, Seq => ISeq, Stack, Vector }
 import collection.breakOut
-import de.sciss.scalaosc.{ OSCMessage, OSCPacket }
+import de.sciss.osc.{ OSCMessage, OSCPacket }
 import File.{ separator => sep }
 
 /**

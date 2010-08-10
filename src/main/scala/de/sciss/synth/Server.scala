@@ -28,7 +28,7 @@
 
 package de.sciss.synth
 
-import de.sciss.scalaosc.{ OSCChannel, OSCClient, OSCMessage, OSCPacket, OSCTransport, TCP, UDP }
+import de.sciss.osc.{ OSCChannel, OSCClient, OSCMessage, OSCPacket, OSCTransport, TCP, UDP }
 import java.net.{ ConnectException, DatagramSocket, InetAddress, InetSocketAddress, ServerSocket, SocketAddress }
 import java.io.{ BufferedReader, File, InputStreamReader, IOException }
 import java.util.{ Timer, TimerTask }
