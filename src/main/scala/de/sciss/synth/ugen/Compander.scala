@@ -52,18 +52,44 @@ object Compander extends UGen7Args {
           ratioAbove: GE = 1, attack: GE = 0.01f, release: GE = 0.01f ) =
     krExp( in, control, thresh, ratioBelow, ratioAbove, attack, release )
 }
+
+/**
+ * A compressor, expander, limiter, gate and ducking UGen. This dynamic processor uses a
+ * hard-knee characteristic. All of the thresholds and ratios are given as direct
+ * values, not in decibels!
+ *
+ * @param   in          The signal to be compressed / expanded / gated.
+ * @param   control     The signal whose amplitude controls the processor. Often the same as in, but one may wish
+ *    to apply equalization or delay to it to change the compressor character (side-chaining), or even feed
+ *    a completely different signal, for instance in a ducking application.
+ * @param   thresh      Control signal amplitude threshold, which determines the break point between slopeBelow
+ *    and slopeAbove. Usually 0..1. The control signal amplitude is calculated using RMS.
+ * @param   ratioBelow  Slope of the amplitude curve below the threshold. If this slope > 1.0, the amplitude
+ *    will drop off more quickly the softer the control signal gets; when the control signal is close to 0
+ *    amplitude, the output should be exactly zero -- hence, noise gating. Values < 1.0 are possible,
+ *    but it means that a very low-level control signal will cause the input signal to be amplified,
+ *    which would raise the noise floor.
+ * @param   ratioAbove  Slope of the amplitude curve above the threshold.. alues < 1.0 achieve compression
+ *    (louder signals are attenuated); > 1.0, you get expansion (louder signals are made even louder).
+ *    For 3:1 compression, you would use a value of 1/3 here.
+ * @param   attack      The amount of time it takes for the amplitude adjustment to kick in fully. This is
+ *    usually pretty small, not much more than 10 milliseconds (the default value). I often set it as low as
+ *    2 milliseconds (0.002).
+ * @param   release     The amount of time for the amplitude adjustment to be released. Usually a bit longer
+ *    than attack; if both times are too short, you can get some (possibly unwanted) artifacts.
+ */
 case class Compander( rate: Rate, in: UGenIn, control: UGenIn, thresh: UGenIn,
                       ratioBelow: UGenIn, ratioAbove: UGenIn, attack: UGenIn,
                       release: UGenIn )
 extends SingleOutUGen( in, control, thresh, ratioBelow, ratioAbove, attack, release )
 
-// _not_ a ugen
-object CompanderD {
-  def ar( in: GE, thresh: GE = 0.5f, ratioBelow: GE = 1,
-          ratioAbove: GE = 1, attack: GE = 0.01f, release: GE = 0.01f ) =
-    Compander.ar( DelayN.ar( in, attack, attack ), in, thresh,
-                  ratioBelow, ratioAbove, attack, release )
-}
+//// _not_ a ugen; XXX remove
+//object CompanderD {
+//  def ar( in: GE, thresh: GE = 0.5f, ratioBelow: GE = 1,
+//          ratioAbove: GE = 1, attack: GE = 0.01f, release: GE = 0.01f ) =
+//    Compander.ar( DelayN.ar( in, attack, attack ), in, thresh,
+//                  ratioBelow, ratioAbove, attack, release )
+//}
 
 object Normalizer extends UGen3Args {
   def ar( in: GE, level: GE = 1, dur: GE = 0.01f ) = arExp( in, level, dur )

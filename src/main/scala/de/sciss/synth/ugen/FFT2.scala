@@ -28,19 +28,43 @@
 
 package de.sciss.synth.ugen
 
-import de.sciss.synth.{ GE, Rate, SingleOutUGen, UGenIn }
+import de.sciss.synth.{ GE, MultiOutUGen, Rate, SingleOutUGen, UGenIn }
 
 // continuous convolution in freq domain
 object Convolution extends UGen3Args {
    def ar( in: GE, kernel: GE, frameSize: GE ) : GE = arExp( in, kernel, frameSize )
 }
+/**
+ * @see  [[de.sciss.synth.ugen.Convolution2L]]
+ * @see  [[de.sciss.synth.ugen.Convolution3]]
+ * @see  [[de.sciss.synth.ugen.Convolution2]]
+ * @see  [[de.sciss.synth.ugen.StereoConvolution2L]]
+ */
 case class Convolution( rate: Rate, in: UGenIn, kernel: UGenIn, frameSize: UGenIn )
 extends SingleOutUGen( in, kernel, frameSize ) // with SideEffectUGen
 
-// triggered convolution in freq domain
 object Convolution2 extends UGen4Args {
-   def ar( in: GE, kernel: GE, trig: GE, frameSize: GE ) : GE = arExp( in, kernel, trig, frameSize )
+   def ar( in: GE, kernel: GE, trig: GE = 1, frameSize: GE ) : GE = arExp( in, kernel, trig, frameSize )
 }
+/**
+ * A frequency-domain convolution UGen using a fixed kernel which can be updated
+ * by a trigger signal. The delay caused by the convolution when the kernel is a dirac impulse
+ * is equal to `(frameSize - controlBlockSize + 1)` (measured august 2010), so for a frameSize
+ * of 2048 and a controlBlockSize of 64, this is 1983 sample frames. 
+ *
+ * @param   in          the realtime input to be convolved
+ * @param   kernel      buffer identifier for the fixed kernel, which may be modulated in combination
+ *                      with the trigger
+ * @param   trigger     updates the kernel on a change from non-positive to positive (<= 0 to >0)
+ * @param   frameSize   size of the kernel. this must be a power of two. the FFT calculated internally
+ *                      by the UGen has a size of twice this value. The maximum allowed frameSize
+ *                      is 65536(?).
+ *
+ * @see  [[de.sciss.synth.ugen.Convolution2L]]
+ * @see  [[de.sciss.synth.ugen.Convolution3]]
+ * @see  [[de.sciss.synth.ugen.Convolution]]
+ * @see  [[de.sciss.synth.ugen.StereoConvolution2L]]
+ */
 case class Convolution2( rate: Rate, in: UGenIn, kernel: UGenIn, trig: UGenIn, frameSize: UGenIn )
 extends SingleOutUGen( in, kernel, trig, frameSize ) // with SideEffectUGen
 
@@ -49,11 +73,41 @@ object Convolution2L extends UGen5Args {
    def ar( in: GE, kernel: GE, trig: GE, frameSize: GE, fadePeriods: GE = 1 ) : GE =
       arExp( in, kernel, trig, frameSize, fadePeriods )
 }
+/**
+ * @see  [[de.sciss.synth.ugen.Convolution2]]
+ * @see  [[de.sciss.synth.ugen.Convolution3]]
+ * @see  [[de.sciss.synth.ugen.Convolution]]
+ * @see  [[de.sciss.synth.ugen.StereoConvolution2L]]
+ */
 case class Convolution2L( rate: Rate, in: UGenIn, kernel: UGenIn, trig: UGenIn, frameSize: UGenIn, fadePeriods: UGenIn )
-extends SingleOutUGen( in, kernel, trig, frameSize, fadePeriods ) // with SideEffectUGen
+extends SingleOutUGen( in, kernel, trig, frameSize, fadePeriods )
 
-// triggered cross-faded stereo convolution in freq domain
-// StereoConvolution2L XXX
+object StereoConvolution2L extends UGen6Args {
+   def ar( in: GE, kernelL: GE, kernelR: GE, trig: GE = 1, frameSize: GE, fadePeriods: GE = 1 ) : GE =
+      arExp( in, kernelL, kernelR, trig, frameSize, fadePeriods )   
+}
+/**
+ * A frequency domain stereo convolution UGen, capable of performing linear crossfades between kernel updates.
+ * When receiving a trigger, there is a linear crossfade between the old kernel the new buffer contents.
+ * It operates similar to Convolution2L, however uses two buffers and outputs a stereo signal, resulting
+ * in better CPU usage than two discrete instances of Convolution2L as this way one FFT transformation per period
+ * is saved.
+ *
+ * @param   in          the realtime input to be convolved
+ * @param   kernelL     buffer identifier for the left channel's fixed kernel, which may be modulated in combination
+ *                      with the trigger
+ * @param   kernelR     buffer identifier for the right channel's fixed kernel, which may be modulated in combination
+ *                      with the trigger
+ * @param   trigger     updates the kernel on a change from non-positive to positive (<= 0 to >0), and starts a new
+ *                      crossfade from the previous kernel to the new one over the given amount of periods.
+ * @param   frameSize   size of each kernel. this must be a power of two. the FFT calculated internally
+ *                      by the UGen has a size of twice this value. The maximum allowed frameSize
+ *                      is 65536(?).
+ * @param   fadePeriods The number of periods over which a crossfade is performed. This must be an integer
+ */
+case class StereoConvolution2L( rate: Rate, in: UGenIn, kernelL: UGenIn, kernelR: UGenIn, trig: UGenIn,
+                                frameSize: UGenIn, fadePeriods: UGenIn )
+extends MultiOutUGen( rate, 2, List( in, kernelL, kernelR, trig, frameSize, fadePeriods ))
 
 // triggered convolution in time domain
 object Convolution3 extends UGen4Args {

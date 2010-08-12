@@ -5,7 +5,7 @@ DecodeB2, PanB2, PanB, BiPanB2,
 GrainSin, GrainFM, GrainBuf, GrainIn, Warp1,
 BeatTrack, Loudness, Onsets, KeyTrack, MFCC, BeatTrack2, SpecFlatness, SpecPcile, SpecCentroid,
 ScopeOut, SharedOut, SharedIn,  // mac internal server only
-// DynKlank, DynKlang, HilbertFIR, Tap, IndexL, SelectX, SelectXFocus, TChoose, TWChoose, // fake ugens
+// DynKlank, DynKlang, HilbertFIR, Tap, IndexL, SelectX, SelectXFocus, TChoose, TWChoose, CompanderD, // fake ugens
 Dpoll,
 MaxLocalBufs, ClearBuf, SetBuf, LocalBuf,
 BBandStop, BHiPass, BLowShelf, BPeakEQ, BAllPass, BHiShelf, BBandPass, BLowPass,
@@ -13,7 +13,7 @@ PV_JensenAndersen, PV_MagFreeze, PV_RectComb2, PV_BrickWall, PV_PhaseShift, PV_H
 // AccelerometerX, AccelerometerY, AccelerometerZ,
 QuadN, QuadL, QuadC, CuspN, CuspL, GbmanN, GbmanL, HenonN, HenonL, HenonC, LatoocarfianN, LatoocarfianC, LatoocarfianL, LinCongN, LinCongL, LinCongC, StandardN, StandardL, FBSineN, FBSineL, FBSineC, LorenzL,
 Spring, Ball, TBall,
-StereoConvolution2L, PartConv,
+PartConv,
 Pluck,
 MoogFF
 
