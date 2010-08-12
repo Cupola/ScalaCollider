@@ -5,7 +5,6 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ugen_list.scd" afterPath="$PROJECT_DIR$/ugen_list.scd" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FFT2.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FFT2.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Compander.scala" afterPath="$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/Compander.scala" />
     </list>
     <ignored path="ScalaCollider.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -109,7 +108,7 @@
       <file leaf-file-name="FFT2.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FFT2.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="127" column="43" selection-start="6367" selection-end="6367" vertical-scroll-proportion="0.9602649">
+            <state line="51" column="29" selection-start="1957" selection-end="1957" vertical-scroll-proportion="0.1986755">
               <folding />
             </state>
           </provider>
@@ -1231,7 +1230,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/de/sciss/synth/ugen/FFT2.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="127" column="43" selection-start="6367" selection-end="6367" vertical-scroll-proportion="0.9602649">
+        <state line="51" column="29" selection-start="1957" selection-end="1957" vertical-scroll-proportion="0.1986755">
           <folding />
         </state>
       </provider>

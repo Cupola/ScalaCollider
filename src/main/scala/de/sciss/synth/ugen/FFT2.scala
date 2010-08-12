@@ -49,7 +49,7 @@ object Convolution2 extends UGen4Args {
 /**
  * A frequency-domain convolution UGen using a fixed kernel which can be updated
  * by a trigger signal. The delay caused by the convolution when the kernel is a dirac impulse
- * is equal to `(frameSize - controlBlockSize + 1)` (measured august 2010), so for a frameSize
+ * is equal to `frameSize - (controlBlockSize + 1)` (measured august 2010), so for a frameSize
  * of 2048 and a controlBlockSize of 64, this is 1983 sample frames. 
  *
  * @param   in          the realtime input to be convolved
@@ -104,6 +104,11 @@ object StereoConvolution2L extends UGen6Args {
  *                      by the UGen has a size of twice this value. The maximum allowed frameSize
  *                      is 65536(?).
  * @param   fadePeriods The number of periods over which a crossfade is performed. This must be an integer
+ *
+ * @see  [[de.sciss.synth.ugen.Convolution2]]
+ * @see  [[de.sciss.synth.ugen.Convolution3]]
+ * @see  [[de.sciss.synth.ugen.Convolution]]
+ * @see  [[de.sciss.synth.ugen.Convolution2L]]
  */
 case class StereoConvolution2L( rate: Rate, in: UGenIn, kernelL: UGenIn, kernelR: UGenIn, trig: UGenIn,
                                 frameSize: UGenIn, fadePeriods: UGenIn )
