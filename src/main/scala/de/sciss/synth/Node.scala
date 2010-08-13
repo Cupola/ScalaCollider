@@ -33,15 +33,39 @@ import osc.{ OSCGroupHeadMessage, OSCGroupTailMessage, OSCNodeAfterMessage, OSCN
              OSCNodeMapnMessage, OSCNodeRunMessage, OSCNodeSetMessage, OSCNodeSetnMessage, OSCNodeTraceMessage }
 
 /**
- *    @version	0.15, 10-May-10
+ * Add-actions are used by the server to determine where to place a node with
+ * respect to other nodes. They form an enumeration of integers which are
+ * represented by case objects being subclasses of this abstract class.
+ *
+ * @see  [[de.sciss.synth.Synth]]
+ * @see  [[de.sciss.synth.Group]]
  */
-
 sealed abstract class AddAction( val id: Int )
 
+/**
+ * AddAction with id 0, indicating that a node should be add to the head of
+ * of a target group.
+ */
 case object addToHead   extends AddAction( 0 )
+/**
+ * AddAction with id 1, indicating that a node should be add to the tail of
+ * of a target group.
+ */
 case object addToTail   extends AddAction( 1 )
+/**
+ * AddAction with id 2, indicating that a node should be added to the same
+ * group as the target node, right before it.
+ */
 case object addBefore   extends AddAction( 2 )
+/**
+ * AddAction with id 3, indicating that a node should be added to the same
+ * group as the target node, right after it.
+ */
 case object addAfter    extends AddAction( 3 )
+/**
+ * AddAction with id 4, indicating that a node should replace an existing
+ * node, that is take the target node's exact position in the tree.
+ */
 case object addReplace  extends AddAction( 4 )
 
 /**
@@ -194,10 +218,38 @@ abstract class Node extends Model {
    
   	def fillMsg( fillings: OSCNodeFillInfo* ) = OSCNodeFillMessage( id, fillings: _* )
 
+   /**
+    * Moves this node before another node
+    *
+    * @param   node  the node before which to move this node
+    *
+    * @see  [[de.sciss.synth.osc.OSCNodeBeforeMessage]]
+    */
    def moveBefore( node: Node ) { server ! moveBeforeMsg( node )}
+   /**
+    * Creates an OSC message to move this node before another node
+    *
+    * @param   node  the node before which to move this node
+    *
+    * @see  [[de.sciss.synth.osc.OSCNodeBeforeMessage]]
+    */
    def moveBeforeMsg( node: Node )  = OSCNodeBeforeMessage( id -> node.id )
 
+   /**
+    * Moves this node after another node
+    *
+    * @param   node  the node after which to move this node
+    *
+    * @see  [[de.sciss.synth.osc.OSCNodeAfterMessage]]
+    */
    def moveAfter( node: Node ) { server ! moveAfterMsg( node )}
+   /**
+    * Creates an OSC message to move this node after another node
+    *
+    * @param   node  the node after which to move this node
+    *
+    * @see  [[de.sciss.synth.osc.OSCNodeAfterMessage]]
+    */
    def moveAfterMsg( node: Node )   = OSCNodeAfterMessage( id -> node.id )
 
    def moveToHead( group: Group ) { server ! moveToHeadMsg( group )}
@@ -207,4 +259,4 @@ abstract class Node extends Model {
   	def moveToTailMsg( group: Group ) : OSCGroupTailMessage = group.moveNodeToTailMsg( this )
 }
 
-class NodeRef( val server: Server, val id: Int ) extends Node
+//class NodeRef( val server: Server, val id: Int ) extends Node

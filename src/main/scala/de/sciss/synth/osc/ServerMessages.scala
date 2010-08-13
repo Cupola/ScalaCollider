@@ -157,44 +157,58 @@ object ServerCodec extends OSCPacketCodec {
 sealed trait OSCServerMessage
 
 /**
- *    Identifies messages sent to the SuperCollider server
+ * Identifies messages sent to the SuperCollider server
  */
 sealed trait OSCSend extends OSCServerMessage {
    def isSynchronous : Boolean
 }
 /**
- *    Identifies messages sent to the server which are
- *    executed synchronously
+ * Identifies messages sent to the server which are
+ * executed synchronously
  */
 sealed trait OSCSyncSend extends OSCSend {
    final def isSynchronous = true
 }
 /**
- *    Identifies command messages sent to the server which are
- *    executed synchronously and do not return a message
+ * Identifies command messages sent to the server which are
+ * executed synchronously and do not return a message
  */
 trait OSCSyncCmd extends OSCSyncSend
 /**
- *    Identifies query messages sent to the server which are
- *    executed synchronously and produce a reply message
+ * Identifies query messages sent to the server which are
+ * executed synchronously and produce a reply message
  */
 trait OSCSyncQuery extends OSCSyncSend
 /**
- *    Identifies messages sent to the server which are
- *    executed asynchronously and reply with a form of
- *    done-message.
+ * Identifies messages sent to the server which are
+ * executed asynchronously and reply with a form of
+ * done-message.
  */
 sealed trait OSCAsyncSend extends OSCSend {
    final def isSynchronous = false
 }
 /**
- *    Identifies messages returned by SuperCollider server
+ * Identifies messages returned by SuperCollider server
  */
 trait OSCReceive extends OSCServerMessage
 
+/**
+ * Represents a `/synced` message, a reply from the server acknowledging that
+ * all asynchronous operations up to the corresponding `/sync` message (i.e. with
+ * the same id) have been completed
+ */
 case class OSCSyncedMessage( id: Int ) extends OSCMessage( "/synced", id )
 with OSCReceive
 
+/**
+ * Represents a `/sync` message, which is queued with the asynchronous messages
+ * on the server, and which, when executed, triggers a corresponding `/synced` reply
+ * message (i.e. with the same id)
+ *
+ * @param   id    an arbitrary identifier which can be used to match the corresponding
+ *                reply message. typically the id is incremented by 1 for each
+ *                `/sync` message sent out. 
+ */
 case class OSCSyncMessage( id: Int ) extends OSCMessage( "/sync", id )
 with OSCAsyncSend
 
@@ -367,10 +381,34 @@ case class OSCGroupQueryTreeMessage( groups: (Int, Boolean)* )
 extends OSCMessage( "/g_queryTree", groups.flatMap( g => List( g._1, if( g._2 ) 1 else 0 )): _* )
 with OSCSyncQuery
 
+/**
+ * Represents an `/g_head` message, which pair-wise places nodes at the head
+ * of groups.
+ * {{{
+ * /g_head
+ *   [
+ *     Int - the ID of the group at which head a node is to be placed (B)
+ *     int - the ID of the node to place (A)
+ *   ] * N
+ * }}}
+ * So that for each pair, node A is moved to the head of group B.
+ */
 case class OSCGroupHeadMessage( groups: (Int, Int)* )
 extends OSCMessage( "/g_head", groups.flatMap( g => List( g._1, g._2 )): _* )
 with OSCSyncCmd
 
+/**
+ * Represents an `/g_tail` message, which pair-wise places nodes at the tail
+ * of groups.
+ * {{{
+ * /g_tail
+ *   [
+ *     Int - the ID of the group at which tail a node is to be placed (B)
+ *     int - the ID of the node to place (A)
+ *   ] * N
+ * }}}
+ * So that for each pair, node A is moved to the tail of group B.
+ */
 case class OSCGroupTailMessage( groups: (Int, Int)* )
 extends OSCMessage( "/g_tail", groups.flatMap( g => List( g._1, g._2 )): _* )
 with OSCSyncCmd
@@ -434,10 +472,34 @@ case class OSCNodeFillMessage( id: Int, fillings: OSCNodeFillInfo* )
 extends OSCMessage( "/n_fill", (id +: fillings.flatMap( f => Vector( f.control, f.numChannels, f.value ))): _* )
 with OSCSyncCmd
 
+/**
+ * Represents an `/n_before` message, which pair-wise places nodes before
+ * other nodes.
+ * {{{
+ * /n_before
+ *   [
+ *     Int - the ID of the node to place (A)
+ *     int - the ID of the node before which the above is placed (B)
+ *   ] * N
+ * }}}
+ * So that for each pair, node A in the same group as node B, to execute immediately before node B.
+ */
 case class OSCNodeBeforeMessage( groups: (Int, Int)* )
 extends OSCMessage( "/n_before", groups.flatMap( g => List( g._1, g._2 )): _* )
 with OSCSyncCmd
 
+/**
+ * Represents an `/n_after` message, which pair-wise places nodes after
+ * other nodes.
+ * {{{
+ * /n_after
+ *   [
+ *     Int - the ID of the node to place (A)
+ *     int - the ID of the node after which the above is placed (B)
+ *   ] * N
+ * }}}
+ * So that for each pair, node A in the same group as node B, to execute immediately after node B.
+ */
 case class OSCNodeAfterMessage( groups: (Int, Int)* )
 extends OSCMessage( "/n_after", groups.flatMap( g => List( g._1, g._2 )): _* )
 with OSCSyncCmd
