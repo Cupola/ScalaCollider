@@ -48,7 +48,7 @@ object Demand {
 }
 
 /**
- * A UGen which polls results from demand-rate ugens.
+ * A UGen which polls results from demand-rate ugens when receiving a trigger.
  * When there is a trigger at the `trig` input, a value is demanded from each ugen in the `multi` input
  * and output. The unit generators in the list should be demand-rate.
  * When there is a trigger at the reset input, the demand rate ugens in the list are reset.
@@ -81,8 +81,22 @@ object Duty extends UGen4Args {
 	// XXX checkInputs
 }
 /**
+ * A UGen which polls results from demand-rate ugens in intervals specified by a durational input.
+ * A value from the `level` ugen is demanded and output according to a stream
+ * of duration values. When there is a trigger at the reset input, the `level`
+ * and the `dur` input are reset.
+ *
+ * @param   dur         the provider of time values. Can be a demand-rate ugen or any signal.
+ *			The next poll is acquired after the previous duration.
+ * @param   reset		   a trigger which resets the dur input (if demand-rated) and the
+ *    the level input ugen. The reset input may also be a demand-rate ugen, in this case
+ *    providing a stream of reset times.
+ * @param   level       a demand-rate ugen providing the output values.
+ * @param   doneAction  a doneAction that is evaluated when the duration stream ends.
+ *
  * @see  [[de.sciss.synth.ugen.TDuty]]
  * @see  [[de.sciss.synth.ugen.Demand]]
+ * @see  [[de.sciss.synth.DoneAction]]
  */
 case class Duty( rate: Rate, dur: UGenIn, reset: UGenIn, level: UGenIn, doneAction: UGenIn )
 extends SingleOutUGen( dur, reset, doneAction, level ) // ! WARNING ! different order
@@ -98,8 +112,28 @@ object TDuty extends UGen5Args {
 }
 
 /**
+ * A UGen which polls results from demand-rate ugens in intervals specified by a durational input,
+ * and outputs them as trigger values.
+ * A value from the `level` ugen is demanded and output for one sample (when
+ * running at audio-rate) or one block (when running at control-rate) according to a stream
+ * of duration values. When there is a trigger at the reset input, the `level` and
+ * the `dur` input are reset.
+ *
+ * @param   dur         the provider of time values. Can be a demand-rate ugen or any signal.
+ *			The next poll is acquired after the previous duration.
+ * @param   reset		   a trigger which resets the dur input (if demand-rated) and the
+ *    the level input ugen. The reset input may also be a demand-rate ugen, in this case
+ *    providing a stream of reset times.
+ * @param   level       a demand-rate ugen providing the output values.
+ * @param   doneAction  a doneAction that is evaluated when the duration stream ends.
+ * @param   gapFirst    when 0 (default), the UGen does the first level poll immediately and then
+ *    waits for the first durational value. When this is 1, the UGen initially polls the first
+ *    durational value, waits for that duration, and then polls the first level
+ *    (along with polling the next durational value).
+ *
  * @see  [[de.sciss.synth.ugen.Duty]]
  * @see  [[de.sciss.synth.ugen.Demand]]
+ * @see  [[de.sciss.synth.DoneAction]]
  */
 case class TDuty( rate: Rate, dur: UGenIn, reset: UGenIn, level: UGenIn, doneAction: UGenIn, gapFirst: UGenIn )
 extends SingleOutUGen( dur, reset, doneAction, level, gapFirst )  // ! WARNING ! different order
