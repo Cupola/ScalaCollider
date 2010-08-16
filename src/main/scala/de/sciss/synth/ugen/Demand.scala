@@ -34,7 +34,7 @@ import SynthGraph._
 import Float.{ PositiveInfinity => inf }
 
 /**
- *    @version	0.10, 05-Aug-10
+ *    @version	0.11, 16-Aug-10
  */
 object Demand {
    def ar( trig: GE, reset: GE = 0, multi: GE ) : GE = make( audio, trig, reset, multi )
@@ -73,12 +73,10 @@ extends MultiOutUGen( rate, multi.size, trig +: reset +: multi )
 
 object Duty extends UGen4Args {
 	def ar( dur: GE = 1, reset: GE = 0, level: GE, doneAction: GE = doNothing ) :  GE =
-      // ! WARNING ! different order
-      arExp( dur, reset, doneAction, level )
+      arExp( dur, reset, level, doneAction )
 
    def kr( dur: GE = 1, reset: GE = 0, level: GE, doneAction: GE = doNothing ) :  GE =
-      // ! WARNING ! different order
-      krExp( dur, reset, doneAction, level )
+      krExp( dur, reset, level, doneAction )
 
 	// XXX checkInputs
 }
@@ -86,17 +84,15 @@ object Duty extends UGen4Args {
  * @see  [[de.sciss.synth.ugen.TDuty]]
  * @see  [[de.sciss.synth.ugen.Demand]]
  */
-case class Duty( rate: Rate, dur: UGenIn, reset: UGenIn, doneAction: UGenIn, level: UGenIn )
-extends SingleOutUGen( dur, reset, doneAction, level )
+case class Duty( rate: Rate, dur: UGenIn, reset: UGenIn, level: UGenIn, doneAction: UGenIn )
+extends SingleOutUGen( dur, reset, doneAction, level ) // ! WARNING ! different order
 
 object TDuty extends UGen5Args {
 	def ar( dur: GE = 1, reset: GE = 0, level: GE = 1, doneAction: GE = doNothing, gapFirst: GE = 0 ) :  GE =
-      // ! WARNING ! different order
-      arExp( dur, reset, doneAction, level, gapFirst )
+      arExp( dur, reset, level, doneAction, gapFirst )
 
    def kr( dur: GE = 1, reset: GE = 0, level: GE = 1, doneAction: GE = doNothing, gapFirst: GE = 0 ) :  GE =
-   // ! WARNING ! different order
-      krExp( dur, reset, doneAction, level, gapFirst )
+      krExp( dur, reset, level, doneAction, gapFirst )
 
 	// XXX checkInputs
 }
@@ -105,8 +101,8 @@ object TDuty extends UGen5Args {
  * @see  [[de.sciss.synth.ugen.Duty]]
  * @see  [[de.sciss.synth.ugen.Demand]]
  */
-case class TDuty( rate: Rate, dur: UGenIn, reset: UGenIn, doneAction: UGenIn, level: UGenIn, gapFirst: UGenIn )
-extends SingleOutUGen( dur, reset, doneAction, level, gapFirst )
+case class TDuty( rate: Rate, dur: UGenIn, reset: UGenIn, level: UGenIn, doneAction: UGenIn, gapFirst: UGenIn )
+extends SingleOutUGen( dur, reset, doneAction, level, gapFirst )  // ! WARNING ! different order
 
 object DemandEnvGen extends UGen10Args {
    def ar( levels: GE, durs: GE, shapes: GE = 1, curvatures: GE = 0, gate: GE = 1, reset: GE = 1,
@@ -160,13 +156,13 @@ object Dseries extends UGen3RArgsIndiv {
  * @see  [[de.sciss.synth.ugen.Dseq]]
  */
 case class Dseries( start: UGenIn, step: UGenIn, length: UGenIn, _indiv: Int )
-extends SingleOutUGen( start, step, length ) with DemandRateUGen
+extends SingleOutUGen( length, start, step ) with DemandRateUGen   // ! WARNING ! different order
 
 object Dgeom extends UGen3RArgsIndiv {
 	def apply( start: GE = 1, grow: GE = 2, length: GE = inf ) : GE = make( start, grow, length )
 }
 case class Dgeom( start: UGenIn, grow: UGenIn, length: UGenIn, _indiv: Int )
-extends SingleOutUGen( start, grow, length ) with DemandRateUGen
+extends SingleOutUGen( length, start, grow ) with DemandRateUGen  // ! WARNING ! different order
 
 object Dbufrd extends UGen3RArgsIndiv {
 	def apply( bufID: GE, phase: GE = 0, loop: GE = 1 ) : GE = make( bufID, phase, loop )
@@ -193,15 +189,17 @@ object Dbufwr extends UGen4RArgsIndiv {
 	def apply( input: GE, bufID: GE, phase: GE = 0, loop: GE = 1 ) : GE = make( input, bufID, phase, loop )
 }
 case class Dbufwr( input: UGenIn, bufID: UGenIn, phase: UGenIn, loop: UGenIn, _indiv: Int )
-extends SingleOutUGen( input, bufID, phase, loop ) with DemandRateUGen
+extends SingleOutUGen( bufID, phase, input, loop ) with DemandRateUGen // ! WARNING ! different order
 
 trait AbstractSeqDemand {
-   def apply( seq: GE, repeats: GE = 1 ) : GE = make( repeats, seq )
-   def apply( repeats: UGenIn, seq: Seq[ UGenIn ], _indiv: Int ) : UGen
+   def apply( seq: GE, repeats: GE = 1 ) : GE = make( seq, repeats )
+   def apply( seq: Seq[ UGenIn ], repeats: UGenIn, _indiv: Int ) : UGen
 
-   private def make( repeats: GE, seq: GE ) : GE = {
+   private def make( seq: GE, repeats: GE ) : GE = {
+      // be ware careful here with the fucked up argument order of
+      // constructor versus underlying ugen!
       val args = repeats +: seq.outputs
-      simplify( for( r :: s <- expand( args: _* )) yield this( r, s, individuate ))
+      simplify( for( r :: s <- expand( args: _* )) yield this( s, r, individuate ))
    }
 }
 
@@ -209,70 +207,74 @@ object Dseq extends AbstractSeqDemand
 /**
  * @see  [[de.sciss.synth.ugen.Dseries]]
  */
-case class Dseq( repeats: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
-extends SingleOutUGen( (repeats +: seq): _* ) with DemandRateUGen
+case class Dseq( seq: Seq[ UGenIn ], repeats: UGenIn, _indiv: Int )
+extends SingleOutUGen( (repeats +: seq): _* ) with DemandRateUGen // ! WARNING ! different order
 
 object Dser extends AbstractSeqDemand
-case class Dser( repeats: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
+case class Dser( seq: Seq[ UGenIn ], repeats: UGenIn, _indiv: Int )
 extends SingleOutUGen( (repeats +: seq): _* ) with DemandRateUGen
 
 object Dshuf extends AbstractSeqDemand
-case class Dshuf( repeats: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
+case class Dshuf( seq: Seq[ UGenIn ], repeats: UGenIn, _indiv: Int )
 extends SingleOutUGen( (repeats +: seq): _* ) with DemandRateUGen
 
 object Drand extends AbstractSeqDemand
-case class Drand( repeats: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
+case class Drand( seq: Seq[ UGenIn ], repeats: UGenIn, _indiv: Int )
 extends SingleOutUGen( (repeats +: seq): _* ) with DemandRateUGen
 
 object Dxrand extends AbstractSeqDemand
-case class Dxrand( repeats: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
+case class Dxrand( seq: Seq[ UGenIn ], repeats: UGenIn, _indiv: Int )
 extends SingleOutUGen( (repeats +: seq): _* ) with DemandRateUGen
 
 object Dswitch1 {
-   def apply( seq: GE, index: GE ) : GE = make( index, seq )
+   def apply( seq: GE, index: GE ) : GE = make( seq, index )
 
-   private def make( index: GE, seq: GE ) : GE = {
+   private def make( seq: GE, index: GE ) : GE = {
+      // be ware careful here with the fucked up argument order of
+      // constructor versus underlying ugen!
       val args = index +: seq.outputs
-      simplify( for( i :: s <- expand( args: _* )) yield this( i, s, individuate ))
+      simplify( for( i :: s <- expand( args: _* )) yield this( s, i, individuate ))
    }
 }
-case class Dswitch1( index: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
-extends SingleOutUGen( (index +: seq): _* ) with DemandRateUGen
+case class Dswitch1( seq: Seq[ UGenIn ], index: UGenIn, _indiv: Int )
+extends SingleOutUGen( (index +: seq): _* ) with DemandRateUGen // ! WARNING ! different order
 
 object Dswitch {
-   def apply( seq: GE, index: GE ) : GE = make( index, seq )
+   def apply( seq: GE, index: GE ) : GE = make( seq, index )
 
-   private def make( index: GE, seq: GE ) : GE = {
+   private def make( seq: GE, index: GE ) : GE = {
+      // be ware careful here with the fucked up argument order of
+      // constructor versus underlying ugen!
       val args = index +: seq.outputs
-      simplify( for( i :: s <- expand( args: _* )) yield this( i, s, individuate ))
+      simplify( for( i :: s <- expand( args: _* )) yield this( s, i, individuate ))
    }
 }
-case class Dswitch( index: UGenIn, seq: Seq[ UGenIn ], _indiv: Int )
-extends SingleOutUGen( (index +: seq): _* ) with DemandRateUGen
+case class Dswitch( seq: Seq[ UGenIn ], index: UGenIn, _indiv: Int )
+extends SingleOutUGen( (index +: seq): _* ) with DemandRateUGen // ! WARNING ! different order
 
 object Dwhite extends UGen3RArgsIndiv {
 	def apply( lo: GE = 0, hi: GE = 1, length: GE = inf ) : GE = make( lo, hi, length )
 }
 case class Dwhite( lo: UGenIn, hi: UGenIn, length: UGenIn, _indiv: Int )
-extends SingleOutUGen( lo, hi, length ) with DemandRateUGen
+extends SingleOutUGen( length, lo, hi ) with DemandRateUGen // ! WARNING ! different order
 
 object Diwhite extends UGen3RArgsIndiv {
 	def apply( lo: GE = 0, hi: GE = 1, length: GE = inf ) : GE = make( lo, hi, length )
 }
 case class Diwhite( lo: UGenIn, hi: UGenIn, length: UGenIn, _indiv: Int )
-extends SingleOutUGen( lo, hi, length ) with DemandRateUGen
+extends SingleOutUGen( length, lo, hi ) with DemandRateUGen  // ! WARNING ! different order
 
 object Dbrown extends UGen4RArgsIndiv {
 	def apply( lo: GE = 0, hi: GE = 1, step: GE = 0.01f, length: GE = inf ) : GE = make( lo, hi, step, length )
 }
 case class Dbrown( lo: UGenIn, hi: UGenIn, step: UGenIn, length: UGenIn, _indiv: Int )
-extends SingleOutUGen( lo, hi, step, length ) with DemandRateUGen
+extends SingleOutUGen( length, lo, hi, step ) with DemandRateUGen  // ! WARNING ! different order
 
 object Dibrown extends UGen4RArgsIndiv {
 	def apply( lo: GE = 0, hi: GE = 1, step: GE = 0.01f, length: GE = inf ) : GE = make( lo, hi, step, length )
 }
 case class Dibrown( lo: UGenIn, hi: UGenIn, step: UGenIn, length: UGenIn, _indiv: Int )
-extends SingleOutUGen( lo, hi, step, length ) with DemandRateUGen
+extends SingleOutUGen( length, lo, hi, step ) with DemandRateUGen    // ! WARNING ! different order
 
 object Dstutter extends UGen2RArgsIndiv {
 	def apply( n: GE, in: GE ) : GE = make( n, in )

@@ -165,6 +165,14 @@ object ToggleFF extends UGen1Args {
   def ar( trig: GE ) : GE = arExp( trig )
   def kr( trig: GE ) : GE = krExp( trig )
 }
+/**
+ * A UGen that toggles like a flip-flop between zero and one upon receiving a trigger.
+ * The flip-flop is initially outputing zero, so changes to one when the first trigger
+ * arrives.
+ *
+ * @param   trig  a signal to trigger the flip-flop. a trigger occurs when the signal
+ *    changes from non-positive to positive.
+ */
 case class ToggleFF( rate: Rate, trig: UGenIn ) extends SingleOutUGen( trig )
 
 object ZeroCrossing extends UGen1Args {

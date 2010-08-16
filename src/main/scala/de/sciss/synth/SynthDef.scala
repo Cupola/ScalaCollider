@@ -39,7 +39,7 @@ import de.sciss.osc.{ OSCMessage, OSCPacket }
 import File.{ separator => sep }
 
 /**
- *    @version 0.19, 17-May-10
+ *    @version 0.19, 16-Aug-10
  *    @todo    should add load and loadDir to companion object
  */
 case class SynthDef( name: String, graph: SynthGraph ) {
@@ -50,7 +50,8 @@ case class SynthDef( name: String, graph: SynthGraph ) {
 
    def freeMsg = OSCSynthDefFreeMessage( name )
 
-   def recv( server: Server, completion: Completion = NoCompletion ) : SynthDef = {
+   def recv : Unit = recv()
+   def recv( server: Server = Server.default, completion: Completion = NoCompletion ) {
       if( completion.action.isDefined ) error( "Completion action not yet supported" )
       server ! recvMsg( completion.message.map( _.apply( this )))
       this
@@ -78,8 +79,9 @@ case class SynthDef( name: String, graph: SynthGraph ) {
       graph.write( dos )
    }
 
+   def load : Unit = load()
    def load( server: Server = Server.default, dir: String = defaultDir,
-             completion: Completion = NoCompletion ) : SynthDef = {
+             completion: Completion = NoCompletion ) {
       if( completion.action.isDefined ) error( "Completion action not yet supported" )
       writeDefFile( dir )
       server ! loadMsg( dir, completion.message.map( _.apply( this )))
@@ -91,7 +93,7 @@ case class SynthDef( name: String, graph: SynthGraph ) {
    def loadMsg( dir: String = defaultDir, completion: Option[ OSCMessage ] = None ) =
 	   OSCSynthDefLoadMessage( dir + sep + name + ".scsyndef", completion )
 
-   def playX: Synth = play()
+   def play: Synth = play()
    def play( target: Node = Server.default, args: Seq[ ControlSetMap ] = Nil, addAction: AddAction = addToHead ) : Synth = {
       val synth   = new Synth( target.server )
 		val newMsg  = synth.newMsg( name, target, args, addAction )
@@ -100,7 +102,6 @@ case class SynthDef( name: String, graph: SynthGraph ) {
    }
     
    def writeDefFile : Unit = writeDefFile()
-
    def writeDefFile( dir: String = defaultDir, overwrite: Boolean = false ) {
       var file = new File( dir, name + ".scsyndef" )
       val exists = file.exists

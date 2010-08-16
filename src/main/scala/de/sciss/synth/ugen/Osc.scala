@@ -261,6 +261,17 @@ object Select {
                      expand( (index :: multi.outputs.toList): _* ))
                 yield this( rate, i, m ))
 }
+/**
+ * A UGen which selects among a sequence of inputs, according to an index signal.
+ * Note that, although only one signal of the `multi` input is let through at
+ * a time, sill all ugens are continuously running.
+ *
+ * @param   index an index signal into the channels of the `multi` argument. The index
+ *    is automatically clipped to lie between `0` and `multi.numOutputs - 1`. The index
+ *    is truncated to its integer part (not rounded), hence using for instance an
+ *    index of `0.9` will still be interpreted as index `0`.
+ * @param   multi a graph element which is composed of the channels to be indexed. 
+ */
 case class Select( rate: Rate, index: UGenIn, multi: Seq[ UGenIn ])
 extends SingleOutUGen( (index :: multi.toList): _* )
 
