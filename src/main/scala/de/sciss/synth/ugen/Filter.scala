@@ -31,7 +31,7 @@ package de.sciss.synth.ugen
 import de.sciss.synth.{ GE, Rate, SideEffectUGen, SingleOutUGen, UGenIn }
 
 /**
- * 	@version	0.12, 01-Jan-10
+ * 	@version	0.13, 16-Aug-10
  */
 object Resonz extends UGen3Args {
   def ar( in: GE, freq: GE = 440, rq: GE = 1 ) : GE = arExp( in, freq, rq )
@@ -120,8 +120,8 @@ case class Lag3( rate: Rate, in: UGenIn, time: UGenIn )
 extends SingleOutUGen( in, time )
 
 object Ramp extends UGen2Args {
-	def ar( in: GE, time: GE = 0.1f ) : GE = arExp( in, time )
-	def kr( in: GE, time: GE = 0.1f ) : GE = krExp( in, time )
+	def ar( in: GE, dur: GE = 0.1f ) : GE = arExp( in, dur )
+	def kr( in: GE, dur: GE = 0.1f ) : GE = krExp( in, dur )
 }
 
 /**
@@ -132,15 +132,15 @@ object Ramp extends UGen2Args {
  * at regular intervals given by the `lagTime` and starting
  * a new line segment after each interval.
  *
- * @param   in       the signal to smooth out
- * @param   lagTime  the ramp-time (seconds) which is also the
- *                   interval of the sampling
+ * @param   in    the signal to smooth out
+ * @param   dur   the ramp-time (seconds) which is also the
+ *                interval of the sampling
  *
  * @see  [[de.sciss.synth.ugen.Lag]]
  * @see  [[de.sciss.synth.ugen.Sweep]]
  */
-case class Ramp( rate: Rate, in: UGenIn, time: UGenIn )
-extends SingleOutUGen( in, time )
+case class Ramp( rate: Rate, in: UGenIn, dur: UGenIn )
+extends SingleOutUGen( in, dur )
 
 object LagUD extends UGen3Args {
 	def ar( in: GE, timeUp: GE = 0.1f, timeDown: GE = 0.1f ) : GE =
@@ -332,13 +332,13 @@ case class Formlet( rate: Rate, in: UGenIn, freq: UGenIn, attack: UGenIn, decay:
 extends SingleOutUGen( in, freq, attack, decay )
 
 object DetectSilence extends UGen4Args {
-  def ar( in: GE, amp: GE = 0.0001f, time: GE = 0.1f, doneAction: GE = 0 ) : GE =
-    arExp( in, amp, time, doneAction )
+  def ar( in: GE, amp: GE = 0.0001f, dur: GE = 0.1f, doneAction: GE = 0 ) : GE =
+    arExp( in, amp, dur, doneAction )
 
-  def kr( in: GE, amp: GE = 0.0001f, time: GE = 0.1f, doneAction: GE = 0 ) : GE =
-    krExp( in, amp, time, doneAction )
+  def kr( in: GE, amp: GE = 0.0001f, dur: GE = 0.1f, doneAction: GE = 0 ) : GE =
+    krExp( in, amp, dur, doneAction )
 }
-case class DetectSilence( rate: Rate, in: UGenIn, amp: UGenIn, time: UGenIn,
+case class DetectSilence( rate: Rate, in: UGenIn, amp: UGenIn, dur: UGenIn,
                           doneAction: UGenIn )
-extends SingleOutUGen( in, amp, time, doneAction ) with SideEffectUGen // side-effect: done-action
+extends SingleOutUGen( in, amp, dur, doneAction ) with SideEffectUGen // side-effect: done-action
 

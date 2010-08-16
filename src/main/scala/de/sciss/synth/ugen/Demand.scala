@@ -37,13 +37,13 @@ import Float.{ PositiveInfinity => inf }
  *    @version	0.11, 16-Aug-10
  */
 object Demand {
-   def ar( trig: GE, reset: GE = 0, multi: GE ) : GE = make( audio, trig, reset, multi )
-   def kr( trig: GE, reset: GE = 0, multi: GE ) : GE = make( control, trig, reset, multi )
+   def ar( trig: GE, multi: GE, reset: GE = 0 ) : GE = make( audio, trig, multi, reset )
+   def kr( trig: GE, multi: GE, reset: GE = 0 ) : GE = make( control, trig, multi, reset )
 
-   private def make( rate: Rate, trig: GE, reset: GE, multi: GE ) : GE = {
+   private def make( rate: Rate, trig: GE, multi: GE, reset: GE ) : GE = {
       val args = trig +: reset +: multi.outputs
       simplify( for( t :: r :: m <- expand( args: _* ))
-         yield this( rate, t, r, m.toIndexedSeq ))
+         yield this( rate, t, m.toIndexedSeq, r ))  // careful!
    }
 }
 
@@ -61,6 +61,11 @@ object Demand {
  * calls this stream twice per demand, possibly yielding different values. To embed the same sequence
  * twice, either make sure the ugen is demanded only once, or create two instances of the ugen.
  *
+ * '''Warning''': the argument order is different from sclang, where `reset` precedes `multi`!
+ *
+ * '''Warning''': Demand currently seems to have problems with infinite sequences. As a workaround
+ *    use a very large length instead. E.g. instead of `Dbrown( 0, 1, inf )` use `Dbrown( 0, 1, 0xFFFFFFFF )`!
+ *
  * @param   trig  trigger. Can be any signal. A trigger happens when the signal changes from non-positive to positive.
  * @param   reset trigger. Resets the list of ugens (`multi`) when triggered.
  * @param   multi a demand-rate signal (possibly multi-channel) which is read at each trigger
@@ -68,8 +73,8 @@ object Demand {
  * @see  [[de.sciss.synth.ugen.Duty]]
  * @see  [[de.sciss.synth.ugen.TDuty]]
  */
-case class Demand( rate: Rate, trig: UGenIn, reset: UGenIn, multi: IndexedSeq[ UGenIn ])
-extends MultiOutUGen( rate, multi.size, trig +: reset +: multi )
+case class Demand( rate: Rate, trig: UGenIn, multi: IndexedSeq[ UGenIn ], reset: UGenIn )
+extends MultiOutUGen( rate, multi.size, trig +: reset +: multi )   // ! WARNING ! different order
 
 object Duty extends UGen4Args {
 	def ar( dur: GE = 1, reset: GE = 0, level: GE, doneAction: GE = doNothing ) :  GE =
@@ -156,6 +161,33 @@ object DemandEnvGen extends UGen10Args {
            levelScale: GE = 1, levelBias: GE = 0, timeScale: GE = 1, doneAction: GE = doNothing ) : GE =
       krExp( levels, durs, shapes, curvatures, gate, reset, levelScale, levelBias, timeScale, doneAction )
 }
+/**
+ * An envelope generator UGen using demand-rate inputs for the envelope segments.
+ * For each parameter of the envelope (levels, durations and shapes), values are polled
+ * every time a new segment starts.
+ *
+ * @param   levels      demand-rate ugen (or other ugen) returning level values
+ * @param   durs        demand-rate ugen (or other ugen) returning durational values
+ * @param   shapes      demand-rate ugen (or other ugen) returning shape number for the
+ *    envelope segment.
+ * @param   curvatures  demand-rate ugen (or other ugen) returning curvature values. these are
+ *    used for curveShape segments (shape number 5) and should be zero for other shapes.
+ * @param   gate	      a control rate gate: if gate is x >= 1, the ugen runs.
+ *    if gate is 0 > x > 1, the ugen is released at the next level (according to doneAction).
+ *    if gate is x <= 0, the ugen is sampled end held.
+ * @param   reset       a trigger signal. a trigger occurs when passing from non-positive to positive.
+ *    when the trigger amplitude is < 1, the input ugens (those that are demand-rated)
+ *    are reset when the current segment ends. if the trigger amplitude is > 1,
+ *    the reset is performed immediately.
+ * @param   levelScale  demand-rate ugen returning level scaling values
+ * @param   levelBias   demand-rate ugen returning level offset values
+ * @param   timeScale   demand-rate ugen returning time scaling values
+ * @param   doneAction  a done action performed when one of the demand-rated series ends
+ *
+ * @see  [[de.sciss.synth.ugen.EnvGen]]
+ * @see  [[de.sciss.synth.EnvShape]]
+ * @see  [[de.sciss.synth.DoneAction]] 
+ */
 case class DemandEnvGen( rate: Rate, levels: UGenIn, durs: UGenIn, shapes: UGenIn, curvatures: UGenIn,
                          gate: UGenIn, reset: UGenIn, levelScale: UGenIn, levelBias: UGenIn, timeScale: UGenIn,
                          doneAction: UGenIn )
