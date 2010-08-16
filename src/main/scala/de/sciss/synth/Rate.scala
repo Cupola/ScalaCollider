@@ -29,10 +29,11 @@
 package de.sciss.synth
 
 /**
- *    @version 0.11, 05-Aug-10
+ *    @version 0.11, 16-Aug-10
  */
 object Rate {
-   def highest( rates: Rate* ) = rates.foldLeft[ Rate ]( scalar )( (a, b) => if( a.id > b.id ) a else b )
+   def highest( rates: Rate* ) : Rate = rates.foldLeft[ Rate ]( scalar )( (a, b) => if( a.id > b.id ) a else b )
+   def highest( ge: GE ) : Rate = highest( ge.outputs.map( _.rate ): _* )
 }
 
 /**

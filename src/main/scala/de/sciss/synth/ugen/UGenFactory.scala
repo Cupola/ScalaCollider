@@ -172,7 +172,7 @@ private[ugen] trait UGen4RArgsIndiv {
 
 private[ugen] trait UGen5Args {
    def apply( rate: Rate, arg1: UGenIn, arg2: UGenIn, arg3: UGenIn, arg4: UGenIn, arg5: UGenIn ) : UGen
-   private def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE ) : GE =
+   private[synth] def make( rate: Rate, arg1: GE, arg2: GE, arg3: GE, arg4: GE, arg5: GE ) : GE =
       simplify( for( List( a1, a2, a3, a4, a5 ) <- expand( arg1, arg2, arg3, arg4, arg5 ))
          yield this( rate, a1, a2, a3, a4, a5 ))
 

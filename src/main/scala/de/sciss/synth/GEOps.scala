@@ -28,7 +28,7 @@
 
 package de.sciss.synth
 
-import ugen.{ BinaryOpUGen, UnaryOpUGen }
+import ugen.{ BinaryOpUGen, UnaryOpUGen, LinLin, LinExp }
 
 class GEOps private[synth]( a: GE ) {
 
@@ -148,4 +148,16 @@ class GEOps private[synth]( a: GE ) {
    def firstarg( b: GE ) : GE = Firstarg.make( a, b ) // sclang uses camel case instead
 // def rrand( b: GE ) : GE    = Rrand.make( a, b )
 // def exprrand( b: GE ) : GE = Exprrand.make( a, b )
+
+   // other ugens
+//   def linlin( srcLo: GE, srcHi: GE, dstLo: GE, dstHi: GE ) : GE = {
+//      val rate = Rate.highest( a.outputs.map( _.rate ))
+//      simplify( for( List( ax, sl, sh, dl, dh ) <- expand( a, srcLo, srcHi, dstLo, dstHi ))
+//         yield LinLin( rate, ax, sl, sh, dl, dh ))
+//   }
+   def linlin( srcLo: GE, srcHi: GE, dstLo: GE, dstHi: GE ) : GE =
+      LinLin.make( Rate.highest( a ), a, srcLo, srcHi, dstLo, dstHi ) // should be highest rate of all inputs? XXX
+
+   def linexp( srcLo: GE, srcHi: GE, dstLo: GE, dstHi: GE ) : GE =
+      LinExp.make( Rate.highest( a ), a, srcLo, srcHi, dstLo, dstHi ) // should be highest rate of all inputs? XXX
 }

@@ -30,6 +30,9 @@ package de.sciss.synth
 
 // ---------------------------- Float ----------------------------
 
+/**
+ * @version 0.11, 16-Aug-10
+ */
 object RichFloat {
    @inline private[synth] def rf_fold( in: Float, lo: Float, hi: Float ) : Float = {
       val x = in - lo
@@ -128,6 +131,14 @@ object RichFloat {
    @inline private[synth] def rf_fold2( a: Float, b: Float ) = rf_fold( a, -b, b )
 
    @inline private[synth] def rf_wrap2( a: Float, b: Float ) = rf_wrap( a, -b, b )
+
+   @inline private[synth] def rf_linlin( in: Float, srcLo: Float, srcHi: Float, dstLo: Float, dstHi: Float ) : Float = {
+      (in - srcLo) / (srcHi - srcLo) * (dstHi - dstLo) + dstLo
+   }
+
+   @inline private def rf_linexp( in: Float, srcLo: Float, srcHi: Float, dstLo: Float, dstHi: Float ) : Float = {
+      math.pow( dstHi / dstLo, (in - srcLo) / (srcHi - srcLo)).toFloat * dstLo
+   }
 }
 
 final case class RichFloat private[synth]( f: Float ) {
@@ -258,12 +269,24 @@ final case class RichFloat private[synth]( f: Float ) {
    def wrap2( b: GE ) : GE          = cn.wrap2( b )
 // def firstarg( b: Float ) : Float = d
    def firstarg( b: GE ) : GE       = cn.firstarg( b )
+
+   def linlin( srcLo: Float, srcHi: Float, dstLo: Float, dstHi: Float ) : Float =
+      rf_linlin( f, srcLo, srcHi, dstLo, dstHi )
+
+   def linlin( srcLo: GE, srcHi: GE, dstLo: GE, dstHi: GE ) : GE =
+      cn.linlin( srcLo, srcHi, dstLo, dstHi )
+
+   def linexp( srcLo: Float, srcHi: Float, dstLo: Float, dstHi: Float ) : Float =
+      rf_linexp( f, srcLo, srcHi, dstLo, dstHi )
+
+   def linexp( srcLo: GE, srcHi: GE, dstLo: GE, dstHi: GE ) : GE =
+      cn.linexp( srcLo, srcHi, dstLo, dstHi )
 }
 
 // ---------------------------- Double ----------------------------
 
 object RichDouble {
-   @inline private def fold( in: Double, lo: Double, hi: Double ) : Double = {
+   @inline private def rd_fold( in: Double, lo: Double, hi: Double ) : Double = {
       val x = in - lo
       // avoid the divide if possible
       if( in >= hi ) {
@@ -282,7 +305,7 @@ object RichDouble {
       lo + (if( c >= range ) range2 - c else c)
    }
 
-   @inline private def wrap( in: Double, lo: Double, hi: Double ) : Double = {
+   @inline private def rd_wrap( in: Double, lo: Double, hi: Double ) : Double = {
       // avoid the divide if possible
       if( in >= hi ) {
          val range   = hi - lo
@@ -297,6 +320,14 @@ object RichDouble {
             in2 - range * math.floor( (in2 - lo) / range )
          }
       } else in
+   }
+
+   @inline private def rd_linlin( in: Double, srcLo: Double, srcHi: Double, dstLo: Double, dstHi: Double ) : Double = {
+      (in - srcLo) / (srcHi - srcLo) * (dstHi - dstLo) + dstLo
+   }
+
+   @inline private def rd_linexp( in: Double, srcLo: Double, srcHi: Double, dstLo: Double, dstHi: Double ) : Double = {
+      math.pow( dstHi / dstLo, (in - srcLo) / (srcHi - srcLo)) * dstLo
    }
 }
 
@@ -406,10 +437,22 @@ final case class RichDouble private[synth]( d: Double ) {
    def clip2( b: GE ) : GE             = cn.clip2( b )
    def excess( b: Double ) : Double    = d - math.max( math.min( d, b ), -b )
    def excess( b: GE ) : GE            = cn.excess( b )
-   def fold2( b: Double ) : Double     = fold( d, -b, b )
+   def fold2( b: Double ) : Double     = rd_fold( d, -b, b )
    def fold2( b: GE ) : GE             = cn.fold2( b )
-   def wrap2( b: Double ) : Double     = wrap( d, -b, b )
+   def wrap2( b: Double ) : Double     = rd_wrap( d, -b, b )
    def wrap2( b: GE ) : GE             = cn.wrap2( b )
 // def firstarg( b: Double ) : Double  = d
    def firstarg( b: GE ) : GE          = cn.firstarg( b )
+
+   def linlin( srcLo: Double, srcHi: Double, dstLo: Double, dstHi: Double ) : Double =
+      rd_linlin( d, srcLo, srcHi, dstLo, dstHi )
+
+   def linlin( srcLo: GE, srcHi: GE, dstLo: GE, dstHi: GE ) : GE =
+      cn.linlin( srcLo, srcHi, dstLo, dstHi )
+
+   def linexp( srcLo: Double, srcHi: Double, dstLo: Double, dstHi: Double ) : Double =
+      rd_linexp( d, srcLo, srcHi, dstLo, dstHi )
+
+   def linexp( srcLo: GE, srcHi: GE, dstLo: GE, dstHi: GE ) : GE =
+      cn.linexp( srcLo, srcHi, dstLo, dstHi )
 }
