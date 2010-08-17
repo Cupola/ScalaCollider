@@ -145,7 +145,7 @@ object DC {
 	def kr( in: GE ) : GE = this( control, in.outputs )
 }
 case class DC( rate: Rate, multi: IIdxSeq[ UGenIn ])
-extends MultiOutUGen( audio, multi.size, multi )
+extends MultiOutUGen( rate, multi.size, multi )
 
 object Silent {
    def ar : GE = ar()

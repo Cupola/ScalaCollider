@@ -155,9 +155,13 @@ class GEOps private[synth]( a: GE ) {
 //      simplify( for( List( ax, sl, sh, dl, dh ) <- expand( a, srcLo, srcHi, dstLo, dstHi ))
 //         yield LinLin( rate, ax, sl, sh, dl, dh ))
 //   }
-   def linlin( srcLo: GE, srcHi: GE, dstLo: GE, dstHi: GE ) : GE =
-      LinLin.make( Rate.highest( a ), a, srcLo, srcHi, dstLo, dstHi ) // should be highest rate of all inputs? XXX
+   def linlin( srcLo: GE, srcHi: GE, dstLo: GE, dstHi: GE ) : GE = Rate.highest( a ) match {
+      case `demand` => (a - srcLo) / (srcHi - srcLo) * (dstHi - dstLo) + dstLo
+      case r => LinLin.make( r, a, srcLo, srcHi, dstLo, dstHi ) // should be highest rate of all inputs? XXX
+   }
 
-   def linexp( srcLo: GE, srcHi: GE, dstLo: GE, dstHi: GE ) : GE =
-      LinExp.make( Rate.highest( a ), a, srcLo, srcHi, dstLo, dstHi ) // should be highest rate of all inputs? XXX
+   def linexp( srcLo: GE, srcHi: GE, dstLo: GE, dstHi: GE ) : GE = Rate.highest( a ) match {
+      case `demand` => (dstHi / dstLo).pow( (a - srcLo) / (srcHi - srcLo) ) * dstLo
+      case r => LinExp.make( r, a, srcLo, srcHi, dstLo, dstHi ) // should be highest rate of all inputs? XXX
+   }
 }
