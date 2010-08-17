@@ -106,6 +106,14 @@ object XFade2 extends UGen4Args {
 	def kr( inA: GE, inB: GE = 0, pan: GE = 0, level: GE = 1 ) : GE =
       krExp( inA, inB, pan, level )
 }
+/**
+ * An equal power two channel cross fading UGen.
+ *
+ * @param   pan   the xfade position from `-1` (only input A audible) to
+ *    `+1` (only input B audible)
+ *
+ * @see  [[de.sciss.synth.ugen.LinXFade2]]
+ */
 case class XFade2( rate: Rate, inA: UGenIn, inB: UGenIn, pan: UGenIn, level: UGenIn )
 extends SingleOutUGen( inA, inB, pan, level )
 
@@ -116,5 +124,13 @@ object LinXFade2 extends UGen4Args {
 	def kr( inA: GE, inB: GE = 0, pan: GE = 0, level: GE = 1 ) : GE =
       krExp( inA, inB, pan, level )
 }
+/**
+ * An linear two channel cross fading UGen.
+ *
+ * @param   pan   the xfade position from `-1` (only input A audible) to
+ *    `+1` (only input B audible)
+ *
+ * @see  [[de.sciss.synth.ugen.XFade2]]
+ */
 case class LinXFade2( rate: Rate, inA: UGenIn, inB: UGenIn, pan: UGenIn, level: UGenIn )
 extends SingleOutUGen( inA, inB, pan, level )

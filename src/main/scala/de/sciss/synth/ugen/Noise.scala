@@ -259,6 +259,25 @@ object LFDNoise1 extends UGen1ArgsIndiv {
    def kr : GE = kr()
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
+/**
+ * A dynamic ramp noise UGen. Like `LFNoise1`, it generates linearly interpolated random values
+ * between `-1` and `+1` at a rate given by the `freq` argument, with two differences:
+ * There is no time quantization, and it there is fast recovery from low freq values.
+ *
+ * In contrast, `LFNoise0`, `LFNoise1`, and `LFNoise2` quantize to the nearest integer division
+ * of the samplerate, and they poll the freq argument only when scheduled, and thus seem
+ * to hang when freqs get very low.
+ *
+ * If very high or very low freqs are not needed, or fixed freqs are used,
+ * `LFNoise1` is more efficient.
+ *
+ * @param   freq  rate at which to generate random values.
+ *
+ * @see  [[de.sciss.synth.ugen.LFNoise1]]
+ * @see  [[de.sciss.synth.ugen.LFDNoise0]]
+ * @see  [[de.sciss.synth.ugen.LFDNoise2]]
+ * @see  [[de.sciss.synth.ugen.Ramp]]
+ */
 case class LFDNoise1( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
 object LFDNoise3 extends UGen1ArgsIndiv {
