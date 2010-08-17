@@ -251,6 +251,25 @@ object LFDNoise0 extends UGen1ArgsIndiv {
    def kr : GE = kr()
 	def kr( freq: GE = 500 ) : GE = krExp( freq )
 }
+/**
+ * A dynamic step noise UGen. Like `LFNoise0`, it generates abruptly changing random values
+ * between `-1` and `+1` at a rate given by the `freq` argument, with two differences:
+ * There is no time quantization, and it there is fast recovery from low freq values.
+ *
+ * In contrast, `LFNoise0`, `LFNoise1`, and `LFNoise2` quantize to the nearest integer division
+ * of the samplerate, and they poll the freq argument only when scheduled, and thus seem
+ * to hang when freqs get very low.
+ *
+ * If very high or very low freqs are not needed, or fixed freqs are used,
+ * `LFNoise0` is more efficient.
+ *
+ * @param   freq  rate at which to generate random values.
+ *
+ * @see  [[de.sciss.synth.ugen.LFNoise0]]
+ * @see  [[de.sciss.synth.ugen.LFDNoise1]]
+ * @see  [[de.sciss.synth.ugen.LFDNoise2]]
+ * @see  [[de.sciss.synth.ugen.TRand]]
+ */
 case class LFDNoise0( rate: Rate, freq: UGenIn, _indiv: Int ) extends SingleOutUGen( freq )
 
 object LFDNoise1 extends UGen1ArgsIndiv {
@@ -317,6 +336,16 @@ object Dust extends UGen1ArgsIndiv {
    def kr : GE = kr()
 	def kr( density: GE = 1 ) : GE = krExp( density )
 }
+/**
+ * A UGen generating random impulses with values ranging from
+ * `0` to `+1`. The pulse duration is one sample for audio-rate
+ * and one block for control-rate operation.
+ *
+ * @param   density  the average number of impulses per second
+ *
+ * @see [[de.sciss.synth.ugen.Dust2]]
+ * @see [[de.sciss.synth.ugen.TRand]]
+ */
 case class Dust( rate: Rate, density: UGenIn, _indiv: Int ) extends SingleOutUGen( density )
 
 object Dust2 extends UGen1ArgsIndiv {
@@ -325,4 +354,14 @@ object Dust2 extends UGen1ArgsIndiv {
    def kr : GE = kr()
 	def kr( density: GE = 1 ) : GE = krExp( density )
 }
+/**
+ * A UGen generating random impulses with values ranging from
+ * `-1` to `+1`. The pulse duration is one sample for audio-rate
+ * and one block for control-rate operation.
+ *
+ * @param   density  the average number of impulses per second
+ *
+ * @see [[de.sciss.synth.ugen.Dust]]
+ * @see [[de.sciss.synth.ugen.TRand]]
+ */
 case class Dust2( rate: Rate, density: UGenIn, _indiv: Int ) extends SingleOutUGen( density )
