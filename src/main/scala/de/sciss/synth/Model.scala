@@ -52,7 +52,11 @@ trait Model {
 
    protected def dispatch( change: AnyRef ) {
       listeners.foreach( l => try {
+val t1 = System.currentTimeMillis
          if( l.isDefinedAt( change )) l( change )
+val t2 = System.currentTimeMillis
+if( (t2 - t1) > 2000 ) println( "" + new java.util.Date() + " WOW listener took long (" + (t2-t1) + ") : " +
+   change + " -> " + l )
       } catch {
          case e => e.printStackTrace() // catch, but print
       })
