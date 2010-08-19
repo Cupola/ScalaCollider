@@ -51,15 +51,18 @@ trait Model {
    private val sync        = new AnyRef
 
    protected def dispatch( change: AnyRef ) {
-      listeners.foreach( l => try {
-val t1 = System.currentTimeMillis
-         if( l.isDefinedAt( change )) l( change )
+      listeners foreach { l =>
+         val t1 = System.currentTimeMillis
+         try {
+            if( l.isDefinedAt( change )) l( change )
+         } catch {
+            case e => e.printStackTrace() // catch, but print
+         } finally {
 val t2 = System.currentTimeMillis
 if( (t2 - t1) > 2000 ) println( "" + new java.util.Date() + " WOW listener took long (" + (t2-t1) + ") : " +
    change + " -> " + l )
-      } catch {
-         case e => e.printStackTrace() // catch, but print
-      })
+         }
+      }
    }
 
    def addListener( l: Listener ) : Listener = {

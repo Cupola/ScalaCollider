@@ -635,7 +635,7 @@ extends ServerLike {
       // ------------ OSCListener interface ------------
 
       def messageReceived( msg: OSCMessage, sender: SocketAddress, time: Long ) {
-if( msg.name == "/synced" ) println( "" + new java.util.Date() + " : ! : " + msg )
+//if( msg.name == "/synced" ) println( "" + new java.util.Date() + " : ! : " + msg )
          this ! ReceivedMessage( msg, sender, time )
       }
 
@@ -644,20 +644,20 @@ if( msg.name == "/synced" ) println( "" + new java.util.Date() + " : ! : " + msg
          var handlers   = Set.empty[ OSCHandler ]
          loopWhile( running )( react {
             case ReceivedMessage( msg, sender, time ) => debug( msg ) {
-if( msg.name == "/synced" ) println( "" + new java.util.Date() + " : received : " + msg )
+//if( msg.name == "/synced" ) println( "" + new java.util.Date() + " : received : " + msg )
                msg match {
                   case nodeMsg:        OSCNodeChange           => nodeMgr.nodeChange( nodeMsg )
                   case bufInfoMsg:     OSCBufferInfoMessage    => bufMgr.bufferInfo( bufInfoMsg )
                   case statusReplyMsg: OSCStatusReplyMessage   => aliveThread.foreach( _.statusReply( statusReplyMsg ))
                   case _ =>
                }
-if( msg.name == "/synced" ) println( "" + new java.util.Date() + " : handlers" )
+//if( msg.name == "/synced" ) println( "" + new java.util.Date() + " : handlers" )
                handlers.foreach( h => if( h.handle( msg )) handlers -= h )
             }
-            case AddHandler( h )    => debug( "add handler" ) { handlers += h }
-            case RemoveHandler( h ) => debug( "remove handler" ) { if( handlers.contains( h )) { handlers -= h; h.removed }}
-            case Clear              => debug( "clear" ) { handlers.foreach( _.removed ); handlers = Set.empty }
-            case Dispose            => debug( "dispose" ) { running = false }
+            case AddHandler( h )    => handlers += h
+            case RemoveHandler( h ) => if( handlers.contains( h )) { handlers -= h; h.removed }
+            case Clear              => handlers.foreach( _.removed ); handlers = Set.empty
+            case Dispose            => running = false
             case m                  => println( "Received illegal message " + m )
          })
       }
@@ -680,7 +680,7 @@ if( msg.name == "/synced" ) println( "" + new java.util.Date() + " : handlers" )
    extends OSCHandler {
       def handle( msg: OSCMessage ) : Boolean = {
          val handled = fun.isDefinedAt( msg )
-if( msg.name == "/synced" ) println( "" + new java.util.Date() + " : inf handled : " + msg + " ? " + handled )
+//if( msg.name == "/synced" ) println( "" + new java.util.Date() + " : inf handled : " + msg + " ? " + handled )
          if( handled ) try {
             ch ! fun.apply( msg )
          } catch { case e => e.printStackTrace() }
@@ -693,7 +693,7 @@ if( msg.name == "/synced" ) println( "" + new java.util.Date() + " : inf handled
    extends OSCHandler {
       def handle( msg: OSCMessage ) : Boolean = {
          val handled = fun.isDefinedAt( msg )
-if( msg.name == "/synced" ) println( "" + new java.util.Date() + " : to handled : " + msg + " ? " + handled )
+//if( msg.name == "/synced" ) println( "" + new java.util.Date() + " : to handled : " + msg + " ? " + handled )
          if( handled ) try {
             ch ! fun.apply( msg )
          } catch { case e => e.printStackTrace() }
